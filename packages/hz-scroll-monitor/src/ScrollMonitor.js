@@ -39,6 +39,14 @@ const initialState = {
   verticalDirection: null,
 };
 
+const keyNotEqual = (a, b) => k => a[k] !== b[k];
+
+const CONFIG_KEYS = ['vertical', 'horizontal', 'direction', 'viewport'];
+const configChanged = (a, b) => CONFIG_KEYS.some(keyNotEqual(a, b));
+
+const BOUNDS_KEYS = ['top', 'right', 'bottom', 'left'];
+const boundsChanged = (a, b) => BOUNDS_KEYS.some(keyNotEqual(a, b));
+
 export default class ScrollMonitor extends Component {
   static propTypes = scrollMonitorConfigTypes;
   static defaultProps = defaultScrollMonitorConfig;
@@ -50,11 +58,16 @@ export default class ScrollMonitor extends Component {
     this.registerIfNecessary();
   }
 
-  // componentWillReceiveProps() {
-    // TODO: Determine if re-registration is necessary.
-    // this.unregister();
-    // this.registerIfNecessary();
-  // }
+  componentWillReceiveProps(nextProps) {
+    let shouldReregister = configChanged(this.props, nextProps);
+    if (!shouldReregister && nextProps.bounds) {
+      shouldReregister = boundsChanged(this.props.bounds, nextProps.bounds);
+    }
+    if (shouldReregister) {
+      this.unregister();
+      this.registerIfNecessary();
+    }
+  }
 
   componentWillUnmount() {
     this.mounted = false;
