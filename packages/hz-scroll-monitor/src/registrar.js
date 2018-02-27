@@ -38,27 +38,30 @@ export type ScrollState = {
 export type ScrollStateHandler = (state: ScrollState) => void;
 
 type EventMap = {[event: string]: Set<ScrollStateHandler>};
-type EventRegistrar = {destroy(): void, events: EventMap};
-type Registrar = Map<HTMLElement, EventRegistrar>;
+type EventRegistrar = {destroy(): void, forceUpdate(): void, events: EventMap};
+type ElementRegistrar = Map<HTMLElement, EventRegistrar>;
 type Registration = {unregister(): void};
 
-let defaultRegistrar: Registrar;
+let defaultRegistrar: ElementRegistrar;
 
 export function register(
-  el: HTMLElement,
+  element: HTMLElement,
   config: RegistrationConfig,
   callback: ScrollStateHandler,
-  registrar: ?Registrar,
+  elementRegistrar: ?ElementRegistrar,
 ): Registration {
-  if (!registrar) {
-    registrar = defaultRegistrar || (defaultRegistrar = new Map());
+  if (!elementRegistrar) {
+    elementRegistrar = defaultRegistrar || (defaultRegistrar = new Map());
   }
 
-  if (!registrar.has(el)) {
-    registrar.set(el, createEventRegistrarAndScrollMonitor(el));
+  if (!elementRegistrar.has(element)) {
+    elementRegistrar.set(
+      element,
+      createEventRegistrarAndScrollMonitor(element),
+    );
   }
 
-  const eventRegistrar = registrar.get(el).events;
+  const eventRegistrar = elementRegistrar.get(element);
   const eventHandlers = {};
 
   for (let eventName of eventsFromConfig(config)) {
@@ -67,27 +70,30 @@ export function register(
     const handler = createHandler(eventName, eventConfig, callback);
     eventHandlers[eventName] = handler;
 
-    const registeredHandlers = eventRegistrar[eventName] || new Set();
+    const registeredHandlers = eventRegistrar.events[eventName] || new Set();
     registeredHandlers.add(handler);
-    eventRegistrar[eventName] = registeredHandlers;
+    eventRegistrar.events[eventName] = registeredHandlers;
   }
 
   const registration = {
     unregister() {
       for (const eventName in eventHandlers) {
-        const registeredHandlers = eventRegistrar[eventName];
+        const registeredHandlers = eventRegistrar.events[eventName];
         registeredHandlers.delete(eventHandlers[eventName]);
         if (!registeredHandlers.size) {
-          delete eventRegistrar[eventName];
+          delete eventRegistrar.events[eventName];
         }
       }
 
-      if (!Object.keys(eventRegistrar).length) {
-        registrar.get(el).destroy();
-        registrar.delete(el);
+      if (!Object.keys(eventRegistrar.events).length) {
+        eventRegistrar.destroy();
+        elementRegistrar.delete(element);
       }
     },
   };
+
+  // Force an initial state update.
+  eventRegistrar.forceUpdate();
 
   return registration;
 }
@@ -100,9 +106,15 @@ function createEventRegistrarAndScrollMonitor(
   const callbacksToCall = new Set();
   let updatePending = false;
 
-  function handleScroll(scrollEvent) {
-    const rect = getScrollRect(scrollEvent);
+  function dispatchStateChange() {
+    updatePending = false;
+    for (const callback of callbacksToCall) {
+      callback(scrollState); // eslint-disable-line callback-return
+    }
+    callbacksToCall.clear();
+  }
 
+  function updateScrollState(rect, immediate) {
     for (const event in events) {
       events[event].forEach(callbackGetter => {
         const callback = callbackGetter(rect, scrollState);
@@ -119,21 +131,24 @@ function createEventRegistrarAndScrollMonitor(
     scrollState.width = rect.width;
     scrollState.height = rect.height;
 
-    if (!updatePending) {
-      updatePending = window.requestAnimationFrame(() => {
-        updatePending = false;
-        for (const callback of callbacksToCall) {
-          callback(scrollState); // eslint-disable-line callback-return
-        }
-        callbacksToCall.clear();
-      });
+    if (immediate) {
+      dispatchStateChange();
+    } else if (!updatePending) {
+      updatePending = window.requestAnimationFrame(dispatchStateChange);
     }
+  }
+
+  function handleScroll(scrollEvent) {
+    updateScrollState(getScrollRect(scrollEvent.currentTarget));
   }
 
   element.addEventListener('scroll', handleScroll);
 
   const eventRegistrar = {
     events,
+    forceUpdate() {
+      updateScrollState(getScrollRect(element), true);
+    },
     destroy() {
       element.removeEventListener('scroll', handleScroll);
       window.cancelAnimationFrame(updatePending);
@@ -143,8 +158,8 @@ function createEventRegistrarAndScrollMonitor(
   return eventRegistrar;
 }
 
-function getScrollRect(event: UIEvent): ScrollRect {
-  const {scrollingElement = event.currentTarget} = event.currentTarget;
+function getScrollRect(element: HTMLElement): ScrollRect {
+  const {scrollingElement = element} = element;
   const {
     scrollTop: top,
     scrollLeft: left,

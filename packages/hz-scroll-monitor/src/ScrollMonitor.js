@@ -87,7 +87,7 @@ export default class ScrollMonitor extends Component {
   }
 
   registerIfNecessary() {
-    if (!this.registration && this.el) {
+    if (!this.registration && this.mounted && this.el) {
       this.registration = register(this.el, this.props, this.handleUpdate);
     }
   }
