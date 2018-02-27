@@ -45,7 +45,8 @@ export default class ScrollMonitor extends Component {
 
   state = {...initialState};
 
-  componentWillMount() {
+  componentDidMount() {
+    this.mounted = true;
     this.registerIfNecessary();
   }
 
@@ -56,11 +57,13 @@ export default class ScrollMonitor extends Component {
   // }
 
   componentWillUnmount() {
+    this.mounted = false;
     this.unregister();
     this.ref = null;
     this.el = null;
   }
 
+  mounted = false;
   registration = null;
 
   unregister() {
@@ -87,7 +90,7 @@ export default class ScrollMonitor extends Component {
   };
 
   handleUpdate = state => {
-    this.setState(state);
+    if (this.mounted) this.setState(state);
   };
 
   render() {

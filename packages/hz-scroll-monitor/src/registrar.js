@@ -76,7 +76,7 @@ export function register(
     unregister() {
       for (const eventName in eventHandlers) {
         const registeredHandlers = eventRegistrar[eventName];
-        registeredHandlers.remove(eventHandlers[eventName]);
+        registeredHandlers.delete(eventHandlers[eventName]);
         if (!registeredHandlers.size) {
           delete eventRegistrar[eventName];
         }
