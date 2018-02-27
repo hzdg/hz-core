@@ -1,9 +1,55 @@
+// @flow
 import {eventsFromConfig, createHandler} from './events';
 
-// Map<HTMLElement, {destroy: function, events: {[event: string]: Set<function>}}>
-const registrar = new Map();
+export type RegistrationConfig = {
+  vertical: ?Boolean,
+  horizontal: ?Boolean,
+  direction: ?Boolean,
+  viewport: ?Boolean,
+  area: ?{
+    top: ?Number,
+    right: ?Number,
+    bottom: ?Number,
+    left: ?Number,
+  },
+};
 
-export function register(el, config, callback) {
+export type ScrollRect = {
+  top: Number,
+  left: Number,
+  width: Number,
+  height: Number,
+};
+
+export type ScrollState = {
+  verticalDirection: 'down' | 'up',
+  horizontalDirection: 'left' | 'right',
+  lastTop: Number,
+  lastLeft: Number,
+  lastWidth: Number,
+  lastHeight: Number,
+  ...ScrollRect,
+};
+
+export type ScrollStateHandler = (state: ScrollState) => void;
+
+type EventMap = {[event: string]: Set<ScrollStateHandler>};
+type EventRegistrar = {destroy(): void, events: EventMap};
+type Registrar = Map<HTMLElement, EventRegistrar>;
+type Registration = {unregister(): void};
+
+let defaultRegistrar: Registrar;
+
+export function register(
+  el: HTMLElement,
+  config: RegistrationConfig,
+  callback: ScrollStateHandler,
+  registrar: ?Registrar,
+): Registration {
+  if (!registrar) {
+    registrar = defaultRegistrar || (defaultRegistrar = new Map());
+  }
+
   if (!registrar.has(el)) {
     registrar.set(el, createEventRegistrarAndScrollMonitor(el));
   }
@@ -40,7 +86,9 @@ export function register(el, config, callback) {
   return registration;
 }
 
-function createEventRegistrarAndScrollMonitor(element) {
+function createEventRegistrarAndScrollMonitor(
+  element: HTMLElement,
+): EventRegistrar {
   const events = {};
   const scrollState = {};
   const callbacksToCall = new Set();
@@ -78,7 +126,7 @@ function createEventRegistrarAndScrollMonitor(element) {
 
   element.addEventListener('scroll', handleScroll);
 
-  const monitorEventRegistrar = {
+  const eventRegistrar = {
     events,
     destroy() {
       element.removeEventListener('scroll', handleScroll);
@@ -86,10 +134,10 @@ function createEventRegistrarAndScrollMonitor(element) {
     },
   };
 
-  return monitorEventRegistrar;
+  return eventRegistrar;
 }
 
-function getScrollRect(event) {
+function getScrollRect(event: UIEvent): ScrollRect {
   const {scrollingElement = event.currentTarget} = event.currentTarget;
   const {
     scrollTop: top,

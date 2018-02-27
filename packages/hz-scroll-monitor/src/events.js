@@ -1,4 +1,12 @@
+// @flow
 import {UP, DOWN, LEFT, RIGHT} from './ScrollDirection';
+
+import type {
+  RegistrationConfig,
+  ScrollRect,
+  ScrollState,
+  ScrollStateHandler,
+} from './registrar';
 
 export const VERTICAL_DIRECTION_CHANGE = 'verticalDirectionChange'; // scrolling has changed vertical directions (up vs down)
 export const HORIZONTAL_DIRECTION_CHANGE = 'horizontalDirectionChange'; // scrolling has changed horizontal directions (left vs right)
@@ -7,7 +15,15 @@ export const EXIT_VIEWPORT = 'exitViewport'; // some part of a rect is not in th
 export const AREA_VISBLE = 'areaVisible'; // 'area' is some rect that contains scroll position
 export const AREA_NOT_VISIBLE = 'areaNotVisible'; // 'area' is some rect that excludes scroll position
 
-export function eventsFromConfig(config) {
+export type MonitorEvent =
+  | typeof VERTICAL_DIRECTION_CHANGE
+  | typeof HORIZONTAL_DIRECTION_CHANGE
+  | typeof ENTER_VIEWPORT
+  | typeof EXIT_VIEWPORT
+  | typeof AREA_VISBLE
+  | typeof AREA_NOT_VISIBLE;
+
+export function eventsFromConfig(config: RegistrationConfig): MonitorEvent[] {
   const events = [];
   if (config.direction) {
     if (!config.vertical && !config.horizontal) {
@@ -22,8 +38,14 @@ export function eventsFromConfig(config) {
   return events;
 }
 
-export function createHandler(event, callback) {
-  return function getMonitorEventCallback(rect, state) {
+export function createHandler(
+  event: MonitorEvent,
+  callback: ScrollStateHandler,
+): (rect: ScrollRect, state: ScrollState) => ?ScrollStateHandler {
+  return function getMonitorEventCallback(
+    rect: ScrollRect,
+    state: ScrollState,
+  ): ?ScrollStateHandler {
     const {top, left, width, height} = rect;
 
     switch (event) {
