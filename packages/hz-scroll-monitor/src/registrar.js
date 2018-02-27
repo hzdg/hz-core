@@ -1,17 +1,19 @@
 // @flow
 import {eventsFromConfig, createHandler} from './events';
 
+export type Bounds = {
+  top: ?Number,
+  right: ?Number,
+  bottom: ?Number,
+  left: ?Number,
+};
+
 export type RegistrationConfig = {
   vertical: ?Boolean,
   horizontal: ?Boolean,
   direction: ?Boolean,
   viewport: ?Boolean,
-  area: ?{
-    top: ?Number,
-    right: ?Number,
-    bottom: ?Number,
-    left: ?Number,
-  },
+  bounds: ?Bounds,
 };
 
 export type ScrollRect = {
@@ -22,12 +24,14 @@ export type ScrollRect = {
 };
 
 export type ScrollState = {
-  verticalDirection: 'down' | 'up',
-  horizontalDirection: 'left' | 'right',
-  lastTop: Number,
-  lastLeft: Number,
-  lastWidth: Number,
-  lastHeight: Number,
+  verticalDirection: ?('down' | 'up'),
+  horizontalDirection: ?('left' | 'right'),
+  inBounds: ?Boolean,
+  inViewport: ?Boolean,
+  lastTop: ?Number,
+  lastLeft: ?Number,
+  lastWidth: ?Number,
+  lastHeight: ?Number,
   ...ScrollRect,
 };
 
@@ -57,22 +61,24 @@ export function register(
   const eventRegistrar = registrar.get(el).events;
   const eventHandlers = {};
 
-  for (const event of eventsFromConfig(config)) {
-    const handler = createHandler(event, callback);
-    eventHandlers[event] = handler;
+  for (let eventName of eventsFromConfig(config)) {
+    let eventConfig = null;
+    if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
+    const handler = createHandler(eventName, eventConfig, callback);
+    eventHandlers[eventName] = handler;
 
-    const registeredHandlers = eventRegistrar[event] || new Set();
+    const registeredHandlers = eventRegistrar[eventName] || new Set();
     registeredHandlers.add(handler);
-    eventRegistrar[event] = registeredHandlers;
+    eventRegistrar[eventName] = registeredHandlers;
   }
 
   const registration = {
     unregister() {
-      for (const event in eventHandlers) {
-        const registeredHandlers = eventRegistrar[event];
-        registeredHandlers.remove(eventHandlers[event]);
+      for (const eventName in eventHandlers) {
+        const registeredHandlers = eventRegistrar[eventName];
+        registeredHandlers.remove(eventHandlers[eventName]);
         if (!registeredHandlers.size) {
-          delete eventRegistrar[event];
+          delete eventRegistrar[eventName];
         }
       }
 

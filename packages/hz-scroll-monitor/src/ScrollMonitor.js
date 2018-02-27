@@ -10,7 +10,7 @@ const scrollMonitorConfigTypes = {
   horizontal: PropTypes.bool,
   direction: PropTypes.bool,
   viewport: PropTypes.bool,
-  area: PropTypes.shape({
+  bounds: PropTypes.shape({
     top: PropTypes.number,
     right: PropTypes.number,
     bottom: PropTypes.number,
@@ -23,7 +23,7 @@ const defaultScrollMonitorConfig = {
   horizontal: false,
   direction: false,
   viewport: false,
-  area: null,
+  bounds: null,
 };
 
 const initialState = {

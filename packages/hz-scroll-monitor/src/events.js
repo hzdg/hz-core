@@ -3,6 +3,7 @@ import {UP, DOWN, LEFT, RIGHT} from './ScrollDirection';
 
 import type {
   RegistrationConfig,
+  Bounds,
   ScrollRect,
   ScrollState,
   ScrollStateHandler,
@@ -10,20 +11,18 @@ import type {
 
 export const VERTICAL_DIRECTION_CHANGE = 'verticalDirectionChange'; // scrolling has changed vertical directions (up vs down)
 export const HORIZONTAL_DIRECTION_CHANGE = 'horizontalDirectionChange'; // scrolling has changed horizontal directions (left vs right)
-export const ENTER_VIEWPORT = 'enterViewport'; // some part of a rect is now in the scrollable viewport
-export const EXIT_VIEWPORT = 'exitViewport'; // some part of a rect is not in the scrollable viewport
-export const AREA_VISBLE = 'areaVisible'; // 'area' is some rect that contains scroll position
-export const AREA_NOT_VISIBLE = 'areaNotVisible'; // 'area' is some rect that excludes scroll position
+export const IN_BOUNDS = 'inBounds'; // Whether some bounds contains scroll position
+export const IN_VIEWPORT = 'inViewport'; // Whether some part of a rect is now in the scrollable viewport
 
 export type MonitorEvent =
   | typeof VERTICAL_DIRECTION_CHANGE
   | typeof HORIZONTAL_DIRECTION_CHANGE
-  | typeof ENTER_VIEWPORT
-  | typeof EXIT_VIEWPORT
-  | typeof AREA_VISBLE
-  | typeof AREA_NOT_VISIBLE;
+  | typeof IN_BOUNDS
+  | typeof IN_VIEWPORT;
 
-export function eventsFromConfig(config: RegistrationConfig): MonitorEvent[] {
+type EventConfig = MonitorEvent | [MonitorEvent, Bounds];
+
+export function eventsFromConfig(config: RegistrationConfig): EventConfig[] {
   const events = [];
   if (config.direction) {
     if (!config.vertical && !config.horizontal) {
@@ -33,13 +32,14 @@ export function eventsFromConfig(config: RegistrationConfig): MonitorEvent[] {
       if (config.horizontal) events.push(HORIZONTAL_DIRECTION_CHANGE);
     }
   }
-  if (config.viewport) events.push(ENTER_VIEWPORT, EXIT_VIEWPORT);
-  if (config.area) events.push(AREA_VISBLE, AREA_NOT_VISIBLE);
+  if (config.bounds) events.push([IN_BOUNDS, config.bounds]);
+  // if (config.viewport) events.push([IN_VIEWPORT, ???]);
   return events;
 }
 
 export function createHandler(
   event: MonitorEvent,
+  config: ?Bounds,
   callback: ScrollStateHandler,
 ): (rect: ScrollRect, state: ScrollState) => ?ScrollStateHandler {
   return function getMonitorEventCallback(
@@ -69,16 +69,16 @@ export function createHandler(
         }
       }
 
-      // case ENTER_VIEWPORT: {
-      // }
-      //
-      // case EXIT_VIEWPORT: {
-      // }
-      //
-      // case AREA_VISBLE: {
-      // }
-      //
-      // case AREA_NOT_VISIBLE: {
+      case IN_BOUNDS: {
+        if (!config) return null;
+        if (state.inBounds !== inBounds(config, rect)) {
+          state.inBounds = !state.inBounds;
+          return callback;
+        }
+        return null;
+      }
+
+      // case IN_VIEWPORT: {
       // }
 
       default: {
@@ -86,4 +86,18 @@ export function createHandler(
       }
     }
   };
+}
+
+function inBounds(bounds, rect) {
+  const {
+    top = rect.top,
+    right = rect.width,
+    bottom = rect.height,
+    left = rect.left,
+  } = bounds;
+
+  const inRangeVertical = top <= rect.top && bottom >= rect.top;
+  const inRangeHorizontal = left <= rect.left && right >= rect.left;
+
+  return inRangeVertical && inRangeHorizontal;
 }
