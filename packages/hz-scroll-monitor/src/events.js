@@ -71,8 +71,9 @@ export function createHandler(
 
       case IN_BOUNDS: {
         if (!config) return null;
-        if (state.inBounds !== inBounds(config, rect)) {
-          state.inBounds = !state.inBounds;
+        const nowInBounds = inBounds(config, rect);
+        if (state.inBounds !== nowInBounds) {
+          state.inBounds = nowInBounds;
           return callback;
         }
         return null;
