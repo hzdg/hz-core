@@ -22,7 +22,7 @@ export function eventsFromConfig(config) {
   return events;
 }
 
-export function handlerForMonitorEvent(event, callback) {
+export function createHandler(event, callback) {
   return function getMonitorEventCallback(rect, state) {
     const {top, left, width, height} = rect;
 

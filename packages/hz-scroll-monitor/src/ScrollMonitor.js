@@ -1,7 +1,8 @@
 /* eslint-disable react/no-unused-prop-types */
-import {Component} from 'react';
+import React, {Component} from 'react';
+import {findDOMNode} from 'react-dom';
 import PropTypes from 'prop-types';
-import {scrollProviderContextTypes} from './ScrollProvider';
+import {register} from './registrar';
 
 const scrollMonitorConfigTypes = {
   children: PropTypes.func.isRequired,
@@ -39,38 +40,68 @@ const initialState = {
 };
 
 export default class ScrollMonitor extends Component {
-  static contextTypes = scrollProviderContextTypes;
   static propTypes = scrollMonitorConfigTypes;
   static defaultProps = defaultScrollMonitorConfig;
 
   state = {...initialState};
 
   componentWillMount() {
-    this.register();
+    this.registerIfNecessary();
   }
 
+  // componentWillReceiveProps() {
+    // TODO: Determine if re-registration is necessary.
+    // this.unregister();
+    // this.registerIfNecessary();
+  // }
+
   componentWillUnmount() {
+    this.unregister();
+    this.ref = null;
+    this.el = null;
+  }
+
+  registration = null;
+
+  unregister() {
     if (this.registration) {
       this.registration.unregister();
       this.registration = null;
     }
   }
 
-  registration = null;
-
-  register() {
-    if (this.registration) this.registration.unregister();
-    this.registration = this.context.scrollProvider.register(
-      this.props,
-      this.handleUpdate,
-    );
+  registerIfNecessary() {
+    if (!this.registration && this.el) {
+      this.registration = register(this.el, this.props, this.handleUpdate);
+    }
   }
+
+  findScrollNode = ref => {
+    if (ref && ref !== this.ref) {
+      this.ref = ref;
+      // eslint-disable-next-line react/no-find-dom-node
+      this.el = getNearestScrollNode(findDOMNode(ref));
+      this.unregister();
+      this.registerIfNecessary();
+    }
+  };
 
   handleUpdate = state => {
     this.setState(state);
   };
 
   render() {
-    return this.props.children(this.state);
+    return React.cloneElement(this.props.children(this.state), {
+      ref: this.findScrollNode,
+    });
   }
+}
+
+function getNearestScrollNode(node) {
+  if (!(node instanceof HTMLElement)) return null;
+
+  const {overflowX, overflowY} = window.getComputedStyle(node);
+  if (overflowX === 'scroll' || overflowY === 'scroll') return node;
+
+  return getNearestScrollNode(node.parentNode) || document;
 }
