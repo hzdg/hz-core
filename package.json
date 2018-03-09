@@ -1,0 +1,34 @@
+{
+  "name": "hz-core",
+  "version": "0.0.1",
+  "description": "HZ's internal library of React Components",
+  "main": "index.js",
+  "repository": "git@github.com:hzdg/hz-core.git",
+  "author": "elainen <elaineh@hzdg.com>",
+  "license": "MIT",
+  "private": true,
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-es2015": "^6.24.1",
+    "lerna": "2.9.0"
+  },
+  "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-preset-react": "^6.24.1",
+    "eslint": "^4.18.2",
+    "express": "^4.16.2",
+    "html-webpack-plugin": "webpack-contrib/html-webpack-plugin",
+    "jest": "^22.4.2",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-styleguidist": "^6.2.7",
+    "tapable": "^1.0.0",
+    "webpack": "^4.1.1",
+    "webpack-blocks": "^1.0.0-rc.2"
+  },
+  "scripts": {
+    "styleguide": "styleguidist server",
+    "styleguide:build": "styleguidist build"
+  }
+}
