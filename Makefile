@@ -1,13 +1,18 @@
-.PHONY: build-dist
+.PHONY: \
+	# Create src/ package.json and README along with basic dependencies
+	create-new-package
 
+	# Builds out all packages to build/ directory
+	build-dist
 
-# Builds out all the packages to their respective package directory with a lib/ folder
-build-dist:
-	./scripts/build-dist.sh
-
-# Publishes all packages to the public npm registry
-publish-to-npm:
-	echo 'Not yet implemented'
+	# Publishes all packages to the public npm registry
+	publish-to-npm
 
 create-new-package:
+	echo 'Not yet implemented'
+
+build-dist:
+	node ./scripts/rollup/build.js
+
+publish-to-npm:
 	echo 'Not yet implemented'
