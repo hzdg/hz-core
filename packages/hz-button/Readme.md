@@ -1,5 +1,5 @@
 Simple button.
 
 ```js
-<Button text="Push Me" />
+<Button text="Press Me" />
 ```
