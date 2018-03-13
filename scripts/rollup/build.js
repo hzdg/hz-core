@@ -2,8 +2,8 @@
 const Packages = require('./packages');
 const {rollup} = require('rollup');
 const {ncp} = require('ncp');
-const babel = require('rollup-plugin-babel');
 const path = require('path');
+const baseRollupConfig = require('./rollup.config');
 
 const createBundle = pkg => {
   // TODO: Set conditional to skip bundle if needed
@@ -11,11 +11,7 @@ const createBundle = pkg => {
   const rollupConfig = {
     input: pkg.bundleInput,
     output: pkg.bundleOutput,
-    plugins: [
-      babel({
-        exclude: 'node_modules/**',
-      }),
-    ],
+    ...baseRollupConfig,
   };
 
   try {
