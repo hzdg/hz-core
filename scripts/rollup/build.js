@@ -1,7 +1,9 @@
 /* eslint-disable no-console */
 const Packages = require('./packages');
 const {rollup} = require('rollup');
+const {ncp} = require('ncp');
 const babel = require('rollup-plugin-babel');
+const path = require('path');
 
 const createBundle = pkg => {
   // TODO: Set conditional to skip bundle if needed
@@ -20,7 +22,7 @@ const createBundle = pkg => {
     rollup(rollupConfig)
       .then(response => {
         response.write(pkg.bundleOutput);
-        console.log('Bundle', pkg.name, 'is complete');
+        console.log('Bundle', pkg.packageName, 'is complete');
       })
       .catch(response => {
         console.log('There was an error with rollup \n', response);
@@ -30,8 +32,30 @@ const createBundle = pkg => {
   }
 };
 
+const copyPackageFiles = ({packageDirectory, packageDistDirectory}) => {
+  console.log(packageDirectory, packageDistDirectory);
+  const filesToCopy = ['package.json', 'LICENSE', 'Makefile'];
+
+  for (const fileName of filesToCopy) {
+    ncp(
+      path.join(packageDirectory, fileName),
+      path.join(packageDistDirectory, fileName),
+      error => {
+        if (error) {
+          if (error[0].code === 'ENOENT') {
+            console.log(error[0].path, 'does not exist. Skipping.');
+          } else {
+            console.error(error);
+          }
+        }
+      },
+    );
+  }
+};
+
 const buildPackage = pkg => {
   createBundle(pkg);
+  copyPackageFiles(pkg);
 };
 
 const buildPackages = () => {

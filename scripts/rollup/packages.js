@@ -8,14 +8,20 @@ const PACKAGE_DIRECTORY = path.resolve(PROJECT_ROOT, 'packages');
 // Append any information needed for each package
 const gatherPackages = () => {
   const packageList = readdirSync(PACKAGE_DIRECTORY);
-  const packageListObject = packageList.map(packageName => ({
-    name: packageName,
-    bundleInput: path.join(PACKAGE_DIRECTORY, packageName, 'src', 'index.js'),
-    bundleOutput: {
-      file: path.join(PROJECT_DIST_DIRECTORY, packageName, 'index.js'),
-      format: 'cjs',
-    },
-  }));
+  const packageListObject = packageList.map(packageName => {
+    const packageDirectory = path.join(PACKAGE_DIRECTORY, packageName);
+    const packageDistDirectory = path.join(PROJECT_DIST_DIRECTORY, packageName);
+    return {
+      packageName,
+      packageDirectory,
+      packageDistDirectory,
+      bundleInput: path.join(PACKAGE_DIRECTORY, packageName, 'src', 'index.js'),
+      bundleOutput: {
+        file: path.join(PROJECT_DIST_DIRECTORY, packageName, 'index.js'),
+        format: 'cjs',
+      },
+    };
+  });
 
   return packageListObject;
 };

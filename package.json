@@ -30,6 +30,7 @@
     "flow-bin": "^0.67.1",
     "html-webpack-plugin": "webpack-contrib/html-webpack-plugin",
     "jest": "^22.4.2",
+    "ncp": "^2.0.0",
     "prettier": "1.11.1",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
