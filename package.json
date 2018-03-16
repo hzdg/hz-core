@@ -40,9 +40,4 @@
     "webpack": "^4.1.1",
     "webpack-blocks": "^1.0.0-rc.2"
   },
-  "scripts": {
-    "start": "docker-compose up",
-    "styleguide": "styleguidist server",
-    "styleguide:build": "styleguidist build"
-  }
 }

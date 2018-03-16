@@ -11,7 +11,15 @@
 create-new-package:
 	echo 'Not yet implemented'
 
+start:
+	yarn
+	docker-compose up
+
+styleguide:
+	styleguidist server
+
 build-dist:
+	lerna bootstrap
 	node ./scripts/rollup/build.js
 
 publish-to-npm:
