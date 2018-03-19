@@ -5,11 +5,15 @@ type Props = {
   /** Styles for the Button Component <br />
    * `Button__base`
    **/
-  styles: ?{
+  styles?: ?{
     Button__base: {[string]: string | number},
   },
   /** Text to display in Button */
   text: string,
+  /** Name of Button, targetted class name */
+  customClassName?: string,
+  /** Names of css module items */
+  cssModuleClassNames?: {[string]: string},
 };
 
 type State = {
@@ -28,11 +32,27 @@ class Button extends Component<Props, State> {
     hover: false,
   };
 
+  // handles css stylesheets and css modules
+  // TODO: Make this universal?
+  getClassName(itemName) {
+    return `${this.props.customClassName}__base ${
+      this.props.cssModuleClassNames
+        ? this.props.cssModuleClassNames[itemName]
+        : null
+    }`;
+  }
+
+  // Handles inlining styles
+  // TODO: Make this universal?
+  getStyles(itemName) {
+    return this.props.styles ? this.props.styles[itemName] : {};
+  }
+
   render() {
     return (
       <div
-        className="Button__base"
-        style={this.props.styles ? this.props.styles.Button__base : {}}
+        className={this.getClassName('buttonBase')}
+        style={this.getStyles('buttonBase')}
       >
         {this.props.text}
       </div>
