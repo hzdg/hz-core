@@ -1,12 +1,14 @@
 .PHONY: \
 	# Create src/ package.json and README along with basic dependencies
-	create-new-package
-
+	create-new-package \
 	# Builds out all packages to build/ directory
-	build-dist
-
+	build-dist \
 	# Publishes all packages to the public npm registry
-	publish-to-npm
+	publish-to-npm \
+	# Start local docker instance
+	start \
+	# Start up styleguidist server
+	styleguide
 
 create-new-package:
 	echo 'Not yet implemented'
@@ -16,7 +18,7 @@ start:
 	docker-compose up
 
 styleguide:
-	styleguidist server
+	./node_modules/.bin/styleguidist server
 
 build-dist:
 	lerna bootstrap
