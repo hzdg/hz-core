@@ -7,7 +7,6 @@ module.exports = {
     color: {
       link: '#f38230',
       linkHover: 'rgb(67, 69, 77)',
-      // sidebarBackground: 'rgb(67, 69, 77)',
       border: '#BABABA',
     },
   },
