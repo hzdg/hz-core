@@ -1,8 +1,8 @@
-const { createConfig, babel, postcss } = require('webpack-blocks');
+const {createConfig, babel, postcss, css} = require('webpack-blocks');
 
 module.exports = {
   components: 'packages/**/src/**.js',
-  webpackConfig: createConfig([babel(), postcss()]),
+  webpackConfig: createConfig([babel(), css(), postcss()]),
   theme: {
     color: {
       link: '#f38230',
@@ -14,4 +14,4 @@ module.exports = {
   getExampleFilename(componentPath) {
     return componentPath.replace(/src\/[A-Za-z]*\.js$/, 'readme.md');
   },
-}
+};
