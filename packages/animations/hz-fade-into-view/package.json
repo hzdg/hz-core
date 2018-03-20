@@ -1,0 +1,7 @@
+{
+  "name": "hz-fade-into-view",
+  "version": "0.0.1",
+  "description": "Fades into view its child component",
+  "main": "index.js",
+  "license": "MIT"
+}
