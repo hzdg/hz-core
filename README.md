@@ -20,6 +20,9 @@ You will need:
 2. Run `make start`. This command will first install any needed dependencies, and then start up a container using your own project directory.
 3. Navigate to `http://localhost:5000`
 
+### New Package
+To create a new package, run `make create-new-package`.
+
 
 ## Build Packages
 1. Run `make yarn build-dist` which will make a build/ folder

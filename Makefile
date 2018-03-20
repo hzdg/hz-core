@@ -11,7 +11,7 @@
 	styleguide
 
 create-new-package:
-	echo 'Not yet implemented'
+	./scripts/create-package.sh
 
 start:
 	yarn
