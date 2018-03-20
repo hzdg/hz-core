@@ -3,6 +3,7 @@ const {createConfig, babel, postcss, css} = require('webpack-blocks');
 module.exports = {
   components: 'packages/**/src/**.js',
   webpackConfig: createConfig([babel(), css(), postcss()]),
+  showUsage: true,
   theme: {
     color: {
       link: '#f38230',
