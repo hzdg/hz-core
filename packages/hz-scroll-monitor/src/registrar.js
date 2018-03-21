@@ -1,12 +1,16 @@
 // @flow
 import {eventsFromConfig, createHandler} from './events';
 
-export type Bounds = {
+const debug = Debug('ScrollMonitor:registrar');
+
+type BoundsRect = {
   top: ?Number,
   right: ?Number,
   bottom: ?Number,
   left: ?Number,
 };
+
+export type Bounds = BoundsRect | ((state: ScrollState) => BoundsRect);
 
 export type RegistrationConfig = {
   vertical: ?Boolean,

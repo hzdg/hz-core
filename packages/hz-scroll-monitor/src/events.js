@@ -71,7 +71,7 @@ export function createHandler(
 
       case IN_BOUNDS: {
         if (!config) return null;
-        const nowInBounds = inBounds(config, rect);
+        const nowInBounds = inBounds(config, rect, state);
         if (state.inBounds !== nowInBounds) {
           state.inBounds = nowInBounds;
           return callback;
@@ -89,13 +89,14 @@ export function createHandler(
   };
 }
 
-function inBounds(bounds, rect) {
+function inBounds(bounds, rect, state) {
   const {
     top = rect.top,
     right = rect.width,
     bottom = rect.height,
     left = rect.left,
-  } = bounds;
+  } =
+    typeof bounds === 'function' ? bounds(state) : bounds;
 
   const inRangeVertical = top <= rect.top && bottom >= rect.top;
   const inRangeHorizontal = left <= rect.left && right >= rect.left;

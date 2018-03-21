@@ -10,12 +10,15 @@ const scrollMonitorConfigTypes = {
   horizontal: PropTypes.bool,
   direction: PropTypes.bool,
   viewport: PropTypes.bool,
-  bounds: PropTypes.shape({
-    top: PropTypes.number,
-    right: PropTypes.number,
-    bottom: PropTypes.number,
-    left: PropTypes.number,
-  }),
+  bounds: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({
+      top: PropTypes.number,
+      right: PropTypes.number,
+      bottom: PropTypes.number,
+      left: PropTypes.number,
+    }),
+  ]),
 };
 
 const defaultScrollMonitorConfig = {
