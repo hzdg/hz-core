@@ -5,10 +5,9 @@ React Component Library used at HZ.
 
 
 ## View Latest Docker Image
-If you only need to view the image.
-1. Select which image tag you will need to pull down from the Docker Hub
-2. Run `docker pull hzdg/hz-core:<TAG NAME>`
-3. Run `docker run --rm -p 5000:6060 hzdg/hz-core:<TAG NAME>` and open `http://localhost:5000` on your browser.
+If you only need to view the latest image:
+1. Run `docker pull hzdg/hz-core:latest`
+2. Run `docker run --rm -p 5000:6060 hzdg/hz-core:latest` and open `http://localhost:5000` on your browser.
 
 
 ## To Develop
