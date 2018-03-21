@@ -1,5 +1,8 @@
 // @flow
 import {UP, DOWN, LEFT, RIGHT} from './ScrollDirection';
+import Debug from 'debug';
+
+const debug = Debug('ScrollMonitor:events');
 
 import type {
   RegistrationConfig,
@@ -55,6 +58,7 @@ export function createHandler(
           return null;
         } else {
           state.verticalDirection = verticalDirection;
+          debug('VERTICAL_DIRECTION_CHANGE', verticalDirection);
           return callback;
         }
       }
@@ -65,6 +69,7 @@ export function createHandler(
           return null;
         } else {
           state.horizontalDirection = horizontalDirection;
+          debug('HORIZONTAL_DIRECTION_CHANGE', horizontalDirection);
           return callback;
         }
       }
@@ -74,6 +79,7 @@ export function createHandler(
         const nowInBounds = inBounds(config, rect, state);
         if (state.inBounds !== nowInBounds) {
           state.inBounds = nowInBounds;
+          debug('IN_BOUNDS', nowInBounds);
           return callback;
         }
         return null;

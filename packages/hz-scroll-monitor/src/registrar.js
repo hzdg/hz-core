@@ -1,5 +1,6 @@
 // @flow
 import {eventsFromConfig, createHandler} from './events';
+import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:registrar');
 
@@ -58,7 +59,10 @@ export function register(
     elementRegistrar = defaultRegistrar || (defaultRegistrar = new Map());
   }
 
+  debug('Registering element', element, 'with config', config);
+
   if (!elementRegistrar.has(element)) {
+    debug(element, 'is a new element to the registrar!');
     elementRegistrar.set(
       element,
       createEventRegistrarAndScrollMonitor(element),
@@ -71,6 +75,7 @@ export function register(
   for (let eventName of eventsFromConfig(config)) {
     let eventConfig = null;
     if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
+    debug('Creating handler for', eventName, 'with config', eventConfig);
     const handler = createHandler(eventName, eventConfig, callback);
     eventHandlers[eventName] = handler;
 
@@ -83,6 +88,7 @@ export function register(
     unregister() {
       for (const eventName in eventHandlers) {
         const registeredHandlers = eventRegistrar.events[eventName];
+        debug('Unregistering', eventName, 'for config', config, 'on', element);
         registeredHandlers.delete(eventHandlers[eventName]);
         if (!registeredHandlers.size) {
           delete eventRegistrar.events[eventName];
@@ -90,6 +96,7 @@ export function register(
       }
 
       if (!Object.keys(eventRegistrar.events).length) {
+        debug('Event registrar for', element, 'is now empty! Cleaning up...');
         eventRegistrar.destroy();
         elementRegistrar.delete(element);
       }
@@ -151,9 +158,11 @@ function createEventRegistrarAndScrollMonitor(
   const eventRegistrar = {
     events,
     forceUpdate() {
+      debug('Forcing update for', element);
       updateScrollState(getScrollRect(element), true);
     },
     destroy() {
+      debug('Destroying event registrar for', element);
       element.removeEventListener('scroll', handleScroll);
       window.cancelAnimationFrame(updatePending);
     },
