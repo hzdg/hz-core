@@ -95,6 +95,18 @@ export function createHandler(
   };
 }
 
+export function createHandlers(config, callback) {
+  const eventHandlers = {};
+  for (let eventName of eventsFromConfig(config)) {
+    let eventConfig = null;
+    if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
+    debug('Creating handler for', eventName, 'with config', eventConfig);
+    const handler = createHandler(eventName, eventConfig, callback);
+    eventHandlers[eventName] = handler;
+  }
+  return eventHandlers;
+}
+
 function inBounds(bounds, rect, state) {
   const {
     top = rect.top,

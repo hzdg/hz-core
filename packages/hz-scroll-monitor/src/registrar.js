@@ -1,5 +1,5 @@
 // @flow
-import {eventsFromConfig, createHandler} from './events';
+import {createHandlers} from './events';
 import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:registrar');
@@ -70,43 +70,23 @@ export function register(
   }
 
   const eventRegistrar = elementRegistrar.get(element);
-  const eventHandlers = {};
-
-  for (let eventName of eventsFromConfig(config)) {
-    let eventConfig = null;
-    if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
-    debug('Creating handler for', eventName, 'with config', eventConfig);
-    const handler = createHandler(eventName, eventConfig, callback);
-    eventHandlers[eventName] = handler;
-
-    const registeredHandlers = eventRegistrar.events[eventName] || new Set();
-    registeredHandlers.add(handler);
-    eventRegistrar.events[eventName] = registeredHandlers;
-  }
-
-  const registration = {
-    unregister() {
-      for (const eventName in eventHandlers) {
-        const registeredHandlers = eventRegistrar.events[eventName];
-        debug('Unregistering', eventName, 'for config', config, 'on', element);
-        registeredHandlers.delete(eventHandlers[eventName]);
-        if (!registeredHandlers.size) {
-          delete eventRegistrar.events[eventName];
-        }
-      }
-
-      if (!Object.keys(eventRegistrar.events).length) {
-        debug('Event registrar for', element, 'is now empty! Cleaning up...');
-        eventRegistrar.destroy();
-        elementRegistrar.delete(element);
-      }
-    },
-  };
+  const eventRegistration = eventRegistrar.register(config, callback);
 
   // Force an initial state update.
   eventRegistrar.forceUpdate();
 
-  return registration;
+  return createRegistration(() => {
+    eventRegistration.unregister();
+    if (!Object.keys(eventRegistrar.events).length) {
+      debug('Event registrar for', element, 'is now empty! Cleaning up...');
+      eventRegistrar.destroy();
+      elementRegistrar.delete(element);
+    }
+  });
+}
+
+function createRegistration(unregister) {
+  return {unregister};
 }
 
 function createEventRegistrarAndScrollMonitor(
@@ -116,6 +96,27 @@ function createEventRegistrarAndScrollMonitor(
   const scrollState = {};
   const callbacksToCall = new Set();
   let updatePending = false;
+
+  function registerConfig(config, callback) {
+    const eventHandlers = createHandlers(config, callback);
+
+    for (const eventName in eventHandlers) {
+      const registeredHandlers = events[eventName] || new Set();
+      registeredHandlers.add(eventHandlers[eventName]);
+      events[eventName] = registeredHandlers;
+    }
+
+    return createRegistration(() => {
+      for (const eventName in eventHandlers) {
+        const registeredHandlers = events[eventName];
+        debug('Unregistering', eventName, 'for config', config);
+        registeredHandlers.delete(eventHandlers[eventName]);
+        if (!registeredHandlers.size) {
+          delete events[eventName];
+        }
+      }
+    });
+  }
 
   function dispatchStateChange() {
     updatePending = false;
@@ -157,6 +158,9 @@ function createEventRegistrarAndScrollMonitor(
 
   const eventRegistrar = {
     events,
+    register(config, callback) {
+      return registerConfig(config, callback);
+    },
     forceUpdate() {
       debug('Forcing update for', element);
       updateScrollState(getScrollRect(element), true);
