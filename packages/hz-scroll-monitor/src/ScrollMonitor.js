@@ -110,10 +110,16 @@ export default class ScrollMonitor extends Component {
   };
 
   render() {
-    return React.cloneElement(this.props.children(this.state), {
-      ref: this.findScrollNode,
-    });
+    return (
+      <ScrollTarget ref={this.findScrollNode}>
+        {this.props.children(this.state)}
+      </ScrollTarget>
+    );
   }
+}
+
+function ScrollTarget({children}) {
+  return children;
 }
 
 function getNearestScrollNode(node) {
