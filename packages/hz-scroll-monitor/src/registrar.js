@@ -1,5 +1,5 @@
 // @flow
-import {createHandlers} from './events';
+import {createHandlers, IN_VIEWPORT} from './events';
 import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:registrar');
@@ -93,10 +93,6 @@ export function register(
   });
 }
 
-function createRegistration(unregister) {
-  return {unregister};
-}
-
 function createEventRegistrarAndScrollMonitor(
   element: HTMLElement,
 ): EventRegistrar {
@@ -105,45 +101,15 @@ function createEventRegistrarAndScrollMonitor(
   const callbacksToCall = new Map();
   let updatePending = false;
 
-  function registerConfig(config, callback) {
-    const eventHandlers = createHandlers(config, callback);
-
-    for (const eventName in eventHandlers) {
-      const registeredHandlers = events[eventName] || new Set();
-      registeredHandlers.add(eventHandlers[eventName]);
-      events[eventName] = registeredHandlers;
-    }
-
-    return createRegistration(() => {
-      for (const eventName in eventHandlers) {
-        const registeredHandlers = events[eventName];
-        debug('Unregistering', eventName, 'for config', config);
-        registeredHandlers.delete(eventHandlers[eventName]);
-        if (!registeredHandlers.size) {
-          delete events[eventName];
-        }
-      }
-    });
-  }
-
-  function dispatchStateChange() {
-    updatePending = false;
-    for (const [callback, eventState] of callbacksToCall.values()) {
-      callback({...scrollState, ...eventState}); // eslint-disable-line callback-return
-    }
-    callbacksToCall.clear();
-  }
-
   function updateScrollState(rect, immediate) {
-    for (const event in events) {
-      events[event].forEach(callbackConfig => {
-        const [callbackGetter, eventState] = callbackConfig;
-        const callback = callbackGetter(rect, scrollState, eventState);
-        if (callback)
-          callbacksToCall.set(callbackConfig, [callback, eventState]);
-      });
-    }
+    // Update the callbacks that care about the impending state change.
+    // Note that  dispatches are asynchronous. This means that some changes
+    // might add a callback to the map, while subsequence changes might
+    // remove it without it ever being called, which is generally
+    // an optimal tradeoff, performance-wise (mitigates update thrashing).
+    updateCallbacksToCall(callbacksToCall, events, scrollState, rect);
 
+    // Update the scroll state.
     scrollState.lastTop = scrollState.top;
     scrollState.lastLeft = scrollState.left;
     scrollState.lastWidth = scrollState.width;
@@ -153,10 +119,19 @@ function createEventRegistrarAndScrollMonitor(
     scrollState.width = rect.width;
     scrollState.height = rect.height;
 
+    // Dispatch the state change, or schedule a dispatch,
+    // if not updating asynchronously (default).
     if (immediate) {
-      dispatchStateChange();
+      window.cancelAnimationFrame(updatePending);
+      updatePending = false;
+      dispatchStateChange(callbacksToCall, scrollState);
     } else if (!updatePending) {
-      updatePending = window.requestAnimationFrame(dispatchStateChange);
+      updatePending = window.requestAnimationFrame(() => {
+        if (updatePending) {
+          updatePending = false;
+          dispatchStateChange(callbacksToCall, scrollState);
+        }
+      });
     }
   }
 
@@ -164,12 +139,26 @@ function createEventRegistrarAndScrollMonitor(
     updateScrollState(getScrollRect(scrollEvent.currentTarget));
   }
 
-  element.addEventListener('scroll', handleScroll);
+  function updateObservers() {
+    element.removeEventListener('scroll', handleScroll);
+    if (hasScrollBoundEvent(events)) {
+      element.addEventListener('scroll', handleScroll);
+    }
+    if (hasIntersectionBoundEvent(events)) {
+      debug('need intersection!')
+    }
+  }
 
-  const eventRegistrar = {
+  function destroyObservers() {
+    element.removeEventListener('scroll', handleScroll);
+  }
+
+  return {
     events,
     register(config, callback) {
-      return registerConfig(config, callback);
+      const registration = registerConfig(events, config, callback);
+      updateObservers();
+      return registration;
     },
     forceUpdate() {
       debug('Forcing update for', element);
@@ -177,12 +166,61 @@ function createEventRegistrarAndScrollMonitor(
     },
     destroy() {
       debug('Destroying event registrar for', element);
-      element.removeEventListener('scroll', handleScroll);
       window.cancelAnimationFrame(updatePending);
+      destroyObservers();
     },
   };
+}
 
-  return eventRegistrar;
+function createRegistration(unregister) {
+  return {unregister};
+}
+
+function registerConfig(events, config, callback) {
+  const eventHandlers = createHandlers(config, callback);
+
+  for (const eventName in eventHandlers) {
+    const registeredHandlers = events[eventName] || new Set();
+    registeredHandlers.add(eventHandlers[eventName]);
+    events[eventName] = registeredHandlers;
+  }
+
+  return createRegistration(() => {
+    for (const eventName in eventHandlers) {
+      const registeredHandlers = events[eventName];
+      debug('Unregistering', eventName, 'for config', config);
+      registeredHandlers.delete(eventHandlers[eventName]);
+      if (!registeredHandlers.size) {
+        delete events[eventName];
+      }
+    }
+  });
+}
+
+function dispatchStateChange(callbacksToCall, scrollState) {
+  for (const [callback, eventState] of callbacksToCall.values()) {
+    callback({...scrollState, ...eventState}); // eslint-disable-line callback-return
+  }
+}
+
+function updateCallbacksToCall(callbacksToCall, events, scrollState, rect) {
+  for (const event in events) {
+    for (const callbackConfig of events[event]) {
+      const [callbackGetter, eventState] = callbackConfig;
+      const callback = callbackGetter(rect, scrollState, eventState);
+      if (callback) {
+        callbacksToCall.set(callbackConfig, [callback, eventState]);
+      }
+    }
+  }
+}
+
+function hasScrollBoundEvent(events) {
+  return Object.keys(events).length > 2 || !hasIntersectionBoundEvent(events);
+}
+
+function hasIntersectionBoundEvent(events) {
+  return IN_VIEWPORT in events;
 }
 
 function getScrollRect(element: HTMLElement): ScrollRect {
