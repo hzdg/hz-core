@@ -1,10 +1,7 @@
 #!/bin/sh
 
-set -e
-
-CYAN='\033[0;36m'
-DEFAULT='\033[0m'
-YELLOW='\033[0;33m'
+my_dir="$(dirname "$0")"
+source "$my_dir/pre-check.sh"
 
 create_new_package () {
   read -p "$(echo $CYAN)Name of new package name (without the hz-): $(echo $DEFAULT)" -r RESPONSE

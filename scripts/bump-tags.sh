@@ -2,34 +2,8 @@
 
 set -e
 
-CURRENT_VERSION_NUMBER=$(node -p "require('./package.json').version")
-CURRENT_BRANCH=$(git symbolic-ref --short -q HEAD)
-DOCKER_REPOSITORY=hzdg/hz-core
-
-LOCAL_BRANCH=$CURRENT_BRANCH
-REMOTE_BRANCH=origin/$CURRENT_BRANCH
-nA2B=$(git rev-list --count $LOCAL_BRANCH..$REMOTE_BRANCH)
-nB2A=$(git rev-list --count $REMOTE_BRANCH..$LOCAL_BRANCH)
-
-CYAN='\033[0;36m'
-DEFAULT='\033[0m'
-YELLOW='\033[0;33m'
-RED='\033[0;31m'
-
-check_clean_working_tree () {
-  if ! git diff-files --quiet --ignore-submodules --
-  then
-      echo >&2 "${RED}Cannot update project version: you have unstaged changes.${DEFAULT}"
-      git diff-files --name-status -r --ignore-submodules -- >&2
-      err=1
-      exit 1
-  elif [ ! $nA2B -eq 0 -o ! $nB2A -eq 0 ];
-  then
-    echo >&2 "${RED}Cannot update project version: $LOCAL_BRANCH does not match $REMOTE_BRANCH.${DEFAULT}"
-    err=1
-    exit 1
-  fi
-}
+my_dir="$(dirname "$0")"
+source "$my_dir/pre-check.sh"
 
 set_github_tag () {
   yarn version --new-version $1
@@ -47,8 +21,6 @@ set_docker_tag () {
 
 update_tags () {
   echo "$(echo $CYAN)Updating remote Git and Docker tags...$(echo $DEFAULT)"
-
-  check_clean_working_tree
 
   read -p "$(echo $CYAN)New library tag version number (current: $CURRENT_VERSION_NUMBER): $(echo $DEFAULT)" -r RESPONSE
 
