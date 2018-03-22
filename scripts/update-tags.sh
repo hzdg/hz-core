@@ -23,7 +23,7 @@ check_clean_working_tree () {
       git diff-files --name-status -r --ignore-submodules -- >&2
       err=1
       exit 1
-  elif [ ! $nA2B -eq 0 -a ! $nB2A -eq 0 ];
+  elif [ ! $nA2B -eq 0 -o ! $nB2A -eq 0 ];
   then
     echo >&2 "${RED}Cannot update project version: $LOCAL_BRANCH does not match $REMOTE_BRANCH.${DEFAULT}"
     err=1
