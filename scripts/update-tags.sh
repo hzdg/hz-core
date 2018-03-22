@@ -17,7 +17,7 @@ YELLOW='\033[0;33m'
 RED='\033[0;31m'
 
 check_clean_working_tree () {
-  if git diff-files --quiet --ignore-submodules --
+  if ! git diff-files --quiet --ignore-submodules --
   then
       echo >&2 "${RED}Cannot update project version: you have unstaged changes.${DEFAULT}"
       git diff-files --name-status -r --ignore-submodules -- >&2
