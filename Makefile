@@ -27,5 +27,8 @@ build-dist:
 bump-tags:
 	./scripts/bump-tags.sh
 
+update-docker-tags:
+	./scripts/update-docker-tags.sh
+
 publish-to-npm:
 	echo 'Not yet implemented'
