@@ -34,6 +34,7 @@ check_clean_working_tree () {
 set_github_tag () {
   yarn version --new-version $1
   git push origin --tags
+  git push origin $CURRENT_BRANCH
   echo "$(echo $CYAN)Updated main package version and created Github tag $1 ...$(echo $DEFAULT)"
 }
 
