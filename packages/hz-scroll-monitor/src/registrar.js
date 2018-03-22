@@ -4,6 +4,8 @@ import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:registrar');
 
+import type {EventState} from './events';
+
 type BoundsRect = {
   top: ?Number,
   right: ?Number,
@@ -29,10 +31,6 @@ export type ScrollRect = {
 };
 
 export type ScrollState = {
-  verticalDirection: ?('down' | 'up'),
-  horizontalDirection: ?('left' | 'right'),
-  inBounds: ?Boolean,
-  inViewport: ?Boolean,
   lastTop: ?Number,
   lastLeft: ?Number,
   lastWidth: ?Number,
@@ -40,10 +38,20 @@ export type ScrollState = {
   ...ScrollRect,
 };
 
-export type ScrollStateHandler = (state: ScrollState) => void;
+type ScrollMonitorState = ScrollState & EventState;
 
-type EventMap = {[event: string]: Set<ScrollStateHandler>};
-type EventRegistrar = {destroy(): void, forceUpdate(): void, events: EventMap};
+export type ScrollMonitorStateHandler = (state: ScrollMonitorState) => void;
+
+type EventMap = {[event: string]: Set<ScrollMonitorStateHandler>};
+type EventRegistrar = {
+  register(
+    config: RegistrationConfig,
+    callback: ScrollMonitorStateHandler,
+  ): Registration,
+  destroy(): void,
+  forceUpdate(): void,
+  events: EventMap,
+};
 type ElementRegistrar = Map<HTMLElement, EventRegistrar>;
 type Registration = {unregister(): void};
 
@@ -52,7 +60,7 @@ let defaultRegistrar: ElementRegistrar;
 export function register(
   element: HTMLElement,
   config: RegistrationConfig,
-  callback: ScrollStateHandler,
+  callback: ScrollMonitorStateHandler,
   elementRegistrar: ?ElementRegistrar,
 ): Registration {
   if (!elementRegistrar) {
@@ -94,7 +102,7 @@ function createEventRegistrarAndScrollMonitor(
 ): EventRegistrar {
   const events = {};
   const scrollState = {};
-  const callbacksToCall = new Set();
+  const callbacksToCall = new Map();
   let updatePending = false;
 
   function registerConfig(config, callback) {
@@ -120,17 +128,19 @@ function createEventRegistrarAndScrollMonitor(
 
   function dispatchStateChange() {
     updatePending = false;
-    for (const callback of callbacksToCall) {
-      callback(scrollState); // eslint-disable-line callback-return
+    for (const [callback, eventState] of callbacksToCall.values()) {
+      callback({...scrollState, ...eventState}); // eslint-disable-line callback-return
     }
     callbacksToCall.clear();
   }
 
   function updateScrollState(rect, immediate) {
     for (const event in events) {
-      events[event].forEach(callbackGetter => {
-        const callback = callbackGetter(rect, scrollState);
-        if (callback) callbacksToCall.add(callback);
+      events[event].forEach(callbackConfig => {
+        const [callbackGetter, eventState] = callbackConfig;
+        const callback = callbackGetter(rect, scrollState, eventState);
+        if (callback)
+          callbacksToCall.set(callbackConfig, [callback, eventState]);
       });
     }
 
