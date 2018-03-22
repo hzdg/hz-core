@@ -1,59 +1,18 @@
 // @flow
-import {createHandlers, IN_VIEWPORT} from './events';
+import {createHandlers} from './events';
+import {IN_VIEWPORT} from './ScrollMonitorEvent';
 import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:registrar');
 
-import type {EventState} from './events';
-
-type BoundsRect = {
-  top: ?Number,
-  right: ?Number,
-  bottom: ?Number,
-  left: ?Number,
-};
-
-export type Bounds = BoundsRect | ((state: ScrollState) => BoundsRect);
-
-export type RegistrationConfig = {
-  vertical: ?Boolean,
-  horizontal: ?Boolean,
-  direction: ?Boolean,
-  viewport: ?Boolean,
-  bounds: ?Bounds,
-};
-
-export type ScrollRect = {
-  top: Number,
-  left: Number,
-  width: Number,
-  height: Number,
-};
-
-export type ScrollState = {
-  lastTop: ?Number,
-  lastLeft: ?Number,
-  lastWidth: ?Number,
-  lastHeight: ?Number,
-  ...ScrollRect,
-};
-
-type ScrollMonitorState = ScrollState & EventState;
-
-export type ScrollMonitorStateHandler = (state: ScrollMonitorState) => void;
-
-type EventMap = {[event: string]: Set<ScrollMonitorStateHandler>};
-type EventRegistrar = {
-  register(
-    config: RegistrationConfig,
-    callback: ScrollMonitorStateHandler,
-  ): Registration,
-  destroy(): void,
-  forceUpdate(): void,
-  events: EventMap,
-};
-type ElementRegistrar = Map<HTMLElement, EventRegistrar>;
-type Registration = {unregister(): void};
+import type {
+  ElementRegistrar,
+  EventRegistrar,
+  Registration,
+  RegistrationConfig,
+  ScrollMonitorStateHandler,
+  ScrollRect,
+} from './types';
 
 let defaultRegistrar: ElementRegistrar;
 
@@ -145,7 +104,7 @@ function createEventRegistrarAndScrollMonitor(
       element.addEventListener('scroll', handleScroll);
     }
     if (hasIntersectionBoundEvent(events)) {
-      debug('need intersection!')
+      debug('need intersection!');
     }
   }
 

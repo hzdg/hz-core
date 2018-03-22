@@ -1,46 +1,30 @@
 // @flow
 import {UP, DOWN, LEFT, RIGHT} from './ScrollDirection';
+import {
+  VERTICAL_DIRECTION_CHANGE,
+  HORIZONTAL_DIRECTION_CHANGE,
+  IN_BOUNDS,
+  IN_VIEWPORT,
+} from './ScrollMonitorEvent';
 import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:events');
 
 import type {
-  RegistrationConfig,
   Bounds,
+  RegistrationConfig,
+  ScrollMonitorEvent,
+  ScrollMonitorEventConfig,
+  ScrollMonitorEventState,
+  ScrollMonitorStateHandler,
+  ScrollMonitorStateHandlerGetter,
   ScrollRect,
   ScrollState,
-  ScrollMonitorStateHandler,
-} from './registrar';
-
-export const VERTICAL_DIRECTION_CHANGE = 'verticalDirectionChange'; // scrolling has changed vertical directions (up vs down)
-export const HORIZONTAL_DIRECTION_CHANGE = 'horizontalDirectionChange'; // scrolling has changed horizontal directions (left vs right)
-export const IN_BOUNDS = 'inBounds'; // Whether some bounds contains scroll position
-export const IN_VIEWPORT = 'inViewport'; // Whether some part of a rect is now in the scrollable viewport
-
-export type MonitorEvent =
-  | typeof VERTICAL_DIRECTION_CHANGE
-  | typeof HORIZONTAL_DIRECTION_CHANGE
-  | typeof IN_BOUNDS
-  | typeof IN_VIEWPORT;
-
-export type EventState = {
-  verticalDirection?: ?(typeof DOWN | typeof UP),
-  horizontalDirection?: ?(typeof LEFT | typeof RIGHT),
-  inBounds?: ?Boolean,
-  inViewport?: ?Boolean,
-};
-
-type EventConfig = MonitorEvent | [MonitorEvent, Bounds];
-
-type ScrollMonitorStateHandlerGetter = (
-  rect: ScrollRect,
-  scrollState: ScrollState,
-  eventState: EventState,
-) => ?ScrollMonitorStateHandler;
+} from './types';
 
 export function eventsFromConfig(
   config: RegistrationConfig,
-): [EventConfig[], EventState] {
+): [ScrollMonitorEventConfig[], ScrollMonitorEventState] {
   const events = [];
   const initialEventState = {};
   if (config.direction) {
@@ -68,14 +52,14 @@ export function eventsFromConfig(
 }
 
 export function createHandler(
-  event: MonitorEvent,
+  event: ScrollMonitorEvent,
   config: ?Bounds,
   callback: ScrollMonitorStateHandler,
 ): ScrollMonitorStateHandlerGetter {
   return function getMonitorEventCallback(
     rect: ScrollRect,
     scrollState: ScrollState,
-    eventState: EventState,
+    eventState: ScrollMonitorEventState,
   ): ?ScrollMonitorStateHandler {
     const {top, left, width, height} = rect;
 
