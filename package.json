@@ -1,6 +1,6 @@
 {
   "name": "hz-core",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "HZ's internal library of React Components",
   "main": "index.js",
   "repository": "git@github.com:hzdg/hz-core.git",
