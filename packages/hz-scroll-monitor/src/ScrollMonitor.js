@@ -77,6 +77,7 @@ export default class ScrollMonitor extends Component {
     this.unregister();
     this.ref = null;
     this.el = null;
+    this.scrollEl = null;
   }
 
   mounted = false;
@@ -90,8 +91,12 @@ export default class ScrollMonitor extends Component {
   }
 
   registerIfNecessary() {
-    if (!this.registration && this.mounted && this.el) {
-      this.registration = register(this.el, this.props, this.handleUpdate);
+    if (!this.registration && this.mounted && this.scrollEl) {
+      this.registration = register(
+        this.scrollEl,
+        getRegistrationProps(this.props, this.el),
+        this.handleUpdate,
+      );
     }
   }
 
@@ -99,7 +104,8 @@ export default class ScrollMonitor extends Component {
     if (ref && ref !== this.ref) {
       this.ref = ref;
       // eslint-disable-next-line react/no-find-dom-node
-      this.el = getNearestScrollNode(findDOMNode(ref));
+      this.el = findDOMNode(ref);
+      this.scrollEl = getNearestScrollNode(this.el);
       this.unregister();
       this.registerIfNecessary();
     }
@@ -120,6 +126,18 @@ export default class ScrollMonitor extends Component {
 
 function ScrollTarget({children}) {
   return children;
+}
+
+// eslint-disable-next-line no-unused-vars
+function getRegistrationProps({children: _, ...props}, el) {
+  // eslint-disable-next-line eqeqeq
+  if (props.viewport !== false && props.viewport != null) {
+    props.viewport = {
+      target: el,
+      threshold: props.viewport === true ? 0 : props.viewport,
+    };
+  }
+  return props;
 }
 
 function getNearestScrollNode(node) {

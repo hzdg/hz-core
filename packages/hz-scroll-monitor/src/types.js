@@ -22,6 +22,10 @@ export type ScrollMonitorEventState = {
   horizontalDirection?: ?HorizontalScrollDirection,
   inBounds?: ?Boolean,
   inViewport?: ?Boolean,
+  viewportRatio?: ?Number,
+  // TODO: figure out what info we actually need for viewport.
+  // i.e., vertical offset (when 'below' vs. when 'above')
+  // and horizontal offset (when 'right' vs when 'left')
 };
 
 export type ScrollRect = {
@@ -46,21 +50,50 @@ export type BoundsRect = {
   left: ?Number,
 };
 
-export type Bounds = BoundsRect | ((state: ScrollState) => BoundsRect);
+export type BoundsConfig = BoundsRect | ((state: ScrollState) => BoundsRect);
+
+export type ViewportConfig = {
+  target: Element,
+  threshold: Number | Number[],
+};
+
+export type ViewportChange = {
+  target: Element,
+  ratio: Number,
+  inViewport: Boolean,
+};
+
+export type UpdatePayload = {
+  rect?: ScrollRect,
+  intersections?: ViewportChange[],
+};
 
 export type ScrollMonitorEventConfig =
   | ScrollMonitorEvent
-  | [ScrollMonitorEvent, Bounds];
+  | [ScrollMonitorEvent, BoundsConfig]
+  | [ScrollMonitorEvent, ViewportConfig];
 
 export type ScrollMonitorState = ScrollState & ScrollMonitorEventState;
 
 export type ScrollMonitorStateHandler = (state: ScrollMonitorState) => void;
 
-export type ScrollMonitorStateHandlerGetter = (
-  rect: ScrollRect,
+export type ScrollMonitorStateHandlerWrapper = (
+  payload: UpdatePayload,
   scrollState: ScrollState,
   eventState: ScrollMonitorEventState,
 ) => ?ScrollMonitorStateHandler;
+
+export type CallbackGetterConfig = [
+  ScrollMonitorStateHandlerWrapper,
+  ScrollMonitorEventState,
+];
+
+export type CallbackConfig = [
+  ScrollMonitorStateHandler,
+  ScrollMonitorEventState,
+];
+
+export type PendingCallbackMap = Map<CallbackGetterConfig, CallbackConfig>;
 
 export type EventMap = {
   [event: string]: Set<[ScrollMonitorStateHandler, ScrollMonitorEventState]>,
@@ -70,8 +103,8 @@ export type RegistrationConfig = {
   vertical: ?Boolean,
   horizontal: ?Boolean,
   direction: ?Boolean,
-  viewport: ?Boolean,
-  bounds: ?Bounds,
+  viewport: ?(Boolean | Number | Number[]),
+  bounds: ?BoundsConfig,
 };
 
 export type Registration = {unregister(): void};
@@ -86,4 +119,4 @@ export type EventRegistrar = {
   events: EventMap,
 };
 
-export type ElementRegistrar = Map<HTMLElement, EventRegistrar>;
+export type ElementRegistrar = Map<Element, EventRegistrar>;

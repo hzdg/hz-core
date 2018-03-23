@@ -1,17 +1,21 @@
 // @flow
 import {createHandlers} from './events';
-import {IN_VIEWPORT} from './ScrollMonitorEvent';
 import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:registrar');
 
 import type {
   ElementRegistrar,
+  EventMap,
   EventRegistrar,
+  ViewportChange,
+  PendingCallbackMap,
   Registration,
   RegistrationConfig,
   ScrollMonitorStateHandler,
   ScrollRect,
+  ScrollState,
+  UpdatePayload,
 } from './types';
 
 let defaultRegistrar: ElementRegistrar;
@@ -23,13 +27,15 @@ export function register(
   elementRegistrar: ?ElementRegistrar,
 ): Registration {
   if (!elementRegistrar) {
-    elementRegistrar = defaultRegistrar || (defaultRegistrar = new Map());
+    if (!defaultRegistrar) {
+      debug('No element registrar provided! Creating default (global)...');
+      defaultRegistrar = new Map();
+    }
+    elementRegistrar = defaultRegistrar;
   }
 
-  debug('Registering element', element, 'with config', config);
-
   if (!elementRegistrar.has(element)) {
-    debug(element, 'is a new element to the registrar!');
+    debug('Registering new element', element);
     elementRegistrar.set(
       element,
       createEventRegistrarAndScrollMonitor(element),
@@ -40,12 +46,14 @@ export function register(
   const eventRegistration = eventRegistrar.register(config, callback);
 
   // Force an initial state update.
-  eventRegistrar.forceUpdate();
+  // FIXME: Is there a heuristic we can use to decide whether or not to do this?
+  // It's very expensive during scaffolding/ initial render phase.
+  // eventRegistrar.forceUpdate();
 
   return createRegistration(() => {
     eventRegistration.unregister();
     if (!Object.keys(eventRegistrar.events).length) {
-      debug('Event registrar for', element, 'is now empty! Cleaning up...');
+      debug('Event registrar is now empty! Cleaning up...', element);
       eventRegistrar.destroy();
       elementRegistrar.delete(element);
     }
@@ -55,28 +63,31 @@ export function register(
 function createEventRegistrarAndScrollMonitor(
   element: HTMLElement,
 ): EventRegistrar {
-  const events = {};
-  const scrollState = {};
-  const callbacksToCall = new Map();
-  let updatePending = false;
+  const events: EventMap = {};
+  const scrollState: ScrollState = {};
+  const callbacksToCall: PendingCallbackMap = new Map();
+  let updatePending: Boolean = false;
+  let intersectionObserver: ?IntersectionObserver;
 
-  function updateScrollState(rect, immediate) {
+  function updateScrollState(payload: UpdatePayload, immediate?: Boolean) {
     // Update the callbacks that care about the impending state change.
     // Note that  dispatches are asynchronous. This means that some changes
     // might add a callback to the map, while subsequence changes might
     // remove it without it ever being called, which is generally
     // an optimal tradeoff, performance-wise (mitigates update thrashing).
-    updateCallbacksToCall(callbacksToCall, events, scrollState, rect);
+    updateCallbacksToCall(callbacksToCall, events, scrollState, payload);
 
-    // Update the scroll state.
-    scrollState.lastTop = scrollState.top;
-    scrollState.lastLeft = scrollState.left;
-    scrollState.lastWidth = scrollState.width;
-    scrollState.lastHeight = scrollState.height;
-    scrollState.top = rect.top;
-    scrollState.left = rect.left;
-    scrollState.width = rect.width;
-    scrollState.height = rect.height;
+    if (payload.rect) {
+      // Update the scroll state.
+      scrollState.lastTop = scrollState.top;
+      scrollState.lastLeft = scrollState.left;
+      scrollState.lastWidth = scrollState.width;
+      scrollState.lastHeight = scrollState.height;
+      scrollState.top = payload.rect.top;
+      scrollState.left = payload.rect.left;
+      scrollState.width = payload.rect.width;
+      scrollState.height = payload.rect.height;
+    }
 
     // Dispatch the state change, or schedule a dispatch,
     // if not updating asynchronously (default).
@@ -95,36 +106,64 @@ function createEventRegistrarAndScrollMonitor(
   }
 
   function handleScroll(scrollEvent) {
-    updateScrollState(getScrollRect(scrollEvent.currentTarget));
+    updateScrollState({rect: getScrollRect(scrollEvent.currentTarget)});
   }
 
-  function updateObservers() {
+  function handleIntersectionChange(entries) {
+    updateScrollState({intersections: getViewportChanges(entries)});
+  }
+
+  function updateObservers(config) {
     element.removeEventListener('scroll', handleScroll);
-    if (hasScrollBoundEvent(events)) {
+
+    if (hasScrollBoundEvent(config)) {
       element.addEventListener('scroll', handleScroll);
     }
-    if (hasIntersectionBoundEvent(events)) {
-      debug('need intersection!');
+
+    // if (intersectionObserver) {
+    //   intersectionObserver.disconnect();
+    //   intersectionObserver = null;
+    // }
+
+    if (hasIntersectionBoundEvent(config)) {
+      // TODO: intersection threshold registrar
+      if (!intersectionObserver) {
+        intersectionObserver = new IntersectionObserver(
+          handleIntersectionChange,
+          {root: element instanceof Element ? element : null},
+        );
+      }
+      intersectionObserver.observe(config.viewport.target);
     }
   }
 
   function destroyObservers() {
     element.removeEventListener('scroll', handleScroll);
+    intersectionObserver.disconnect();
+    intersectionObserver = null;
   }
+
+  debug('Creating event registrar', element);
 
   return {
     events,
     register(config, callback) {
       const registration = registerConfig(events, config, callback);
-      updateObservers();
+      updateObservers(config);
       return registration;
     },
     forceUpdate() {
-      debug('Forcing update for', element);
-      updateScrollState(getScrollRect(element), true);
+      debug('Forcing update', element);
+      updateScrollState(
+        {
+          rect: getScrollRect(element),
+          intersections: getViewportChanges(intersectionObserver.takeRecords()),
+        },
+        true,
+      );
     },
     destroy() {
-      debug('Destroying event registrar for', element);
+      debug('Destroying event registrar', element);
       window.cancelAnimationFrame(updatePending);
       destroyObservers();
     },
@@ -140,6 +179,7 @@ function registerConfig(events, config, callback) {
 
   for (const eventName in eventHandlers) {
     const registeredHandlers = events[eventName] || new Set();
+    debug(`Registering event ${eventName}`);
     registeredHandlers.add(eventHandlers[eventName]);
     events[eventName] = registeredHandlers;
   }
@@ -147,7 +187,7 @@ function registerConfig(events, config, callback) {
   return createRegistration(() => {
     for (const eventName in eventHandlers) {
       const registeredHandlers = events[eventName];
-      debug('Unregistering', eventName, 'for config', config);
+      debug(`Unregistering event ${eventName}`);
       registeredHandlers.delete(eventHandlers[eventName]);
       if (!registeredHandlers.size) {
         delete events[eventName];
@@ -156,30 +196,41 @@ function registerConfig(events, config, callback) {
   });
 }
 
-function dispatchStateChange(callbacksToCall, scrollState) {
+function dispatchStateChange(
+  callbacksToCall: PendingCallbackMap,
+  scrollState: ScrollState,
+) {
   for (const [callback, eventState] of callbacksToCall.values()) {
     callback({...scrollState, ...eventState}); // eslint-disable-line callback-return
   }
 }
 
-function updateCallbacksToCall(callbacksToCall, events, scrollState, rect) {
+function updateCallbacksToCall(
+  callbacksToCall: PendingCallbackMap,
+  events: EventMap,
+  scrollState: ScrollState,
+  payload: UpdatePayload,
+) {
   for (const event in events) {
     for (const callbackConfig of events[event]) {
       const [callbackGetter, eventState] = callbackConfig;
-      const callback = callbackGetter(rect, scrollState, eventState);
+      const callback = callbackGetter(payload, scrollState, eventState);
       if (callback) {
         callbacksToCall.set(callbackConfig, [callback, eventState]);
+      } else {
+        callbacksToCall.delete(callbackConfig);
       }
     }
   }
 }
 
-function hasScrollBoundEvent(events) {
-  return Object.keys(events).length > 2 || !hasIntersectionBoundEvent(events);
+function hasScrollBoundEvent(config: RegistrationConfig): Boolean {
+  return Object.keys(config).length > 2 || !hasIntersectionBoundEvent(config);
 }
 
-function hasIntersectionBoundEvent(events) {
-  return IN_VIEWPORT in events;
+function hasIntersectionBoundEvent(config: RegistrationConfig): Boolean {
+  // eslint-disable-next-line eqeqeq
+  return config.viewport !== false && config.viewport != null;
 }
 
 function getScrollRect(element: HTMLElement): ScrollRect {
@@ -191,4 +242,13 @@ function getScrollRect(element: HTMLElement): ScrollRect {
     scrollHeight: height,
   } = scrollingElement;
   return {top, left, width, height};
+}
+
+function getViewportChanges(
+  entries: IntersectionObserverEntry[],
+): ViewportChange[] {
+  return entries.map(({target, isIntersecting: inViewport}) => ({
+    target,
+    inViewport,
+  }));
 }

@@ -11,15 +11,18 @@ import Debug from 'debug';
 const debug = Debug('ScrollMonitor:events');
 
 import type {
-  Bounds,
+  BoundsConfig,
+  BoundsRect,
   RegistrationConfig,
   ScrollMonitorEvent,
   ScrollMonitorEventConfig,
   ScrollMonitorEventState,
   ScrollMonitorStateHandler,
-  ScrollMonitorStateHandlerGetter,
-  ScrollRect,
+  ScrollMonitorStateHandlerWrapper,
   ScrollState,
+  UpdatePayload,
+  ViewportConfig,
+  ViewportChange,
 } from './types';
 
 export function eventsFromConfig(
@@ -47,80 +50,133 @@ export function eventsFromConfig(
     events.push([IN_BOUNDS, config.bounds]);
     initialEventState.inBounds = null;
   }
-  // if (config.viewport) events.push([IN_VIEWPORT, ???]);
+  if (config.viewport) {
+    events.push([IN_VIEWPORT, config.viewport]);
+    initialEventState.inViewport = null;
+  }
   return [events, initialEventState];
 }
 
-export function createHandler(
+export function wrapHandler(
   event: ScrollMonitorEvent,
-  config: ?Bounds,
+  config: ?(BoundsConfig | ViewportConfig),
   callback: ScrollMonitorStateHandler,
-): ScrollMonitorStateHandlerGetter {
-  return function getMonitorEventCallback(
-    rect: ScrollRect,
-    scrollState: ScrollState,
-    eventState: ScrollMonitorEventState,
-  ): ?ScrollMonitorStateHandler {
-    const {top, left, width, height} = rect;
+): ScrollMonitorStateHandlerWrapper {
+  // Default wrapper just always returns false (never handles anything).
+  let wrapper = () => false;
 
-    switch (event) {
-      case VERTICAL_DIRECTION_CHANGE: {
-        const verticalDirection = top < scrollState.top ? UP : DOWN;
-        if (verticalDirection === eventState.verticalDirection) {
-          return false;
-        } else {
-          eventState.verticalDirection = verticalDirection;
-          debug('VERTICAL_DIRECTION_CHANGE', verticalDirection);
-          return callback;
-        }
-      }
-
-      case HORIZONTAL_DIRECTION_CHANGE: {
-        const horizontalDirection = left < scrollState.left ? RIGHT : LEFT;
-        if (horizontalDirection === eventState.horizontalDirection) {
-          return false;
-        } else {
-          eventState.horizontalDirection = horizontalDirection;
-          debug('HORIZONTAL_DIRECTION_CHANGE', horizontalDirection);
-          return callback;
-        }
-      }
-
-      case IN_BOUNDS: {
-        if (!config) return false;
-        const nowInBounds = inBounds(config, rect, scrollState);
-        if (eventState.inBounds !== nowInBounds) {
-          eventState.inBounds = nowInBounds;
-          debug('IN_BOUNDS', nowInBounds);
-          return callback;
-        }
-        return false;
-      }
-
-      // case IN_VIEWPORT: {
-      // }
-
-      default: {
-        return false;
-      }
+  switch (event) {
+    case VERTICAL_DIRECTION_CHANGE: {
+      wrapper = wrapVerticalDirectionChange(callback);
+      break;
     }
-  };
+    case HORIZONTAL_DIRECTION_CHANGE: {
+      wrapper = wrapHorizontalDirectionChange(callback);
+      break;
+    }
+    case IN_BOUNDS: {
+      if (config) wrapper = wrapBoundsChange(config, callback);
+      break;
+    }
+    case IN_VIEWPORT: {
+      if (config) wrapper = wrapViewportChange(config, callback);
+      break;
+    }
+  }
+
+  return wrapper;
 }
 
-export function createHandlers(config, callback) {
+export function createHandlers(
+  config: RegistrationConfig,
+  callback: ScrollMonitorStateHandler,
+): {
+  [key: string]: [ScrollMonitorStateHandlerWrapper, ScrollMonitorEventState],
+} {
   const eventHandlers = {};
   const [eventNames, eventState] = eventsFromConfig(config);
   for (let eventName of eventNames) {
     let eventConfig = null;
     if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
-    debug('Creating handler for', eventName, 'with config', eventConfig);
-    const handler = createHandler(eventName, eventConfig, callback);
+    debug(`Creating handler for ${eventName}`, eventConfig);
+    const handler = wrapHandler(eventName, eventConfig, callback);
     eventHandlers[eventName] = [handler, eventState];
   }
   return eventHandlers;
 }
 
-function inBounds(bounds, rect, state) {
+function wrapVerticalDirectionChange(
+  callback: ScrollMonitorStateHandler,
+): ScrollMonitorStateHandlerWrapper {
+  return (
+    payload: UpdatePayload,
+    scrollState: ScrollState,
+    eventState: ScrollMonitorEventState,
+  ): ?ScrollMonitorStateHandler => {
+    const {rect} = payload;
+    if (!rect) return false;
+    const {top} = rect;
+    if (top === void 0) return false;
+    const verticalDirection = top < scrollState.top ? UP : DOWN;
+    if (verticalDirection === eventState.verticalDirection) {
+      return false;
+    } else {
+      eventState.verticalDirection = verticalDirection;
+      debug('VERTICAL_DIRECTION_CHANGE', verticalDirection);
+      return callback;
+    }
+  };
+}
+
+function wrapHorizontalDirectionChange(
+  callback: ScrollMonitorStateHandler,
+): ScrollMonitorStateHandlerWrapper {
+  return (
+    payload: UpdatePayload,
+    scrollState: ScrollState,
+    eventState: ScrollMonitorEventState,
+  ): ?ScrollMonitorStateHandler => {
+    const {rect} = payload;
+    if (!rect) return false;
+    const {left} = rect;
+    if (left === void 0) return false;
+    const horizontalDirection = left < scrollState.left ? RIGHT : LEFT;
+    if (horizontalDirection === eventState.horizontalDirection) {
+      return false;
+    } else {
+      eventState.horizontalDirection = horizontalDirection;
+      debug('HORIZONTAL_DIRECTION_CHANGE', horizontalDirection);
+      return callback;
+    }
+  };
+}
+
+function wrapBoundsChange(
+  config: BoundsConfig,
+  callback: ScrollMonitorStateHandler,
+): ScrollMonitorStateHandlerWrapper {
+  return (
+    payload: UpdatePayload,
+    scrollState: ScrollState,
+    eventState: ScrollMonitorEventState,
+  ): ?ScrollMonitorStateHandler => {
+    const {rect} = payload;
+    if (!rect) return false;
+    const nowInBounds = inBounds(config, rect, scrollState);
+    if (eventState.inBounds !== nowInBounds) {
+      eventState.inBounds = nowInBounds;
+      debug('IN_BOUNDS', nowInBounds);
+      return callback;
+    }
+    return false;
+  };
+}
+
+function inBounds(
+  bounds: BoundsConfig,
+  rect: BoundsRect,
+  state: ScrollState,
+): Boolean {
   const {
     top = rect.top,
     right = rect.width,
@@ -133,4 +189,34 @@ function inBounds(bounds, rect, state) {
   const inRangeHorizontal = left <= rect.left && right >= rect.left;
 
   return inRangeVertical && inRangeHorizontal;
+}
+
+function wrapViewportChange(
+  config: ViewportConfig,
+  callback: ScrollMonitorStateHandler,
+): ScrollMonitorStateHandlerWrapper {
+  return (
+    payload: UpdatePayload,
+    scrollState: ScrollState,
+    eventState: ScrollMonitorEventState,
+  ): ?ScrollMonitorStateHandler => {
+    const {intersections} = payload;
+    if (!intersections) return false;
+    const intersection = getViewportChange(config, intersections);
+    if (!intersection) return false;
+    if (eventState.inViewport !== intersection.inViewport) {
+      eventState.inViewport = intersection.inViewport;
+      eventState.viewportRatio = intersection.ratio;
+      debug('IN_VIEWPORT', intersection.inViewport);
+      return callback;
+    }
+    return false;
+  };
+}
+
+function getViewportChange(
+  config: ViewportConfig,
+  intersections: ViewportChange[],
+): ?ViewportChange {
+  return intersections.find(({target}) => target === config.target);
 }
