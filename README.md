@@ -11,6 +11,9 @@ If you only need to view the latest image:
 
 
 ## To Develop
+
+**NOTE**: This project is currently deployed in docker as a _public repository_. **DO NOT** add sensitive information (secret keys, API tokens, passwords, etc) in this codebase.
+
 You will need:
 - Node 8+
 - Yarn
