@@ -27,7 +27,7 @@ To create a new package, run `make create-new-package`.
 
 
 ## Build Packages
-1. Run `make yarn build-dist` which will make a build/ folder
+1. Run `make build-dist` which will make a build/ folder
 2. TODO: Automate tagging for both the docker image and git tagging
 
 
