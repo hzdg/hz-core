@@ -15,6 +15,7 @@ create-new-package:
 
 start:
 	yarn
+	jest
 	docker-compose up
 
 styleguide:
