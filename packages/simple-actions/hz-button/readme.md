@@ -1,7 +1,10 @@
 Simple button.
 
 ```js
-<Button text="Press Me" />
+const renderButton = ({hover}) =>
+  <div>{hover ? 'Press' : 'Hover'} me!</div>;
+
+<Button>{renderButton}</Button>
 ```
 
 ### Styles
@@ -12,19 +15,22 @@ File: [mystyles.css](../packages/hz-button/src/styles/mystyles.css)
 ```js
 require('./src/styles/mystyles.css');
 
-<Button text="Press Red" customClassName="RedButton" />
+const renderButtonWithClassName = ({hover}) =>
+  <div className="RedButton__base">
+    {hover ? 'Press' : 'Hover'} me!
+  </div>;
+
+<Button>{renderButtonWithClassName}</Button>
 ```
 
 #### Adding Styles with Inline Styling
 ```js
+const renderButton = ({hover}) =>
+  <div style={{border: '3px solid', borderColor: hover ? 'red' : 'blue'}}>
+    {hover ? 'Press' : 'Hover'} me!
+  </div>;
 
-const myInlineStyles = {
-    buttonBase: {
-        border: '3px solid blue',
-    },
-};
-
-<Button text="Press Me" styles={myInlineStyles} />
+<Button>{renderButton}</Button>
 ```
 
 #### Adding Styles with CSS Modules
@@ -32,5 +38,10 @@ const myInlineStyles = {
 ```js
 const myCssModulesStyles = require('./src/styles/mystyles.css');
 
-<Button text="Press Me" cssModuleClassNames={myCssModulesStyles} />
+const renderButtonWithCssModule = ({hover}) =>
+  <div className={myCssModulesStyles.buttonBase}>
+    {hover ? 'Press' : 'Hover'} me!
+  </div>;
+
+<Button>{renderButtonWithCssModule}</Button>
 ```

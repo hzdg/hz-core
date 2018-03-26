@@ -1,19 +1,21 @@
 // @flow
 import React, {Component} from 'react';
 
+// eslint-disable-next-line no-duplicate-imports
+import type {Element} from 'react';
+
 type Props = {
-  /** Styles for the Button Component <br />
-   * `Button__base`
-   **/
-  styles?: ?{
-    Button__base: {[string]: string | number},
-  },
-  /** Text to display in Button */
-  text: string,
-  /** Name of Button, targetted class name */
-  customClassName?: string,
-  /** Names of css module items */
-  cssModuleClassNames?: {[string]: string},
+  /**
+   * A callback for handling Button hover state changes.
+   * This may be useful (for example) for synchronizing
+   * external state with the Button's hover state.
+   */
+  onHoverChange?: (value: boolean) => void,
+  /**
+   * The Button 'render prop'. This should take `State`
+   * as it's only argument, and return a valid React Element.
+   */
+  children: (props: State) => Element<*>,
 };
 
 type State = {
@@ -24,39 +26,29 @@ type State = {
  * A normal button component
  */
 class Button extends Component<Props, State> {
-  static defaultProps = {
-    styles: {},
-  };
-
   state = {
     hover: false,
   };
 
-  // handles css stylesheets and css modules
-  // TODO: Make this universal?
-  getClassName(itemName) {
-    return `${this.props.customClassName}__base ${
-      this.props.cssModuleClassNames
-        ? this.props.cssModuleClassNames[itemName]
-        : null
-    }`;
-  }
+  handleMouseEnter = () => {
+    this.setState({hover: true});
+    if (typeof this.props.onHoverChange === 'function') {
+      this.props.onHoverChange(false);
+    }
+  };
 
-  // Handles inlining styles
-  // TODO: Make this universal?
-  getStyles(itemName) {
-    return this.props.styles ? this.props.styles[itemName] : {};
-  }
+  handleMouseLeave = () => {
+    this.setState({hover: false});
+    if (typeof this.props.onHoverChange === 'function') {
+      this.props.onHoverChange(false);
+    }
+  };
 
   render() {
-    return (
-      <div
-        className={this.getClassName('buttonBase')}
-        style={this.getStyles('buttonBase')}
-      >
-        {this.props.text}
-      </div>
-    );
+    return React.cloneElement(this.props.children(this.state), {
+      onMouseEnter: this.handleMouseEnter,
+      onMouseLeave: this.handleMouseLeave,
+    });
   }
 }
 
