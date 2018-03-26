@@ -139,7 +139,9 @@ function createEventRegistrarAndScrollMonitor(
 
   function destroyObservers() {
     element.removeEventListener('scroll', handleScroll);
-    intersectionObserver.disconnect();
+    if (intersectionObserver) {
+      intersectionObserver.disconnect();
+    }
     intersectionObserver = null;
   }
 
