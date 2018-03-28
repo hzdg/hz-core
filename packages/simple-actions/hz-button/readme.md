@@ -62,3 +62,38 @@ const renderButtonWithCssModule = ({hover, setHover}) =>
 
 <Button render={renderButtonWithCssModule} />
 ```
+
+#### TODO
+
+We may want to ship variants that make it easier to get up and running
+in common scenarios. For example:
+
+```js static
+// @flow
+import {Component} from 'react';
+
+type DomButtonPropTypes = {
+  render: (props: {hover: boolean}) => Element<*>,
+};
+
+class DomButton extends Component<DomButtonPropTypes> {
+  renderButton = ({setHover, ...props}) => {
+    const {render, ...domRenderProps} = this.props;
+    const element = render({...props, ...domRenderProps});
+    return React.cloneElement(element, {
+      onMouseEnter: () => {
+        setHover(true);
+      },
+      onMouseLeave: () => {
+        setHover(false);
+      },
+    });
+  };
+
+  render() {
+    return <Button render={this.renderButton} />;
+  }
+}
+
+<DomButton render={({hover}) => <span>{`hovering? ${hover}`}</span>} />
+```
