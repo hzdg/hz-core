@@ -4,6 +4,10 @@ import React, {Component} from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import type {Element} from 'react';
 
+type State = {
+  hover: boolean,
+};
+
 type Props = {
   /**
    * A callback for handling Button hover state changes.
@@ -12,14 +16,17 @@ type Props = {
    */
   onHoverChange?: (value: boolean) => void,
   /**
-   * The Button 'render prop'. This should take `State`
+   * The Button 'render prop'. This should take `RenderProps`
    * as it's only argument, and return a valid React Element.
    */
-  children: (props: State) => Element<*>,
+  render: (props: RenderProps) => Element<*>,
 };
 
-type State = {
-  hover: boolean,
+type RenderProps = State & {
+  /**
+   * A callback for updating Button hover state.
+   */
+  setHover: (value: boolean) => void,
 };
 
 /**
@@ -30,24 +37,32 @@ class Button extends Component<Props, State> {
     hover: false,
   };
 
-  handleMouseEnter = () => {
-    this.setState({hover: true});
-    if (typeof this.props.onHoverChange === 'function') {
-      this.props.onHoverChange(false);
+  componentDidUpdate(_: any, prevState: State) {
+    if (
+      typeof this.props.onHoverChange === 'function' &&
+      prevState.hover !== this.state.hover
+    ) {
+      this.props.onHoverChange(this.state.hover);
     }
-  };
+  }
 
-  handleMouseLeave = () => {
-    this.setState({hover: false});
-    if (typeof this.props.onHoverChange === 'function') {
-      this.props.onHoverChange(false);
-    }
+  handleSetHover = (hover: boolean) => {
+    this.setState((state: State): ?State => {
+      if (hover === state.hover) return null;
+      return {...state, hover};
+    });
   };
 
   render() {
-    return React.cloneElement(this.props.children(this.state), {
-      onMouseEnter: this.handleMouseEnter,
-      onMouseLeave: this.handleMouseLeave,
+    // Extract the Button props (render and change handlers).
+    // Pass all other props through to the render prop
+    // along with Button state and callbacks.
+    // eslint-disable-next-line no-unused-vars
+    const {onHoverChange: _, render, ...props} = this.props;
+    return render({
+      ...props,
+      ...this.state,
+      setHover: this.handleSetHover,
     });
   }
 }

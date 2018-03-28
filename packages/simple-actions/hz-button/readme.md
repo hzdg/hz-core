@@ -1,10 +1,15 @@
 Simple button.
 
 ```js
-const renderButton = ({hover}) =>
-  <div>{hover ? 'Press' : 'Hover'} me!</div>;
+const renderButton = ({hover, setHover}) =>
+  <div
+    onMouseEnter={() => setHover(true)}
+    onMouseLeave={() => setHover(false)}
+  >
+    {hover ? 'Press' : 'Hover'} me!
+  </div>;
 
-<Button>{renderButton}</Button>
+<Button render={renderButton} />
 ```
 
 ### Styles
@@ -15,22 +20,30 @@ File: [mystyles.css](../packages/hz-button/src/styles/mystyles.css)
 ```js
 require('./src/styles/mystyles.css');
 
-const renderButtonWithClassName = ({hover}) =>
-  <div className="RedButton__base">
+const renderButtonWithClassName = ({hover, setHover}) =>
+  <div
+    className="RedButton__base"
+    onMouseEnter={() => setHover(true)}
+    onMouseLeave={() => setHover(false)}
+  >
     {hover ? 'Press' : 'Hover'} me!
   </div>;
 
-<Button>{renderButtonWithClassName}</Button>
+<Button render={renderButtonWithClassName} />
 ```
 
 #### Adding Styles with Inline Styling
 ```js
-const renderButton = ({hover}) =>
-  <div style={{border: '3px solid', borderColor: hover ? 'red' : 'blue'}}>
+const renderButton = ({hover, setHover}) =>
+  <div
+    style={{border: '3px solid', borderColor: hover ? 'red' : 'blue'}}
+    onMouseEnter={() => setHover(true)}
+    onMouseLeave={() => setHover(false)}
+  >
     {hover ? 'Press' : 'Hover'} me!
   </div>;
 
-<Button>{renderButton}</Button>
+<Button render={renderButton} />
 ```
 
 #### Adding Styles with CSS Modules
@@ -38,10 +51,14 @@ const renderButton = ({hover}) =>
 ```js
 const myCssModulesStyles = require('./src/styles/mystyles.css');
 
-const renderButtonWithCssModule = ({hover}) =>
-  <div className={myCssModulesStyles.buttonBase}>
+const renderButtonWithCssModule = ({hover, setHover}) =>
+  <div
+    className={myCssModulesStyles.buttonBase}
+    onMouseEnter={() => setHover(true)}
+    onMouseLeave={() => setHover(false)}
+  >
     {hover ? 'Press' : 'Hover'} me!
   </div>;
 
-<Button>{renderButtonWithCssModule}</Button>
+<Button render={renderButtonWithCssModule} />
 ```
