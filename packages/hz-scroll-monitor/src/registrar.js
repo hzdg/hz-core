@@ -9,7 +9,7 @@ import type {
   ElementRegistrar,
   EventMap,
   EventRegistrar,
-  ViewportChange,
+  ObserverMap,
   PendingCallbackMap,
   Registration,
   RegistrationConfig,
@@ -17,6 +17,7 @@ import type {
   ScrollRect,
   ScrollState,
   UpdatePayload,
+  ViewportChange,
 } from './types';
 
 let defaultRegistrar: ElementRegistrar;
@@ -53,7 +54,10 @@ export function register(
 
   return createRegistration(() => {
     eventRegistration.unregister();
-    if (!Object.keys(eventRegistrar.events).length) {
+    if (
+      !Object.keys(eventRegistrar.events).length &&
+      !Object.keys(eventRegistrar.observers).length
+    ) {
       debug('Event registrar is now empty!', element);
       eventRegistrar.destroy();
       elementRegistrar.delete(element);
@@ -65,6 +69,7 @@ function createEventRegistrarAndScrollMonitor(
   element: HTMLElement,
 ): EventRegistrar {
   const events: EventMap = {};
+  const observers: ObserverMap = {};
   const scrollState: ScrollState = {};
   const callbacksToCall: PendingCallbackMap = new Map();
   let updatePending: Boolean = false;
@@ -119,41 +124,53 @@ function createEventRegistrarAndScrollMonitor(
   }
 
   function updateObservers(config) {
-    element.removeEventListener('scroll', handleScroll);
-
     if (hasScrollBoundEvent(config)) {
-      element.addEventListener('scroll', handleScroll);
+      if (!observers.scroll) {
+        debug('Subscribing to scroll events', element);
+        element.addEventListener('scroll', handleScroll);
+        observers.scroll = {
+          disconnect() {
+            element.removeEventListener('scroll', handleScroll);
+          },
+        };
+      }
     }
 
-    // if (intersectionObserver) {
-    //   intersectionObserver.disconnect();
-    //   intersectionObserver = null;
-    // }
-
     if (hasIntersectionBoundEvent(config)) {
-      // TODO: intersection threshold registrar
+      const {threshold} = config.viewport;
+      const key =
+        threshold === null
+          ? null
+          : Array.isArray(threshold) ? threshold.join() : threshold.toString();
+      intersectionObserver = observers[key];
       if (!intersectionObserver) {
+        debug(`Creating Observer for intersection threshold ${key}`, element);
         intersectionObserver = new IntersectionObserver(
           handleIntersectionChange,
-          {root: element instanceof Element ? element : null},
+          {
+            threshold,
+            root: element instanceof Element ? element : null,
+          },
         );
+        observers[key] = intersectionObserver;
       }
+      debug(`Observing intersection threshold ${key}`, config.viewport.target);
       intersectionObserver.observe(config.viewport.target);
     }
   }
 
   function destroyObservers() {
-    element.removeEventListener('scroll', handleScroll);
-    if (intersectionObserver) {
-      intersectionObserver.disconnect();
+    for (const key in observers) {
+      observers[key].disconnect();
+      delete observers[key];
     }
-    intersectionObserver = null;
   }
 
   debug('Creating event registrar', element);
 
   return {
     events,
+    observers,
     register(config, callback) {
       const registration = registerConfig(events, config, callback);
       updateObservers(config);

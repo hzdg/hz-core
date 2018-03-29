@@ -99,6 +99,10 @@ export type EventMap = {
   [event: string]: Set<[ScrollMonitorStateHandler, ScrollMonitorEventState]>,
 };
 
+export type ObserverMap = {
+  [threshold: ?string]: IntersectionObserver,
+};
+
 export type RegistrationConfig = {
   vertical: ?Boolean,
   horizontal: ?Boolean,
@@ -117,6 +121,7 @@ export type EventRegistrar = {
   destroy(): void,
   forceUpdate(): void,
   events: EventMap,
+  observers: ObserverMap,
 };
 
 export type ElementRegistrar = Map<Element, EventRegistrar>;
