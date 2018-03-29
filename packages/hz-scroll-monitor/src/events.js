@@ -205,9 +205,9 @@ function wrapViewportChange(
     eventState: ScrollMonitorEventState,
   ): ?ScrollMonitorStateHandler => {
     const {intersections} = payload;
-    if (!intersections) return false;
+    if (!intersections) return;
     const intersection = getViewportChange(config, intersections);
-    if (!intersection) return false;
+    if (!intersection) return;
     if (eventState.inViewport !== intersection.inViewport) {
       eventState.inViewport = intersection.inViewport;
       eventState.viewportRatio = intersection.ratio;

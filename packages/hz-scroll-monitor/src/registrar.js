@@ -227,7 +227,7 @@ function updateCallbacksToCall(
       const callback = callbackGetter(payload, scrollState, eventState);
       if (callback) {
         callbacksToCall.set(callbackConfig, [callback, eventState]);
-      } else {
+      } else if (callback === false) {
         callbacksToCall.delete(callbackConfig);
       }
     }
