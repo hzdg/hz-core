@@ -8,8 +8,6 @@ import {
 } from './ScrollMonitorEvent';
 import Debug from 'debug';
 
-const debug = Debug('ScrollMonitor:events');
-
 import type {
   BoundsConfig,
   BoundsRect,
@@ -25,7 +23,26 @@ import type {
   ViewportChange,
 } from './types';
 
-export function eventsFromConfig(
+export function createHandlers(
+  config: RegistrationConfig,
+  callback: ScrollMonitorStateHandler,
+): {
+  [key: string]: [ScrollMonitorStateHandlerWrapper, ScrollMonitorEventState],
+} {
+  const debug = Debug(`ScrollMonitor:uid:${config.uid}`);
+  const eventHandlers = {};
+  const [eventNames, eventState] = eventsFromConfig(config, debug);
+  for (let eventName of eventNames) {
+    let eventConfig = null;
+    if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
+    debug(`Creating handler for ${eventName}`, eventConfig);
+    const handler = wrapHandler(eventName, eventConfig, callback, debug);
+    eventHandlers[eventName] = [handler, eventState];
+  }
+  return eventHandlers;
+}
+
+function eventsFromConfig(
   config: RegistrationConfig,
 ): [ScrollMonitorEventConfig[], ScrollMonitorEventState] {
   const events = [];
@@ -51,35 +68,36 @@ export function eventsFromConfig(
     initialEventState.inBounds = null;
   }
   if (config.viewport) {
-    events.push([IN_VIEWPORT, config.viewport]);
+    events.push([IN_VIEWPORT, {...config.viewport}]);
     initialEventState.inViewport = null;
   }
   return [events, initialEventState];
 }
 
-export function wrapHandler(
+function wrapHandler(
   event: ScrollMonitorEvent,
   config: ?(BoundsConfig | ViewportConfig),
   callback: ScrollMonitorStateHandler,
+  debug: Function,
 ): ScrollMonitorStateHandlerWrapper {
   // Default wrapper just always returns false (never handles anything).
   let wrapper = () => false;
 
   switch (event) {
     case VERTICAL_DIRECTION_CHANGE: {
-      wrapper = wrapVerticalDirectionChange(callback);
+      wrapper = wrapVerticalDirectionChange(callback, debug);
       break;
     }
     case HORIZONTAL_DIRECTION_CHANGE: {
-      wrapper = wrapHorizontalDirectionChange(callback);
+      wrapper = wrapHorizontalDirectionChange(callback, debug);
       break;
     }
     case IN_BOUNDS: {
-      if (config) wrapper = wrapBoundsChange(config, callback);
+      if (config) wrapper = wrapBoundsChange(config, callback, debug);
       break;
     }
     case IN_VIEWPORT: {
-      if (config) wrapper = wrapViewportChange(config, callback);
+      if (config) wrapper = wrapViewportChange(config, callback, debug);
       break;
     }
   }
@@ -87,26 +105,9 @@ export function wrapHandler(
   return wrapper;
 }
 
-export function createHandlers(
-  config: RegistrationConfig,
-  callback: ScrollMonitorStateHandler,
-): {
-  [key: string]: [ScrollMonitorStateHandlerWrapper, ScrollMonitorEventState],
-} {
-  const eventHandlers = {};
-  const [eventNames, eventState] = eventsFromConfig(config);
-  for (let eventName of eventNames) {
-    let eventConfig = null;
-    if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
-    debug(`Creating handler for ${eventName}`, eventConfig);
-    const handler = wrapHandler(eventName, eventConfig, callback);
-    eventHandlers[eventName] = [handler, eventState];
-  }
-  return eventHandlers;
-}
-
 function wrapVerticalDirectionChange(
   callback: ScrollMonitorStateHandler,
+  debug: Function,
 ): ScrollMonitorStateHandlerWrapper {
   return (
     payload: UpdatePayload,
@@ -130,6 +131,7 @@ function wrapVerticalDirectionChange(
 
 function wrapHorizontalDirectionChange(
   callback: ScrollMonitorStateHandler,
+  debug: Function,
 ): ScrollMonitorStateHandlerWrapper {
   return (
     payload: UpdatePayload,
@@ -154,6 +156,7 @@ function wrapHorizontalDirectionChange(
 function wrapBoundsChange(
   config: BoundsConfig,
   callback: ScrollMonitorStateHandler,
+  debug: Function,
 ): ScrollMonitorStateHandlerWrapper {
   return (
     payload: UpdatePayload,
@@ -194,6 +197,7 @@ function inBounds(
 function wrapViewportChange(
   config: ViewportConfig,
   callback: ScrollMonitorStateHandler,
+  debug: Function,
 ): ScrollMonitorStateHandlerWrapper {
   return (
     payload: UpdatePayload,

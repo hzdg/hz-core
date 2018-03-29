@@ -3,6 +3,7 @@ import {createHandlers} from './events';
 import Debug from 'debug';
 
 const debug = Debug('ScrollMonitor:registrar');
+const debugDispatch = Debug('ScrollMonitor:dispatch');
 
 import type {
   ElementRegistrar,
@@ -53,7 +54,7 @@ export function register(
   return createRegistration(() => {
     eventRegistration.unregister();
     if (!Object.keys(eventRegistrar.events).length) {
-      debug('Event registrar is now empty! Cleaning up...', element);
+      debug('Event registrar is now empty!', element);
       eventRegistrar.destroy();
       elementRegistrar.delete(element);
     }
@@ -76,6 +77,10 @@ function createEventRegistrarAndScrollMonitor(
     // remove it without it ever being called, which is generally
     // an optimal tradeoff, performance-wise (mitigates update thrashing).
     updateCallbacksToCall(callbacksToCall, events, scrollState, payload);
+
+    if (callbacksToCall.size) {
+      debugDispatch(`${callbacksToCall.size} updates scheduled`);
+    }
 
     if (payload.rect) {
       // Update the scroll state.
@@ -202,9 +207,12 @@ function dispatchStateChange(
   callbacksToCall: PendingCallbackMap,
   scrollState: ScrollState,
 ) {
+  if (!callbacksToCall.size) return;
+  debugDispatch(`dispatching ${callbacksToCall.size} changes`);
   for (const [callback, eventState] of callbacksToCall.values()) {
     callback({...scrollState, ...eventState}); // eslint-disable-line callback-return
   }
+  callbacksToCall.clear();
 }
 
 function updateCallbacksToCall(

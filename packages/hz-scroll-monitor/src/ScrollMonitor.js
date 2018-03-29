@@ -2,6 +2,7 @@
 import React, {Component} from 'react';
 import {findDOMNode} from 'react-dom';
 import PropTypes from 'prop-types';
+import uuid from 'uuid/v1';
 import {register} from './registrar';
 
 const scrollMonitorConfigTypes = {
@@ -54,7 +55,10 @@ export default class ScrollMonitor extends Component {
   static propTypes = scrollMonitorConfigTypes;
   static defaultProps = defaultScrollMonitorConfig;
 
-  state = {...initialState};
+  state = {
+    ...initialState,
+    uid: uuid().slice(0, 8),
+  };
 
   componentDidMount() {
     this.mounted = true;
@@ -94,7 +98,7 @@ export default class ScrollMonitor extends Component {
     if (!this.registration && this.mounted && this.scrollEl) {
       this.registration = register(
         this.scrollEl,
-        getRegistrationProps(this.props, this.el),
+        getRegistrationProps(this.props, this.state.uid, this.el),
         this.handleUpdate,
       );
     }
@@ -116,6 +120,9 @@ export default class ScrollMonitor extends Component {
   };
 
   render() {
+    // We wrap our render prop in a ScrollTarget so we can get a ref
+    // to the rendered node. This allows the render prop to return
+    // fragments.
     return (
       <ScrollTarget ref={this.findScrollNode}>
         {this.props.children(this.state)}
@@ -129,7 +136,7 @@ function ScrollTarget({children}) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function getRegistrationProps({children: _, ...props}, el) {
+function getRegistrationProps({children: _, ...props}, uid, el) {
   // eslint-disable-next-line eqeqeq
   if (props.viewport !== false && props.viewport != null) {
     props.viewport = {
@@ -137,7 +144,7 @@ function getRegistrationProps({children: _, ...props}, el) {
       threshold: props.viewport === true ? 0 : props.viewport,
     };
   }
-  return props;
+  return {...props, uid};
 }
 
 function getNearestScrollNode(node) {
