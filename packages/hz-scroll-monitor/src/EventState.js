@@ -1,119 +1,122 @@
 // @flow
-import {UP, DOWN, LEFT, RIGHT} from './ScrollDirection';
+import warning from 'warning';
+import Debug from 'debug';
 import {
+  UP,
+  DOWN,
+  LEFT,
+  RIGHT,
   VERTICAL_DIRECTION_CHANGE,
   HORIZONTAL_DIRECTION_CHANGE,
   IN_BOUNDS,
   IN_VIEWPORT,
-} from './ScrollMonitorEvent';
-import Debug from 'debug';
+} from './types';
 
+/* eslint-disable no-duplicate-imports */
 import type {
   BoundsConfig,
   BoundsRect,
-  RegistrationConfig,
+  EventStateStore,
+  ScrollMonitorChangeChecker,
+  ScrollMonitorConfig,
   ScrollMonitorEvent,
   ScrollMonitorEventConfig,
   ScrollMonitorEventState,
-  ScrollMonitorStateHandler,
-  ScrollMonitorStateHandlerWrapper,
   ScrollState,
   UpdatePayload,
   ViewportConfig,
-  ViewportChange,
 } from './types';
+/* eslint-enable no-duplicate-imports */
 
-export function createHandlers(
-  config: RegistrationConfig,
-  callback: ScrollMonitorStateHandler,
-): {
-  [key: string]: [ScrollMonitorStateHandlerWrapper, ScrollMonitorEventState],
-} {
+export function create(config: ScrollMonitorConfig): EventStateStore {
   const debug = Debug(`ScrollMonitor:uid:${config.uid}`);
-  const eventHandlers = {};
-  const [eventNames, eventState] = eventsFromConfig(config, debug);
-  for (let eventName of eventNames) {
-    let eventConfig = null;
-    if (Array.isArray(eventName)) [eventName, eventConfig] = eventName;
-    debug(`Creating handler for ${eventName}`, eventConfig);
-    const handler = wrapHandler(eventName, eventConfig, callback, debug);
-    eventHandlers[eventName] = [handler, eventState];
-  }
-  return eventHandlers;
-}
-
-function eventsFromConfig(
-  config: RegistrationConfig,
-): [ScrollMonitorEventConfig[], ScrollMonitorEventState] {
-  const events = [];
+  const configs = [];
   const initialEventState = {};
   if (config.direction) {
     if (!config.vertical && !config.horizontal) {
-      events.push(VERTICAL_DIRECTION_CHANGE, HORIZONTAL_DIRECTION_CHANGE);
+      configs.push(
+        createEventConfig(VERTICAL_DIRECTION_CHANGE, null, debug),
+        createEventConfig(HORIZONTAL_DIRECTION_CHANGE, null, debug),
+      );
       initialEventState.verticalDirection = null;
       initialEventState.horizontDirection = null;
     } else {
       if (config.vertical) {
-        events.push(VERTICAL_DIRECTION_CHANGE);
+        configs.push(createEventConfig(VERTICAL_DIRECTION_CHANGE, null, debug));
         initialEventState.verticalDirection = null;
       }
       if (config.horizontal) {
-        events.push(HORIZONTAL_DIRECTION_CHANGE);
+        configs.push(
+          createEventConfig(HORIZONTAL_DIRECTION_CHANGE, null, debug),
+        );
         initialEventState.horizontDirection = null;
       }
     }
   }
   if (config.bounds) {
-    events.push([IN_BOUNDS, config.bounds]);
+    configs.push(createEventConfig(IN_BOUNDS, config.bounds, debug));
     initialEventState.inBounds = null;
   }
   if (config.viewport) {
-    events.push([IN_VIEWPORT, {...config.viewport}]);
+    configs.push(createEventConfig(IN_VIEWPORT, config.viewport, debug));
     initialEventState.inViewport = null;
   }
-  return [events, initialEventState];
+  return {configs, state: initialEventState};
 }
 
-function wrapHandler(
+/*
+ * An event config is an object that wraps a `ScrollMonitorEvent`
+ * with config and  a `shouldUpdate` method.
+ *
+ * The `shouldUpdate` method should return `true` if
+ * the given payload indicates that this particular event
+ * should be dispatched. It should return `false` if the given payload
+ * indicates that this particular event should not be dispatched.
+ * Finally, it should return `undefined` if it cannot be determined
+ * from the payload whether or not this particular event should be dispatched.
+ */
+function createEventConfig(
   event: ScrollMonitorEvent,
   config: ?(BoundsConfig | ViewportConfig),
-  callback: ScrollMonitorStateHandler,
   debug: Function,
-): ScrollMonitorStateHandlerWrapper {
-  // Default wrapper just always returns false (never handles anything).
-  let wrapper = () => false;
+): ScrollMonitorEventConfig {
+  // Default shouldUpdate always does nothing.
+  let shouldUpdate = () => void 0;
 
   switch (event) {
     case VERTICAL_DIRECTION_CHANGE: {
-      wrapper = wrapVerticalDirectionChange(callback, debug);
+      shouldUpdate = createVerticalDirectionChangeChecker(debug);
       break;
     }
     case HORIZONTAL_DIRECTION_CHANGE: {
-      wrapper = wrapHorizontalDirectionChange(callback, debug);
+      shouldUpdate = createHorizontalDirectionChangeChecker(debug);
       break;
     }
     case IN_BOUNDS: {
-      if (config) wrapper = wrapBoundsChange(config, callback, debug);
+      if (config) shouldUpdate = createBoundsChangeChecker(config, debug);
       break;
     }
     case IN_VIEWPORT: {
-      if (config) wrapper = wrapViewportChange(config, callback, debug);
+      if (config) shouldUpdate = createViewportChangeChecker(config, debug);
+      break;
+    }
+    default: {
+      warning(false, `Unsupported event type ${event}.`);
       break;
     }
   }
 
-  return wrapper;
+  return {event, config, shouldUpdate};
 }
 
-function wrapVerticalDirectionChange(
-  callback: ScrollMonitorStateHandler,
+function createVerticalDirectionChangeChecker(
   debug: Function,
-): ScrollMonitorStateHandlerWrapper {
+): ScrollMonitorChangeChecker {
   return (
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?ScrollMonitorStateHandler => {
+  ): ?boolean => {
     const {rect} = payload;
     if (!rect) return false;
     const {top} = rect;
@@ -124,20 +127,19 @@ function wrapVerticalDirectionChange(
     } else {
       eventState.verticalDirection = verticalDirection;
       debug('VERTICAL_DIRECTION_CHANGE', verticalDirection);
-      return callback;
+      return true;
     }
   };
 }
 
-function wrapHorizontalDirectionChange(
-  callback: ScrollMonitorStateHandler,
+function createHorizontalDirectionChangeChecker(
   debug: Function,
-): ScrollMonitorStateHandlerWrapper {
+): ScrollMonitorChangeChecker {
   return (
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?ScrollMonitorStateHandler => {
+  ): ?boolean => {
     const {rect} = payload;
     if (!rect) return false;
     const {left} = rect;
@@ -148,28 +150,28 @@ function wrapHorizontalDirectionChange(
     } else {
       eventState.horizontalDirection = horizontalDirection;
       debug('HORIZONTAL_DIRECTION_CHANGE', horizontalDirection);
-      return callback;
+      return true;
     }
   };
 }
 
-function wrapBoundsChange(
+function createBoundsChangeChecker(
   config: BoundsConfig,
-  callback: ScrollMonitorStateHandler,
   debug: Function,
-): ScrollMonitorStateHandlerWrapper {
+): ScrollMonitorChangeChecker {
+  config = typeof config === 'object' ? {...config} : config;
   return (
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?ScrollMonitorStateHandler => {
+  ): ?boolean => {
     const {rect} = payload;
     if (!rect) return false;
     const nowInBounds = inBounds(config, rect, scrollState);
     if (eventState.inBounds !== nowInBounds) {
       eventState.inBounds = nowInBounds;
       debug('IN_BOUNDS', nowInBounds);
-      return callback;
+      return true;
     }
     return false;
   };
@@ -179,7 +181,7 @@ function inBounds(
   bounds: BoundsConfig,
   rect: BoundsRect,
   state: ScrollState,
-): Boolean {
+): ?boolean {
   const {
     top = rect.top,
     right = rect.width,
@@ -194,33 +196,26 @@ function inBounds(
   return inRangeVertical && inRangeHorizontal;
 }
 
-function wrapViewportChange(
+function createViewportChangeChecker(
   config: ViewportConfig,
-  callback: ScrollMonitorStateHandler,
   debug: Function,
-): ScrollMonitorStateHandlerWrapper {
+): ScrollMonitorChangeChecker {
+  config = typeof config === 'object' ? {...config} : config;
   return (
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?ScrollMonitorStateHandler => {
-    const {intersections} = payload;
-    if (!intersections) return;
-    const intersection = getViewportChange(config, intersections);
+  ): ?boolean => {
+    const {intersection} = payload;
     if (!intersection) return;
     if (eventState.inViewport !== intersection.inViewport) {
       eventState.inViewport = intersection.inViewport;
       eventState.viewportRatio = intersection.ratio;
       debug('IN_VIEWPORT', intersection.inViewport);
-      return callback;
+      return true;
     }
     return false;
   };
 }
 
-function getViewportChange(
-  config: ViewportConfig,
-  intersections: ViewportChange[],
-): ?ViewportChange {
-  return intersections.find(({target}) => target === config.target);
-}
+export default {create};

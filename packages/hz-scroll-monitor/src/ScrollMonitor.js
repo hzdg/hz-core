@@ -3,7 +3,7 @@ import React, {Component} from 'react';
 import {findDOMNode} from 'react-dom';
 import PropTypes from 'prop-types';
 import uuid from 'uuid/v1';
-import {register} from './registrar';
+import ScrollState from './ScrollState';
 
 const scrollMonitorConfigTypes = {
   children: PropTypes.func.isRequired,
@@ -62,7 +62,7 @@ export default class ScrollMonitor extends Component {
 
   componentDidMount() {
     this.mounted = true;
-    this.registerIfNecessary();
+    this.subscribeIfNecessary();
   }
 
   componentWillReceiveProps(nextProps) {
@@ -71,34 +71,33 @@ export default class ScrollMonitor extends Component {
       shouldReregister = boundsChanged(this.props.bounds, nextProps.bounds);
     }
     if (shouldReregister) {
-      this.unregister();
-      this.registerIfNecessary();
+      this.unsubscribe();
+      this.subscribeIfNecessary();
     }
   }
 
   componentWillUnmount() {
     this.mounted = false;
-    this.unregister();
+    this.unsubscribe();
     this.ref = null;
     this.el = null;
     this.scrollEl = null;
   }
 
   mounted = false;
-  registration = null;
+  subscription = null;
 
-  unregister() {
-    if (this.registration) {
-      this.registration.unregister();
-      this.registration = null;
+  unsubscribe() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
     }
   }
 
-  registerIfNecessary() {
-    if (!this.registration && this.mounted && this.scrollEl) {
-      this.registration = register(
-        this.scrollEl,
-        getRegistrationProps(this.props, this.state.uid, this.el),
+  subscribeIfNecessary() {
+    if (!this.subscription && this.mounted && this.scrollEl) {
+      const config = getObservableConfig(this.props, this.state.uid, this.el);
+      this.subscription = ScrollState.create(this.scrollEl, config).subscribe(
         this.handleUpdate,
       );
     }
@@ -110,8 +109,8 @@ export default class ScrollMonitor extends Component {
       // eslint-disable-next-line react/no-find-dom-node
       this.el = findDOMNode(ref);
       this.scrollEl = getNearestScrollNode(this.el);
-      this.unregister();
-      this.registerIfNecessary();
+      this.unsubscribe();
+      this.subscribeIfNecessary();
     }
   };
 
@@ -136,7 +135,7 @@ function ScrollTarget({children}) {
 }
 
 // eslint-disable-next-line no-unused-vars
-function getRegistrationProps({children: _, ...props}, uid, el) {
+function getObservableConfig({children: _, ...props}, uid, el) {
   // eslint-disable-next-line eqeqeq
   if (props.viewport !== false && props.viewport != null) {
     props.viewport = {

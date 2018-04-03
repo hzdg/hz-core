@@ -1,13 +1,15 @@
 // @flow
-import {UP, DOWN, LEFT, RIGHT} from './ScrollDirection';
-import {
-  VERTICAL_DIRECTION_CHANGE,
-  HORIZONTAL_DIRECTION_CHANGE,
-  IN_BOUNDS,
-  IN_VIEWPORT,
-} from './ScrollMonitorEvent';
+export const DOWN = 'down';
+export const UP = 'up';
+export const LEFT = 'left';
+export const RIGHT = 'right';
 
-export type VeritcalScrollDirection = typeof DOWN | typeof UP;
+export const VERTICAL_DIRECTION_CHANGE = 'verticalDirectionChange'; // scrolling has changed vertical directions (up vs down)
+export const HORIZONTAL_DIRECTION_CHANGE = 'horizontalDirectionChange'; // scrolling has changed horizontal directions (left vs right)
+export const IN_BOUNDS = 'inBounds'; // Whether some bounds contains scroll position
+export const IN_VIEWPORT = 'inViewport'; // Whether some part of a rect is now in the scrollable viewport
+
+export type VerticalScrollDirection = typeof DOWN | typeof UP;
 
 export type HorizontalScrollDirection = typeof LEFT | typeof RIGHT;
 
@@ -18,7 +20,7 @@ export type ScrollMonitorEvent =
   | typeof IN_VIEWPORT;
 
 export type ScrollMonitorEventState = {
-  verticalDirection?: ?VeritcalScrollDirection,
+  verticalDirection?: ?VerticalScrollDirection,
   horizontalDirection?: ?HorizontalScrollDirection,
   inBounds?: ?Boolean,
   inViewport?: ?Boolean,
@@ -54,7 +56,7 @@ export type BoundsConfig = BoundsRect | ((state: ScrollState) => BoundsRect);
 
 export type ViewportConfig = {
   target: Element,
-  threshold: Number | Number[],
+  threshold: ?(Number | Number[]),
 };
 
 export type ViewportChange = {
@@ -65,45 +67,29 @@ export type ViewportChange = {
 
 export type UpdatePayload = {
   rect?: ScrollRect,
-  intersections?: ViewportChange[],
+  intersection?: ViewportChange,
 };
 
-export type ScrollMonitorEventConfig =
-  | ScrollMonitorEvent
-  | [ScrollMonitorEvent, BoundsConfig]
-  | [ScrollMonitorEvent, ViewportConfig];
+export type ScrollMonitorEventConfig = {
+  event: ScrollMonitorEvent,
+  config: ?(BoundsConfig | ViewportConfig),
+  update: ScrollMonitorChangeChecker,
+};
 
 export type ScrollMonitorState = ScrollState & ScrollMonitorEventState;
 
-export type ScrollMonitorStateHandler = (state: ScrollMonitorState) => void;
-
-export type ScrollMonitorStateHandlerWrapper = (
+export type ScrollMonitorChangeChecker = (
   payload: UpdatePayload,
   scrollState: ScrollState,
   eventState: ScrollMonitorEventState,
-) => ?ScrollMonitorStateHandler;
+) => ?boolean;
 
-export type CallbackGetterConfig = [
-  ScrollMonitorStateHandlerWrapper,
-  ScrollMonitorEventState,
-];
-
-export type CallbackConfig = [
-  ScrollMonitorStateHandler,
-  ScrollMonitorEventState,
-];
-
-export type PendingCallbackMap = Map<CallbackGetterConfig, CallbackConfig>;
-
-export type EventMap = {
-  [event: string]: Set<[ScrollMonitorStateHandler, ScrollMonitorEventState]>,
+export type EventStateStore = {
+  configs: ScrollMonitorEventConfig[],
+  state: ScrollMonitorEventState,
 };
 
-export type ObserverMap = {
-  [threshold: ?string]: IntersectionObserver,
-};
-
-export type RegistrationConfig = {
+export type ScrollMonitorConfig = {
   vertical: ?Boolean,
   horizontal: ?Boolean,
   direction: ?Boolean,
@@ -111,17 +97,10 @@ export type RegistrationConfig = {
   bounds: ?BoundsConfig,
 };
 
-export type Registration = {unregister(): void};
-
-export type EventRegistrar = {
-  register(
-    config: RegistrationConfig,
-    callback: ScrollMonitorStateHandler,
-  ): Registration,
-  destroy(): void,
-  forceUpdate(): void,
-  events: EventMap,
-  observers: ObserverMap,
+export type Observer = {
+  next(value: any): void,
+  error(error: Error): void,
+  complete(): void,
 };
 
-export type ElementRegistrar = Map<Element, EventRegistrar>;
+export type ObserverSet = Set<Observer>;
