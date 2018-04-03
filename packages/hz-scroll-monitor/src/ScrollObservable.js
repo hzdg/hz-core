@@ -29,7 +29,7 @@ export function create(element: Element): Observable {
       unsubscribe() {
         debug('Unsubscribing from scroll events', element, observer);
         const observers = elements.get(element);
-        observers.remove(observer);
+        observers.delete(observer);
         if (!observers.size) {
           elements.delete(element);
           if (!elements.get(element)) {

@@ -53,7 +53,7 @@ export function create(element: Element, config: ViewportConfig): Observable {
     return {
       unsubscribe() {
         debug('Unsubscribing from viewport events', element, observer);
-        observers.remove(observer);
+        observers.delete(observer);
         if (!observers.size) {
           observers = null;
           targets.delete(target);

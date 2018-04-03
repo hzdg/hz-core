@@ -126,9 +126,11 @@ export function create(
     return {
       unsubscribe() {
         debug('Unsubscribing from scroll state', element, config);
-        observers.remove(observer);
+        observers.delete(observer);
         if (!observers.size) {
-          subscriptionMap.values().forEach(unsubscribe => unsubscribe());
+          for (const sub of subscriptionMap.values()) {
+            sub.unsubscribe();
+          }
           subscriptionMap.clear();
           reset();
         }
