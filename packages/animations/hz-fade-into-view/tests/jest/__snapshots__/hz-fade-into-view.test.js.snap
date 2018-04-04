@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`FadeIntoView should render something 1`] = `
+exports[`FadeIntoView should render link text 1`] = `
 <div
   style={
     Object {
@@ -9,8 +9,25 @@ exports[`FadeIntoView should render something 1`] = `
     }
   }
 >
-  <div>
+  <a
+    href="http://www.google.com"
+  >
     Boo!
-  </div>
+  </a>
+</div>
+`;
+
+exports[`FadeIntoView should render simple text 1`] = `
+<div
+  style={
+    Object {
+      "opacity": 0,
+      "transform": "translateY(100px)",
+    }
+  }
+>
+  <p>
+    Boo!
+  </p>
 </div>
 `;

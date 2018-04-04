@@ -9,10 +9,6 @@ type Direction = 'Up' | 'Down' | 'Left' | 'Right';
 
 type Props = {
   /**
-   * One node component that contains the content to fade in
-   */
-  children: React.Node,
-  /**
    * The direction for the content to move into view. <br />
    * Valid Directions are: "Up", "Down", "Left", "Right"
    */
@@ -25,13 +21,18 @@ type Props = {
    * Initial position of content before it fades into view
    */
   offsetPosition?: number,
+  /**
+   * One node component that contains the content to fade in
+   */
+  render: React.Node,
 };
 
 type State = {
   activate: boolean,
+  inView: boolean,
 };
 
-/**
+/*
  * Fades and moves its children into view.
  * @extends Component
  */
@@ -39,6 +40,11 @@ class FadeIntoView extends Component<Props, State> {
   static defaultProps = {
     activate: false,
     offsetPosition: 100,
+  };
+
+  state = {
+    isRest: false,
+    activate: this.props.activate,
   };
 
   getDirectionStyle(transformNum) {
@@ -56,6 +62,17 @@ class FadeIntoView extends Component<Props, State> {
     }
   }
 
+  setResting = () => {
+    this.setState({isRest: true});
+  };
+
+  handleSetActive = (activate: boolean) => {
+    this.setState((state: State): ?State => {
+      if (activate === state.activate) return null;
+      return {...state, activate};
+    });
+  };
+
   render() {
     return (
       <Motion
@@ -64,18 +81,19 @@ class FadeIntoView extends Component<Props, State> {
           transformNum: this.props.offsetPosition,
         }}
         style={{
-          opacityNum: spring(this.props.activate ? 1 : 0, {
+          opacityNum: spring(this.state.activate ? 1 : 0, {
             stiffness: 30,
             damping: 20,
           }),
           transformNum: spring(
-            this.props.activate ? 0 : this.props.offsetPosition,
+            this.state.activate ? 0 : this.props.offsetPosition,
             {
               stiffness: 120,
               damping: 20,
             },
           ),
         }}
+        onRest={this.setResting}
       >
         {({opacityNum, transformNum}) => (
           <div
@@ -84,7 +102,11 @@ class FadeIntoView extends Component<Props, State> {
               transform: this.getDirectionStyle(transformNum),
             }}
           >
-            {this.props.children}
+            {this.props.render({
+              ...this.props,
+              ...this.state,
+              setActive: this.handleSetActive,
+            })}
           </div>
         )}
       </Motion>
