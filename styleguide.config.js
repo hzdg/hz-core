@@ -5,6 +5,7 @@ module.exports = {
   components: 'packages/**/src/**.js',
   webpackConfig: createConfig([babel(), css()]),
   showUsage: true,
+  pagePerSection: true,
   template: path.join(__dirname, 'conf', 'styleguide', 'template.html'),
   require: [path.join(__dirname, 'conf', 'styleguide', 'styles.css')],
   theme: {
