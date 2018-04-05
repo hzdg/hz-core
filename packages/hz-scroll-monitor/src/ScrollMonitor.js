@@ -1,6 +1,6 @@
 /* eslint-disable react/no-unused-prop-types */
 import React, {Component} from 'react';
-import {findDOMNode} from 'react-dom';
+import invariant from 'invariant';
 import PropTypes from 'prop-types';
 import uuid from 'uuid/v1';
 import ScrollState from './ScrollState';
@@ -59,10 +59,7 @@ export default class ScrollMonitor extends Component {
   static propTypes = scrollMonitorConfigTypes;
   static defaultProps = defaultScrollMonitorConfig;
 
-  state = {
-    ...initialState,
-    uid: uuid().slice(0, 8),
-  };
+  state = {...initialState};
 
   componentDidMount() {
     this.mounted = true;
@@ -83,11 +80,13 @@ export default class ScrollMonitor extends Component {
   componentWillUnmount() {
     this.mounted = false;
     this.unsubscribe();
-    this.ref = null;
-    this.el = null;
-    this.scrollEl = null;
+    this.node = null;
+    this.scrollNode = null;
   }
 
+  uid = uuid().slice(0, 8);
+  node = null;
+  scrollNode = null;
   mounted = false;
   subscription = null;
 
@@ -99,20 +98,22 @@ export default class ScrollMonitor extends Component {
   }
 
   subscribeIfNecessary() {
-    if (!this.subscription && this.mounted && this.scrollEl) {
-      const config = getObservableConfig(this.props, this.state.uid, this.el);
-      this.subscription = ScrollState.create(this.scrollEl, config).subscribe(
+    if (!this.subscription && this.mounted && this.scrollNode) {
+      const config = getObservableConfig(this.props, this.uid, this.node);
+      this.subscription = ScrollState.create(this.scrollNode, config).subscribe(
         this.handleUpdate,
       );
     }
   }
 
-  findScrollNode = ref => {
-    if (ref && ref !== this.ref) {
-      this.ref = ref;
-      // eslint-disable-next-line react/no-find-dom-node
-      this.el = findDOMNode(ref);
-      this.scrollEl = getNearestScrollNode(this.el);
+  findScrollNode = node => {
+    invariant(
+      node === null || node instanceof HTMLElement,
+      `Expected an HTMLElement node, but got ${node}.`,
+    );
+    if (node && node !== this.node) {
+      this.node = node;
+      this.scrollNode = getNearestScrollNode(this.node);
       this.unsubscribe();
       this.subscribeIfNecessary();
     }
@@ -123,27 +124,20 @@ export default class ScrollMonitor extends Component {
   };
 
   render() {
-    // We wrap our render prop in a ScrollTarget so we can get a ref
-    // to the rendered node. This allows the render prop to return
-    // fragments.
-    return (
-      <ScrollTarget ref={this.findScrollNode}>
-        {this.props.children(this.state)}
-      </ScrollTarget>
-    );
+    return this.props.children({
+      ...this.state,
+      uid: this.uid,
+      scrollRef: this.findScrollNode,
+    });
   }
 }
 
-function ScrollTarget({children}) {
-  return children;
-}
-
 // eslint-disable-next-line no-unused-vars
-function getObservableConfig({children: _, ...props}, uid, el) {
+function getObservableConfig({children: _, ...props}, uid, node) {
   // eslint-disable-next-line eqeqeq
   if (props.viewport !== false && props.viewport != null) {
     props.viewport = {
-      target: el,
+      target: node,
       threshold: props.viewport === true ? 0 : props.viewport,
     };
   }
