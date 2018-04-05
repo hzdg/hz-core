@@ -2,7 +2,7 @@
 import Debug from 'debug';
 import ScrollObservable from './ScrollObservable';
 import ViewportObservable from './ViewportObservable';
-import EventState from './Eventstate';
+import EventState from './EventState';
 import {
   Observable,
   hasScrollBoundEvent,
