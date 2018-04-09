@@ -35,6 +35,7 @@ To create a new package, run `make create-new-package`.
 ## Notes
 - Every push to current develop branch will trigger a build with a latest tag. This tag will be pulled at every run.
 - Possibly only change one package for every new tag
+- Add `@version` jsdoc tag to show version for the component
 
 
 ## Project Structure

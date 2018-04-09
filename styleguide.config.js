@@ -56,4 +56,14 @@ module.exports = {
       components: './packages/animations/**/src/index.js',
     },
   ],
+  updateDocs(docs) {
+    if (docs.doclets.version) {
+      const versionFilePath = path.resolve(__dirname, 'package.json');
+      const thisThing = require(versionFilePath); // eslint-disable-line global-require
+      const version = thisThing.version; // eslint-disable-line prefer-destructuring
+      docs.doclets.version = version;
+      docs.tags.version[0].description = version;
+    }
+    return docs;
+  },
 };
