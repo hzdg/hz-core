@@ -10,5 +10,6 @@
 [options]
 emoji=true
 
+module.name_mapper='^\/\(.*\)$' -> '<PROJECT_ROOT>/\1'
 
 [strict]

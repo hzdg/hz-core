@@ -16,6 +16,7 @@ create-new-package:
 start:
 	yarn
 	jest
+	flow
 	docker-compose up
 
 styleguide:
