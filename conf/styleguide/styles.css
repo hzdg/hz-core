@@ -2,6 +2,7 @@ div[class^='rsg--preview'] {
   position: relative;
   padding: 50px 30px 30px;
   overflow:hidden;
+  box-Shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px;
 }
 
 div[class^='rsg--preview']:before {
