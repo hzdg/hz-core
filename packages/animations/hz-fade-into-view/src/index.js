@@ -2,9 +2,9 @@
 import React, {Component} from 'react';
 import {Motion, spring} from 'react-motion';
 
-/**
- * Various Directions
- */
+// eslint-disable-next-line no-duplicate-imports
+import type {Element} from 'react';
+
 type Direction = 'Up' | 'Down' | 'Left' | 'Right';
 
 type Props = {
@@ -12,7 +12,7 @@ type Props = {
    * The direction for the content to move into view. <br />
    * Valid Directions are: "Up", "Down", "Left", "Right"
    */
-  direction: Direction<string>,
+  direction: Direction,
   /**
    * Control whether not item should be active
    */
@@ -22,19 +22,40 @@ type Props = {
    */
   offsetPosition?: number,
   /**
-   * One node component that contains the content to fade in
+   * The function "render prop". The props fed into this function are: <br />
+   * `{...this.props, ...this.state, RenderProps}`
    */
-  render: React.Node,
+  render: (props: RenderProps) => Element<*>,
 };
+
+/**
+ * What is this
+ * @type {[type]}
+ */
+export interface Something {
+  blah: string;
+}
 
 type State = {
-  activate: boolean,
-  inView: boolean,
+  activate?: boolean,
+  isRest: boolean,
 };
 
-/*
- * Fades and moves its children into view.
- * @extends Component
+/**
+ * RenderProps
+ * @type {[type]}
+ * @public
+ */
+type RenderProps = State & {
+  /**
+   * A callback for updating Button active state.
+   */
+  setActive: (activeValue: boolean) => void,
+};
+
+/**
+ * Fades and moves its children into view
+ * @version
  */
 class FadeIntoView extends Component<Props, State> {
   static defaultProps = {
@@ -47,7 +68,7 @@ class FadeIntoView extends Component<Props, State> {
     activate: this.props.activate,
   };
 
-  getDirectionStyle(transformNum) {
+  getDirectionStyle(transformNum:string) {
     switch (this.props.direction) {
       case 'Up':
         return `translateY(${transformNum}px)`;
@@ -113,5 +134,6 @@ class FadeIntoView extends Component<Props, State> {
     );
   }
 }
+
 
 export default FadeIntoView;
