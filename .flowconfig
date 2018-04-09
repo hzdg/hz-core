@@ -8,5 +8,7 @@
 [lints]
 
 [options]
+emoji=true
+
 
 [strict]
