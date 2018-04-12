@@ -18,7 +18,7 @@ export function create(element: Element): Observable {
   return new Observable(observer => {
     if (!elements.has(element)) {
       debug('Creating scroll event listener', element);
-      element.addEventListener('scroll', handleScroll);
+      element.addEventListener('scroll', handleScroll, {passive: true});
       elements.set(element, new Set());
     }
 
