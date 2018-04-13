@@ -6,29 +6,37 @@ import type {ObserverSet} from './types';
 
 const debug = Debug('ScrollMonitor:scroll');
 
-const elements: Map<Element, ObserverSet> = new Map();
+const elements: Map<HTMLElement | Document, ObserverSet> = new Map();
 
-export function create(element: Element): Observable {
-  const handleScroll = scrollEvent => {
-    elements.get(element).forEach(observer => {
-      observer.next({rect: getScrollRect(scrollEvent.currentTarget)});
-    });
+export function create(element: HTMLElement | Document): Observable {
+  const handleScroll = (scrollEvent: Event) => {
+    const observers = elements.get(element);
+    const target = scrollEvent.currentTarget;
+    if (
+      target instanceof HTMLElement &&
+      observers &&
+      scrollEvent.currentTarget
+    ) {
+      observers.forEach(observer => {
+        observer.next({rect: getScrollRect(target)});
+      });
+    }
   };
 
   return new Observable(observer => {
+    const observers: ObserverSet = elements.get(element) || new Set();
     if (!elements.has(element)) {
       debug('Creating scroll event listener', element);
       element.addEventListener('scroll', handleScroll, {passive: true});
-      elements.set(element, new Set());
+      elements.set(element, observers);
     }
 
     debug('Subscribing to scroll events', element, observer);
-    elements.get(element).add(observer);
+    observers.add(observer);
 
     return {
       unsubscribe() {
         debug('Unsubscribing from scroll events', element, observer);
-        const observers = elements.get(element);
         observers.delete(observer);
         if (!observers.size) {
           elements.delete(element);
