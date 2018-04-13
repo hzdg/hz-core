@@ -1,0 +1,20 @@
+{
+  "name": "hz-scroll-monitor",
+  "version": "0.0.1",
+  "main": "index.js",
+  "license": "MIT",
+  "private": true,
+  "peerDependencies": {
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1"
+  },
+  "dependencies": {
+    "debug": "^3.1.0",
+    "invariant": "^2.2.4",
+    "prop-types": "^15.6.1",
+    "symbol-observable": "^1.2.0",
+    "uuid": "^3.2.1",
+    "warning": "^3.0.0",
+    "zen-observable": "^0.8.8"
+  }
+}
