@@ -9,6 +9,11 @@
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
   },
+  "workspaces": [
+    "packages/animations/*",
+    "packages/simple-actions/*",
+    "packages/*"
+  ],
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "^6.24.1",
