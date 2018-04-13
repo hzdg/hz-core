@@ -1,3 +1,4 @@
+// @flow
 import {UP, RIGHT, DOWN, LEFT} from './types';
 
 export const ScrollDirection = {UP, RIGHT, DOWN, LEFT};

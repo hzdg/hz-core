@@ -1,4 +1,6 @@
 // @flow
+import type {Node as ReactNode} from 'react';
+
 export const DOWN = 'down';
 export const UP = 'up';
 export const LEFT = 'left';
@@ -22,47 +24,47 @@ export type ScrollMonitorEvent =
 export type ScrollMonitorEventState = {
   verticalDirection?: ?VerticalScrollDirection,
   horizontalDirection?: ?HorizontalScrollDirection,
-  inBounds?: ?Boolean,
-  inViewport?: ?Boolean,
-  viewportRatio?: ?Number,
+  inBounds?: ?boolean,
+  inViewport?: ?boolean,
+  viewportRatio?: ?number,
   // TODO: figure out what info we actually need for viewport.
   // i.e., vertical offset (when 'below' vs. when 'above')
   // and horizontal offset (when 'right' vs when 'left')
 };
 
 export type ScrollRect = {
-  top: Number,
-  left: Number,
-  width: Number,
-  height: Number,
+  top: ?number,
+  left: ?number,
+  width: ?number,
+  height: ?number,
 };
 
 export type ScrollState = {
-  lastTop: ?Number,
-  lastLeft: ?Number,
-  lastWidth: ?Number,
-  lastHeight: ?Number,
+  lastTop: ?number,
+  lastLeft: ?number,
+  lastWidth: ?number,
+  lastHeight: ?number,
   ...ScrollRect,
 };
 
 export type BoundsRect = {
-  top: ?Number,
-  right: ?Number,
-  bottom: ?Number,
-  left: ?Number,
+  top: ?number,
+  right: ?number,
+  bottom: ?number,
+  left: ?number,
 };
 
 export type BoundsConfig = BoundsRect | ((state: ScrollState) => BoundsRect);
 
 export type ViewportConfig = {
-  target: Element,
-  threshold: ?(Number | Number[]),
+  target: HTMLElement,
+  threshold: ?(number | number[]),
 };
 
 export type ViewportChange = {
-  target: Element,
-  ratio: Number,
-  inViewport: Boolean,
+  target: HTMLElement,
+  ratio: number,
+  inViewport: boolean,
 };
 
 export type UpdatePayload = {
@@ -78,6 +80,15 @@ export type ScrollMonitorEventConfig = {
 
 export type ScrollMonitorState = ScrollState & ScrollMonitorEventState;
 
+export type ScrollMonitorProps = {
+  children: (state: ScrollMonitorState) => ReactNode,
+  vertical: ?boolean,
+  horizontal: ?boolean,
+  direction: ?boolean,
+  viewport: ?(boolean | number | number[]),
+  bounds: ?BoundsConfig,
+};
+
 export type ScrollMonitorChangeChecker = (
   payload: UpdatePayload,
   scrollState: ScrollState,
@@ -90,11 +101,12 @@ export type EventStateStore = {
 };
 
 export type ScrollMonitorConfig = {
-  vertical: ?Boolean,
-  horizontal: ?Boolean,
-  direction: ?Boolean,
-  viewport: ?(Boolean | Number | Number[]),
-  bounds: ?BoundsConfig,
+  vertical?: ?boolean,
+  horizontal?: ?boolean,
+  direction?: ?boolean,
+  viewport?: ?ViewportConfig,
+  bounds?: ?BoundsConfig,
+  uid: string,
 };
 
 export type Observer = {

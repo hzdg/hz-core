@@ -1,11 +1,18 @@
+// @flow
 /* eslint-disable react/no-unused-prop-types */
-import React, {Component} from 'react';
+import {Component} from 'react';
 import invariant from 'invariant';
 import PropTypes from 'prop-types';
 import uuid from 'uuid/v1';
 import ScrollState from './ScrollState';
 
-const scrollMonitorConfigTypes = {
+import type {
+  ScrollMonitorConfig,
+  ScrollMonitorProps,
+  ScrollMonitorState,
+} from './types';
+
+const scrollMonitorPropTypes = {
   children: PropTypes.func.isRequired,
   vertical: PropTypes.bool,
   horizontal: PropTypes.bool,
@@ -47,7 +54,7 @@ const initialState = {
   verticalDirection: null,
 };
 
-const keyNotEqual = (a, b) => k => a[k] !== b[k];
+const keyNotEqual = (a: any, b: any) => k => a[k] !== b[k];
 
 const CONFIG_KEYS = ['vertical', 'horizontal', 'direction', 'viewport'];
 const configChanged = (a, b) => CONFIG_KEYS.some(keyNotEqual(a, b));
@@ -55,8 +62,11 @@ const configChanged = (a, b) => CONFIG_KEYS.some(keyNotEqual(a, b));
 const BOUNDS_KEYS = ['top', 'right', 'bottom', 'left'];
 const boundsChanged = (a, b) => BOUNDS_KEYS.some(keyNotEqual(a, b));
 
-export default class ScrollMonitor extends Component {
-  static propTypes = scrollMonitorConfigTypes;
+export default class ScrollMonitor extends Component<
+  ScrollMonitorProps,
+  ScrollMonitorState,
+> {
+  static propTypes = scrollMonitorPropTypes;
   static defaultProps = defaultScrollMonitorConfig;
 
   state = {...initialState};
@@ -66,7 +76,7 @@ export default class ScrollMonitor extends Component {
     this.subscribeIfNecessary();
   }
 
-  componentWillReceiveProps(nextProps) {
+  componentWillReceiveProps(nextProps: ScrollMonitorProps) {
     let shouldReregister = configChanged(this.props, nextProps);
     if (!shouldReregister && nextProps.bounds) {
       shouldReregister = boundsChanged(this.props.bounds, nextProps.bounds);
@@ -84,11 +94,11 @@ export default class ScrollMonitor extends Component {
     this.scrollNode = null;
   }
 
-  uid = uuid().slice(0, 8);
-  node = null;
-  scrollNode = null;
+  uid: string = uuid().slice(0, 8);
+  node: ?HTMLElement = null;
+  scrollNode: ?(HTMLElement | Document) = null;
   mounted = false;
-  subscription = null;
+  subscription: any = null;
 
   unsubscribe() {
     if (this.subscription) {
@@ -98,18 +108,18 @@ export default class ScrollMonitor extends Component {
   }
 
   subscribeIfNecessary() {
-    if (!this.subscription && this.mounted && this.scrollNode) {
-      const config = getObservableConfig(this.props, this.uid, this.node);
-      this.subscription = ScrollState.create(this.scrollNode, config).subscribe(
-        this.handleUpdate,
-      );
+    if (!this.subscription && this.mounted && this.scrollNode && this.node) {
+      this.subscription = ScrollState.create(
+        this.scrollNode,
+        getObservableConfig(this.props, this.uid, this.node),
+      ).subscribe(this.handleUpdate);
     }
   }
 
-  findScrollNode = node => {
+  findScrollNode = (node: ?Element) => {
     invariant(
       node === null || node instanceof HTMLElement,
-      `Expected an HTMLElement node, but got ${node}.`,
+      `Expected an HTMLElement node, but got ${((node: any): string)}.`,
     );
     if (node && node !== this.node) {
       this.node = node;
@@ -119,7 +129,7 @@ export default class ScrollMonitor extends Component {
     }
   };
 
-  handleUpdate = state => {
+  handleUpdate = (state: ScrollMonitorState) => {
     if (this.mounted) this.setState(state);
   };
 
@@ -132,19 +142,33 @@ export default class ScrollMonitor extends Component {
   }
 }
 
-// eslint-disable-next-line no-unused-vars
-function getObservableConfig({children: _, ...props}, uid, node) {
+function getObservableConfig(
+  props: ScrollMonitorProps,
+  uid: string,
+  node: HTMLElement,
+): ScrollMonitorConfig {
+  const config: ScrollMonitorConfig = {
+    vertical: props.vertical,
+    horizontal: props.horizontal,
+    direction: props.direction,
+    bounds: props.bounds,
+    uid,
+  };
   // eslint-disable-next-line eqeqeq
-  if (props.viewport !== false && props.viewport != null) {
-    props.viewport = {
+  if (
+    props.viewport === true ||
+    typeof props.viewport === 'number' ||
+    Array.isArray(props.viewport)
+  ) {
+    config.viewport = {
       target: node,
       threshold: props.viewport === true ? 0 : props.viewport,
     };
   }
-  return {...props, uid};
+  return config;
 }
 
-function getNearestScrollNode(node) {
+function getNearestScrollNode(node): ?(HTMLElement | Document) {
   if (!(node instanceof HTMLElement)) return null;
 
   const {overflowX, overflowY} = window.getComputedStyle(node);

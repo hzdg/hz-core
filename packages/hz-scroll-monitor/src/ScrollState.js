@@ -18,7 +18,7 @@ import type {
 } from './types';
 
 export function create(
-  element: Element,
+  element: HTMLElement | Document,
   config: ScrollMonitorConfig,
 ): Observable {
   const debug = Debug(`ScrollMonitor:uid:${config.uid}`);
