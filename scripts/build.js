@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
+const report = require('yurnalist');
 const babel = require('@babel/core');
 const {rollup} = require('rollup');
 const {uglify} = require('rollup-plugin-uglify');
@@ -114,7 +115,7 @@ const copyPackageFiles = ({meta, dir, dist}) =>
         await copyFile(filename, dir, dist);
       } catch (error) {
         if (error.code === 'ENOENT') {
-          console.log(`[${meta.name}] ${filename} does not exist. Skipping.`);
+          report.warn(`[${meta.name}] ${filename} does not exist. Skipping.`);
         } else {
           throw error;
         }
@@ -151,22 +152,22 @@ const buildBundles = pkg =>
     buildBundle(pkg, 'production'),
   ]);
 
-const buildPackage = async pkg => {
+const buildPackage = async (pkg, activity) => {
   try {
-    console.log(`[${pkg.meta.name}] Copying package files ...`);
+    activity.tick(`[${pkg.meta.name}] Copying package files ...`);
     await mkdir(pkg.dist);
     await copyPackageFiles(pkg);
-    console.log(`[${pkg.meta.name}] Building modules ...`);
+    activity.tick(`[${pkg.meta.name}] Building modules ...`);
     await buildModules(pkg);
-    console.log(`[${pkg.meta.name}] Building UMD bundles ...`);
+    activity.tick(`[${pkg.meta.name}] Building UMD bundles ...`);
     await buildBundles(pkg);
   } catch (error) {
-    console.error(`[${pkg.meta.name}] There was an error!`);
+    report.error(`[${pkg.meta.name}] There was an error!`);
     throw error;
   }
 };
 
-const buildPackages = () => {
+const buildPackages = () =>
   WORKSPACES
     // Find all of the package.json files in package workspaces.
     .reduce(
@@ -192,16 +193,31 @@ const buildPackages = () => {
     })
     // Queue up a package build for each workspace.
     .reduce(
-      (buildQueue, pkg) => buildQueue.then(() => buildPackage(pkg)),
+      (buildQueue, pkg, step, {length: steps}) =>
+        buildQueue.then(() => {
+          report.step(step + 1, steps, `[${pkg.meta.name}]`);
+          const activity = report.activity();
+          return buildPackage(pkg, activity)
+            .then(() => activity.end())
+            .catch(err => {
+              activity.end();
+              throw err;
+            });
+        }),
       Promise.resolve(),
     )
     .then(() => {
-      console.log('All packages built!');
+      report.success('All packages built!');
     })
     .catch(err => {
-      console.error(err);
+      report.error((err.stack && err.stack) || err);
       process.exit(1);
     });
-};
 
-buildPackages();
+module.exports = buildPackages;
+
+
+// If this is module is being run as a script, invoke the build function.
+if (typeof require !== 'undefined' && require.main === module) {
+  buildPackages();
+}

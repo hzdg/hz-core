@@ -57,18 +57,18 @@ module.exports = {
     },
     {
       name: 'Other Components',
-      components: './packages/hz-*/**/src/index.js',
+      components: './packages/hzcore-*/**/src/index.js',
     },
   ],
   getComponentPathLine(componentPath) {
-    const pkgName = componentPath.replace(/.*\/?hz-([^/]*).*/, '$1');
+    const pkgName = componentPath.replace(/.*\/?hzcore-([^/]*).*/, '$1');
     let moduleName = path.basename(componentPath, '.js');
     while (moduleName === 'index' || moduleName === 'src') {
       componentPath = path.dirname(componentPath);
       moduleName = path.basename(componentPath);
     }
     moduleName = moduleName
-      .replace(/hz-/, '')
+      .replace(/hzcore-/, '')
       .split('-')
       .map(s => `${s[0].toUpperCase()}${s.slice(1)}`)
       .join('');

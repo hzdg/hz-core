@@ -34,7 +34,7 @@ Before making a new package, make sure you are:
 
 1. working off a clean working tree with all other changes either stashed or committed and pushed. Because of the nature of how lerna publishes packages, it is essential to isolate your package creation/development isolated from any other changes across the library.
 
-2. working off your own branch apart from any release branches (eg. `hz-my-component`)
+2. working off your own branch apart from any release branches (eg. `hzcore-my-component`)
 
 To create a new package, run `make create-new-package`. A new package will be added into the `./packages` directory. Move the component if it will need to live under any of the subcategories (eg. `./packages/animations`).
 
