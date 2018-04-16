@@ -15,13 +15,13 @@ import {
 /* eslint-disable no-duplicate-imports */
 import type {
   BoundsConfig,
-  BoundsRect,
   EventStateStore,
   ScrollMonitorChangeChecker,
   ScrollMonitorConfig,
   ScrollMonitorEvent,
   ScrollMonitorEventConfig,
   ScrollMonitorEventState,
+  ScrollRect,
   ScrollState,
   UpdatePayload,
   ViewportConfig,
@@ -93,11 +93,19 @@ function createEventConfig(
       break;
     }
     case IN_BOUNDS: {
-      if (config) shouldUpdate = createBoundsChangeChecker(config, debug);
+      if (config)
+        shouldUpdate = createBoundsChangeChecker(
+          ((config: any): BoundsConfig),
+          debug,
+        );
       break;
     }
     case IN_VIEWPORT: {
-      if (config) shouldUpdate = createViewportChangeChecker(config, debug);
+      if (config)
+        shouldUpdate = createViewportChangeChecker(
+          ((config: any): ViewportConfig),
+          debug,
+        );
       break;
     }
     default: {
@@ -121,7 +129,12 @@ function createVerticalDirectionChangeChecker(
     if (!rect) return false;
     const {top} = rect;
     if (top === void 0) return false;
-    const verticalDirection = top < scrollState.top ? UP : DOWN;
+    const verticalDirection =
+      typeof scrollState.top === 'number' &&
+      typeof top === 'number' &&
+      top < scrollState.top
+        ? UP
+        : DOWN;
     if (verticalDirection === eventState.verticalDirection) {
       return false;
     } else {
@@ -144,7 +157,12 @@ function createHorizontalDirectionChangeChecker(
     if (!rect) return false;
     const {left} = rect;
     if (left === void 0) return false;
-    const horizontalDirection = left < scrollState.left ? RIGHT : LEFT;
+    const horizontalDirection =
+      typeof scrollState.left === 'number' &&
+      typeof left === 'number' &&
+      left < scrollState.left
+        ? RIGHT
+        : LEFT;
     if (horizontalDirection === eventState.horizontalDirection) {
       return false;
     } else {
@@ -179,7 +197,7 @@ function createBoundsChangeChecker(
 
 function inBounds(
   bounds: BoundsConfig,
-  rect: BoundsRect,
+  rect: ScrollRect,
   state: ScrollState,
 ): ?boolean {
   const {
@@ -190,8 +208,15 @@ function inBounds(
   } =
     typeof bounds === 'function' ? bounds(state) : bounds;
 
-  const inRangeVertical = top <= rect.top && bottom >= rect.top;
-  const inRangeHorizontal = left <= rect.left && right >= rect.left;
+  const inRangeVertical =
+    typeof rect.top === 'number' &&
+    (typeof top === 'number' && top <= rect.top) &&
+    (typeof bottom === 'number' && bottom >= rect.top);
+
+  const inRangeHorizontal =
+    typeof rect.left === 'number' &&
+    (typeof left === 'number' && left <= rect.left) &&
+    (typeof right === 'number' && right >= rect.left);
 
   return inRangeVertical && inRangeHorizontal;
 }
