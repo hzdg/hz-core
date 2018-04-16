@@ -1,32 +1,25 @@
 // @flow
 import ZenObservable from 'zen-observable';
 import $$observable from 'symbol-observable';
-import type {RegistrationConfig, ScrollRect, ViewportChange} from './types';
 
-// rxjs interopt
+import type {ScrollRect, ViewportChange} from './types';
+
 export class Observable extends ZenObservable {
+  // rxjs interopt
+  // $FlowFixMe: Computed property keys not supported.
   [$$observable]() {
     return this;
   }
 }
 
-export function hasScrollBoundEvent(config: RegistrationConfig): Boolean {
-  return Object.keys(config).length > 2 || !hasIntersectionBoundEvent(config);
-}
-
-export function hasIntersectionBoundEvent(config: RegistrationConfig): Boolean {
-  // eslint-disable-next-line eqeqeq
-  return config.viewport !== false && config.viewport != null;
-}
-
-export function getScrollRect(element: HTMLElement): ScrollRect {
-  const {scrollingElement = element} = element;
+export function getScrollRect(element: HTMLElement | Document): ScrollRect {
+  const {scrollingElement = element} = (element: any);
   const {
     scrollTop: top,
     scrollLeft: left,
     scrollWidth: width,
     scrollHeight: height,
-  } = scrollingElement;
+  } = ((scrollingElement: any): HTMLElement);
   return {top, left, width, height};
 }
 

@@ -3,11 +3,7 @@ import Debug from 'debug';
 import ScrollObservable from './ScrollObservable';
 import ViewportObservable from './ViewportObservable';
 import EventState from './EventState';
-import {
-  Observable,
-  hasScrollBoundEvent,
-  hasIntersectionBoundEvent,
-} from './utils';
+import {Observable} from './utils';
 
 import type {
   ObserverSet,
@@ -41,7 +37,9 @@ export function create(
     if (!eventsToDispatch.size) return;
     const nextState = {...scrollState, ...eventState.state};
     debug(
-      `dispatching ${eventsToDispatch.size} events to ${observers.size} observers`,
+      `dispatching ${eventsToDispatch.size} events to ${
+        observers.size
+      } observers`,
     );
     observers.forEach(observer => {
       observer.next(nextState);
@@ -49,7 +47,7 @@ export function create(
     eventsToDispatch.clear();
   }
 
-  function update(payload: UpdatePayload, immediate?: Boolean) {
+  function update(payload: UpdatePayload, immediate?: boolean) {
     // Update the callbacks that care about the impending state change.
     // Note that dispatches are asynchronous by default. This means that
     // some changes might add a callback to the map, while subsequent
@@ -63,7 +61,7 @@ export function create(
         eventState.state,
       );
       if (result) {
-        debug(`schedule update`)
+        debug(`schedule update`);
         eventsToDispatch.add(eventConfig);
       } else if (result === false) {
         eventsToDispatch.delete(eventConfig);
@@ -104,15 +102,19 @@ export function create(
 
   return new Observable(observer => {
     if (!observers.size) {
-      if (hasScrollBoundEvent(config)) {
-        const scrollObservable = ScrollObservable.create(element, config);
+      if (Object.keys(config).length > 2 || !config.viewport) {
+        const scrollObservable = ScrollObservable.create(element);
         subscriptionMap.set(
           scrollObservable,
           scrollObservable.subscribe(update),
         );
       }
-      if (hasIntersectionBoundEvent(config)) {
-        const viewportObservable = ViewportObservable.create(element, config);
+
+      if (config.viewport) {
+        const viewportObservable = ViewportObservable.create(
+          element,
+          config.viewport,
+        );
         subscriptionMap.set(
           viewportObservable,
           viewportObservable.subscribe(update),

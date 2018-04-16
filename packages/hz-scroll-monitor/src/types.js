@@ -33,17 +33,17 @@ export type ScrollMonitorEventState = {
 };
 
 export type ScrollRect = {
-  top: ?number,
-  left: ?number,
-  width: ?number,
-  height: ?number,
+  top?: ?number,
+  left?: ?number,
+  width?: ?number,
+  height?: ?number,
 };
 
 export type ScrollState = {
-  lastTop: ?number,
-  lastLeft: ?number,
-  lastWidth: ?number,
-  lastHeight: ?number,
+  lastTop?: ?number,
+  lastLeft?: ?number,
+  lastWidth?: ?number,
+  lastHeight?: ?number,
   ...ScrollRect,
 };
 
@@ -75,7 +75,7 @@ export type UpdatePayload = {
 export type ScrollMonitorEventConfig = {
   event: ScrollMonitorEvent,
   config: ?(BoundsConfig | ViewportConfig),
-  update: ScrollMonitorChangeChecker,
+  shouldUpdate: ScrollMonitorChangeChecker,
 };
 
 export type ScrollMonitorState = ScrollState & ScrollMonitorEventState;
