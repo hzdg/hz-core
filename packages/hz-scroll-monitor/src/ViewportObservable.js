@@ -9,39 +9,43 @@ type IntersectionConfig = {
   intersection: IntersectionObserver,
   targets: TargetMap,
 };
-type IntersectionConfigs = {[key: string]: IntersectionConfig};
-type ElementMap = Map<Element, IntersectionConfigs>;
+type IntersectionConfigs = {[key: ?string]: IntersectionConfig};
+type ElementMap = Map<HTMLElement | Document, IntersectionConfigs>;
 
 const debug = Debug('ScrollMonitor:viewport');
 
 const elementMap: ElementMap = new Map();
 
-export function create(element: Element, config: ViewportConfig): Observable {
-  if (!elementMap.has(element)) {
-    debug('Creating element intersection observer', element);
-    elementMap.set(element, new Map());
-  }
-  let configs: IntersectionConfigs = elementMap.get(element);
+export function create(
+  element: HTMLElement | Document,
+  config: ViewportConfig,
+): Observable {
+  const {threshold, target} = config;
+  const configs: IntersectionConfigs = elementMap.get(element) || {};
 
-  const {threshold, target} = config.viewport;
+  if (!elementMap.has(element) && configs) {
+    debug('Creating element intersection observer', element);
+    elementMap.set(element, configs);
+  }
 
   const key =
     threshold === null
       ? null
-      : Array.isArray(threshold) ? threshold.join() : threshold.toString();
+      : Array.isArray(threshold)
+        ? threshold.join()
+        : typeof threshold === 'number' ? threshold.toString() : null;
 
-  if (!(key in configs)) {
-    debug(`Creating observer for threshold ${key}`, element);
-    configs[key] = configIntersectionObserver(element, threshold);
+  if (!configs[key]) {
+    debug(`Creating observer for threshold ${(key: any)}`, element);
+    configs[key] = createIntersectionConfig(element, threshold);
   }
 
-  let {intersection, targets} = configs[key];
+  const {intersection, targets} = configs[key];
+  const observers: ObserverSet = targets.get(target) || new Set();
 
   if (!targets.has(target)) {
-    targets.set(target, new Set());
+    targets.set(target, observers);
   }
-
-  let observers = targets.get(target);
 
   return new Observable(observer => {
     if (!observers.size) {
@@ -55,18 +59,14 @@ export function create(element: Element, config: ViewportConfig): Observable {
         debug('Unsubscribing from viewport events', element, observer);
         observers.delete(observer);
         if (!observers.size) {
-          observers = null;
           targets.delete(target);
           if (!targets.size) {
             debug('Disconnecting intersection', element, target, threshold);
             intersection.disconnect();
             delete configs[key];
-            intersection = null;
-            targets = null;
             if (!Object.keys(configs).length) {
               debug('Cleaning up element map', element);
               elementMap.delete(element);
-              configs = null;
             }
           }
         }
@@ -75,27 +75,31 @@ export function create(element: Element, config: ViewportConfig): Observable {
   });
 }
 
-function configIntersectionObserver(
-  element: Element,
-  threshold: ?(Number | Number[]),
+function createIntersectionConfig(
+  element: HTMLElement | Document,
+  threshold: ?(number | number[]),
 ): IntersectionConfig {
   const targets = new Map();
 
   function handleIntersectionChange(entries) {
     getViewportChanges(entries).forEach(intersection => {
       const observers = targets.get(intersection.target);
-      observers.forEach(observer => {
-        // FIXME: no array needed here any more.
-        observer.next({intersection});
-      });
+      if (observers) {
+        observers.forEach(observer => {
+          // FIXME: no array needed here any more.
+          observer.next({intersection});
+        });
+      }
     });
   }
 
   return {
     targets,
     intersection: new IntersectionObserver(handleIntersectionChange, {
-      threshold,
-      root: element instanceof Element ? element : null,
+      threshold: threshold || void 0,
+      root: element instanceof HTMLElement ? element : null,
+      // TODO: add rootMargin support?
+      // rootMargin?: string
     }),
   };
 }
