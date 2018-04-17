@@ -36,6 +36,8 @@ To create a new package, run `make create-new-package`.
 - Every push to current develop branch will trigger a build with a latest tag. This tag will be pulled at every run.
 - Possibly only change one package for every new tag
 - Add `@version` jsdoc tag to show version for the component
+- Render prop arguments should have this.props precede this.state to favor key namespace in state.
+- Possibly strip render prop when sending arguments to render prop
 
 
 ## Project Structure
