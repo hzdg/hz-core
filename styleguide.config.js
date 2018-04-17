@@ -55,6 +55,10 @@ module.exports = {
       name: 'Animations',
       components: './packages/animations/**/src/index.js',
     },
+    {
+      name: 'Other Components',
+      components: './packages/hz-*/**/src/index.js',
+    },
   ],
   updateDocs(docs) {
     if (docs.doclets.version) {
