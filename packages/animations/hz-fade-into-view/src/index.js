@@ -23,18 +23,10 @@ type Props = {
   offsetPosition?: number,
   /**
    * The function "render prop". The props fed into this function are: <br />
-   * `{...this.props, ...this.state, RenderProps}`
+   * `{...this.props, ...this.state, handlers}`
    */
   render: (props: RenderProps) => Element<*>,
 };
-
-/**
- * What is this
- * @type {[type]}
- */
-export interface Something {
-  blah: string;
-}
 
 type State = {
   activate?: boolean,
@@ -43,8 +35,6 @@ type State = {
 
 /**
  * RenderProps
- * @type {[type]}
- * @public
  */
 type RenderProps = State & {
   /**
@@ -68,7 +58,7 @@ class FadeIntoView extends Component<Props, State> {
     activate: this.props.activate,
   };
 
-  getDirectionStyle(transformNum:string) {
+  getDirectionStyle(transformNum: string) {
     switch (this.props.direction) {
       case 'Up':
         return `translateY(${transformNum}px)`;
@@ -134,6 +124,5 @@ class FadeIntoView extends Component<Props, State> {
     );
   }
 }
-
 
 export default FadeIntoView;

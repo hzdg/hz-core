@@ -1,3 +1,36 @@
+**STATE**
+
+| State name | Type | Default | Description |
+|-|-|-|
+| isRest | boolean | False | Determines if the component has completed animation
+| activate | boolean | False | Determines if the component is active to animate
+
+**HANDLERS**
+
+Along with Props and State, below are handlers that will also be passed:
+
+| Handler name | Type | Default | Description |
+|-|-|-|-|
+| setActive | function(activate: boolean) | null | Handler to set FadeIntoView as active/inactive |
+
+
+<hr />
+
+All possible arguments sent to render prop:
+```jsx static
+const myContent = ({
+    direction,
+    render, // TODO: This should be omitted
+    offsetPosition,
+    activate,
+    isRest,
+    setActive}) => {
+    // ...
+};
+
+<FadeIntoView direction="Up" render={myContent} />
+```
+
 A simple Example using `isRest` to update content.
 ```js
     const myContent = ({isRest}) => (
