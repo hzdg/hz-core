@@ -39,7 +39,7 @@ export function create(config: ScrollMonitorConfig): EventStateStore {
         createEventConfig(HORIZONTAL_DIRECTION_CHANGE, null, debug),
       );
       initialEventState.verticalDirection = null;
-      initialEventState.horizontDirection = null;
+      initialEventState.horizontalDirection = null;
     } else {
       if (config.vertical) {
         configs.push(createEventConfig(VERTICAL_DIRECTION_CHANGE, null, debug));
@@ -49,7 +49,7 @@ export function create(config: ScrollMonitorConfig): EventStateStore {
         configs.push(
           createEventConfig(HORIZONTAL_DIRECTION_CHANGE, null, debug),
         );
-        initialEventState.horizontDirection = null;
+        initialEventState.horizontalDirection = null;
       }
     }
   }
