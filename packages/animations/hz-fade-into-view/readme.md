@@ -1,7 +1,7 @@
 **STATE**
 
 | State name | Type | Default | Description |
-|-|-|-|
+|-|-|-|-|
 | isRest | boolean | False | Determines if the component has completed animation
 | activate | boolean | False | Determines if the component is active to animate
 
