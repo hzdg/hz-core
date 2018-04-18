@@ -12,7 +12,7 @@ nA2B=0
 nB2A=0
 
 # Determine if the branch varies between local and remote
-if [$(git ls-remote --heads git@github.com:hzdg/hz-core.git 0.1 | wc -l) eq 1];
+if [[ $(git ls-remote --heads git@github.com:hzdg/hz-core.git $CURRENT_BRANCH) ]];
 then
   nA2B=$(git rev-list --count $LOCAL_BRANCH..$REMOTE_BRANCH)
   nB2A=$(git rev-list --count $REMOTE_BRANCH..$LOCAL_BRANCH)
@@ -27,14 +27,12 @@ RED='\033[0;31m'
 check_clean_working_tree () {
   if ! git diff-files --quiet --ignore-submodules --
   then
-      echo >&2 "${RED}Can not run script: you have unstaged changes:${DEFAULT}"
       git diff-files --name-status -r --ignore-submodules -- >&2
-      err=1
+      echo >&2 "${RED}You have unstaged changes. Please clean working tree before creating a new package.${DEFAULT}"
       exit 1
   elif [ ! $nA2B -eq 0 -o ! $nB2A -eq 0 ];
   then
     echo >&2 "${RED}Can not run script: $LOCAL_BRANCH does not match $REMOTE_BRANCH.${DEFAULT}"
-    err=1
     exit 1
   fi
 }
