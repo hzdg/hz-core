@@ -8,8 +8,15 @@ DOCKER_REPOSITORY=hzdg/hz-core
 
 LOCAL_BRANCH=$CURRENT_BRANCH
 REMOTE_BRANCH=origin/$CURRENT_BRANCH
-nA2B=$(git rev-list --count $LOCAL_BRANCH..$REMOTE_BRANCH)
-nB2A=$(git rev-list --count $REMOTE_BRANCH..$LOCAL_BRANCH)
+nA2B=0
+nB2A=0
+
+# Determine if the branch varies between local and remote
+if [$(git ls-remote --heads git@github.com:hzdg/hz-core.git 0.1 | wc -l) eq 1];
+then
+  nA2B=$(git rev-list --count $LOCAL_BRANCH..$REMOTE_BRANCH)
+  nB2A=$(git rev-list --count $REMOTE_BRANCH..$LOCAL_BRANCH)
+fi
 
 CYAN='\033[0;36m'
 DEFAULT='\033[0m'
