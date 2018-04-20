@@ -1,0 +1,7 @@
+{
+  "name": "hz-pressible",
+  "version": "0.0.1",
+  "description": "A pressible component",
+  "main": "index.js",
+  "license": "MIT"
+}
