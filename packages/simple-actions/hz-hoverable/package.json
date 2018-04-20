@@ -1,0 +1,7 @@
+{
+  "name": "hz-hoverable",
+  "version": "0.0.1",
+  "description": "Component that handles focus state for its children",
+  "main": "index.js",
+  "license": "MIT"
+}
