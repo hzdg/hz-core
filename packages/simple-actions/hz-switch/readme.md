@@ -132,7 +132,7 @@ const checkbox = {
     textTransform: 'uppercase',
     fontFamily: 'arial',
     textAlign: 'center',
-    '-webkit-appearance': 'none',
+    WebkitAppearance: 'none',
     transition: 'all 0.3s ease',
     border: '2px solid rgba(0, 0, 0, 0.5)',
     borderRadius: 2,
