@@ -12,34 +12,47 @@ type RenderProps = {
 
 type Props = {
   render: (props: RenderProps) => Element<*>,
+  defaultOn: boolean,
   /**
    * Provide optional default value
    */
-  isOn?: boolean,
+  on: boolean,
 
   onSwitch?: (value: boolean) => void,
 };
 
 type State = {
-  isOn: boolean,
+  on: boolean,
 };
 
 class Switch extends Component<Props, State> {
+  static defaultProps = {
+    defaultOn: false,
+  };
+
   state = {
-    isOn: this.props.isOn || false,
+    on: this.getOn({on: this.props.defaultOn}),
   };
 
   componentDidUpdate(_: any, prevState: State) {
     if (
       typeof this.props.onSwitch === 'function' &&
-      prevState.isOn !== this.state.isOn
+      prevState.on !== this.state.on
     ) {
-      this.props.onSwitch(this.state.isOn);
+      this.props.onSwitch(this.state.on);
     }
   }
 
   handleToggleSwitch = () => {
     this.setState((state: State): ?State => ({...state, isOn: !state.isOn}));
+  getOn(state: State = this.state): boolean {
+    return this.isOnControlled() ? this.props.on : state.on;
+  }
+
+  isOnControlled(): boolean {
+    return this.props.on !== undefined;
+  }
+
   };
 
   render() {
