@@ -4,15 +4,16 @@ _TODO: The below examples will need to be broken into separate components for re
 
 Simple off and on button
 ```js
-const otherStyles = {
+const switchStyles = {
     cursor: 'pointer',
     padding: '10px',
     display: 'inline-block',
     color: 'white',
     textTransform: 'uppercase',
     fontFamily: 'arial',
-    width: 100,
+    width: 40,
     textAlign: 'center',
+    borderRadius: 5,
 };
 
 const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch}) =>
@@ -25,7 +26,7 @@ const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch})
         }}
         onMouseUp={() => setPress(false)}
         style={{
-            ...otherStyles,
+            ...switchStyles,
             backgroundColor: isOn ? '#00ab00' : '#ec4444',
             border: hovered ? '3px solid rgba(0, 0, 0, 0.5)' : '3px solid rgba(0, 0, 0, 0.2)',
             boxShadow: pressed ? 'rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px' : 'rgba(0, 0, 0, 0.3) 0px 2px 6px, rgba(0, 0, 0, 0.3) 0px 1px 4px',
@@ -61,7 +62,7 @@ const leverStyles = {
     top: 0,
     borderRadius: 50,
     transition: 'transform 0.3s ease, background-color 0.2s ease',
-    boxShadow: 'rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px',
+    boxShadow: 'rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px, rgba(0, 0, 0, 0.1) -2px -3px 5px inset',
 };
 
 const textStyles = {
@@ -72,7 +73,9 @@ const textStyles = {
     textAlign: 'center',
     display: 'block',
     width: '100%',
-    fontSize: 12,
+    fontSize: 20,
+    fontWeight: 700,
+    fontFamily: 'Courier',
 }
 
 const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch}) =>
@@ -96,7 +99,7 @@ const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch})
                 transform: isOn ? 'translateX(100%)' : 'translateX(0)',
             }}
         >
-            <span style={textStyles}>{isOn ? 'On' : 'Off'}</span>
+            <span style={textStyles}>{isOn ? '1' : '0'}</span>
         </div>
     </div>;
 
@@ -131,7 +134,8 @@ const checkbox = {
     textAlign: 'center',
     '-webkit-appearance': 'none',
     transition: 'all 0.3s ease',
-    border: '3px solid rgba(0, 0, 0, 0.5)',
+    border: '2px solid rgba(0, 0, 0, 0.5)',
+    borderRadius: 2,
 };
 
 const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch}) =>
