@@ -2,12 +2,12 @@ A component that manages a pressed state for the children.
 
 ```js
 
-const myPressible = ({pressed, setPress}) =>
+const myPressible = ({getPressibleProps}) =>
     <div
-        onMouseDown={() => setPress(true)}
-        onMouseUp={() => setPress(false)}
+        onMouseDown={() => getPressibleProps.setPress(true)}
+        onMouseUp={() => getPressibleProps.setPress(false)}
         style={{
-            backgroundColor: pressed ? 'pink' : 'gray',
+            backgroundColor: getPressibleProps.pressed ? 'pink' : 'gray',
             padding: 10,
             display: 'inline-block',
         }}

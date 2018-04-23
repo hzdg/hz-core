@@ -1,12 +1,12 @@
 A component that manages a focused state for the children.
 
 ```js
-const cardComponent = ({hovered, setHover}) =>
+const cardComponent = ({getHoverableProps}) =>
     <div
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+        onMouseEnter={() => getHoverableProps.setHover(true)}
+        onMouseLeave={() => getHoverableProps.setHover(false)}
         style={{
-            backgroundColor: hovered ? 'blue' : 'purple',
+            backgroundColor: getHoverableProps.hovered ? 'blue' : 'purple',
             color: 'white',
             padding: 10,
             display: 'inline-block',

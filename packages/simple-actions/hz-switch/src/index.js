@@ -6,12 +6,8 @@ import Pressible from '../../hz-pressible/src/index';
 // eslint-disable-next-line no-duplicate-imports
 import type {Element} from 'react';
 
-type RenderProps = {
-  setToggleSwitch: () => void,
-};
-
 type Props = {
-  render: (props: RenderProps) => Element<*>,
+  render: (props: {any: any}) => Element<*>,
   defaultOn: boolean,
   /**
    * Provide optional default value
@@ -43,16 +39,27 @@ class Switch extends Component<Props, State> {
     }
   }
 
-  handleToggleSwitch = () => {
-    this.setState((state: State): ?State => ({...state, isOn: !state.isOn}));
   getOn(state: State = this.state): boolean {
     return this.isOnControlled() ? this.props.on : state.on;
+  }
+
+  getSwitchReturnProps(ancestorGetters: {}): {} {
+    return {
+      getSwitchProps: {
+        ...ancestorGetters,
+        ...this.props,
+        ...this.state,
+        setToggleSwitch: this.handleToggleSwitch,
+      },
+    };
   }
 
   isOnControlled(): boolean {
     return this.props.on !== undefined;
   }
 
+  handleToggleSwitch = (): void => {
+    this.setState((state: State): ?State => ({...state, on: !state.on}));
   };
 
   render() {
@@ -70,12 +77,12 @@ class Switch extends Component<Props, State> {
           render={pressibleProps => (
             <Hoverable
               render={hoverableProps =>
-                this.props.render({
-                  ...pressibleProps,
-                  ...hoverableProps,
-                  ...this.state,
-                  setToggleSwitch: this.handleToggleSwitch,
-                })
+                this.props.render(
+                  this.getSwitchReturnProps({
+                    ...pressibleProps.getPressibleProps,
+                    ...hoverableProps.getHoverableProps,
+                  }),
+                )
               }
             />
           )}

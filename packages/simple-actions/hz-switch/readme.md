@@ -16,23 +16,23 @@ const switchStyles = {
     borderRadius: 5,
 };
 
-const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch}) =>
+const mySwitch = ({getSwitchProps}) =>
     <div
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+        onMouseEnter={() => getSwitchProps.setHover(true)}
+        onMouseLeave={() => getSwitchProps.setHover(false)}
         onMouseDown={() => {
-            setToggleSwitch();
-            setPress(true);
+            getSwitchProps.setToggleSwitch();
+            getSwitchProps.setPress(true);
         }}
-        onMouseUp={() => setPress(false)}
+        onMouseUp={() => getSwitchProps.setPress(false)}
         style={{
             ...switchStyles,
-            backgroundColor: isOn ? '#00ab00' : '#ec4444',
-            border: hovered ? '3px solid rgba(0, 0, 0, 0.5)' : '3px solid rgba(0, 0, 0, 0.2)',
-            boxShadow: pressed ? 'rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px' : 'rgba(0, 0, 0, 0.3) 0px 2px 6px, rgba(0, 0, 0, 0.3) 0px 1px 4px',
+            backgroundColor: getSwitchProps.on ? '#00ab00' : '#ec4444',
+            border: getSwitchProps.hovered ? '3px solid rgba(0, 0, 0, 0.5)' : '3px solid rgba(0, 0, 0, 0.2)',
+            boxShadow: getSwitchProps.pressed ? 'rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px' : 'rgba(0, 0, 0, 0.3) 0px 2px 6px, rgba(0, 0, 0, 0.3) 0px 1px 4px',
         }}
     >
-        {isOn ? 'On' : 'Off'}
+        {getSwitchProps.on ? 'On' : 'Off'}
     </div>;
 
 <Switch render={mySwitch} />
@@ -78,28 +78,28 @@ const textStyles = {
     fontFamily: 'Courier',
 }
 
-const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch}) =>
+const mySwitch = ({getSwitchProps}) =>
     <div
-        onMouseEnter={() => setHover(true)}
-        onMouseLeave={() => setHover(false)}
+        onMouseEnter={() => getSwitchProps.setHover(true)}
+        onMouseLeave={() => getSwitchProps.setHover(false)}
         onMouseDown={() => {
-            setToggleSwitch();
-            setPress(true);
+            getSwitchProps.setToggleSwitch();
+            getSwitchProps.setPress(true);
         }}
-        onMouseUp={() => setPress(false)}
+        onMouseUp={() => getSwitchProps.setPress(false)}
         style={{
             ...trackStyles,
-            backgroundColor: isOn ? '#75dc75' : 'gray',
+            backgroundColor: getSwitchProps.on ? '#75dc75' : 'gray',
         }}
     >
         <div
             style={{
                 ...leverStyles,
-                backgroundColor: isOn ? '#00ab00' : '#333333',
-                transform: isOn ? 'translateX(100%)' : 'translateX(0)',
+                backgroundColor: getSwitchProps.on ? '#00ab00' : '#333333',
+                transform: getSwitchProps.on ? 'translateX(100%)' : 'translateX(0)',
             }}
         >
-            <span style={textStyles}>{isOn ? '1' : '0'}</span>
+            <span style={textStyles}>{getSwitchProps.on ? '1' : '0'}</span>
         </div>
     </div>;
 
@@ -138,31 +138,31 @@ const checkbox = {
     borderRadius: 2,
 };
 
-const mySwitch = ({isOn, hovered, pressed, setPress, setHover, setToggleSwitch}) =>
+const mySwitch = ({getSwitchProps}) =>
     <div
         style={checkboxWrapper}
     >
         <input
             type="checkbox"
-            onMouseEnter={() => setHover(true)}
-            onMouseLeave={() => setHover(false)}
+            onMouseEnter={() => getSwitchProps.setHover(true)}
+            onMouseLeave={() => getSwitchProps.setHover(false)}
             onMouseDown={() => {
-                setToggleSwitch();
-                setPress(true);
+                getSwitchProps.setToggleSwitch();
+                getSwitchProps.setPress(true);
             }}
-            onMouseUp={() => setPress(false)}
-            checked={isOn}
+            onMouseUp={() => getSwitchProps.setPress(false)}
+            checked={getSwitchProps.on}
             style={shadowCheckbox}
         />
         <div
             style={{
                 ...checkbox,
-                backgroundColor: isOn ? 'green' : 'gray',
-                transform: pressed ? 'scale(0.9)' : 'scale(1)',
-                boxShadow: hovered ? 'inset rgba(0, 0, 0, 0.6) 0px 0px 10px 1px' : '',
+                backgroundColor: getSwitchProps.on ? 'green' : 'gray',
+                transform: getSwitchProps.pressed ? 'scale(0.9)' : 'scale(1)',
+                boxShadow: getSwitchProps.hovered ? 'inset rgba(0, 0, 0, 0.6) 0px 0px 10px 1px' : '',
             }}
         >
-            <span>{isOn ? '✔' : '✕'}</span>
+            <span>{getSwitchProps.on ? '✔' : '✕'}</span>
         </div>
         <span style={{paddingLeft: '10px', fontFamily: 'arial'}}>Sign Me Up!</span>
     </div>;

@@ -4,19 +4,10 @@ import {Component} from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import type {Element} from 'react';
 
-type RenderProps = {};
+type RenderProps = {any: any};
 
 type Props = {
-  /**
-   * Something something
-   * @param  {[type]} props [description]
-   * @return {[type]}       [description]
-   */
   render: (props: RenderProps) => Element<*>,
-  /**
-   * [value description]
-   * @type {[type]}
-   */
   onPress?: (value: boolean) => void,
 };
 
@@ -30,7 +21,6 @@ const intialState = {
 
 /**
  *  This is a basic pressible component
- *  @returns Component
  */
 class Pressible extends Component<Props, State> {
   state = {...intialState};
@@ -44,6 +34,16 @@ class Pressible extends Component<Props, State> {
     }
   }
 
+  getPressibleReturnProps(): {_: {}} {
+    return {
+      getPressibleProps: {
+        ...this.props,
+        ...this.state,
+        setPress: this.handlePress,
+      },
+    };
+  }
+
   handlePress = (pressed: boolean) => {
     this.setState((state: State): ?State => {
       if (pressed === state.pressed) return null;
@@ -52,11 +52,7 @@ class Pressible extends Component<Props, State> {
   };
 
   render() {
-    return this.props.render({
-      ...this.props,
-      ...this.state,
-      setPress: this.handlePress,
-    });
+    return this.props.render(this.getPressibleReturnProps());
   }
 }
 

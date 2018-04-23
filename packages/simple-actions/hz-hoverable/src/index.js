@@ -32,6 +32,16 @@ class Hoverable extends Component<Props, State> {
     }
   }
 
+  getHoverableReturnProps() {
+    return {
+      getHoverableProps: {
+        ...this.props,
+        ...this.state,
+        setHover: this.handleSetHover,
+      },
+    };
+  }
+
   handleSetHover = (hovered: boolean) => {
     this.setState((state: State): ?State => {
       if (hovered === state.hovered) return null;
@@ -40,11 +50,7 @@ class Hoverable extends Component<Props, State> {
   };
 
   render() {
-    return this.props.render({
-      ...this.props,
-      ...this.state,
-      setHover: this.handleSetHover,
-    });
+    return this.props.render(this.getHoverableReturnProps());
   }
 }
 
