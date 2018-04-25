@@ -6,6 +6,7 @@
   "repository": "git@github.com:hzdg/hz-core.git",
   "author": "elainen <elaineh@hzdg.com>",
   "license": "MIT",
+  "private": true,
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
   },
