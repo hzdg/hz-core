@@ -1,8 +1,18 @@
 {
-  "presets": ["env", "flow", "react"],
+  "presets": [
+    [
+      "env",
+      {
+        "modules": false
+      }
+    ],
+    "flow",
+    "react"
+  ],
   "plugins": [
     "transform-class-properties",
     "transform-flow-strip-types",
-    "transform-object-rest-spread"
+    "transform-object-rest-spread",
+    "external-helpers"
   ]
 }
