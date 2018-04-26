@@ -19,7 +19,7 @@ create-new-package:
 start:
 	yarn
 	jest
-	flow
+	flow check
 	docker-compose up
 
 styleguide:
