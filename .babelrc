@@ -13,6 +13,5 @@
     "transform-class-properties",
     "transform-flow-strip-types",
     "transform-object-rest-spread",
-    "external-helpers"
   ]
 }
