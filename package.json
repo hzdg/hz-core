@@ -48,6 +48,7 @@
     "react-dom": "^16.2.0",
     "react-motion": "^0.5.2",
     "react-styleguidist": "^7.0.4",
+    "rollup": "^0.58.2",
     "rollup-plugin-babel": "^3.0.3",
     "rollup-plugin-json": "^2.3.0",
     "tapable": "^1.0.0",
