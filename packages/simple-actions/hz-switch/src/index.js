@@ -6,8 +6,11 @@ import Pressible from '../../hz-pressible/src/index';
 // eslint-disable-next-line no-duplicate-imports
 import type {Element} from 'react';
 
+
+type RenderProps = {getSwitchProps: {}};
+
 type Props = {
-  render: (props: {any: any}) => Element<*>,
+  render: (props: RenderProps) => Element<*>,
   defaultOn: boolean,
   /**
    * Provide optional default value
@@ -43,7 +46,7 @@ class Switch extends Component<Props, State> {
     return this.isOnControlled() ? this.props.on : state.on;
   }
 
-  getSwitchReturnProps(ancestorGetters: {}): {} {
+  getSwitchReturnProps(ancestorGetters: {}): {getSwitchProps: {}} {
     return {
       getSwitchProps: {
         ...ancestorGetters,

@@ -4,7 +4,7 @@ import {Component} from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import type {Element} from 'react';
 
-type RenderProps = {any: any};
+type RenderProps = {getPressibleProps: {}};
 
 type Props = {
   render: (props: RenderProps) => Element<*>,
@@ -34,7 +34,7 @@ class Pressible extends Component<Props, State> {
     }
   }
 
-  getPressibleReturnProps(): {_: {}} {
+  getPressibleReturnProps(): {getPressibleProps: {}} {
     return {
       getPressibleProps: {
         ...this.props,

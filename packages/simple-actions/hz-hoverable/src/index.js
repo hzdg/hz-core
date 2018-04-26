@@ -4,7 +4,7 @@ import {Component} from 'react';
 // eslint-disable-next-line no-duplicate-imports
 import type {Element} from 'react';
 
-type RenderProps = {};
+type RenderProps = {getHoverableProps: {}};
 
 type Props = {
   render: (props: RenderProps) => Element<*>,
