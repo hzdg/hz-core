@@ -1,7 +1,6 @@
 // @flow
 /* eslint-disable no-duplicate-imports, react/no-unused-prop-types */
-import {Component} from 'react';
-import invariant from 'invariant';
+import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import uuid from 'uuid/v1';
 import ScrollState from './ScrollState';
@@ -98,18 +97,28 @@ export default class ScrollMonitor extends Component<
     }
   }
 
+  componentWillUpdate() {
+    this.prevScrollRef = this.scrollRef.current;
+  }
+
+  componentDidUpdate() {
+    if (this.prevScrollRef !== this.scrollRef.current) {
+      this.prevScrollRef = null;
+      this.unsubscribe();
+      this.subscribeIfNecessary();
+    }
+  }
+
   componentWillUnmount() {
     this.mounted = false;
     this.unsubscribe();
-    this.node = null;
-    this.scrollNode = null;
   }
 
   uid: string = uuid().slice(0, 8);
-  node: ?HTMLElement = null;
-  scrollNode: ?(HTMLElement | Document) = null;
   mounted = false;
   subscription: any = null;
+  scrollRef = React.createRef();
+  prevScrollRef: any = null;
 
   unsubscribe() {
     if (this.subscription) {
@@ -119,26 +128,20 @@ export default class ScrollMonitor extends Component<
   }
 
   subscribeIfNecessary() {
-    if (!this.subscription && this.mounted && this.scrollNode && this.node) {
-      this.subscription = ScrollState.create(
-        this.scrollNode,
-        getObservableConfig(this.props, this.uid, this.node),
-      ).subscribe(this.handleUpdate);
+    if (!this.subscription && this.mounted) {
+      const config = getObservableConfig(
+        this.props,
+        this.uid,
+        getNode(this.scrollRef.current),
+      );
+      const node = getNearestScrollNode(this.scrollRef.current);
+      if (node) {
+        this.subscription = ScrollState.create(node, config).subscribe(
+          this.handleUpdate,
+        );
+      }
     }
   }
-
-  findScrollNode = (node: ?Element) => {
-    invariant(
-      node === null || node instanceof HTMLElement,
-      `Expected an HTMLElement node, but got ${((node: any): string)}.`,
-    );
-    if (node && node !== this.node) {
-      this.node = node;
-      this.scrollNode = getNearestScrollNode(this.node);
-      this.unsubscribe();
-      this.subscribeIfNecessary();
-    }
-  };
 
   handleUpdate = (state: ScrollMonitorState) => {
     if (this.mounted) this.setState(state);
@@ -148,7 +151,7 @@ export default class ScrollMonitor extends Component<
     return this.props.children({
       ...this.state,
       uid: this.uid,
-      scrollRef: this.findScrollNode,
+      scrollRef: this.scrollRef,
     });
   }
 }
@@ -179,7 +182,14 @@ function getObservableConfig(
   return config;
 }
 
+function getNode(node) {
+  ({node = node.element || node} = node);
+  return node;
+}
+
 function getNearestScrollNode(node): ?(HTMLElement | Document) {
+  node = getNode(node);
+  if (node instanceof Document) return node;
   if (!(node instanceof HTMLElement)) return null;
 
   const {overflowX, overflowY} = window.getComputedStyle(node);
