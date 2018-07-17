@@ -1,5 +1,5 @@
 {
-  "name": "hz-scroll-monitor",
+  "name": "@hzcore/scroll-monitor",
   "version": "0.0.1",
   "main": "index.js",
   "license": "MIT",
