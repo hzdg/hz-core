@@ -1,0 +1,173 @@
+/* eslint-disable no-console, no-process-exit */
+const fs = require('fs');
+const path = require('path');
+const babel = require('@babel/core');
+const glob = require('glob');
+
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+const PROJECT_DIST_DIRECTORY = path.resolve(PROJECT_ROOT, 'build', 'dist');
+const WORKSPACES = require(path.join(PROJECT_ROOT, 'package.json')).workspaces;
+const PACKAGE_FILES = ['package.json', 'LICENSE'];
+const SRC_GLOB = '**/*.js';
+const EXT_RE = /\..+$/;
+const EXTENSIONS = {
+  es: '.js',
+  cjs: '.cjs.js',
+};
+
+const mkdir = dirpath =>
+  new Promise((resolve, reject) => {
+    fs.mkdir(dirpath, err => {
+      if (err) {
+        if (err.code === 'EEXIST') {
+          resolve();
+        } else if (err.code === 'ENOENT') {
+          // Make the parent path, then try again.
+          mkdir(path.dirname(dirpath)).then(
+            () => mkdir(dirpath).then(resolve, reject),
+            reject,
+          );
+        } else {
+          reject(err);
+        }
+      } else {
+        resolve();
+      }
+    });
+  });
+
+const transformFile = (filename, options) =>
+  new Promise((resolve, reject) => {
+    try {
+      babel.transformFile(
+        filename,
+        {
+          envName: 'es',
+          extends: path.resolve('.babelrc'),
+          ...options,
+        },
+        (err, result) => {
+          if (err) reject(err);
+          else resolve(result);
+        },
+      );
+    } catch (e) {
+      reject(e);
+    }
+  });
+
+const writeFile = (filename, data, options) =>
+  new Promise((resolve, reject) => {
+    fs.writeFile(filename, data, {encoding: 'utf8', ...options}, err => {
+      if (err) reject(err);
+      else resolve();
+    });
+  });
+
+const buildModule = (filename, src, dist, format) =>
+  transformFile(filename, {envName: format}).then(({code}) =>
+    writeFile(
+      path.join(
+        dist,
+        path.dirname(path.relative(src, filename)),
+        path.basename(filename).replace(EXT_RE, EXTENSIONS[format]),
+      ),
+      code,
+    ),
+  );
+
+const buildModules = ({dist, src}) =>
+  Promise.all(
+    glob
+      .sync(path.join(src, SRC_GLOB))
+      .map(input =>
+        Promise.all([
+          buildModule(input, src, dist, 'es'),
+          buildModule(input, src, dist, 'cjs'),
+        ]),
+      ),
+  );
+
+const copyFile = (filename, dir, dist) =>
+  new Promise((resolve, reject) => {
+    try {
+      fs.copyFile(
+        path.join(dir, filename),
+        path.join(dist, filename),
+        error => {
+          if (error) reject(error);
+          else resolve();
+        },
+      );
+    } catch (e) {
+      reject(e);
+    }
+  });
+
+const copyPackageFiles = ({meta, dir, dist}) =>
+  Promise.all(
+    PACKAGE_FILES.map(async filename => {
+      try {
+        await copyFile(filename, dir, dist);
+      } catch (error) {
+        if (error.code === 'ENOENT') {
+          console.log(`[${meta.name}] ${filename} does not exist. Skipping.`);
+        } else {
+          throw error;
+        }
+      }
+    }),
+  );
+
+const buildPackage = async pkg => {
+  try {
+    console.log(`[${pkg.meta.name}] Copying package files ...`);
+    await mkdir(pkg.dist);
+    await copyPackageFiles(pkg);
+    console.log(`[${pkg.meta.name}] Building modules ...`);
+    await buildModules(pkg);
+  } catch (error) {
+    console.error(`[${pkg.meta.name}] There was an error!`);
+    throw error;
+  }
+};
+
+const buildPackages = () => {
+  WORKSPACES
+    // Find all of the package.json files in package workspaces.
+    .reduce(
+      (matches, pattern) =>
+        matches.concat(
+          glob.sync(path.join(PROJECT_ROOT, pattern, 'package.json')),
+        ),
+      [],
+    )
+    // Append any information needed for each package.
+    .map(pkg => {
+      const meta = require(pkg); // eslint-disable-line global-require
+      const dir = path.dirname(pkg);
+      const name = path.basename(dir);
+      const dist = path.join(PROJECT_DIST_DIRECTORY, name);
+      const src = path.join(dir, 'src');
+      return {
+        meta,
+        dir,
+        dist,
+        src,
+      };
+    })
+    // Queue up a package build for each workspace.
+    .reduce(
+      (buildQueue, pkg) => buildQueue.then(() => buildPackage(pkg)),
+      Promise.resolve(),
+    )
+    .then(() => {
+      console.log('All packages built!');
+    })
+    .catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+};
+
+buildPackages();

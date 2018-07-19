@@ -30,7 +30,7 @@ bump-tags:
 
 build-dist:
 	lerna bootstrap
-	node ./scripts/rollup/build.js
+	node ./scripts/build.js
 
 publish-to-npm:
 	echo 'Not yet implemented'

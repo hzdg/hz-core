@@ -1,7 +1,8 @@
 {
   "name": "@hzcore/button",
   "version": "0.0.1",
-  "main": "index.js",
+  "main": "index.cjs.js",
+  "module": "index.js",
   "license": "MIT",
   "private": true,
   "dependencies": {
