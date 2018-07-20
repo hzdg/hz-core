@@ -1,8 +1,11 @@
 /* eslint-disable no-console, no-process-exit */
 const fs = require('fs');
 const path = require('path');
-const babel = require('@babel/core');
 const glob = require('glob');
+const babel = require('@babel/core');
+const {rollup} = require('rollup');
+const {uglify} = require('rollup-plugin-uglify');
+const rollupConfig = require('../rollup.config');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const PROJECT_DIST_DIRECTORY = path.resolve(PROJECT_ROOT, 'build', 'dist');
@@ -119,6 +122,35 @@ const copyPackageFiles = ({meta, dir, dist}) =>
     }),
   );
 
+const buildBundle = async ({meta, src, dist}, env) => {
+  const dev = env !== 'production';
+  const {output, ...config} = rollupConfig;
+  const bundle = await rollup({
+    ...config,
+    input: path.join(src, meta.module),
+    external: [
+      ...Object.keys(output.globals),
+      ...Object.keys(meta.devDependencies || {}),
+      ...Object.keys(meta.peerDependencies || {}),
+    ],
+    plugins: [...rollupConfig.plugins, ...(dev ? [] : [uglify()])],
+  });
+
+  const name = meta.name.replace(/@.+\/(.+)/, `hzcore-$1`);
+
+  await bundle.write({
+    ...output,
+    name,
+    file: path.join(dist, `${name}.umd.${dev ? 'js' : 'min.js'}`),
+  });
+};
+
+const buildBundles = pkg =>
+  Promise.all([
+    buildBundle(pkg, 'development'),
+    buildBundle(pkg, 'production'),
+  ]);
+
 const buildPackage = async pkg => {
   try {
     console.log(`[${pkg.meta.name}] Copying package files ...`);
@@ -126,6 +158,8 @@ const buildPackage = async pkg => {
     await copyPackageFiles(pkg);
     console.log(`[${pkg.meta.name}] Building modules ...`);
     await buildModules(pkg);
+    console.log(`[${pkg.meta.name}] Building UMD bundles ...`);
+    await buildBundles(pkg);
   } catch (error) {
     console.error(`[${pkg.meta.name}] There was an error!`);
     throw error;
