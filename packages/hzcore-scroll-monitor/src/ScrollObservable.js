@@ -13,9 +13,8 @@ export function create(element: HTMLElement | Document): Observable {
     const observers = elements.get(element);
     const target = scrollEvent.currentTarget;
     if (
-      target instanceof HTMLElement &&
-      observers &&
-      scrollEvent.currentTarget
+      (target instanceof HTMLElement || target instanceof Document) &&
+      observers
     ) {
       observers.forEach(observer => {
         observer.next({rect: getScrollRect(target)});
