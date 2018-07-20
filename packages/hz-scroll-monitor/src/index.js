@@ -2,7 +2,7 @@
 /* eslint-disable no-duplicate-imports, react/no-unused-prop-types */
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
-import uuid from 'uuid/v1';
+import {uuid} from './utils';
 import ScrollState from './ScrollState';
 
 import {UP, RIGHT, DOWN, LEFT} from './types';

@@ -32,3 +32,18 @@ export function getViewportChanges(
     inViewport: isIntersecting,
   }));
 }
+
+function random() {
+  // $FlowFixMe: crypto can't be resolved
+  if (typeof crypto === 'undefined') return Math.random() * 16;
+  if (typeof crypto.randomBytes === 'undefined')
+    return crypto.getRandomValues(new Uint8Array(1))[0] % 16;
+  return crypto.randomBytes(1)[0] % 16;
+}
+
+// Adapted from https://gist.github.com/jed/982883
+export function uuid(): string {
+  return (([1e7]: any) + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, c =>
+    (c ^ (random() >> (c / 4))).toString(16),
+  );
+}
