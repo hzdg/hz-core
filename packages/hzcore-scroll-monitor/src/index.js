@@ -33,13 +33,20 @@ const scrollMonitorPropTypes = {
     PropTypes.arrayOf(PropTypes.number),
   ]),
   bounds: PropTypes.oneOfType([
-    PropTypes.func,
     PropTypes.shape({
       top: PropTypes.number,
       right: PropTypes.number,
       bottom: PropTypes.number,
       left: PropTypes.number,
     }),
+    PropTypes.arrayOf(
+      PropTypes.shape({
+        top: PropTypes.number,
+        right: PropTypes.number,
+        bottom: PropTypes.number,
+        left: PropTypes.number,
+      }),
+    ),
   ]),
 };
 

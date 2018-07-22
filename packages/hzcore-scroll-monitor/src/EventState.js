@@ -1,6 +1,7 @@
 // @flow
 import warning from 'warning';
 import Debug from 'debug';
+import shallowEqual from 'shallowequal';
 import {
   UP,
   DOWN,
@@ -15,6 +16,7 @@ import {
 /* eslint-disable no-duplicate-imports */
 import type {
   BoundsConfig,
+  BoundsRect,
   EventStateStore,
   ScrollMonitorChangeChecker,
   ScrollMonitorConfig,
@@ -177,7 +179,6 @@ function createBoundsChangeChecker(
   config: BoundsConfig,
   debug: Function,
 ): ScrollMonitorChangeChecker {
-  config = typeof config === 'object' ? {...config} : config;
   return (
     payload: UpdatePayload,
     scrollState: ScrollState,
@@ -185,28 +186,35 @@ function createBoundsChangeChecker(
   ): ?boolean => {
     const {rect} = payload;
     if (!rect) return false;
-    const nowInBounds = inBounds(config, rect, scrollState);
-    if (eventState.inBounds !== nowInBounds) {
-      eventState.inBounds = nowInBounds;
-      debug('IN_BOUNDS', nowInBounds);
-      return true;
+    if (Array.isArray(config)) {
+      const nowInBounds = config.map(c =>
+        inBounds(typeof c === 'object' ? {...c} : c, rect),
+      );
+      if (!shallowEqual(eventState.inBounds, nowInBounds)) {
+        eventState.inBounds = nowInBounds;
+        debug('IN_BOUNDS', nowInBounds);
+        return true;
+      }
+    } else {
+      config = typeof config === 'object' ? {...config} : config;
+      const nowInBounds = inBounds(config, rect);
+      if (eventState.inBounds !== nowInBounds) {
+        eventState.inBounds = nowInBounds;
+        debug('IN_BOUNDS', nowInBounds);
+        return true;
+      }
     }
     return false;
   };
 }
 
-function inBounds(
-  bounds: BoundsConfig,
-  rect: ScrollRect,
-  state: ScrollState,
-): ?boolean {
+function inBounds(bounds: BoundsRect, rect: ScrollRect): boolean {
   const {
     top = rect.top,
     right = rect.width,
     bottom = rect.height,
     left = rect.left,
-  } =
-    typeof bounds === 'function' ? bounds(state) : bounds;
+  } = bounds;
 
   const inRangeVertical =
     typeof rect.top === 'number' &&

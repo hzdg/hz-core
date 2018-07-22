@@ -24,7 +24,7 @@ export type ScrollMonitorEvent =
 export type ScrollMonitorEventState = {
   verticalDirection?: ?VerticalScrollDirection,
   horizontalDirection?: ?HorizontalScrollDirection,
-  inBounds?: ?boolean,
+  inBounds?: ?(boolean | boolean[]),
   inViewport?: ?boolean,
   viewportRatio?: ?number,
   // TODO: figure out what info we actually need for viewport.
@@ -54,7 +54,7 @@ export type BoundsRect = {
   left: ?number,
 };
 
-export type BoundsConfig = BoundsRect | ((state: ScrollState) => BoundsRect);
+export type BoundsConfig = BoundsRect | BoundsRect[];
 
 export type ViewportConfig = {
   target: HTMLElement,
