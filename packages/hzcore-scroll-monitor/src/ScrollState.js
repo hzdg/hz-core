@@ -1,12 +1,15 @@
 // @flow
+/* eslint-disable no-duplicate-imports */
 import Debug from 'debug';
 import ScrollObservable from './ScrollObservable';
 import ViewportObservable from './ViewportObservable';
 import EventState from './EventState';
 import {Observable} from './utils';
+import {SCROLL_PROPS} from './types';
 
 import type {
   ObserverSet,
+  Subscription,
   ScrollMonitorConfig,
   ScrollMonitorEventConfig,
   ScrollState,
@@ -19,7 +22,7 @@ export function create(
 ): Observable {
   const debug = Debug(`ScrollMonitor:uid:${config.uid}`);
   const observers: ObserverSet = new Set();
-  const subscriptionMap = new Map();
+  const subscriptions: Set<Subscription> = new Set();
   const eventsToDispatch: Set<ScrollMonitorEventConfig> = new Set();
   const eventState = EventState.create(config);
 
@@ -27,6 +30,7 @@ export function create(
   let updatePending: boolean = false;
 
   function reset() {
+    debug(`canceling update; clearing ${eventsToDispatch.size} events`);
     window.cancelAnimationFrame(updatePending);
     updatePending = false;
     eventsToDispatch.clear();
@@ -63,13 +67,10 @@ export function create(
       if (result) {
         debug(`schedule update`);
         eventsToDispatch.add(eventConfig);
-      } else if (result === false) {
+      } else if (result === false && eventsToDispatch.has(eventConfig)) {
+        debug(`unschedule update`);
         eventsToDispatch.delete(eventConfig);
       }
-    }
-
-    if (eventsToDispatch.size) {
-      debug(`${eventsToDispatch.size} updates scheduled`);
     }
 
     if (payload.rect) {
@@ -102,22 +103,13 @@ export function create(
 
   return new Observable(observer => {
     if (!observers.size) {
-      if (Object.keys(config).length > 2 || !config.viewport) {
-        const scrollObservable = ScrollObservable.create(element);
-        subscriptionMap.set(
-          scrollObservable,
-          scrollObservable.subscribe(update),
-        );
+      if (SCROLL_PROPS.some(p => Boolean(config[p]))) {
+        subscriptions.add(ScrollObservable.create(element).subscribe(update));
       }
 
       if (config.viewport) {
-        const viewportObservable = ViewportObservable.create(
-          element,
-          config.viewport,
-        );
-        subscriptionMap.set(
-          viewportObservable,
-          viewportObservable.subscribe(update),
+        subscriptions.add(
+          ViewportObservable.create(element, config.viewport).subscribe(update),
         );
       }
     }
@@ -130,10 +122,10 @@ export function create(
         debug('Unsubscribing from scroll state', element, config);
         observers.delete(observer);
         if (!observers.size) {
-          for (const sub of subscriptionMap.values()) {
+          for (const sub of subscriptions) {
             sub.unsubscribe();
           }
-          subscriptionMap.clear();
+          subscriptions.clear();
           reset();
         }
       },

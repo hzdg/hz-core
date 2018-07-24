@@ -11,6 +11,7 @@ export const HORIZONTAL_DIRECTION_CHANGE = 'horizontalDirectionChange'; // scrol
 export const IN_BOUNDS = 'inBounds'; // Whether some bounds contains scroll position
 export const IN_VIEWPORT = 'inViewport'; // Whether some part of a rect is now in the scrollable viewport
 
+export const SCROLL_PROPS = ['direction', 'bounds'];
 export type VerticalScrollDirection = typeof DOWN | typeof UP;
 
 export type HorizontalScrollDirection = typeof LEFT | typeof RIGHT;
@@ -116,3 +117,7 @@ export type Observer = {
 };
 
 export type ObserverSet = Set<Observer>;
+
+export type Subscription = {
+  unsubscribe(): void,
+};
