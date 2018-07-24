@@ -2,10 +2,11 @@
 /* eslint-disable no-duplicate-imports, react/no-unused-prop-types */
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
+import shallowEqual from 'shallowequal';
 import {uuid} from './utils';
 import ScrollState from './ScrollState';
 
-import {UP, RIGHT, DOWN, LEFT} from './types';
+import {UP, RIGHT, DOWN, LEFT, CONFIG_SHAPE} from './types';
 
 import type {
   ScrollMonitorConfig,
@@ -71,13 +72,8 @@ const initialState = {
   verticalDirection: null,
 };
 
-const keyNotEqual = (a: any, b: any) => k => a[k] !== b[k];
-
-const CONFIG_KEYS = ['vertical', 'horizontal', 'direction', 'viewport'];
-const configChanged = (a, b) => CONFIG_KEYS.some(keyNotEqual(a, b));
-
-const BOUNDS_KEYS = ['top', 'right', 'bottom', 'left'];
-const boundsChanged = (a, b) => BOUNDS_KEYS.some(keyNotEqual(a, b));
+const configChanged = (a, b) =>
+  CONFIG_SHAPE.some(k => !shallowEqual(a[k], b[k]));
 
 export default class ScrollMonitor extends Component<
   ScrollMonitorProps,
@@ -91,40 +87,31 @@ export default class ScrollMonitor extends Component<
   componentDidMount() {
     this.mounted = true;
     this.subscribeIfNecessary();
-  }
-
-  componentWillReceiveProps(nextProps: ScrollMonitorProps) {
-    let shouldReregister = configChanged(this.props, nextProps);
-    if (!shouldReregister && nextProps.bounds) {
-      shouldReregister = boundsChanged(this.props.bounds, nextProps.bounds);
-    }
-    if (shouldReregister) {
-      this.unsubscribe();
-      this.subscribeIfNecessary();
-    }
-  }
-
-  componentWillUpdate() {
     this.prevScrollRef = this.scrollRef.current;
   }
 
-  componentDidUpdate() {
-    if (this.prevScrollRef !== this.scrollRef.current) {
-      this.prevScrollRef = null;
+  componentDidUpdate(prevProps: ScrollMonitorProps) {
+    if (
+      this.prevScrollRef !== this.scrollRef.current ||
+      configChanged(prevProps, this.props)
+    ) {
       this.unsubscribe();
       this.subscribeIfNecessary();
+      this.prevScrollRef = this.scrollRef.current;
     }
   }
 
   componentWillUnmount() {
     this.mounted = false;
+    this.scrollRef = null;
+    this.prevScrollRef = null;
     this.unsubscribe();
   }
 
   uid: string = uuid().slice(0, 8);
-  mounted = false;
+  mounted: boolean = false;
   subscription: any = null;
-  scrollRef = React.createRef();
+  scrollRef: any = React.createRef();
   prevScrollRef: any = null;
 
   unsubscribe() {
@@ -136,13 +123,13 @@ export default class ScrollMonitor extends Component<
 
   subscribeIfNecessary() {
     if (!this.subscription && this.mounted) {
-      const config = getObservableConfig(
-        this.props,
-        this.uid,
-        getNode(this.scrollRef.current),
-      );
       const node = getNearestScrollNode(this.scrollRef.current);
       if (node) {
+        const config = getObservableConfig(
+          this.props,
+          this.uid,
+          getNode(this.scrollRef.current),
+        );
         this.subscription = ScrollState.create(node, config).subscribe(
           this.handleUpdate,
         );
