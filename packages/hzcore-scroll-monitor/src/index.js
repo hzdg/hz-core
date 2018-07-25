@@ -28,6 +28,7 @@ const scrollMonitorPropTypes = {
   vertical: PropTypes.bool,
   horizontal: PropTypes.bool,
   direction: PropTypes.bool,
+  position: PropTypes.bool,
   viewport: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.number,
@@ -55,6 +56,7 @@ const defaultScrollMonitorConfig = {
   vertical: false,
   horizontal: false,
   direction: false,
+  position: false,
   viewport: false,
   bounds: null,
 };
@@ -159,6 +161,7 @@ function getObservableConfig(
     vertical: props.vertical,
     horizontal: props.horizontal,
     direction: props.direction,
+    position: props.position,
     bounds: props.bounds,
     uid,
   };

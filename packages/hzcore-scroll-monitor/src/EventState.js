@@ -9,6 +9,8 @@ import {
   RIGHT,
   VERTICAL_DIRECTION_CHANGE,
   HORIZONTAL_DIRECTION_CHANGE,
+  VERTICAL_POSITION_CHANGE,
+  HORIZONTAL_POSITION_CHANGE,
   IN_BOUNDS,
   IN_VIEWPORT,
 } from './types';
@@ -55,6 +57,23 @@ export function create(config: ScrollMonitorConfig): EventStateStore {
       }
     }
   }
+  if (config.position) {
+    if (!config.vertical && !config.horizontal) {
+      configs.push(
+        createEventConfig(VERTICAL_POSITION_CHANGE, null, debug),
+        createEventConfig(HORIZONTAL_POSITION_CHANGE, null, debug),
+      );
+    } else {
+      if (config.vertical) {
+        configs.push(createEventConfig(VERTICAL_POSITION_CHANGE, null, debug));
+      }
+      if (config.horizontal) {
+        configs.push(
+          createEventConfig(HORIZONTAL_POSITION_CHANGE, null, debug),
+        );
+      }
+    }
+  }
   if (config.bounds) {
     configs.push(createEventConfig(IN_BOUNDS, config.bounds, debug));
     initialEventState.inBounds = null;
@@ -92,6 +111,14 @@ function createEventConfig(
     }
     case HORIZONTAL_DIRECTION_CHANGE: {
       shouldUpdate = createHorizontalDirectionChangeChecker(debug);
+      break;
+    }
+    case VERTICAL_POSITION_CHANGE: {
+      shouldUpdate = createVerticalPositionChangeChecker(debug);
+      break;
+    }
+    case HORIZONTAL_POSITION_CHANGE: {
+      shouldUpdate = createHorizontalPositionChangeChecker(debug);
       break;
     }
     case IN_BOUNDS: {
@@ -172,6 +199,34 @@ function createHorizontalDirectionChangeChecker(
       debug('HORIZONTAL_DIRECTION_CHANGE', horizontalDirection);
       return true;
     }
+  };
+}
+
+function createVerticalPositionChangeChecker(
+  debug: Function,
+): ScrollMonitorChangeChecker {
+  return (payload: UpdatePayload, scrollState: ScrollState): ?boolean => {
+    const {rect} = payload;
+    if (!rect) return false;
+    const {top} = rect;
+    if (top === void 0) return false;
+    if (top === scrollState.top) return false;
+    debug('VERTICAL_POSITION_CHANGE', top);
+    return true;
+  };
+}
+
+function createHorizontalPositionChangeChecker(
+  debug: Function,
+): ScrollMonitorChangeChecker {
+  return (payload: UpdatePayload, scrollState: ScrollState): ?boolean => {
+    const {rect} = payload;
+    if (!rect) return false;
+    const {left} = rect;
+    if (left === void 0) return false;
+    if (left === scrollState.left) return false;
+    debug('HORIZONTAL_POSITION_CHANGE', left);
+    return true;
   };
 }
 
