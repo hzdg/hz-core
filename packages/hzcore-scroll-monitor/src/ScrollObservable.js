@@ -44,6 +44,9 @@ export function create(element: HTMLElement | Document): Observable {
     debug('Subscribing to scroll events', element, observer);
     elementConfig.observers.add(observer);
 
+    // Give the observer the current value;
+    observer.next({rect: getScrollRect(element)});
+
     return {
       unsubscribe() {
         if (elementConfig) {
