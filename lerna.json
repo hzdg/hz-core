@@ -6,10 +6,5 @@
     "init": {
       "exact": true
     }
-  },
-  "packages": [
-    "packages/animations/*",
-    "packages/simple-actions/*",
-    "packages/*"
-  ]
+  }
 }
