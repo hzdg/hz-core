@@ -3,6 +3,13 @@
   "useWorkspaces": true,
   "version": "independent",
   "command": {
+    "publish": {
+      "ignoreChanges": [
+        "animations",
+        "simple-actions",
+        "*.md"
+      ]
+    },
     "init": {
       "exact": true
     }
