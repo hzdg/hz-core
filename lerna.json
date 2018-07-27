@@ -1,17 +1,18 @@
 {
   "npmClient": "yarn",
-  "useWorkspaces": true,
+  "useWorkspaces": false,
   "version": "independent",
   "command": {
     "publish": {
       "ignoreChanges": [
-        "animations",
-        "simple-actions",
         "*.md"
       ]
     },
     "init": {
       "exact": true
     }
-  }
+  },
+  "packages": [
+    "packages/behaviors/*"
+  ]
 }
