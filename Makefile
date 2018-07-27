@@ -29,7 +29,7 @@ bump-tags:
 	./scripts/bump-tags.sh
 
 build-dist:
-	lerna bootstrap
+	yarn
 	node ./scripts/build.js
 
 publish-to-npm:

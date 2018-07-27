@@ -2,6 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
+const rimraf = require('rimraf');
 const report = require('yurnalist');
 const babel = require('@babel/core');
 const {rollup} = require('rollup');
@@ -9,15 +10,19 @@ const {uglify} = require('rollup-plugin-uglify');
 const rollupConfig = require('../rollup.config');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');
-const PROJECT_DIST_DIRECTORY = path.resolve(PROJECT_ROOT, 'build', 'dist');
 const WORKSPACES = require(path.join(PROJECT_ROOT, 'package.json')).workspaces;
-const PACKAGE_FILES = ['package.json', 'LICENSE'];
 const SRC_GLOB = '**/*.js';
-const EXT_RE = /\..+$/;
-const EXTENSIONS = {
-  es: '.js',
-  cjs: '.cjs.js',
-};
+
+const rmdir = dirpath =>
+  new Promise((resolve, reject) => {
+    rimraf(dirpath, err => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve();
+      }
+    });
+  });
 
 const mkdir = dirpath =>
   new Promise((resolve, reject) => {
@@ -68,67 +73,45 @@ const writeFile = (filename, data, options) =>
     });
   });
 
-const buildModule = (filename, src, dist, format) =>
-  transformFile(filename, {envName: format}).then(({code}) =>
-    writeFile(
-      path.join(
-        dist,
-        path.dirname(path.relative(src, filename)),
-        path.basename(filename).replace(EXT_RE, EXTENSIONS[format]),
-      ),
-      code,
-    ),
-  );
+const buildModule = async (filename, src, dir, format) => {
+  const dist = path.join(dir, format);
+  await rmdir(dist);
+  await mkdir(dist);
 
-const buildModules = ({dist, src}) =>
+  const {code} = await transformFile(filename, {envName: format});
+
+  await writeFile(
+    path.join(
+      dist,
+      path.dirname(path.relative(src, filename)),
+      path.basename(filename),
+    ),
+    code,
+  );
+};
+
+const buildModules = ({dir, src}) =>
   Promise.all(
     glob
       .sync(path.join(src, SRC_GLOB))
       .map(input =>
         Promise.all([
-          buildModule(input, src, dist, 'es'),
-          buildModule(input, src, dist, 'cjs'),
+          buildModule(input, src, dir, 'es'),
+          buildModule(input, src, dir, 'cjs'),
         ]),
       ),
   );
 
-const copyFile = (filename, dir, dist) =>
-  new Promise((resolve, reject) => {
-    try {
-      fs.copyFile(
-        path.join(dir, filename),
-        path.join(dist, filename),
-        error => {
-          if (error) reject(error);
-          else resolve();
-        },
-      );
-    } catch (e) {
-      reject(e);
-    }
-  });
+const buildBundle = async ({meta, src, dir}, env) => {
+  const dist = path.join(dir, 'umd');
+  await rmdir(dist);
+  await mkdir(dist);
 
-const copyPackageFiles = ({meta, dir, dist}) =>
-  Promise.all(
-    PACKAGE_FILES.map(async filename => {
-      try {
-        await copyFile(filename, dir, dist);
-      } catch (error) {
-        if (error.code === 'ENOENT') {
-          report.warn(`[${meta.name}] ${filename} does not exist. Skipping.`);
-        } else {
-          throw error;
-        }
-      }
-    }),
-  );
-
-const buildBundle = async ({meta, src, dist}, env) => {
   const dev = env !== 'production';
   const {output, ...config} = rollupConfig;
   const bundle = await rollup({
     ...config,
-    input: path.join(src, meta.module),
+    input: path.resolve(src, 'index.js'),
     external: [
       ...Object.keys(output.globals),
       ...Object.keys(meta.devDependencies || {}),
@@ -138,11 +121,10 @@ const buildBundle = async ({meta, src, dist}, env) => {
   });
 
   const name = meta.name.replace(/@.+\/(.+)/, `hzcore-$1`);
-
   await bundle.write({
     ...output,
     name,
-    file: path.join(dist, `${name}.umd.${dev ? 'js' : 'min.js'}`),
+    file: path.join(dist, `${name}.${dev ? 'js' : 'min.js'}`),
   });
 };
 
@@ -154,9 +136,6 @@ const buildBundles = pkg =>
 
 const buildPackage = async (pkg, activity) => {
   try {
-    activity.tick(`[${pkg.meta.name}] Copying package files ...`);
-    await mkdir(pkg.dist);
-    await copyPackageFiles(pkg);
     activity.tick(`[${pkg.meta.name}] Building modules ...`);
     await buildModules(pkg);
     activity.tick(`[${pkg.meta.name}] Building UMD bundles ...`);
@@ -181,13 +160,10 @@ const buildPackages = () =>
     .map(pkg => {
       const meta = require(pkg); // eslint-disable-line global-require
       const dir = path.dirname(pkg);
-      const name = path.basename(dir);
-      const dist = path.join(PROJECT_DIST_DIRECTORY, name);
       const src = path.join(dir, 'src');
       return {
         meta,
         dir,
-        dist,
         src,
       };
     })
@@ -215,7 +191,6 @@ const buildPackages = () =>
     });
 
 module.exports = buildPackages;
-
 
 // If this is module is being run as a script, invoke the build function.
 if (typeof require !== 'undefined' && require.main === module) {

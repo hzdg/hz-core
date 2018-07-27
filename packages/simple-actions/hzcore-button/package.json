@@ -1,10 +1,15 @@
 {
   "name": "@hzcore/button",
   "version": "0.0.1",
-  "main": "index.cjs.js",
-  "module": "index.js",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
   "license": "MIT",
   "private": true,
+  "files": [
+    "cjs",
+    "es",
+    "umd"
+  ],
   "dependencies": {
     "react": "^16.2.0"
   }

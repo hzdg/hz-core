@@ -1,12 +1,17 @@
 {
   "name": "@hzcore/scroll-monitor",
   "version": "0.0.1",
-  "main": "index.cjs.js",
-  "module": "index.js",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
   "license": "MIT",
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
   },
+  "files": [
+    "cjs",
+    "es",
+    "umd"
+  ],
   "peerDependencies": {
     "prop-types": "15.x.x",
     "react": "^16.3.1",

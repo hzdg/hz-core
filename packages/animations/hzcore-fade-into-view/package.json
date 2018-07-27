@@ -2,7 +2,12 @@
   "name": "@hzcore/fade-into-view",
   "version": "0.0.1",
   "description": "Fades into view its child component",
-  "main": "index.cjs.js",
-  "module": "index.js",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "files": [
+    "cjs",
+    "es",
+    "umd"
+  ],
   "license": "MIT"
 }

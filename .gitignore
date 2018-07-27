@@ -1,5 +1,9 @@
 .env
 node_modules
 build
+dist
+packages/**/cjs
+packages/**/es
+packages/**/umd
 
 lerna-debug.log
