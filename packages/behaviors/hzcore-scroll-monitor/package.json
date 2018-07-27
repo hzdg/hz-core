@@ -4,7 +4,9 @@
   "main": "index.cjs.js",
   "module": "index.js",
   "license": "MIT",
-  "private": true,
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
   "peerDependencies": {
     "prop-types": "15.x.x",
     "react": "^16.3.1",
