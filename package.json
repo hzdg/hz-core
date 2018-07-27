@@ -12,8 +12,8 @@
   },
   "workspaces": [
     "packages/animations/*",
-    "packages/simple-actions/*",
-    "packages/*"
+    "packages/behaviors/*",
+    "packages/simple-actions/*"
   ],
   "dependencies": {
     "@babel/cli": "7.0.0-beta.54",

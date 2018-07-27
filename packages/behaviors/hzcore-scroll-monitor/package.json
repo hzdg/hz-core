@@ -1,0 +1,23 @@
+{
+  "name": "@hzcore/scroll-monitor",
+  "version": "0.0.1",
+  "main": "index.cjs.js",
+  "module": "index.js",
+  "license": "MIT",
+  "private": true,
+  "peerDependencies": {
+    "prop-types": "15.x.x",
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1"
+  },
+  "devDependencies": {
+    "debug": "^3.1.0"
+  },
+  "dependencies": {
+    "invariant": "^2.2.4",
+    "shallowequal": "^1.1.0",
+    "symbol-observable": "^1.2.0",
+    "warning": "^3.0.0",
+    "zen-observable": "^0.8.8"
+  }
+}
