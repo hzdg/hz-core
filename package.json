@@ -10,6 +10,9 @@
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
   },
+  "scripts": {
+    "preversion": "node ./scripts/build.js"
+  },
   "workspaces": [
     "packages/animations/*",
     "packages/behaviors/*",
