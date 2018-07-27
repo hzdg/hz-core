@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/scroll-monitor",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "license": "MIT",
