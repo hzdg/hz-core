@@ -55,7 +55,25 @@ module.exports = {
       name: 'Animations',
       components: './packages/animations/**/src/index.js',
     },
+    {
+      name: 'Other Components',
+      components: './packages/hzcore-*/**/src/index.js',
+    },
   ],
+  getComponentPathLine(componentPath) {
+    const pkgName = componentPath.replace(/.*\/?hzcore-([^/]*).*/, '$1');
+    let moduleName = path.basename(componentPath, '.js');
+    while (moduleName === 'index' || moduleName === 'src') {
+      componentPath = path.dirname(componentPath);
+      moduleName = path.basename(componentPath);
+    }
+    moduleName = moduleName
+      .replace(/hzcore-/, '')
+      .split('-')
+      .map(s => `${s[0].toUpperCase()}${s.slice(1)}`)
+      .join('');
+    return `import ${moduleName} from '@hz/${pkgName}';`;
+  },
   updateDocs(docs) {
     if (docs.doclets.version) {
       const versionFilePath = path.resolve(__dirname, 'package.json');
