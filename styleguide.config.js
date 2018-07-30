@@ -1,4 +1,4 @@
-const {createConfig, babel, css} = require('webpack-blocks');
+const {createConfig, babel, css, setDevTool} = require('webpack-blocks');
 const {generateJSReferences} = require('mini-html-webpack-plugin');
 const path = require('path');
 const fs = require('fs');
@@ -35,8 +35,12 @@ function resolve(filePath, {js, publicPath}) {
 
 module.exports = {
   components: 'packages/**/src/**.js',
-  webpackConfig: createConfig([babel(), css()]),
-  showUsage: true,
+  webpackConfig: createConfig([
+    setDevTool('cheap-module-source-map'),
+    babel(),
+    css(),
+  ]),
+  usageMode: 'expand',
   pagePerSection: true,
   title: 'HZ Core Component Library',
   require: [path.join(__dirname, 'conf', 'styleguide', 'styles.css')],
