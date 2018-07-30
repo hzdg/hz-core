@@ -5,7 +5,8 @@ const fs = require('fs');
 
 const PROJECT_ROOT = __dirname;
 const WORKSPACES = require(path.join(PROJECT_ROOT, 'package.json')).workspaces;
-const COMPONENT_GLOB = 'hzcore-*/src/index.js';
+const NAMESPACE = 'hzcore';
+const COMPONENT_GLOB = `${NAMESPACE}-*/src/index.js`;
 
 const capFirst = word => `${word[0].toUpperCase()}${word.slice(1)}`;
 
@@ -74,18 +75,21 @@ module.exports = {
       components: componentGlobFromWorkspace(workspace),
     })),
   getComponentPathLine(componentPath) {
-    const pkgName = componentPath.replace(/.*\/?hzcore-([^/]*).*/, '$1');
+    const pkgName = componentPath.replace(
+      new RegExp(`.*/?${NAMESPACE}-([^/]*).*`),
+      '$1',
+    );
     let moduleName = path.basename(componentPath, '.js');
     while (moduleName === 'index' || moduleName === 'src') {
       componentPath = path.dirname(componentPath);
       moduleName = path.basename(componentPath);
     }
     moduleName = moduleName
-      .replace(/hzcore-/, '')
+      .replace(`${NAMESPACE}-`, '')
       .split('-')
-      .map(s => `${s[0].toUpperCase()}${s.slice(1)}`)
+      .map(capFirst)
       .join('');
-    return `import ${moduleName} from '@hz/${pkgName}';`;
+    return `import ${moduleName} from '@${NAMESPACE}/${pkgName}';`;
   },
   updateDocs(docs) {
     if (docs.doclets.version) {
