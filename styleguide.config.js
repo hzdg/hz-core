@@ -3,6 +3,27 @@ const {generateJSReferences} = require('mini-html-webpack-plugin');
 const path = require('path');
 const fs = require('fs');
 
+const PROJECT_ROOT = __dirname;
+const WORKSPACES = require(path.join(PROJECT_ROOT, 'package.json')).workspaces;
+const COMPONENT_GLOB = 'hzcore-*/src/index.js';
+
+const capFirst = word => `${word[0].toUpperCase()}${word.slice(1)}`;
+
+const dumbTitleCase = str =>
+  str
+    .split(/[\s-_]/)
+    .map(capFirst)
+    .join(' ');
+
+const pathnameFromWorkspace = workspace =>
+  path.dirname(path.relative(PROJECT_ROOT, workspace));
+
+const nameFromWorkspace = workspace =>
+  dumbTitleCase(path.basename(pathnameFromWorkspace(workspace)));
+
+const componentGlobFromWorkspace = workspace =>
+  path.join(pathnameFromWorkspace(workspace), COMPONENT_GLOB);
+
 function resolve(filePath, {js, publicPath}) {
   const jsReference = generateJSReferences(js, publicPath);
   return fs
@@ -46,20 +67,12 @@ module.exports = {
   getExampleFilename(componentPath) {
     return componentPath.replace(/src\/[A-Za-z]*\.js$/, 'readme.md');
   },
-  sections: [
-    {
-      name: 'Simple Actions',
-      components: './packages/simple-actions/**/src/index.js',
-    },
-    {
-      name: 'Animations',
-      components: './packages/animations/**/src/index.js',
-    },
-    {
-      name: 'Other Components',
-      components: './packages/hzcore-*/**/src/index.js',
-    },
-  ],
+  sections:
+    // Create a section for each workspace.
+    WORKSPACES.map(workspace => ({
+      name: nameFromWorkspace(workspace),
+      components: componentGlobFromWorkspace(workspace),
+    })),
   getComponentPathLine(componentPath) {
     const pkgName = componentPath.replace(/.*\/?hzcore-([^/]*).*/, '$1');
     let moduleName = path.basename(componentPath, '.js');
