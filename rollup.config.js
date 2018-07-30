@@ -20,7 +20,7 @@ module.exports = {
   },
   plugins: [
     babel({
-      extends: path.resolve('.babelrc'),
+      extends: path.resolve('babel.config.js'),
       exclude: 'node_modules/**',
       envName: 'umd',
     }),

@@ -52,7 +52,7 @@ const transformFile = (filename, options) =>
         filename,
         {
           envName: 'es',
-          extends: path.resolve('.babelrc'),
+          extends: path.resolve('babel.config.js'),
           ...options,
         },
         (err, result) => {
