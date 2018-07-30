@@ -7,11 +7,12 @@
   "author": "elainen <elaineh@hzdg.com>",
   "license": "MIT",
   "private": true,
+  "scripts": {
+    "preversion": "node ./scripts/build.js",
+    "test": "jest"
+  },
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
-  },
-  "scripts": {
-    "preversion": "node ./scripts/build.js"
   },
   "workspaces": [
     "packages/animations/*",
@@ -27,7 +28,9 @@
     "@babel/preset-env": "7.0.0-beta.54",
     "@babel/preset-flow": "7.0.0-beta.54",
     "@babel/preset-react": "7.0.0-beta.54",
+    "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.2",
+    "babel-jest": "23.4.2",
     "eslint": "^4.18.2",
     "eslint-config-hzdg": "^0.7.1",
     "eslint-config-hzdg-react": "^0.6.0",
@@ -40,7 +43,7 @@
     "flow-bin": "^0.67.1",
     "flow-typed": "^2.4.0",
     "glob": "^7.1.2",
-    "jest": "^22.4.2",
+    "jest": "23.4.2",
     "lerna": "3.0.0-rc.0",
     "ncp": "^2.0.0",
     "prettier": "1.11.1",
