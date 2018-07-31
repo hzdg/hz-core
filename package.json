@@ -8,7 +8,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "preversion": "node ./scripts/build.js",
+    "build": "lerna bootstrap && node ./scripts/build.js",
+    "lint": "eslint ./scripts ./packages & flow check",
+    "preversion": "yarn build",
     "styleguide": "styleguidist server",
     "test": "jest"
   },
