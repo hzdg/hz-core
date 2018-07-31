@@ -1,6 +1,6 @@
 {
   "npmClient": "yarn",
-  "useWorkspaces": false,
+  "useWorkspaces": true,
   "version": "independent",
   "command": {
     "publish": {
@@ -13,6 +13,8 @@
     }
   },
   "packages": [
-    "packages/behaviors/*"
+    "packages/animations/*",
+    "packages/behaviors/*",
+    "packages/simple-actions/*"
   ]
 }
