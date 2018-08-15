@@ -2188,6 +2188,50 @@ call-me-maybe@^1.0.1:
   version "1.0.1"
   resolved "http://npmregistry.hzdg.com/call-me-maybe/-/call-me-maybe-1.0.1.tgz#26d208ea89e37b5cbde60250a15f031c16a4d66b"
 
+callbag-filter@^1.0.1:
+  version "1.0.1"
+  resolved "http://npmregistry.hzdg.com/callbag-filter/-/callbag-filter-1.0.1.tgz#82d3b80231cf890fd6e0d61c3a33cd09dcb52570"
+
+callbag-flatten@^1.2.0:
+  version "1.2.0"
+  resolved "http://npmregistry.hzdg.com/callbag-flatten/-/callbag-flatten-1.2.0.tgz#33d5175e7943c26b822b4e6a8c54e272699a417d"
+
+callbag-from-event@^1.0.0:
+  version "1.0.0"
+  resolved "http://npmregistry.hzdg.com/callbag-from-event/-/callbag-from-event-1.0.0.tgz#e3a8931cd46775256eff3a960a743ad1c7ccfea9"
+
+callbag-map@^1.0.1:
+  version "1.0.1"
+  resolved "http://npmregistry.hzdg.com/callbag-map/-/callbag-map-1.0.1.tgz#a5bcd41cde60c226cdd22f5868beb7b2ecd6c167"
+
+callbag-merge@^3.1.0:
+  version "3.1.0"
+  resolved "http://npmregistry.hzdg.com/callbag-merge/-/callbag-merge-3.1.0.tgz#6f70cfad249bbc574be2bcbf52b11cadb8b4d865"
+
+callbag-pipe@^1.1.1:
+  version "1.1.1"
+  resolved "http://npmregistry.hzdg.com/callbag-pipe/-/callbag-pipe-1.1.1.tgz#f9d9f651f0bb64bc78d91f7132d738f066e3a4cf"
+
+callbag-scan@^1.0.1:
+  version "1.0.1"
+  resolved "http://npmregistry.hzdg.com/callbag-scan/-/callbag-scan-1.0.1.tgz#4634df4823705deb8a5e5fe3a5b3dc48a107ea81"
+
+callbag-share@^1.1.1:
+  version "1.1.1"
+  resolved "http://npmregistry.hzdg.com/callbag-share/-/callbag-share-1.1.1.tgz#25109b01fc591629c18a142771be813df3cf9268"
+
+callbag-start-with@^3.1.0:
+  version "3.1.0"
+  resolved "http://npmregistry.hzdg.com/callbag-start-with/-/callbag-start-with-3.1.0.tgz#58c7f7cb3f3f44049e130166c2cf884c76e332ac"
+
+callbag-subscribe@^1.4.1:
+  version "1.4.1"
+  resolved "http://npmregistry.hzdg.com/callbag-subscribe/-/callbag-subscribe-1.4.1.tgz#f9bd86b713230c9113acf6b7c5c6baf7d5ec772f"
+
+callbag-take-until@^1.1.0:
+  version "1.1.0"
+  resolved "http://npmregistry.hzdg.com/callbag-take-until/-/callbag-take-until-1.1.0.tgz#aac5b811ef952dabc41acc88e8529d8204eb7bfd"
+
 caller-path@^0.1.0:
   version "0.1.0"
   resolved "https://registry.yarnpkg.com/caller-path/-/caller-path-0.1.0.tgz#94085ef63581ecd3daa92444a8fe94e82577751f"
