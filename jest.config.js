@@ -58,9 +58,7 @@ module.exports = {
   // globals: {},
 
   // An array of directory names to be searched recursively up from the requiring module's location
-  // moduleDirectories: [
-  //   "node_modules"
-  // ],
+  moduleDirectories: ['testutils', 'node_modules'],
 
   // An array of file extensions your modules use
   // moduleFileExtensions: [
@@ -148,7 +146,7 @@ module.exports = {
   // ],
 
   // The regexp pattern Jest uses to detect test files
-  // testRegex: "",
+  testRegex: '.*/__tests__/.*test.jsx?$',
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: null,

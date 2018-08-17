@@ -1,5 +1,6 @@
 // @flow
 /* eslint-disable no-duplicate-imports */
+import $$observable from 'symbol-observable';
 import filter from 'callbag-filter';
 import flatten from 'callbag-flatten';
 import fromEvent from 'callbag-from-event';
@@ -89,6 +90,12 @@ export default class GestureObservable {
     initialState: GestureState,
   ) {
     return new this.prototype.constructor(node, config, initialState);
+  }
+
+  // rxjs interopt
+  // $FlowFixMe: Computed property keys not supported.
+  [$$observable]() {
+    return this;
   }
 
   state: Callbag;
