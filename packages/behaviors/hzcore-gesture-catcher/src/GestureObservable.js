@@ -25,6 +25,9 @@ import {
 } from './types';
 import {isGestureKey, isRepeatKey, not, getNearestFocusableNode} from './utils';
 
+const GESTURE_END = 'gestureend';
+const GESTURE_END_TIMEOUT = 60;
+
 import type {GestureCatcherConfig, GestureState} from './types';
 
 type Callbag = any;
@@ -138,6 +141,21 @@ const gesture = (
     flatten,
   );
 
+const gestureEndDebounced = (source: Callbag): Callbag => {
+  let timeout = null;
+  return (start, sink) => {
+    source(0, (type, data) => {
+      if (type === 1) {
+        if (timeout) clearTimeout(timeout);
+        timeout = setTimeout(() => {
+          sink(1, {type: GESTURE_END});
+        }, GESTURE_END_TIMEOUT);
+      }
+      sink(type, data);
+    });
+  };
+};
+
 function* generateGestures(
   node: HTMLElement,
   config: GestureCatcherConfig,
@@ -174,7 +192,7 @@ function wheel(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
   const wheelMove = shouldPreventDefault
     ? pipe(fromEvent(node, WHEEL, {passive: false}), preventDefault)
     : fromEvent(node, WHEEL);
-  return wheelMove;
+  return pipe(wheelMove, gestureEndDebounced);
 }
 
 function keyboard(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
@@ -194,17 +212,66 @@ function reduceGestureState(
   state: GestureState,
   event: GestureEvent,
 ): GestureState {
+  const {type} = event;
+  switch (type) {
+    case TOUCH_START:
+    case TOUCH_MOVE:
+    case TOUCH_END:
+      [event] = event.touches;
+  }
+
   const nextState = {
     ...state,
-    xPrev: state.x,
-    yPrev: state.y,
+    x: event.clientX == null ? state.x : event.clientX, // eslint-disable-line eqeqeq
+    y: event.clientY == null ? state.y : event.clientY, // eslint-disable-line eqeqeq
+    key: event.code == null ? null : event.code, // eslint-disable-line eqeqeq
   };
-  nextState.x = event.pageX;
-  nextState.y = event.pageY;
-  nextState.xDelta = event.pageX - state.xInitial;
-  nextState.yDelta = event.pageY - state.yInitial;
-  nextState.xVelocity = event.pageX - nextState.x;
-  nextState.yVelocity = event.pageY - nextState.y;
+
+  switch (type) {
+    case KEY_DOWN:
+      nextState.gesturing = true;
+      break;
+    case WHEEL:
+      nextState.xInitial = event.clientX;
+      nextState.yInitial = event.clientY;
+      nextState.xPrev = event.clientX;
+      nextState.yPrev = event.clientY;
+      nextState.xDelta = event.deltaX;
+      nextState.yDelta = event.deltaY;
+      nextState.xVelocity = event.deltaX;
+      nextState.yVelocity = event.deltaY;
+      nextState.gesturing = true;
+      break;
+    case TOUCH_START:
+    case MOUSE_DOWN:
+      nextState.xInitial = event.clientX;
+      nextState.yInitial = event.clientY;
+      nextState.xPrev = event.clientX;
+      nextState.yPrev = event.clientY;
+      nextState.xDelta = 0;
+      nextState.yDelta = 0;
+      nextState.gesturing = true;
+      break;
+    case TOUCH_MOVE:
+    case MOUSE_MOVE:
+      nextState.xPrev = state.x;
+      nextState.yPrev = state.y;
+      nextState.xDelta = event.clientX - state.xInitial;
+      nextState.yDelta = event.clientY - state.yInitial;
+      nextState.xVelocity = event.clientX - state.x;
+      nextState.yVelocity = event.clientY - state.y;
+      nextState.gesturing = true;
+      break;
+    // Special case: Some gestures don't have clear start/end events,
+    // (like WHEEL), so we look for this message to indicate
+    // that we are no longer gesturing.
+    case GESTURE_END:
+    case TOUCH_END:
+    case MOUSE_UP:
+    case KEY_UP:
+      nextState.gesturing = false;
+      break;
+  }
   state = nextState;
   return state;
 }
