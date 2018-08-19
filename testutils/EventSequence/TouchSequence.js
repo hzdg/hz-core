@@ -105,7 +105,7 @@ function normalizeTouchInit(init: TouchInit, from: Touch): TouchInit {
 function normalizeTouchEventInit(
   init: TouchInit | TouchEventInit | TouchMoveEventInit,
   from: TouchEvent,
-): Event$EventInit & TouchEventInit {
+): Event$Init & TouchEventInit {
   let touches = getValue(init, 'touches', init);
   if (!Array.isArray(touches)) touches = [touches];
 

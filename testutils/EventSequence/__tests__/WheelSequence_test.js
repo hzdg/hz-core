@@ -5,15 +5,15 @@ beforeEach(() => {
   jest.useFakeTimers();
 });
 
-test.skip('WheelSequence.wheel() creates an event sequence', async () => {
+test('WheelSequence.wheel() creates an event sequence', async () => {
   const result = await WheelSequence.create(document.createElement('div'))
     .wheel()
-    .wheel()
+    .wheel({deltaX: -3, deltaY: -2})
     .wheel();
 
-  // expect(result).toEqual([
-  //   expect.objectContaining({type: 'mousedown', clientX: 0, clientY: 0}),
-  //   expect.objectContaining({type: 'mousemove', clientX: 5, clientY: 3}),
-  //   expect.objectContaining({type: 'mouseup', clientX: 5, clientY: 3}),
-  // ]);
+  expect(result).toEqual([
+    expect.objectContaining({type: 'wheel', deltaX: 0, deltaY: 1}),
+    expect.objectContaining({type: 'wheel', deltaX: -3, deltaY: -2}),
+    expect.objectContaining({type: 'wheel', deltaX: 0, deltaY: 1}),
+  ]);
 });

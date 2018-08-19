@@ -92,13 +92,13 @@ export default class MouseSequence extends EventSequence {
   }
   down(downOpts: MouseEventInit): MouseDownSequence {
     const downSequence: MouseDownSequence = this.dispatch(
-      'mousedown',
+      MOUSE_DOWN,
       downOpts,
     ).expose({
       down: false,
       move: (moveOpts: MouseMoveEventInit): MouseDownSequence =>
-        downSequence.dispatch('mousemove', moveOpts),
-      up: (): MouseSequence => this.dispatch('mouseup'),
+        downSequence.dispatch(MOUSE_MOVE, moveOpts),
+      up: (): MouseSequence => this.dispatch(MOUSE_UP),
     });
     return downSequence;
   }
