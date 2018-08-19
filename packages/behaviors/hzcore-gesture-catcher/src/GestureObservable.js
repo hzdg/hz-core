@@ -65,7 +65,17 @@ const defaultConfig = {
 
 function parseConfig(config: any): GestureCatcherConfig {
   if (!config) return {...defaultConfig};
-  return {...defaultConfig, ...config};
+  const {
+    keyboard = false,
+    mouse = false,
+    touch = false,
+    wheel = false,
+  } = config;
+  if (keyboard || mouse || touch || wheel) {
+    return {...defaultConfig, ...config, keyboard, mouse, touch, wheel};
+  } else {
+    return {...defaultConfig, ...config};
+  }
 }
 
 function initializeState(initialState: any): GestureState {
@@ -160,17 +170,20 @@ function* generateGestures(
   node: HTMLElement,
   config: GestureCatcherConfig,
 ): Generator<Callbag, *, *> {
-  if (config.mouse) yield mouse(node, config.preventDefault);
-  if (config.touch) yield touch(node, config.preventDefault);
-  if (config.wheel) yield wheel(node, config.preventDefault);
-  if (config.keyboard) yield keyboard(node, config.preventDefault);
+  if (config.mouse) yield mouseGesture(node, config.preventDefault);
+  if (config.touch) yield touchGesture(node, config.preventDefault);
+  if (config.wheel) yield wheelGesture(node, config.preventDefault);
+  if (config.keyboard) yield keyboardGesture(node, config.preventDefault);
 }
 
 function gestures(node: HTMLElement, config: GestureCatcherConfig): Callbag {
   return merge(...generateGestures(node, config));
 }
 
-function mouse(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
+function mouseGesture(
+  node: HTMLElement,
+  shouldPreventDefault: ?boolean,
+): Callbag {
   const mouseDown = fromEvent(node, MOUSE_DOWN);
   const mouseUp = fromEvent(document, MOUSE_UP);
   const mouseMove = shouldPreventDefault
@@ -179,7 +192,10 @@ function mouse(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
   return gesture(mouseMove, mouseDown, () => mouseUp);
 }
 
-function touch(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
+function touchGesture(
+  node: HTMLElement,
+  shouldPreventDefault: ?boolean,
+): Callbag {
   const touchStart = fromEvent(node, TOUCH_START);
   const touchEnd = fromEvent(document, TOUCH_END);
   const touchMove = shouldPreventDefault
@@ -188,14 +204,20 @@ function touch(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
   return gesture(touchMove, touchStart, () => touchEnd);
 }
 
-function wheel(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
+function wheelGesture(
+  node: HTMLElement,
+  shouldPreventDefault: ?boolean,
+): Callbag {
   const wheelMove = shouldPreventDefault
     ? pipe(fromEvent(node, WHEEL, {passive: false}), preventDefault)
     : fromEvent(node, WHEEL);
   return pipe(wheelMove, gestureEndDebounced);
 }
 
-function keyboard(node: HTMLElement, shouldPreventDefault: ?boolean): Callbag {
+function keyboardGesture(
+  node: HTMLElement,
+  shouldPreventDefault: ?boolean,
+): Callbag {
   const keyDown = shouldPreventDefault
     ? pipe(fromEvent(getNearestFocusableNode(node), KEY_DOWN), preventDefault)
     : fromEvent(getNearestFocusableNode(node), KEY_DOWN);

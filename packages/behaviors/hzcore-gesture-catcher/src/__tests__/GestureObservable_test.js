@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 /* eslint-env jest */
 import GestureObservable from '../GestureObservable';
 import {
@@ -288,3 +289,48 @@ test('GestureObservable observes keyboard gestures', async () => {
     },
   ]);
 });
+
+test('GestureObservable observes all inputs by default', async () => {
+  jest.useFakeTimers();
+  const history = new GestureHistory();
+  const gesture = new GestureObservable(node);
+  subscription = gesture.subscribe(history);
+  await MouseSequence.create(node)
+    .down()
+    .move()
+    .up();
+  await TouchSequence.create(node)
+    .start()
+    .move()
+    .end();
+  await WheelSequence.create(node).wheel();
+  await KeyboardSequence.create(node)
+    .space()
+    .up();
+  jest.runAllTimers();
+  expect(history.size).toBe(10);
+});
+
+test.each([['mouse', 3], ['touch', 3], ['wheel', 2], ['keyboard', 2]])(
+  'GestureObservable observes only specified inputs',
+  async (inputType, expectedUpdates) => {
+    jest.useFakeTimers();
+    const history = new GestureHistory();
+    const gesture = new GestureObservable(node, {[inputType]: true});
+    subscription = gesture.subscribe(history);
+    await MouseSequence.create(node)
+      .down()
+      .move()
+      .up();
+    await TouchSequence.create(node)
+      .start()
+      .move()
+      .end();
+    await WheelSequence.create(node).wheel();
+    await KeyboardSequence.create(node)
+      .space()
+      .up();
+    jest.runAllTimers();
+    expect(history.size).toBe(expectedUpdates);
+  },
+);
