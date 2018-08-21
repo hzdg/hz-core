@@ -12,6 +12,10 @@ const rollupConfig = require('../rollup.config');
 const PROJECT_ROOT = path.resolve(__dirname, '..');
 const WORKSPACES = require(path.join(PROJECT_ROOT, 'package.json')).workspaces;
 const SRC_GLOB = '**/*.js';
+const EXCLUDE_GLOBS = [
+  '**/@(__tests__|tests|examples|docs)/**/*',
+  '**/*_test.js',
+];
 
 const rmdir = dirpath =>
   new Promise((resolve, reject) => {
@@ -93,7 +97,7 @@ const buildModule = async (filename, src, dir, format) => {
 const buildModules = ({dir, src}) =>
   Promise.all(
     glob
-      .sync(path.join(src, SRC_GLOB))
+      .sync(path.join(src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
       .map(input =>
         Promise.all([
           buildModule(input, src, dir, 'es'),
