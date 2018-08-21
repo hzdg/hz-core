@@ -6,7 +6,7 @@ const rimraf = require('rimraf');
 const report = require('yurnalist');
 const babel = require('@babel/core');
 const {rollup} = require('rollup');
-const {uglify} = require('rollup-plugin-uglify');
+const uglify = require('rollup-plugin-uglify-es');
 const rollupConfig = require('../rollup.config');
 
 const PROJECT_ROOT = path.resolve(__dirname, '..');

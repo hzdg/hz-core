@@ -23,6 +23,7 @@ module.exports = {
       extends: path.resolve('babel.config.js'),
       exclude: 'node_modules/**',
       envName: 'umd',
+      runtimeHelpers: true,
     }),
     resolve({
       customResolveOptions: {
