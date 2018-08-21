@@ -26,27 +26,20 @@ const gestureCatcherPropTypes = {
   wheel: PropTypes.bool,
   onStart: PropTypes.func,
   onMove: PropTypes.func,
-  onStop: PropTypes.func,
-};
-
-// TODO: Make default config based on initial props,
-// i.e., if none of the inputs are explicit, assume all or true,
-// otherwise if any of them are explict, assume all others are false.
-const defaultGestureCatcherConfig = {
-  preventDefault: false,
-  keyboard: true,
-  mouse: true,
-  touch: true,
-  wheel: true,
+  onEnd: PropTypes.func,
 };
 
 const defaultGestureCatcherProps = {
   preventDefault: false,
   disabled: false,
   gestureRef: null,
+  keyboard: void 0,
+  mouse: void 0,
+  touch: void 0,
+  wheel: void 0,
   onStart: void 0,
   onMove: void 0,
-  onStop: void 0,
+  onEnd: void 0,
 };
 
 const initialState = {
@@ -110,6 +103,8 @@ export default class GestureCatcher extends Component<
 
   mounted: boolean = false;
   subscription: any = null;
+  updateScheduled: boolean | AnimationFrameID = false;
+  nextState: ?GestureState;
 
   unsubscribe() {
     if (this.subscription) {
@@ -132,9 +127,27 @@ export default class GestureCatcher extends Component<
     }
   }
 
+  updateNow = () => {
+    this.updateScheduled = false;
+    if (this.mounted) {
+      const nextState = {...this.nextState};
+      this.setState(({gesturing}, {onStart, onMove, onEnd}) => {
+        if (typeof onStart === 'function' && !gesturing && nextState.gesturing)
+          onStart(nextState);
+        if (typeof onEnd === 'function' && gesturing && !nextState.gesturing)
+          onEnd(nextState);
+        if (typeof onMove === 'function' && gesturing && nextState.gesturing)
+          onMove(nextState);
+        return nextState;
+      });
+    }
+  };
+
   handleUpdate = (state: GestureState) => {
-    // TODO: Use onStart/onStop/onMove cbs
-    // if (this.mounted) this.setState(state);
+    this.nextState = state;
+    if (!this.updateScheduled) {
+      this.updateScheduled = requestAnimationFrame(this.updateNow);
+    }
   };
 
   render() {

@@ -87,7 +87,7 @@ export type GestureCatcherProps = {
   children: (state: GestureCatcherState) => ReactNode,
   gestureRef: ?ReactRef,
   disabled: ?boolean,
-  onStart?: (state: GestureCatcherState) => GestureCatcherState,
-  onMove?: (state: GestureCatcherState) => GestureCatcherState,
-  onStop?: (state: GestureCatcherState) => GestureCatcherState,
+  onStart?: (state: GestureState) => void,
+  onMove?: (state: GestureState) => void,
+  onEnd?: (state: GestureState) => void,
 };
