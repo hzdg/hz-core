@@ -43,7 +43,10 @@ module.exports = {
   usageMode: 'expand',
   pagePerSection: true,
   title: 'HZ Core Component Library',
-  require: [path.join(__dirname, 'conf', 'styleguide', 'styles.css')],
+  require: [
+    'babel-polyfill',
+    path.join(__dirname, 'conf', 'styleguide', 'styles.css'),
+  ],
   template: ({js, publicPath}) =>
     resolve(path.join(__dirname, 'conf', 'styleguide', 'template.html'), {
       js,
