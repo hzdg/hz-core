@@ -59,11 +59,11 @@ export type ReactRef = {
 };
 
 export type GestureCatcherConfig = {
-  preventDefault: ?boolean,
-  keyboard: ?boolean,
-  mouse: ?boolean,
-  touch: ?boolean,
-  wheel: ?boolean,
+  preventDefault?: boolean,
+  keyboard?: boolean,
+  mouse?: boolean,
+  touch?: boolean,
+  wheel?: boolean,
 };
 
 export type GestureState = {

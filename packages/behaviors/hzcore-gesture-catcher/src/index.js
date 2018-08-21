@@ -41,7 +41,7 @@ const defaultGestureCatcherConfig = {
 };
 
 const defaultGestureCatcherProps = {
-  ...defaultGestureCatcherConfig,
+  preventDefault: false,
   disabled: false,
   gestureRef: null,
   onStart: void 0,
@@ -149,12 +149,16 @@ function getNode(node) {
 }
 
 function getObservableConfig(props: GestureCatcherProps): GestureCatcherConfig {
-  const config: GestureCatcherConfig = {
-    preventDefault: props.preventDefault,
-    keyboard: props.keyboard,
-    mouse: props.mouse,
-    touch: props.touch,
-    wheel: props.wheel,
-  };
-  return config;
+  const {preventDefault, keyboard, mouse, touch, wheel} = props;
+  if (keyboard || mouse || touch || wheel) {
+    return {
+      preventDefault,
+      keyboard,
+      mouse,
+      touch,
+      wheel,
+    };
+  } else {
+    return {preventDefault};
+  }
 }
