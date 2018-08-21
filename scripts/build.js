@@ -81,17 +81,18 @@ const buildModule = async (filename, src, dir, format) => {
   const dist = path.join(dir, format);
   await rmdir(dist);
   await mkdir(dist);
-
-  const {code} = await transformFile(filename, {envName: format});
-
-  await writeFile(
-    path.join(
-      dist,
-      path.dirname(path.relative(src, filename)),
-      path.basename(filename),
-    ),
-    code,
+  // eslint-disable-next-line prefer-const
+  let {code, map} = await transformFile(filename, {envName: format});
+  const basename = path.basename(filename);
+  const filepath = path.join(
+    dist,
+    path.dirname(path.relative(src, filename)),
+    basename,
   );
+  code = `${code}\n//# sourceMappingURL=${basename}.map`;
+  map.file = basename;
+  await writeFile(`${filepath}.map`, JSON.stringify(map));
+  await writeFile(filepath, code);
 };
 
 const buildModules = ({dir, src}) =>
