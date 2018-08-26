@@ -25,6 +25,9 @@ export const ScrollDirection = {UP, RIGHT, DOWN, LEFT};
 
 const scrollMonitorPropTypes = {
   children: PropTypes.func.isRequired,
+  scrollRef: PropTypes.shape({
+    current: PropTypes.any,
+  }),
   vertical: PropTypes.bool,
   horizontal: PropTypes.bool,
   direction: PropTypes.bool,
@@ -57,6 +60,7 @@ const scrollMonitorPropTypes = {
 };
 
 const defaultScrollMonitorConfig = {
+  scrollRef: null,
   vertical: false,
   horizontal: false,
   direction: false,
@@ -78,6 +82,7 @@ const initialState = {
   horizontalDirection: null,
   verticalDirection: null,
   scrolling: null,
+  scrollRef: React.createRef(),
 };
 
 const configChanged = (a, b) =>
@@ -94,13 +99,21 @@ export default class ScrollMonitor extends Component<
     onChange: void 0,
     onEnd: void 0,
   };
+  static getDerivedStateFromProps = (
+    props: ScrollMonitorProps,
+    state: ScrollMonitorState,
+  ) => {
+    if (props.scrollRef && props.scrollRef !== state.scrollRef) {
+      return {scrollRef: props.scrollRef};
+    }
+    return null;
+  };
 
   state = {...initialState};
 
   componentDidMount() {
     this.mounted = true;
     this.subscribeIfNecessary();
-    this.prevScrollRef = this.scrollRef.current;
   }
 
   componentDidUpdate(
@@ -108,27 +121,22 @@ export default class ScrollMonitor extends Component<
     prevState: ScrollMonitorState,
   ) {
     if (
-      this.prevScrollRef !== this.scrollRef.current ||
+      prevState.scrollRef !== this.state.scrollRef ||
       configChanged(prevProps, this.props)
     ) {
       this.unsubscribe();
       this.subscribeIfNecessary();
-      this.prevScrollRef = this.scrollRef.current;
     }
   }
 
   componentWillUnmount() {
     this.mounted = false;
-    this.scrollRef = null;
-    this.prevScrollRef = null;
     this.unsubscribe();
   }
 
   uid: string = uuid().slice(0, 8);
   mounted: boolean = false;
   subscription: any = null;
-  scrollRef: any = React.createRef();
-  prevScrollRef: any = null;
 
   unsubscribe() {
     if (this.subscription) {
@@ -139,16 +147,13 @@ export default class ScrollMonitor extends Component<
 
   subscribeIfNecessary() {
     if (!this.subscription && this.mounted) {
-      const node = getNearestScrollNode(this.scrollRef.current);
-      if (node) {
-        const config = getObservableConfig(
-          this.props,
-          this.uid,
-          getNode(this.scrollRef.current),
-        );
-        this.subscription = ScrollState.create(node, config).subscribe(
-          this.handleUpdate,
-        );
+      const target = getNode(this.state.scrollRef.current);
+      const scrollingElement = getNearestScrollNode(target);
+      if (scrollingElement && target) {
+        this.subscription = ScrollState.create(
+          scrollingElement,
+          getObservableConfig(this.props, this.uid, target),
+        ).subscribe(this.handleUpdate);
       }
     }
   }
@@ -161,7 +166,6 @@ export default class ScrollMonitor extends Component<
     return this.props.children({
       ...this.state,
       uid: this.uid,
-      scrollRef: this.scrollRef,
     });
   }
 }

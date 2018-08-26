@@ -1,6 +1,10 @@
 // @flow
 import type {Node as ReactNode} from 'react';
 
+export type ReactRef = {
+  current: any,
+};
+
 export const DOWN = 'down';
 export const UP = 'up';
 export const LEFT = 'left';
@@ -89,14 +93,16 @@ export type ScrollMonitorEventConfig = {
   onUpdate?: ?ChangeHandler,
 };
 
-export type ScrollMonitorState = ScrollState & ScrollMonitorEventState;
 export type ChangeHandler = (
   state: ScrollState & ScrollMonitorEventState,
 ) => void;
 
+export type ScrollMonitorState = ScrollState &
+  ScrollMonitorEventState & {scrollRef: ReactRef};
 
 export type ScrollMonitorProps = {
   children: (state: ScrollMonitorState) => ReactNode,
+  scrollRef: ?ReactRef,
   vertical: ?boolean,
   horizontal: ?boolean,
   direction: ?boolean,
