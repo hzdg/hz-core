@@ -48,6 +48,11 @@ export function create(
     observers.forEach(observer => {
       observer.next(nextState);
     });
+    eventsToDispatch.forEach(eventConfig => {
+      if (typeof eventConfig.onUpdate === 'function') {
+        eventConfig.onUpdate(nextState);
+      }
+    });
     eventsToDispatch.clear();
   }
 

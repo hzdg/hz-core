@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 // @flow
 import warning from 'warning';
 import Debug from 'debug';
@@ -7,6 +8,7 @@ import {
   DOWN,
   LEFT,
   RIGHT,
+  SCROLLING_CHANGE,
   VERTICAL_DIRECTION_CHANGE,
   HORIZONTAL_DIRECTION_CHANGE,
   VERTICAL_POSITION_CHANGE,
@@ -29,6 +31,7 @@ import type {
   ScrollState,
   UpdatePayload,
   ViewportConfig,
+  ChangeHandler,
 } from './types';
 /* eslint-enable no-duplicate-imports */
 
@@ -36,22 +39,64 @@ export function create(config: ScrollMonitorConfig): EventStateStore {
   const debug = Debug(`ScrollMonitor:uid:${config.uid}`);
   const configs = [];
   const initialEventState = {};
+  const changeHandler = config.onChange
+    ? createDebouncedChangeHandler(config.onChange)
+    : null;
+  const hasScrollingHandlers = Boolean(config.onStart || config.onEnd);
+
+  if (hasScrollingHandlers || config.scrolling) {
+    let scrollingChangeHandler = changeHandler;
+    if (hasScrollingHandlers) {
+      const {onStart, onEnd} = config;
+      scrollingChangeHandler = state => {
+        if (state.scrolling && typeof onStart === 'function') onStart(state);
+        if (typeof changeHandler === 'function') changeHandler(state);
+        if (!state.scrolling && typeof onEnd === 'function') onEnd(state);
+      };
+    }
+    configs.push(
+      createEventConfig(SCROLLING_CHANGE, null, scrollingChangeHandler, debug),
+    );
+    initialEventState.scrolling = null;
+  }
   if (config.direction) {
     if (!config.vertical && !config.horizontal) {
       configs.push(
-        createEventConfig(VERTICAL_DIRECTION_CHANGE, null, debug),
-        createEventConfig(HORIZONTAL_DIRECTION_CHANGE, null, debug),
+        createEventConfig(
+          VERTICAL_DIRECTION_CHANGE,
+          null,
+          changeHandler,
+          debug,
+        ),
+        createEventConfig(
+          HORIZONTAL_DIRECTION_CHANGE,
+          null,
+          changeHandler,
+          debug,
+        ),
       );
       initialEventState.verticalDirection = null;
       initialEventState.horizontalDirection = null;
     } else {
       if (config.vertical) {
-        configs.push(createEventConfig(VERTICAL_DIRECTION_CHANGE, null, debug));
+        configs.push(
+          createEventConfig(
+            VERTICAL_DIRECTION_CHANGE,
+            null,
+            changeHandler,
+            debug,
+          ),
+        );
         initialEventState.verticalDirection = null;
       }
       if (config.horizontal) {
         configs.push(
-          createEventConfig(HORIZONTAL_DIRECTION_CHANGE, null, debug),
+          createEventConfig(
+            HORIZONTAL_DIRECTION_CHANGE,
+            null,
+            changeHandler,
+            debug,
+          ),
         );
         initialEventState.horizontalDirection = null;
       }
@@ -60,26 +105,47 @@ export function create(config: ScrollMonitorConfig): EventStateStore {
   if (config.position) {
     if (!config.vertical && !config.horizontal) {
       configs.push(
-        createEventConfig(VERTICAL_POSITION_CHANGE, null, debug),
-        createEventConfig(HORIZONTAL_POSITION_CHANGE, null, debug),
+        createEventConfig(VERTICAL_POSITION_CHANGE, null, changeHandler, debug),
+        createEventConfig(
+          HORIZONTAL_POSITION_CHANGE,
+          null,
+          changeHandler,
+          debug,
+        ),
       );
     } else {
       if (config.vertical) {
-        configs.push(createEventConfig(VERTICAL_POSITION_CHANGE, null, debug));
+        configs.push(
+          createEventConfig(
+            VERTICAL_POSITION_CHANGE,
+            null,
+            changeHandler,
+            debug,
+          ),
+        );
       }
       if (config.horizontal) {
         configs.push(
-          createEventConfig(HORIZONTAL_POSITION_CHANGE, null, debug),
+          createEventConfig(
+            HORIZONTAL_POSITION_CHANGE,
+            null,
+            changeHandler,
+            debug,
+          ),
         );
       }
     }
   }
   if (config.bounds) {
-    configs.push(createEventConfig(IN_BOUNDS, config.bounds, debug));
+    configs.push(
+      createEventConfig(IN_BOUNDS, config.bounds, changeHandler, debug),
+    );
     initialEventState.inBounds = null;
   }
   if (config.viewport) {
-    configs.push(createEventConfig(IN_VIEWPORT, config.viewport, debug));
+    configs.push(
+      createEventConfig(IN_VIEWPORT, config.viewport, changeHandler, debug),
+    );
     initialEventState.inViewport = null;
   }
   return {configs, state: initialEventState};
@@ -99,12 +165,17 @@ export function create(config: ScrollMonitorConfig): EventStateStore {
 function createEventConfig(
   event: ScrollMonitorEvent,
   config: ?(BoundsConfig | ViewportConfig),
+  onUpdate: ?ChangeHandler,
   debug: Function,
 ): ScrollMonitorEventConfig {
   // Default shouldUpdate always does nothing.
   let shouldUpdate = () => void 0;
 
   switch (event) {
+    case SCROLLING_CHANGE: {
+      shouldUpdate = createScrollingChangeChecker(debug);
+      break;
+    }
     case VERTICAL_DIRECTION_CHANGE: {
       shouldUpdate = createVerticalDirectionChangeChecker(debug);
       break;
@@ -143,7 +214,40 @@ function createEventConfig(
     }
   }
 
-  return {event, config, shouldUpdate};
+  return {event, config, shouldUpdate, onUpdate};
+}
+
+function createDebouncedChangeHandler(handler: ChangeHandler): ChangeHandler {
+  let called = false;
+  return state => {
+    if (!called) {
+      handler(state);
+      called = true;
+      setTimeout(() => {
+        called = false;
+      });
+    }
+  };
+}
+
+function createScrollingChangeChecker(
+  debug: Function,
+): ScrollMonitorChangeChecker {
+  return (
+    payload: UpdatePayload,
+    scrollState: ScrollState,
+    eventState: ScrollMonitorEventState,
+  ): ?boolean => {
+    const {scrolling} = payload;
+    if (scrolling == null) return false; // eslint-disable-line eqeqeq
+    if (scrolling === eventState.scrolling) {
+      return false;
+    } else {
+      eventState.scrolling = scrolling;
+      debug('SCROLLING_CHANGE', scrolling);
+      return true;
+    }
+  };
 }
 
 function createVerticalDirectionChangeChecker(

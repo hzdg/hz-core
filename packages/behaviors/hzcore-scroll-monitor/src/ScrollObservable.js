@@ -4,6 +4,8 @@ import {Observable, getScrollRect} from './utils';
 
 import type {ObserverSet} from './types';
 
+// TODO: Find the smallest timeout that won't ever get tricked by inertia.
+const SCROLL_TIMEOUT = 60;
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS = {passive: true};
 
@@ -15,16 +17,39 @@ const elements: Map<
 > = new Map();
 
 function createScrollHandler(element) {
+  let scrollTimeoutPending: ?(TimeoutID | false);
+
+  const handleScrollTimeout = () => {
+    if (scrollTimeoutPending) {
+      clearTimeout(scrollTimeoutPending);
+      scrollTimeoutPending = false;
+    }
+    const elementConfig = elements.get(element);
+    if (elementConfig) {
+      elementConfig.observers.forEach(observer => {
+        observer.next({scrolling: false});
+      });
+    }
+  };
+
   const handleScroll = (scrollEvent: Event) => {
     const target = scrollEvent.currentTarget;
     const elementConfig = elements.get(element);
+    if (scrollTimeoutPending) {
+      clearTimeout(scrollTimeoutPending);
+      scrollTimeoutPending = false;
+    }
     if (
       elementConfig &&
       (target instanceof HTMLElement || target instanceof Document)
     ) {
       elementConfig.observers.forEach(observer => {
-        observer.next({rect: getScrollRect(target)});
+        observer.next({
+          scrolling: true,
+          rect: getScrollRect(target),
+        });
       });
+      scrollTimeoutPending = setTimeout(handleScrollTimeout, SCROLL_TIMEOUT);
     }
   };
   return handleScroll;
@@ -45,7 +70,7 @@ export function create(element: HTMLElement | Document): Observable {
     elementConfig.observers.add(observer);
 
     // Give the observer the current value;
-    observer.next({rect: getScrollRect(element)});
+    observer.next({scrolling: false, rect: getScrollRect(element)});
 
     return {
       unsubscribe() {

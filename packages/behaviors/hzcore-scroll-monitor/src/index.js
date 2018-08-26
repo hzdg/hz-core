@@ -29,6 +29,7 @@ const scrollMonitorPropTypes = {
   horizontal: PropTypes.bool,
   direction: PropTypes.bool,
   position: PropTypes.bool,
+  scrolling: PropTypes.bool,
   viewport: PropTypes.oneOfType([
     PropTypes.bool,
     PropTypes.number,
@@ -50,6 +51,9 @@ const scrollMonitorPropTypes = {
       }),
     ),
   ]),
+  onStart: PropTypes.func,
+  onChange: PropTypes.func,
+  onEnd: PropTypes.func,
 };
 
 const defaultScrollMonitorConfig = {
@@ -57,6 +61,7 @@ const defaultScrollMonitorConfig = {
   horizontal: false,
   direction: false,
   position: false,
+  scrolling: false,
   viewport: false,
   bounds: null,
 };
@@ -72,6 +77,7 @@ const initialState = {
   lastHeight: null,
   horizontalDirection: null,
   verticalDirection: null,
+  scrolling: null,
 };
 
 const configChanged = (a, b) =>
@@ -82,7 +88,12 @@ export default class ScrollMonitor extends Component<
   ScrollMonitorState,
 > {
   static propTypes = scrollMonitorPropTypes;
-  static defaultProps = defaultScrollMonitorConfig;
+  static defaultProps = {
+    ...defaultScrollMonitorConfig,
+    onStart: void 0,
+    onChange: void 0,
+    onEnd: void 0,
+  };
 
   state = {...initialState};
 
@@ -92,7 +103,10 @@ export default class ScrollMonitor extends Component<
     this.prevScrollRef = this.scrollRef.current;
   }
 
-  componentDidUpdate(prevProps: ScrollMonitorProps) {
+  componentDidUpdate(
+    prevProps: ScrollMonitorProps,
+    prevState: ScrollMonitorState,
+  ) {
     if (
       this.prevScrollRef !== this.scrollRef.current ||
       configChanged(prevProps, this.props)
@@ -153,33 +167,53 @@ export default class ScrollMonitor extends Component<
 }
 
 function getObservableConfig(
-  props: ScrollMonitorProps,
+  {
+    vertical,
+    horizontal,
+    direction,
+    position,
+    scrolling,
+    viewport,
+    bounds,
+    onStart,
+    onChange,
+    onEnd,
+  }: ScrollMonitorProps,
   uid: string,
-  node: HTMLElement,
+  node: Node,
 ): ScrollMonitorConfig {
   const config: ScrollMonitorConfig = {
-    vertical: props.vertical,
-    horizontal: props.horizontal,
-    direction: props.direction,
-    position: props.position,
-    bounds: props.bounds,
+    vertical,
+    horizontal,
+    onStart,
+    onChange,
+    onEnd,
     uid,
   };
-  // eslint-disable-next-line eqeqeq
-  if (
-    props.viewport === true ||
-    typeof props.viewport === 'number' ||
-    Array.isArray(props.viewport)
-  ) {
-    config.viewport = {
-      target: node,
-      threshold: props.viewport === true ? 0 : props.viewport,
-    };
+
+  if (direction || position || scrolling || bounds || viewport) {
+    config.direction = direction;
+    config.position = position;
+    config.scrolling = scrolling;
+    config.bounds = bounds;
+    // eslint-disable-next-line eqeqeq
+    if (
+      viewport === true ||
+      typeof viewport === 'number' ||
+      Array.isArray(viewport)
+    ) {
+      config.viewport = {
+        target: node,
+        threshold: viewport === true ? 0 : viewport,
+      };
+    }
+  } else {
+    config.position = true;
   }
   return config;
 }
 
-function getNode(node) {
+function getNode(node: any): ?Node {
   ({node = node.element || node} = node);
   return node;
 }
