@@ -260,9 +260,11 @@ function reduceGestureState(
 
   const nextState = {
     ...state,
+    type,
     x: event.clientX == null ? state.x : event.clientX, // eslint-disable-line eqeqeq
     y: event.clientY == null ? state.y : event.clientY, // eslint-disable-line eqeqeq
     key: event.code == null ? null : event.code, // eslint-disable-line eqeqeq
+    repeat: event.repeat == null ? null : event.repeat, // eslint-disable-line eqeqeq
   };
 
   switch (type) {
