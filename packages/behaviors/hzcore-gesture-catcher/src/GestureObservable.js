@@ -22,24 +22,21 @@ import {
   TOUCH_MOVE,
   TOUCH_END,
   WHEEL,
+  GESTURE_END,
 } from './types';
 import {isGestureKey, isRepeatKey, not, getNearestFocusableNode} from './utils';
 
-const GESTURE_END = 'gestureend';
+// TODO: Find the smallest timeout that won't ever get tricked by inertia.
 const GESTURE_END_TIMEOUT = 60;
 
-import type {GestureCatcherConfig, GestureState} from './types';
-
-type Callbag = any;
-type Observer = {
-  next: ?(value: any) => void,
-  error: ?(error: Error) => void,
-  complete: ?() => void,
-};
-type Subscription = {
-  unsubscribe(): void,
-};
-type GestureEvent = any;
+import type {
+  Callbag,
+  GestureCatcherConfig,
+  GestureEvent,
+  GestureState,
+  Observer,
+  Subscription,
+} from './types';
 
 const defaultInitialState: GestureState = {
   x: 0,
@@ -53,6 +50,9 @@ const defaultInitialState: GestureState = {
   xVelocity: 0,
   yVelocity: 0,
   gesturing: false,
+  key: null,
+  repeat: null,
+  type: null,
 };
 
 const defaultConfig = {

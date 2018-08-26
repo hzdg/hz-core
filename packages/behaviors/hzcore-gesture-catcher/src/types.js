@@ -10,6 +10,7 @@ export const TOUCH_MOVE = 'touchmove';
 export const TOUCH_END = 'touchend';
 export const KEY_DOWN = 'keydown';
 export const KEY_UP = 'keyup';
+export const GESTURE_END = 'gestureend';
 
 export const SPACE = 'Space';
 export const PAGE_UP = 'PageUp';
@@ -54,6 +55,30 @@ export const CONFIG_SHAPE = [
   'wheel',
 ];
 
+export type GestureType =
+  | typeof WHEEL
+  | typeof MOUSE_DOWN
+  | typeof MOUSE_MOVE
+  | typeof MOUSE_UP
+  | typeof TOUCH_START
+  | typeof TOUCH_MOVE
+  | typeof TOUCH_END
+  | typeof KEY_DOWN
+  | typeof KEY_UP
+  | typeof GESTURE_END;
+
+// FIXME: Type these things.
+export type Callbag = any;
+export type Observer = {
+  next: ?(value: any) => void,
+  error: ?(error: Error) => void,
+  complete: ?() => void,
+};
+export type Subscription = {
+  unsubscribe(): void,
+};
+export type GestureEvent = any;
+
 export type ReactRef = {
   current: any,
 };
@@ -78,6 +103,9 @@ export type GestureState = {
   xVelocity: number,
   yVelocity: number,
   gesturing: boolean,
+  key: ?string,
+  repeat: ?boolean,
+  type: ?GestureType,
 };
 
 export type GestureCatcherState = GestureState & {gestureRef: ReactRef};

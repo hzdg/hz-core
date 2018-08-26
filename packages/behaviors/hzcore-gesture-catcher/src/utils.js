@@ -23,9 +23,7 @@ export const isRepeatKey = (eventA: KeyboardEvent) => (eventB: KeyboardEvent) =>
 export const not = (fn: (...args: any[]) => any) => (...args: any[]) =>
   !fn(...args);
 
-export function getNearestFocusableNode(
-  node: ?Node,
-): ?(HTMLElement | Document) {
+export function getNearestFocusableNode(node: ?Node): Node {
   if (node instanceof Document) return node;
   if (!(node instanceof HTMLElement)) return document;
   if (node.tabIndex >= 0) return node;

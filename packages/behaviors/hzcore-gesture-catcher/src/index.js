@@ -6,12 +6,36 @@ import shallowEqual from 'shallowequal';
 import GestureObservable from './GestureObservable';
 import {CONFIG_SHAPE} from './types';
 
+export {
+  SPACE,
+  PAGE_UP,
+  PAGE_DOWN,
+  END,
+  HOME,
+  ARROW_LEFT,
+  ARROW_UP,
+  ARROW_RIGHT,
+  ARROW_DOWN,
+  WHEEL,
+  MOUSE_DOWN,
+  MOUSE_MOVE,
+  MOUSE_UP,
+  TOUCH_START,
+  TOUCH_MOVE,
+  TOUCH_END,
+  KEY_DOWN,
+  KEY_UP,
+  GESTURE_END,
+} from './types';
+
 import type {
   GestureState,
   GestureCatcherState,
   GestureCatcherProps,
   GestureCatcherConfig,
 } from './types';
+
+export type {GestureState} from './types';
 
 const gestureCatcherPropTypes = {
   gestureRef: PropTypes.shape({
@@ -54,6 +78,9 @@ const initialState = {
   xVelocity: 0,
   yVelocity: 0,
   gesturing: false,
+  key: null,
+  repeat: null,
+  type: null,
   gestureRef: (React: any).createRef(),
 };
 
