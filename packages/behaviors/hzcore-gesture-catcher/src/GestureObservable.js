@@ -274,8 +274,10 @@ function reduceGestureState(
       nextState.yInitial = event.clientY;
       nextState.xPrev = event.clientX;
       nextState.yPrev = event.clientY;
-      nextState.xDelta = event.deltaX;
-      nextState.yDelta = event.deltaY;
+      nextState.xDelta =
+        state.type === WHEEL ? state.xDelta - event.deltaX : event.deltaX;
+      nextState.yDelta =
+        state.type === WHEEL ? state.yDelta - event.deltaY : event.deltaY;
       nextState.xVelocity = event.deltaX;
       nextState.yVelocity = event.deltaY;
       nextState.gesturing = true;
