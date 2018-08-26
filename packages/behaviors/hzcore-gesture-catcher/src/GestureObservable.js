@@ -1,3 +1,4 @@
+/* eslint-disable no-duplicate-imports, max-lines */
 // @flow
 import $$observable from 'symbol-observable';
 import filter from 'callbag-filter';
@@ -123,12 +124,16 @@ export default class GestureObservable {
   }
 }
 
-const preventDefault: Callbag = map((event: GestureEvent) => {
-  if (typeof event.preventDefault === 'function') {
-    event.preventDefault();
-  }
-  return event;
-});
+function preventDefault(predicate: ?(event: GestureEvent) => boolean): Callbag {
+  return map((event: GestureEvent) => {
+    if (typeof predicate !== 'function' || predicate(event)) {
+      if (typeof event.preventDefault === 'function') {
+        event.preventDefault();
+      }
+    }
+    return event;
+  });
+}
 
 const exclude = (fn): Callbag => filter(not(fn));
 
@@ -196,7 +201,7 @@ function mouseGesture(
   const mouseDown = fromEvent(node, MOUSE_DOWN);
   const mouseUp = fromEvent(document, MOUSE_UP);
   const mouseMove = shouldPreventDefault
-    ? pipe(fromEvent(document, MOUSE_MOVE, {passive: false}), preventDefault)
+    ? pipe(fromEvent(document, MOUSE_MOVE, {passive: false}), preventDefault())
     : fromEvent(document, MOUSE_MOVE);
   return gesture(mouseMove, mouseDown, () => mouseUp);
 }
@@ -208,7 +213,7 @@ function touchGesture(
   const touchStart = fromEvent(node, TOUCH_START);
   const touchEnd = fromEvent(document, TOUCH_END);
   const touchMove = shouldPreventDefault
-    ? pipe(fromEvent(document, TOUCH_MOVE, {passive: false}), preventDefault)
+    ? pipe(fromEvent(document, TOUCH_MOVE, {passive: false}), preventDefault())
     : fromEvent(document, TOUCH_MOVE);
   return gesture(touchMove, touchStart, () => touchEnd);
 }
@@ -218,7 +223,7 @@ function wheelGesture(
   shouldPreventDefault: ?boolean,
 ): Callbag {
   const wheelMove = shouldPreventDefault
-    ? pipe(fromEvent(node, WHEEL, {passive: false}), preventDefault)
+    ? pipe(fromEvent(node, WHEEL, {passive: false}), preventDefault())
     : fromEvent(node, WHEEL);
   return pipe(wheelMove, gestureEndDebounced);
 }
@@ -228,10 +233,13 @@ function keyboardGesture(
   shouldPreventDefault: ?boolean,
 ): Callbag {
   const keyDown = shouldPreventDefault
-    ? pipe(fromEvent(getNearestFocusableNode(node), KEY_DOWN), preventDefault)
+    ? pipe(
+        fromEvent(getNearestFocusableNode(node), KEY_DOWN),
+        preventDefault(isGestureKey),
+      )
     : fromEvent(getNearestFocusableNode(node), KEY_DOWN);
   const keyUp = shouldPreventDefault
-    ? pipe(fromEvent(document, KEY_UP), preventDefault)
+    ? pipe(fromEvent(document, KEY_UP), preventDefault(isGestureKey))
     : fromEvent(document, KEY_UP);
   const keyStart = pipe(keyDown, filter(isGestureKey));
   const keyStopSelector = keyDownEvent =>
