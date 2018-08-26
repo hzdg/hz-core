@@ -255,7 +255,6 @@ function reduceGestureState(
   switch (type) {
     case TOUCH_START:
     case TOUCH_MOVE:
-    case TOUCH_END:
       [event] = event.touches;
   }
 
