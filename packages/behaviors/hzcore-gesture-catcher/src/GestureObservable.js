@@ -1,9 +1,7 @@
 // @flow
-/* eslint-disable no-duplicate-imports */
 import $$observable from 'symbol-observable';
 import filter from 'callbag-filter';
 import flatten from 'callbag-flatten';
-import fromEvent from 'callbag-from-event';
 import map from 'callbag-map';
 import merge from 'callbag-merge';
 import pipe from 'callbag-pipe';
@@ -178,6 +176,17 @@ function* generateGestures(
 
 function gestures(node: HTMLElement, config: GestureCatcherConfig): Callbag {
   return merge(...generateGestures(node, config));
+}
+
+function fromEvent(node: Node, name: string, options: any): Callbag {
+  return (start, sink) => {
+    if (start !== 0) return;
+    const handler = ev => sink(1, ev);
+    sink(0, t => {
+      if (t === 2) node.removeEventListener(name, handler, options);
+    });
+    node.addEventListener(name, handler, options);
+  };
 }
 
 function mouseGesture(

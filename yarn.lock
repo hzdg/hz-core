@@ -2250,10 +2250,6 @@ callbag-flatten@^1.2.0:
   version "1.2.0"
   resolved "http://npmregistry.hzdg.com/callbag-flatten/-/callbag-flatten-1.2.0.tgz#33d5175e7943c26b822b4e6a8c54e272699a417d"
 
-callbag-from-event@^1.0.0:
-  version "1.0.0"
-  resolved "http://npmregistry.hzdg.com/callbag-from-event/-/callbag-from-event-1.0.0.tgz#e3a8931cd46775256eff3a960a743ad1c7ccfea9"
-
 callbag-map@^1.0.1:
   version "1.0.1"
   resolved "http://npmregistry.hzdg.com/callbag-map/-/callbag-map-1.0.1.tgz#a5bcd41cde60c226cdd22f5868beb7b2ecd6c167"
