@@ -1,0 +1,17 @@
+{
+  "name": "@hzcore/commitlint-config",
+  "version": "1.0.0",
+  "description": "The hzcore commitlint confg",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "private": true,
+  "main": "index.js",
+  "author": "Eric Eldredge <lettertwo@gmail.com>",
+  "dependencies": {
+    "@commitlint/config-conventional": "^7.0.1",
+    "@hzcore/gitmoji": "^1.0.0",
+    "@lerna/project": "^3.0.0"
+  }
+}

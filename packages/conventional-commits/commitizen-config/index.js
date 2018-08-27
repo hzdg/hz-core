@@ -4,8 +4,8 @@ const wrap = require('wrap-ansi');
 const pad = require('pad');
 const Fuse = require('fuse.js');
 const autocompletePrompt = require('inquirer-autocomplete-prompt');
-const emojis = require('./cz-emoji-types.json');
-const workspaces = require('./scripts/list-workspaces')();
+const emojis = require('@hzcore/gitmoji');
+const project = require('@lerna/project');
 
 /**
  * This commitizen config is based on https://github.com/ngryman/cz-emoji
@@ -21,12 +21,17 @@ const FUSE_OPTIONS = {
 };
 
 function autocomplete({name, message, choices, keys}) {
-  const search = new Fuse(choices, {...FUSE_OPTIONS, keys});
+  let search;
   return {
     type: 'autocomplete',
     name,
     message,
-    source: (_, q) => Promise.resolve(q ? search.search(q) : choices),
+    async source(_, q) {
+      if (!search) {
+        search = new Fuse(await choices, {...FUSE_OPTIONS, keys});
+      }
+      return Promise.resolve(q ? search.search(q) : choices);
+    },
   };
 }
 
@@ -41,16 +46,17 @@ function getTypeChoices() {
   }));
 }
 
-function getScopeChoices() {
-  const maxNameLength = workspaces
-    .map(({meta: {name}}) => name)
+async function getScopeChoices() {
+  const scopes = await project.getPackages(process.cwd());
+  const maxNameLength = scopes
+    .map(({name}) => name)
     .reduce((max, {length}) => (length > max ? length : max), 0);
   return [
     {name: pad('<none>', maxNameLength), value: ' '},
-    ...workspaces.map(({dir, meta: {name}}) => ({
-      name: `${pad(name, maxNameLength)}  ${path.relative('.', dir)}`,
+    ...scopes.map(({location, name}) => ({
+      name: `${pad(name, maxNameLength)}  ${path.relative('.', location)}`,
       value: name,
-      dir,
+      location,
     })),
   ];
 }
@@ -71,7 +77,7 @@ function format({type, scope, subject, issues, body}) {
 module.exports = {
   prompter(cz, commit) {
     cz.prompt.registerPrompt('autocomplete', autocompletePrompt);
-    cz
+    return cz
       .prompt([
         autocomplete({
           name: 'type',
@@ -83,7 +89,7 @@ module.exports = {
           name: 'scope',
           message: 'Specify a scope:',
           choices: getScopeChoices(),
-          keys: ['name', 'dir'],
+          keys: ['name', 'location'],
         }),
         {
           type: 'input',

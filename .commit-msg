@@ -1,7 +1,9 @@
-const workspaces = require('./scripts/list-workspaces')();
-const emojiTypes = require('./cz-emoji-types.json');
+const project = require('@lerna/project');
+const emojiTypes = require('@hzcore/gitmoji');
 
-module.exports = `type (scope) subject
+module.exports = async () => {
+  const scopes = await project.getPackages(process.cwd());
+  return `type (scope) subject
 
 # NOTE: It is recommended to author commits using \`yarn commit\`
 # or \`git-cz\`, rather than \`git commit\`.
@@ -44,4 +46,5 @@ ${emojiTypes.map(({emoji, description}) => `#   ${emoji} - ${description}`).join
 #
 #
 # Valid values for [(scope)] are:
-${workspaces.map(({meta: {name}}) => `#   (${name})`).join('\n')}`;
+${scopes.map(({name}) => `#   (${name})`).join('\n')}`;
+}

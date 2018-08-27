@@ -1,0 +1,12 @@
+{
+  "name": "@hzcore/gitmoji",
+  "version": "1.0.0",
+  "description": "Emoji data for git commits",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "private": true,
+  "main": "gitmoji.json",
+  "author": "Eric Eldredge <lettertwo@gmail.com>"
+}

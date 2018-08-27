@@ -1,10 +1,6 @@
 // const atomPresetOpts = require('conventional-changelog-atom');
-const emojiTypes = require('./cz-emoji-types.json');
-
-const parserOpts = {
-  headerPattern: /^([^(\s]*)(?: \(([\w$./@\-* ]*)\))? (.*)$/,
-  headerCorrespondence: ['emoji', 'scope', 'shortDesc'],
-};
+const emojiTypes = require('@hzcore/gitmoji');
+const {parserPreset: {parserOpts}} = require('@hzcore/commitlint-config');
 
 function whatBump(commits) {
   let level = 2;

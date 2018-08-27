@@ -1,0 +1,23 @@
+{
+  "name": "@hzcore/commitizen-config",
+  "version": "1.0.0",
+  "description": "The hzcore commitizen confg",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "repository": "git@github.com:hzdg/hz-core.git",
+  "author": "Eric Eldredge <lettertwo@gmail.com>",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@hzcore/gitmoji": "^1.0.0",
+    "@lerna/project": "^3.0.0",
+    "cli-truncate": "^1.1.0",
+    "fuse.js": "^3.2.1",
+    "inquirer": "^6.2.0",
+    "inquirer-autocomplete-prompt": "^1.0.1",
+    "pad": "^2.2.1",
+    "wrap-ansi": "^3.0.1"
+  }
+}

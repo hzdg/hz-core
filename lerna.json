@@ -5,10 +5,13 @@
   "command": {
     "version": {
       "conventionalCommits": true,
-      "changelogPreset": "./conventional-changelog.js"
+      "changelogPreset": "@hzcore/conventional-changelog"
     },
     "publish": {
-      "allowBranch": ["master", "0.1"],
+      "allowBranch": [
+        "master",
+        "0.1"
+      ],
       "ignoreChanges": [
         "*.md"
       ]
@@ -20,6 +23,7 @@
   "packages": [
     "packages/animations/*",
     "packages/behaviors/*",
+    "packages/conventional-commits/*",
     "packages/simple-actions/*"
   ]
 }

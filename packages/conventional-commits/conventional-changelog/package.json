@@ -1,0 +1,18 @@
+{
+  "name": "@hzcore/conventional-changelog",
+  "version": "1.0.0",
+  "description": "The hzcore conventional changelog preset",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "repository": "git@github.com:hzdg/hz-core.git",
+  "author": "Eric Eldredge <lettertwo@gmail.com>",
+  "private": true,
+  "main": "index.js",
+  "dependencies": {
+    "@hzcore/commitlint-config": "^1.0.0",
+    "@hzcore/gitmoji": "^1.0.0",
+    "conventional-changelog-atom": "^2.0.0"
+  }
+}
