@@ -3,7 +3,12 @@
   "useWorkspaces": true,
   "version": "independent",
   "command": {
+    "version": {
+      "conventionalCommits": true,
+      "changelogPreset": "./conventional-changelog.js"
+    },
     "publish": {
+      "allowBranch": ["master", "0.1"],
       "ignoreChanges": [
         "*.md"
       ]

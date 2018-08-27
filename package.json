@@ -50,6 +50,7 @@
     "cli-truncate": "1.1.0",
     "commit-template": "1.0.0",
     "commitizen": "2.10.1",
+    "conventional-changelog-atom": "2.0.0",
     "eslint": "^4.18.2",
     "eslint-config-hzdg": "^0.7.1",
     "eslint-config-hzdg-react": "^0.6.0",
