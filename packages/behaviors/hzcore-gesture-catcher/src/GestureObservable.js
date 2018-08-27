@@ -277,11 +277,15 @@ function reduceGestureState(
       nextState.xPrev = event.clientX;
       nextState.yPrev = event.clientY;
       nextState.xDelta =
-        state.type === WHEEL ? state.xDelta - event.deltaX : event.deltaX;
+        state.type === WHEEL
+          ? state.xDelta - event.deltaX
+          : event.deltaX ? -event.deltaX : 0;
       nextState.yDelta =
-        state.type === WHEEL ? state.yDelta - event.deltaY : event.deltaY;
-      nextState.xVelocity = event.deltaX;
-      nextState.yVelocity = event.deltaY;
+        state.type === WHEEL
+          ? state.yDelta - event.deltaY
+          : event.deltaY ? -event.deltaY : 0;
+      nextState.xVelocity = event.deltaX ? -event.deltaX : 0;
+      nextState.yVelocity = event.deltaY ? -event.deltaY : 0;
       nextState.gesturing = true;
       break;
     case TOUCH_START:
