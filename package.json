@@ -9,6 +9,9 @@
   "private": true,
   "scripts": {
     "build": "lerna bootstrap && node ./scripts/build.js",
+    "commit": "git-cz",
+    "commitmsg": "commitlint -E GIT_PARAMS",
+    "preparecommitmsg": "commit-template",
     "lint": "eslint ./scripts ./packages & flow check",
     "preversion": "yarn build",
     "styleguide": "styleguidist server",
@@ -22,6 +25,11 @@
     "packages/behaviors/*",
     "packages/simple-actions/*"
   ],
+  "config": {
+    "commitizen": {
+      "path": "./commitizen.config.js"
+    }
+  },
   "dependencies": {
     "@babel/cli": "7.0.0-beta.54",
     "@babel/core": "7.0.0-beta.54",
@@ -34,9 +42,14 @@
     "@babel/preset-flow": "7.0.0-beta.54",
     "@babel/preset-react": "7.0.0-beta.54",
     "@babel/runtime": "7.0.0-beta.54",
+    "@commitlint/cli": "7.0.0",
+    "@commitlint/config-conventional": "7.0.1",
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^8.2.2",
     "babel-jest": "23.4.2",
+    "cli-truncate": "1.1.0",
+    "commit-template": "1.0.0",
+    "commitizen": "2.10.1",
     "eslint": "^4.18.2",
     "eslint-config-hzdg": "^0.7.1",
     "eslint-config-hzdg-react": "^0.6.0",
@@ -48,12 +61,17 @@
     "express": "^4.16.2",
     "flow-bin": "0.78.0",
     "flow-typed": "2.5.1",
+    "fuse.js": "3.2.1",
     "glob": "^7.1.2",
+    "husky": "0.14.3",
+    "inquirer": "6.2.0",
+    "inquirer-autocomplete-prompt": "1.0.1",
     "invariant": "^2.2.4",
     "jest": "23.4.2",
     "lerna": "3.0.0-rc.0",
     "ncp": "^2.0.0",
-    "prettier": "1.11.1",
+    "pad": "2.2.1",
+    "prettier": "1.14.2",
     "react": "16.4.1",
     "react-dom": "16.4.1",
     "react-motion": "^0.5.2",
@@ -70,6 +88,7 @@
     "tapable": "^1.0.0",
     "webpack": "^4.1.1",
     "webpack-blocks": "^1.0.0-rc.2",
+    "wrap-ansi": "3.0.1",
     "yurnalist": "0.2.1"
   }
 }
