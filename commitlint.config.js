@@ -1,3 +1,1 @@
-module.exports = {
-  extends: ['@hzcore/commitlint-config'],
-};
+module.exports = require('@hzcore/commitlint-config');

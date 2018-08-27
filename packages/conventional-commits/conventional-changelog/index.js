@@ -1,6 +1,9 @@
-// const atomPresetOpts = require('conventional-changelog-atom');
 const emojiTypes = require('@hzcore/gitmoji');
-const {parserPreset: {parserOpts}} = require('@hzcore/commitlint-config');
+const atomPresetOpts = require('conventional-changelog-atom');
+
+const parserOpts = {
+  headerPattern: /^([^(\s]*)(?: \(([\w$./@\-* ]*)\))? (.*)$/,
+};
 
 function whatBump(commits) {
   let level = 2;
@@ -31,35 +34,7 @@ function whatBump(commits) {
   };
 }
 
-
-
-const mainTemplate = `{{> header}}
-
-{{#each commitGroups}}
-
-{{#if title}}
-### {{title}}
-
-{{/if}}
-{{#each commits}}
-{{> commit root=@root}}
-{{/each}}
-{{/each}}
-`;
-
-const headerPartial = `{{#if isPatch}}##{{else}}#{{/if}} {{#if @root.linkCompare}}[{{version}}]({{@root.host}}/{{#if @root.owner}}{{@root.owner}}/{{/if}}{{@root.repository}}/compare/{{previousTag}}...{{currentTag}}){{else}}{{version}}{{/if}}{{#if title}} "{{title}}"{{/if}}{{#if date}} ({{date}}){{/if}}
-`;
-
-const commitPartial = `* {{#if shortDesc}}{{shortDesc}}{{else}}{{header}}{{/if}}
-
-{{~!-- commit hash --}} {{#if @root.linkReferences}}([{{hash}}]({{#if @root.host}}{{@root.host}}/{{/if}}{{#if @root.owner}}{{@root.owner}}/{{/if}}{{@root.repository}}/{{@root.commit}}/{{hash}})){{else}}{{hash~}}{{/if}}
-
-{{~!-- commit references --}}{{#if references}}, closes{{~#each references}} {{#if @root.linkReferences}}[{{#if this.owner}}{{this.owner}}/{{/if}}{{this.repository}}#{{this.issue}}]({{#if @root.host}}{{@root.host}}/{{/if}}{{#if this.repository}}{{#if this.owner}}{{this.owner}}/{{/if}}{{this.repository}}{{else}}{{#if @root.owner}}{{@root.owner}}/{{/if}}{{@root.repository}}{{/if}}/{{@root.issue}}/{{this.issue}}){{else}}{{#if this.owner}}{{this.owner}}/{{/if}}{{this.repository}}#{{this.issue}}{{/if}}{{/each}}{{/if}}`;
-
 const writerOpts = {
-  mainTemplate,
-  headerPartial,
-  commitPartial,
   transform(commit) {
     if (!commit.emoji || typeof commit.emoji !== 'string') {
       return;
@@ -82,44 +57,27 @@ const writerOpts = {
   commitsSort: [`emoji`, `shortDesc`],
 };
 
-module.exports = {
-  conventionalChangelog: {parserOpts, writerOpts},
-  recommendedBumpOpts: {parserOpts, whatBump},
-  parserOpts,
-  writerOpts,
-};
+function presetOpts(cb) {
+  atomPresetOpts((err, opts) => {
+    if (err) return cb(err);
+    cb(null, {
+      ...opts,
+      conventionalChangelog: {
+        ...opts.conventionalChangelog,
+        parserOpts: {...opts.conventionalChangelog.parserOpts, ...parserOpts},
+        writerOpts: {...opts.conventionalChangelog.writerOpts, ...writerOpts},
+      },
+      recommendedBumpOpts: {
+        ...opts.recommendedBumpOpts,
+        parserOpts: {...opts.recommendedBumpOpts.parserOpts, ...parserOpts},
+        whatBump,
+      },
+      parserOpts: {...opts.parserOpts, ...parserOpts},
+      writerOpts: {...opts.writerOpts, ...writerOpts},
+    });
+  });
+}
 
-// module.exports = function presetOpts(cb) {
-//   atomPresetOpts((err, opts) => {
-//     if (err) return cb(err);
-//     cb(null, {
-//       conventionalChangelog: {parserOpts, writerOpts},
-//       recommendedBumpOpts: {parserOpts, whatBump},
-//       parserOpts,
-//       writerOpts,
-//     });
-//   //   cb(null, {
-//   //     ...opts,
-//   //     conventionalChangelog: {
-//   //       ...opts.conventionalChangelog,
-//   //       parserOpts: {...opts.conventionalChangelog.parserOpts, ...parserOpts},
-//   //       writerOpts: {...opts.conventionalChangelog.writerOpts, ...writerOpts},
-//   //     },
-//   //     recommendedBumpOpts: {
-//   //       ...opts.recommendedBumpOpts,
-//   //       parserOpts: {...opts.recommendedBumpOpts.parserOpts, ...parserOpts},
-//   //       whatBump,
-//   //     },
-//   //     parserOpts: {...opts.parserOpts, ...parserOpts},
-//   //     writerOpts: {...opts.writerOpts, ...writerOpts},
-//   //   });
-//   });
-// };
+presetOpts.parserOpts = parserOpts;
 
-//
-// module.exports = {
-//   conventionalChangelog: {parserOpts, writerOpts},
-//   recommendedBumpOpts: {parserOpts, whatBump},
-//   parserOpts,
-//   writerOpts,
-// };
+module.exports = presetOpts;

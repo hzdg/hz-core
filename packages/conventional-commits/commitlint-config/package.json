@@ -11,7 +11,7 @@
   "author": "Eric Eldredge <lettertwo@gmail.com>",
   "dependencies": {
     "@commitlint/config-conventional": "^7.0.1",
-    "@hzcore/gitmoji": "^1.0.0",
-    "@lerna/project": "^3.0.0"
+    "@hzcore/conventional-changelog": "^1.0.0",
+    "@hzcore/gitmoji": "^1.0.0"
   }
 }
