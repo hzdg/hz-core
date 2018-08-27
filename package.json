@@ -68,7 +68,7 @@
     "inquirer-autocomplete-prompt": "1.0.1",
     "invariant": "^2.2.4",
     "jest": "23.4.2",
-    "lerna": "3.0.0-rc.0",
+    "lerna": "3.1.4",
     "ncp": "^2.0.0",
     "pad": "2.2.1",
     "prettier": "1.14.2",
