@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Fades into view its child component",
   "main": "cjs/index.js",
+  "private": true,
   "module": "es/index.js",
   "files": [
     "cjs",
