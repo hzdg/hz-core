@@ -6,11 +6,12 @@ const glob = require('glob');
 const rimraf = require('rimraf');
 const report = require('yurnalist');
 const babel = require('@babel/core');
+const project = require('@lerna/project');
 const {rollup} = require('rollup');
 const uglify = require('rollup-plugin-uglify-es');
 const rollupConfig = require('../rollup.config');
-const listWorkspaces = require('./list-workspaces');
 
+const PROJECT_ROOT = process.cwd();
 const SRC_GLOB = '**/*.js';
 const EXCLUDE_GLOBS = [
   '**/@(__tests__|tests|examples|docs)/**/*',
@@ -152,21 +153,31 @@ const buildPackage = async (pkg, activity) => {
 };
 
 const buildPackages = () =>
-  listWorkspaces()
-    // Queue up a package build for each workspace.
-    .reduce(
-      (buildQueue, pkg, step, {length: steps}) =>
-        buildQueue.then(() => {
-          report.step(step + 1, steps, `[${pkg.meta.name}]`);
-          const activity = report.activity();
-          return buildPackage(pkg, activity)
-            .then(() => activity.end())
-            .catch(err => {
-              activity.end();
-              throw err;
-            });
-        }),
-      Promise.resolve(),
+  project
+    .getPackages(PROJECT_ROOT)
+    .then(workspaces =>
+      // Queue up a package build for each workspace.
+      workspaces
+        .map(pkg => ({
+          dir: pkg.location,
+          meta: pkg,
+          name: pkg.name,
+          src: path.join(pkg.location, 'src'),
+        }))
+        .reduce(
+          (buildQueue, pkg, step, {length: steps}) =>
+            buildQueue.then(() => {
+              report.step(step + 1, steps, `[${pkg.meta.name}]`);
+              const activity = report.activity();
+              return buildPackage(pkg, activity)
+                .then(() => activity.end())
+                .catch(err => {
+                  activity.end();
+                  throw err;
+                });
+            }),
+          Promise.resolve(),
+        ),
     )
     .then(() => {
       report.success('All packages built!');
