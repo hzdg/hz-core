@@ -1,3 +1,4 @@
+#! /usr/bin/env node
 /* eslint-disable no-console, no-process-exit */
 const fs = require('fs');
 const path = require('path');
@@ -8,9 +9,8 @@ const babel = require('@babel/core');
 const {rollup} = require('rollup');
 const uglify = require('rollup-plugin-uglify-es');
 const rollupConfig = require('../rollup.config');
+const listWorkspaces = require('./list-workspaces');
 
-const PROJECT_ROOT = path.resolve(__dirname, '..');
-const WORKSPACES = require(path.join(PROJECT_ROOT, 'package.json')).workspaces;
 const SRC_GLOB = '**/*.js';
 const EXCLUDE_GLOBS = [
   '**/@(__tests__|tests|examples|docs)/**/*',
@@ -152,26 +152,7 @@ const buildPackage = async (pkg, activity) => {
 };
 
 const buildPackages = () =>
-  WORKSPACES
-    // Find all of the package.json files in package workspaces.
-    .reduce(
-      (matches, pattern) =>
-        matches.concat(
-          glob.sync(path.join(PROJECT_ROOT, pattern, 'package.json')),
-        ),
-      [],
-    )
-    // Append any information needed for each package.
-    .map(pkg => {
-      const meta = require(pkg); // eslint-disable-line global-require
-      const dir = path.dirname(pkg);
-      const src = path.join(dir, 'src');
-      return {
-        meta,
-        dir,
-        src,
-      };
-    })
+  listWorkspaces()
     // Queue up a package build for each workspace.
     .reduce(
       (buildQueue, pkg, step, {length: steps}) =>
