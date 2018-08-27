@@ -141,14 +141,22 @@ const buildBundles = pkg =>
   ]);
 
 const buildPackage = async (pkg, activity) => {
-  try {
-    activity.tick(`[${pkg.meta.name}] Building modules ...`);
-    await buildModules(pkg);
-    activity.tick(`[${pkg.meta.name}] Building UMD bundles ...`);
-    await buildBundles(pkg);
-  } catch (error) {
-    report.error(`[${pkg.meta.name}] There was an error!`);
-    throw error;
+  if (pkg.meta.private) {
+    report.info(`[${pkg.meta.name}] is private! Skipping build step ...`);
+  } else if (fs.existsSync(pkg.src)) {
+    try {
+      activity.tick(`[${pkg.meta.name}] Building modules ...`);
+      await buildModules(pkg);
+      activity.tick(`[${pkg.meta.name}] Building UMD bundles ...`);
+      await buildBundles(pkg);
+    } catch (error) {
+      report.error(`[${pkg.meta.name}] There was an error!`);
+      throw error;
+    }
+  } else {
+    report.info(
+      `[${pkg.meta.name}] No src dir found! Assuming no build step ...`,
+    );
   }
 };
 
