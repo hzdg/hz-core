@@ -14,7 +14,8 @@
       ],
       "ignoreChanges": [
         "*.md"
-      ]
+      ],
+      "message": "🔖 publish"
     },
     "init": {
       "exact": true
