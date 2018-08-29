@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/gitmoji",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Emoji data for git commits",
   "license": "MIT",
   "publishConfig": {
