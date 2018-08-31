@@ -177,7 +177,9 @@ test('GestureObservable observes wheel gestures', async () => {
   expect(history.size).toBe(4);
   expect(Array.from(history)).toMatchObject([
     {
+      type: 'wheel',
       key: null,
+      repeat: null,
       gesturing: true,
       x: 0,
       xInitial: 0,
@@ -191,7 +193,9 @@ test('GestureObservable observes wheel gestures', async () => {
       yVelocity: -1,
     },
     {
+      type: 'wheel',
       key: null,
+      repeat: null,
       gesturing: true,
       x: 0,
       xInitial: 0,
@@ -205,7 +209,9 @@ test('GestureObservable observes wheel gestures', async () => {
       yVelocity: 0,
     },
     {
+      type: 'wheel',
       key: null,
+      repeat: null,
       gesturing: true,
       x: 0,
       xInitial: 0,
@@ -219,7 +225,9 @@ test('GestureObservable observes wheel gestures', async () => {
       yVelocity: -5,
     },
     {
+      type: 'gestureend',
       key: null,
+      repeat: null,
       gesturing: false,
       x: 0,
       xInitial: 0,
@@ -312,7 +320,7 @@ test('GestureObservable observes all inputs by default', async () => {
 });
 
 test.each([['mouse', 3], ['touch', 3], ['wheel', 2], ['keyboard', 2]])(
-  'GestureObservable observes only specified inputs',
+  'GestureObservable observes only %s inputs when specified',
   async (inputType, expectedUpdates) => {
     jest.useFakeTimers();
     const history = new GestureHistory();

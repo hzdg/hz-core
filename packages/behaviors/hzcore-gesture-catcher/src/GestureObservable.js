@@ -1,18 +1,14 @@
-/* eslint-disable no-duplicate-imports, max-lines */
+/* eslint-disable no-duplicate-imports */
 // @flow
 import $$observable from 'symbol-observable';
-import filter from 'callbag-filter';
-import flatten from 'callbag-flatten';
-import map from 'callbag-map';
 import merge from 'callbag-merge';
 import pipe from 'callbag-pipe';
 import scan from 'callbag-scan';
 import share from 'callbag-share';
-import startWith from 'callbag-start-with';
 import subscribe from 'callbag-subscribe';
-import takeUntil from 'callbag-take-until';
 import MouseSensor from './MouseSensor';
 import TouchSensor from './TouchSensor';
+import WheelSensor from './WheelSensor';
 import KeyboardSensor from './KeyboardSensor';
 import {
   KEY_DOWN,
@@ -26,9 +22,6 @@ import {
   WHEEL,
   GESTURE_END,
 } from './types';
-
-// TODO: Find the smallest timeout that won't ever get tricked by inertia.
-const GESTURE_END_TIMEOUT = 60;
 
 import type {
   Callbag,
@@ -131,78 +124,20 @@ export default class GestureObservable {
   }
 }
 
-function preventDefault(predicate: ?(event: GestureEvent) => boolean): Callbag {
-  return map((event: GestureEvent) => {
-    if (typeof predicate !== 'function' || predicate(event)) {
-      if (typeof event.preventDefault === 'function') {
-        event.preventDefault();
-      }
-    }
-    return event;
-  });
-}
-
-const gesture = (
-  source: Callbag,
-  startSource: Callbag,
-  endSelector: (value: any) => Callbag,
-): Callbag =>
-  pipe(
-    startSource,
-    map(value => {
-      const endSource = endSelector(value);
-      return merge(
-        pipe(source, takeUntil(endSource), startWith(value)),
-        endSource,
-      );
-    }),
-    flatten,
-  );
-
-const gestureEndDebounced = (source: Callbag): Callbag => {
-  let timeout = null;
-  return (start, sink) => {
-    source(0, (type, data) => {
-      if (type === 1) {
-        if (timeout) clearTimeout(timeout);
-        timeout = setTimeout(() => {
-          sink(1, {type: GESTURE_END});
-        }, GESTURE_END_TIMEOUT);
-      }
-      sink(type, data);
-    });
-  };
-};
-
 function* generateGestures(
   node: HTMLElement,
   config: GestureCatcherConfig,
 ): Generator<Callbag, *, *> {
-  if (config.wheel) yield wheelGesture(node, config.preventDefault);
   const {mouse, touch, keyboard, wheel, ...all} = config;
   if (mouse) yield fromSensor(new MouseSensor(node, makeConfig(all, mouse)));
   if (touch) yield fromSensor(new TouchSensor(node, makeConfig(all, touch)));
+  if (wheel) yield fromSensor(new WheelSensor(node, makeConfig(all, wheel)));
   if (keyboard)
     yield fromSensor(new KeyboardSensor(node, makeConfig(all, keyboard)));
 }
 
 function makeConfig(base: Object, config: Object | boolean) {
   return typeof config === 'object' ? {...base, ...config} : {...base};
-}
-
-function gestures(node: HTMLElement, config: GestureCatcherConfig): Callbag {
-  return merge(...generateGestures(node, config));
-}
-
-function fromEvent(node: Node, name: string, options: any): Callbag {
-  return (start, sink) => {
-    if (start !== 0) return;
-    const handler = ev => sink(1, ev);
-    sink(0, t => {
-      if (t === 2) node.removeEventListener(name, handler, options);
-    });
-    node.addEventListener(name, handler, options);
-  };
 }
 
 function fromSensor(sensor) {
@@ -216,16 +151,6 @@ function fromSensor(sensor) {
       });
     }
   };
-}
-
-function wheelGesture(
-  node: HTMLElement,
-  shouldPreventDefault: ?boolean,
-): Callbag {
-  const wheelMove = shouldPreventDefault
-    ? pipe(fromEvent(node, WHEEL, {passive: false}), preventDefault())
-    : fromEvent(node, WHEEL);
-  return pipe(wheelMove, gestureEndDebounced);
 }
 
 function reduceGestureState(

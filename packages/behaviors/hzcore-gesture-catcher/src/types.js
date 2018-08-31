@@ -97,14 +97,21 @@ export type TouchSensorConfig =
     }
   | boolean;
 
+export type WheelSensorConfig =
+  | {
+      preventDefault?: boolean,
+      threshold?: number | false,
+    }
+  | boolean;
+
 export type KeyboardSensorConfig = {preventDefault?: boolean} | boolean;
 
 export type GestureCatcherConfig = {
   preventDefault?: boolean,
-  wheel?: boolean,
   keyboard?: KeyboardSensorConfig,
   mouse?: MouseSensorConfig,
   touch?: TouchSensorConfig,
+  wheel?: WheelSensorConfig,
 };
 
 export type GestureState = {
