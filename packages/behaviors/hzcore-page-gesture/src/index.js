@@ -34,13 +34,12 @@ export const FIRST = 'first';
 export const LAST = 'last';
 
 import type {Node as ReactNode} from 'react';
-import type {GestureState} from '@hzcore/gesture-catcher';
+import type {GestureState, GestureCatcherConfig} from '@hzcore/gesture-catcher';
 
-type PageGestureProps = {
+type PageGestureProps = GestureCatcherConfig & {
   children: (state: PageGestureState) => ReactNode,
   orientation: typeof VERTICAL | typeof HORIZONTAL,
   disabled?: ?boolean,
-  preventDefault?: ?boolean,
   gestureRef?: any,
   onNext?: ?(state: PageGestureState) => void,
   onPrevious?: ?(state: PageGestureState) => void,
@@ -65,6 +64,10 @@ export default class PageGesture extends Component<PageGestureProps> {
     orientation: PropTypes.oneOf([VERTICAL, HORIZONTAL]),
     disabled: PropTypes.bool,
     preventDefault: PropTypes.bool,
+    touch: PropTypes.bool,
+    mouse: PropTypes.bool,
+    wheel: PropTypes.bool,
+    keyboard: PropTypes.bool,
     gestureRef: PropTypes.any,
     onNext: PropTypes.func,
     onPrevious: PropTypes.func,
@@ -76,6 +79,10 @@ export default class PageGesture extends Component<PageGestureProps> {
     orientation: HORIZONTAL,
     disabled: false,
     preventDefault: false,
+    touch: void 0,
+    mouse: void 0,
+    wheel: void 0,
+    keyboard: void 0,
     gestureRef: void 0,
     onNext: void 0,
     onPrevious: void 0,
@@ -248,11 +255,12 @@ export default class PageGesture extends Component<PageGestureProps> {
   };
 
   render() {
-    const {orientation, disabled, preventDefault, gestureRef} = this.props;
+    const {orientation, disabled, gestureRef} = this.props;
+    const gestureConfig = getGestureConfig(this.props);
     return (
       <GestureCatcher
+        {...gestureConfig}
         disabled={disabled}
-        preventDefault={preventDefault}
         horizontal={orientation === HORIZONTAL}
         vertical={orientation === VERTICAL}
         gestureRef={gestureRef}
@@ -262,5 +270,20 @@ export default class PageGesture extends Component<PageGestureProps> {
         {this.renderGesture}
       </GestureCatcher>
     );
+  }
+}
+
+function getGestureConfig(props: GestureCatcherConfig): GestureCatcherConfig {
+  const {preventDefault, keyboard, mouse, touch, wheel} = props;
+  if (keyboard || mouse || touch || wheel) {
+    return {
+      preventDefault,
+      keyboard,
+      mouse,
+      touch,
+      wheel,
+    };
+  } else {
+    return {preventDefault};
   }
 }
