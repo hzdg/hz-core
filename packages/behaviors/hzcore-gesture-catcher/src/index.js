@@ -114,12 +114,11 @@ export default class GestureCatcher extends Component<
     prevProps: GestureCatcherProps,
     prevState: GestureCatcherState,
   ) {
-    if (
-      prevState.gestureRef !== this.state.gestureRef ||
-      configChanged(prevProps, this.props)
-    ) {
+    if (prevState.gestureRef !== this.state.gestureRef) {
       this.unsubscribe();
       this.subscribeIfNecessary();
+    } else if (this.gestureObservable && configChanged(prevProps, this.props)) {
+      this.gestureObservable.updateConfig(getObservableConfig(this.props));
     }
   }
 
@@ -129,6 +128,7 @@ export default class GestureCatcher extends Component<
   }
 
   mounted: boolean = false;
+  gestureObservable: ?GestureObservable = null;
   subscription: any = null;
   updateScheduled: boolean | AnimationFrameID = false;
   nextState: ?GestureState;
@@ -145,11 +145,12 @@ export default class GestureCatcher extends Component<
       const node = getNode(this.state.gestureRef.current);
       if (node) {
         const config = getObservableConfig(this.props);
-        this.subscription = GestureObservable.create(
+        this.gestureObservable = GestureObservable.create(
           node,
           config,
           initialState,
-        ).subscribe(this.handleUpdate);
+        );
+        this.subscription = this.gestureObservable.subscribe(this.handleUpdate);
       }
     }
   }

@@ -1,6 +1,8 @@
 /* eslint-disable no-duplicate-imports */
 // @flow
 import $$observable from 'symbol-observable';
+import flatten from 'callbag-flatten';
+import map from 'callbag-map';
 import merge from 'callbag-merge';
 import pipe from 'callbag-pipe';
 import scan from 'callbag-scan';
@@ -77,15 +79,45 @@ function initializeState(initialState: any): GestureState {
   return {...defaultInitialState, ...initialState};
 }
 
+class Config {
+  constructor(config: any) {
+    this.config = parseConfig(config);
+    this.handlers = new Set();
+  }
+
+  config: GestureCatcherConfig;
+  handlers: Set<Callbag>;
+
+  read = (start, sink: Callbag): Callbag => {
+    if (start !== 0) return;
+    const handler = config => sink(1, config);
+    this.handlers.add(handler);
+    sink(0, stop => {
+      if (stop === 2) this.handlers.delete(handler);
+    });
+    if (this.config && this.handlers.has(handler)) {
+      handler(this.config);
+    }
+  };
+
+  write = (config: any): void => {
+    this.config = parseConfig(config);
+    this.handlers.forEach(handler => handler(this.config));
+  };
+}
+
 export default class GestureObservable {
   constructor(
     node: HTMLElement,
     config: GestureCatcherConfig,
     initialState: GestureState,
   ) {
+    this.config = new Config(config);
     this.state = share(
       pipe(
-        gestures(node, parseConfig(config)),
+        this.config.read,
+        map(currentConfig => merge(...createSources(node, currentConfig))),
+        flatten,
         scan(reduceGestureState, initializeState(initialState)),
       ),
     );
@@ -105,7 +137,12 @@ export default class GestureObservable {
     return this;
   }
 
+  config: Callbag;
   state: Callbag;
+
+  updateConfig(config: GestureCatcherConfig) {
+    this.config.write(config);
+  }
 
   subscribe(
     observer: ?(Observer | Function),
@@ -124,19 +161,22 @@ export default class GestureObservable {
   }
 }
 
-function* generateGestures(
+function* createSources(
   node: HTMLElement,
   config: GestureCatcherConfig,
 ): Generator<Callbag, *, *> {
   const {mouse, touch, keyboard, wheel, ...all} = config;
-  if (mouse) yield fromSensor(new MouseSensor(node, makeConfig(all, mouse)));
-  if (touch) yield fromSensor(new TouchSensor(node, makeConfig(all, touch)));
-  if (wheel) yield fromSensor(new WheelSensor(node, makeConfig(all, wheel)));
+  if (mouse)
+    yield fromSensor(new MouseSensor(node, makeSensorConfig(all, mouse)));
+  if (touch)
+    yield fromSensor(new TouchSensor(node, makeSensorConfig(all, touch)));
+  if (wheel)
+    yield fromSensor(new WheelSensor(node, makeSensorConfig(all, wheel)));
   if (keyboard)
-    yield fromSensor(new KeyboardSensor(node, makeConfig(all, keyboard)));
+    yield fromSensor(new KeyboardSensor(node, makeSensorConfig(all, keyboard)));
 }
 
-function makeConfig(base: Object, config: Object | boolean) {
+function makeSensorConfig(base: Object, config: Object | boolean) {
   return typeof config === 'object' ? {...base, ...config} : {...base};
 }
 
