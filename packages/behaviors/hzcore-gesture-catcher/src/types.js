@@ -83,12 +83,28 @@ export type ReactRef = {
   current: any,
 };
 
+export type MouseSensorConfig =
+  | {
+      preventDefault?: boolean,
+      threshold?: number | false,
+    }
+  | boolean;
+
+export type TouchSensorConfig =
+  | {
+      preventDefault?: boolean,
+      threshold?: number | false,
+    }
+  | boolean;
+
+export type KeyboardSensorConfig = {preventDefault?: boolean} | boolean;
+
 export type GestureCatcherConfig = {
   preventDefault?: boolean,
-  keyboard?: boolean,
-  mouse?: boolean,
-  touch?: boolean,
   wheel?: boolean,
+  keyboard?: KeyboardSensorConfig,
+  mouse?: MouseSensorConfig,
+  touch?: TouchSensorConfig,
 };
 
 export type GestureState = {

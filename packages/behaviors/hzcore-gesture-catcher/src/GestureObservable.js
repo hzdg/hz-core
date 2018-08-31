@@ -11,6 +11,9 @@ import share from 'callbag-share';
 import startWith from 'callbag-start-with';
 import subscribe from 'callbag-subscribe';
 import takeUntil from 'callbag-take-until';
+import MouseSensor from './MouseSensor';
+import TouchSensor from './TouchSensor';
+import KeyboardSensor from './KeyboardSensor';
 import {
   KEY_DOWN,
   KEY_UP,
@@ -23,7 +26,6 @@ import {
   WHEEL,
   GESTURE_END,
 } from './types';
-import {isGestureKey, isRepeatKey, not, getNearestFocusableNode} from './utils';
 
 // TODO: Find the smallest timeout that won't ever get tricked by inertia.
 const GESTURE_END_TIMEOUT = 60;
@@ -120,7 +122,12 @@ export default class GestureObservable {
     if (typeof observer !== 'object' || observer === null) {
       observer = {next: observer, error, complete};
     }
-    return {unsubscribe: pipe(this.state, subscribe(observer))};
+    return {
+      unsubscribe: pipe(
+        this.state,
+        subscribe(observer),
+      ),
+    };
   }
 }
 
@@ -134,8 +141,6 @@ function preventDefault(predicate: ?(event: GestureEvent) => boolean): Callbag {
     return event;
   });
 }
-
-const exclude = (fn): Callbag => filter(not(fn));
 
 const gesture = (
   source: Callbag,
@@ -173,10 +178,16 @@ function* generateGestures(
   node: HTMLElement,
   config: GestureCatcherConfig,
 ): Generator<Callbag, *, *> {
-  if (config.mouse) yield mouseGesture(node, config.preventDefault);
-  if (config.touch) yield touchGesture(node, config.preventDefault);
   if (config.wheel) yield wheelGesture(node, config.preventDefault);
-  if (config.keyboard) yield keyboardGesture(node, config.preventDefault);
+  const {mouse, touch, keyboard, wheel, ...all} = config;
+  if (mouse) yield fromSensor(new MouseSensor(node, makeConfig(all, mouse)));
+  if (touch) yield fromSensor(new TouchSensor(node, makeConfig(all, touch)));
+  if (keyboard)
+    yield fromSensor(new KeyboardSensor(node, makeConfig(all, keyboard)));
+}
+
+function makeConfig(base: Object, config: Object | boolean) {
+  return typeof config === 'object' ? {...base, ...config} : {...base};
 }
 
 function gestures(node: HTMLElement, config: GestureCatcherConfig): Callbag {
@@ -194,28 +205,17 @@ function fromEvent(node: Node, name: string, options: any): Callbag {
   };
 }
 
-function mouseGesture(
-  node: HTMLElement,
-  shouldPreventDefault: ?boolean,
-): Callbag {
-  const mouseDown = fromEvent(node, MOUSE_DOWN);
-  const mouseUp = fromEvent(document, MOUSE_UP);
-  const mouseMove = shouldPreventDefault
-    ? pipe(fromEvent(document, MOUSE_MOVE, {passive: false}), preventDefault())
-    : fromEvent(document, MOUSE_MOVE);
-  return gesture(mouseMove, mouseDown, () => mouseUp);
-}
-
-function touchGesture(
-  node: HTMLElement,
-  shouldPreventDefault: ?boolean,
-): Callbag {
-  const touchStart = fromEvent(node, TOUCH_START);
-  const touchEnd = fromEvent(document, TOUCH_END);
-  const touchMove = shouldPreventDefault
-    ? pipe(fromEvent(document, TOUCH_MOVE, {passive: false}), preventDefault())
-    : fromEvent(document, TOUCH_MOVE);
-  return gesture(touchMove, touchStart, () => touchEnd);
+function fromSensor(sensor) {
+  return (start, sink) => {
+    if (start === 0) {
+      const subscription = sensor.subscribe(v => sink(1, v));
+      sink(0, done => {
+        if (done === 2) {
+          subscription.unsubscribe();
+        }
+      });
+    }
+  };
 }
 
 function wheelGesture(
@@ -226,25 +226,6 @@ function wheelGesture(
     ? pipe(fromEvent(node, WHEEL, {passive: false}), preventDefault())
     : fromEvent(node, WHEEL);
   return pipe(wheelMove, gestureEndDebounced);
-}
-
-function keyboardGesture(
-  node: HTMLElement,
-  shouldPreventDefault: ?boolean,
-): Callbag {
-  const keyDown = shouldPreventDefault
-    ? pipe(
-        fromEvent(getNearestFocusableNode(node), KEY_DOWN),
-        preventDefault(isGestureKey),
-      )
-    : fromEvent(getNearestFocusableNode(node), KEY_DOWN);
-  const keyUp = shouldPreventDefault
-    ? pipe(fromEvent(document, KEY_UP), preventDefault(isGestureKey))
-    : fromEvent(document, KEY_UP);
-  const keyStart = pipe(keyDown, filter(isGestureKey));
-  const keyStopSelector = keyDownEvent =>
-    merge(keyUp, pipe(keyDown, exclude(isRepeatKey(keyDownEvent))));
-  return gesture(keyDown, keyStart, keyStopSelector);
 }
 
 function reduceGestureState(
@@ -279,11 +260,15 @@ function reduceGestureState(
       nextState.xDelta =
         state.type === WHEEL
           ? state.xDelta - event.deltaX
-          : event.deltaX ? -event.deltaX : 0;
+          : event.deltaX
+            ? -event.deltaX
+            : 0;
       nextState.yDelta =
         state.type === WHEEL
           ? state.yDelta - event.deltaY
-          : event.deltaY ? -event.deltaY : 0;
+          : event.deltaY
+            ? -event.deltaY
+            : 0;
       nextState.xVelocity = event.deltaX ? -event.deltaX : 0;
       nextState.yVelocity = event.deltaY ? -event.deltaY : 0;
       nextState.gesturing = true;
