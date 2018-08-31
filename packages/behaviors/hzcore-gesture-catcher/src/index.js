@@ -35,7 +35,7 @@ import type {
   GestureCatcherConfig,
 } from './types';
 
-export type {GestureState} from './types';
+export type {GestureState, GestureCatcherConfig} from './types';
 
 const gestureCatcherPropTypes = {
   gestureRef: PropTypes.shape({
