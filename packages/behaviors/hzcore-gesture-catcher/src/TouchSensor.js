@@ -21,11 +21,13 @@ export default class TouchSensor {
           )
         : fromEvent(document, TOUCH_MOVE),
     );
+    this.webkitHack = config.preventDefault ? new WebkitHack() : null;
   }
 
   touchStart: Callbag;
   touchMove: Callbag;
   touchEnd: Callbag;
+  webkitHack: ?WebkitHack = null;
   gesturing: boolean = false;
 
   state = (source: Callbag) => (start: 0, sink: Callbag) => {
@@ -40,6 +42,7 @@ export default class TouchSensor {
           case TOUCH_START: {
             if (this.gesturing) return talkback(1);
             this.gesturing = true;
+            if (this.webkitHack) this.webkitHack.preventTouchMove();
             return sink(1, data);
           }
           case TOUCH_MOVE: {
@@ -49,6 +52,7 @@ export default class TouchSensor {
           case TOUCH_END: {
             if (!this.gesturing) return talkback(1);
             this.gesturing = false;
+            if (this.webkitHack) this.webkitHack.allowTouchMove();
             return sink(1, data);
           }
         }
@@ -73,5 +77,47 @@ export default class TouchSensor {
         subscribe(observer),
       ),
     };
+  }
+}
+
+// Webkit does not allow event.preventDefault() in dynamically added handlers
+// (i.e., a handler added to 'touchmove' after handling a 'touchstart'),
+// so we add a permanent 'touchmove' handler to get around this.
+// webkit bug: https://bugs.webkit.org/show_bug.cgi?id=184250
+// Original implementation: https://github.com/atlassian/react-beautiful-dnd/pull/416
+class WebkitHack {
+  constructor() {
+    // Do nothing when server side rendering or no touch support.
+    if (typeof window !== 'undefined' && 'ontouchstart' in window) {
+      // Adding a persistent event handler.
+      // It can't be passive, otherwise we wouldn't
+      // be able to preventDefault().
+      window.addEventListener('touchmove', this.handleTouchMove, {
+        passive: false,
+      });
+    }
+  }
+
+  shouldPreventDefault: boolean = false;
+
+  destroy() {
+    if (typeof window === 'undefined') return;
+    window.removeEventListener('touchmove', this.handleTouchMove, {
+      passive: false,
+    });
+  }
+
+  handleTouchMove = (event: TouchEvent) => {
+    if (this.shouldPreventDefault && !event.defaultPrevented) {
+      event.preventDefault();
+    }
+  };
+
+  preventTouchMove() {
+    this.shouldPreventDefault = true;
+  }
+
+  allowTouchMove() {
+    this.shouldPreventDefault = false;
   }
 }
