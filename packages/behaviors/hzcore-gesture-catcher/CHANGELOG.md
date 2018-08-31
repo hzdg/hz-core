@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.1...@hzcore/gesture-catcher@0.1.2) (2018-08-31)
+
+
+### @hzcore/gesture-catcher
+
+* extract {Mouse,Touch,Keyboard}Sensor ([90ac47e](https://github.com/hzdg/hz-core/commit/90ac47e))
+* allow WheelSensor gesture threshold ([9b45eb6](https://github.com/hzdg/hz-core/commit/9b45eb6))
+* add missing shallowequal dependency ([e3ca782](https://github.com/hzdg/hz-core/commit/e3ca782))
+* fix mobile safari touch hijacking ([edd7714](https://github.com/hzdg/hz-core/commit/edd7714))
+* allow config changes to GestureObservable ([8bcd464](https://github.com/hzdg/hz-core/commit/8bcd464))
+* export the GestureCatcherConfig type ([0b538d0](https://github.com/hzdg/hz-core/commit/0b538d0))
+
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## 0.1.1 (2018-08-29)
 
 
