@@ -1,4 +1,4 @@
-/* eslint-disable react/no-multi-comp, no-duplicate-imports */
+/* eslint-disable react/no-multi-comp, no-duplicate-imports, max-lines */
 // @flow
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
@@ -13,6 +13,7 @@ import GestureCatcher, {
   ARROW_RIGHT,
   ARROW_DOWN,
   KEY_DOWN,
+  WHEEL,
 } from '@hzcore/gesture-catcher';
 
 const GESTURE_THRESHOLD = 50;
@@ -177,13 +178,19 @@ export default class PageGesture extends Component<PageGestureProps> {
       return this.dispatchAction(gestureProps);
     }
 
+    const threshold = getThreshold(type, this.props);
+
     const {orientation} = this.props;
     const hDelta = Math.abs(xDelta);
     const vDelta = Math.abs(yDelta);
     const direction =
       orientation === VERTICAL
-        ? yDelta < 0 ? UP : DOWN
-        : xDelta < 0 ? LEFT : RIGHT;
+        ? yDelta < 0
+          ? UP
+          : DOWN
+        : xDelta < 0
+          ? LEFT
+          : RIGHT;
     let state;
     let delta;
     if (orientation === this.prevOrientation) {
@@ -196,14 +203,14 @@ export default class PageGesture extends Component<PageGestureProps> {
             case DOWN:
               state =
                 yDelta < this.prevDelta ||
-                (this.prevDelta < 0 && vDelta < GESTURE_THRESHOLD)
+                (this.prevDelta < 0 && vDelta < threshold)
                   ? CANCELED
                   : DOWN;
               break;
             case UP:
               state =
                 yDelta > this.prevDelta ||
-                (this.prevDelta > 0 && vDelta < GESTURE_THRESHOLD)
+                (this.prevDelta > 0 && vDelta < threshold)
                   ? CANCELED
                   : UP;
               break;
@@ -215,14 +222,14 @@ export default class PageGesture extends Component<PageGestureProps> {
             case RIGHT:
               state =
                 xDelta < this.prevDelta ||
-                (this.prevDelta < 0 && hDelta < GESTURE_THRESHOLD)
+                (this.prevDelta < 0 && hDelta < threshold)
                   ? CANCELED
                   : RIGHT;
               break;
             case LEFT:
               state =
                 xDelta > this.prevDelta ||
-                (this.prevDelta > 0 && hDelta < GESTURE_THRESHOLD)
+                (this.prevDelta > 0 && hDelta < threshold)
                   ? CANCELED
                   : LEFT;
               break;
@@ -234,18 +241,17 @@ export default class PageGesture extends Component<PageGestureProps> {
       switch (orientation) {
         case VERTICAL:
           delta = yDelta;
-          state = vDelta > GESTURE_THRESHOLD ? direction : CANCELED;
+          state = vDelta >= threshold ? direction : CANCELED;
           break;
         case HORIZONTAL:
           delta = xDelta;
-          state = hDelta > GESTURE_THRESHOLD ? direction : CANCELED;
+          state = hDelta >= threshold ? direction : CANCELED;
           break;
       }
     }
     delta = delta || 0;
     this.prevOrientation = orientation;
-    this.prevGestureState =
-      Math.abs(delta) > GESTURE_THRESHOLD ? state : CANCELED;
+    this.prevGestureState = Math.abs(delta) >= threshold ? state : CANCELED;
     if (this.prevGestureState !== CANCELED) this.prevDelta = delta;
   };
 
@@ -255,15 +261,10 @@ export default class PageGesture extends Component<PageGestureProps> {
   };
 
   render() {
-    const {orientation, disabled, gestureRef} = this.props;
-    const gestureConfig = getGestureConfig(this.props);
+    const config = getGestureConfig(this.props);
     return (
       <GestureCatcher
-        {...gestureConfig}
-        disabled={disabled}
-        horizontal={orientation === HORIZONTAL}
-        vertical={orientation === VERTICAL}
-        gestureRef={gestureRef}
+        {...config}
         onMove={this.handleGestureMove}
         onEnd={this.handleGestureEnd}
       >
@@ -273,17 +274,37 @@ export default class PageGesture extends Component<PageGestureProps> {
   }
 }
 
-function getGestureConfig(props: GestureCatcherConfig): GestureCatcherConfig {
-  const {preventDefault, keyboard, mouse, touch, wheel} = props;
+function getThreshold(type: string, props: PageGestureProps) {
+  switch (type) {
+    case WHEEL:
+      return (props.wheel && props.wheel.threshold) || GESTURE_THRESHOLD;
+    default:
+      return GESTURE_THRESHOLD;
+  }
+}
+
+function getGestureConfig(props: PageGestureProps): GestureCatcherConfig {
+  const {
+    orientation,
+    disabled,
+    gestureRef,
+    preventDefault,
+    keyboard,
+    mouse,
+    touch,
+    wheel,
+  } = props;
+  const config = {
+    orientation,
+    disabled,
+    gestureRef,
+    preventDefault,
+    horizontal: orientation === HORIZONTAL,
+    vertical: orientation === VERTICAL,
+  };
   if (keyboard || mouse || touch || wheel) {
-    return {
-      preventDefault,
-      keyboard,
-      mouse,
-      touch,
-      wheel,
-    };
+    return {...config, keyboard, mouse, touch, wheel};
   } else {
-    return {preventDefault};
+    return config;
   }
 }
