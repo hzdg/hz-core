@@ -3,6 +3,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import GestureCatcher, {
+  GestureSensorConfig,
   SPACE,
   PAGE_UP,
   PAGE_DOWN,
@@ -65,10 +66,10 @@ export default class PageGesture extends Component<PageGestureProps> {
     orientation: PropTypes.oneOf([VERTICAL, HORIZONTAL]),
     disabled: PropTypes.bool,
     preventDefault: PropTypes.bool,
-    touch: PropTypes.bool,
-    mouse: PropTypes.bool,
-    wheel: PropTypes.bool,
-    keyboard: PropTypes.bool,
+    touch: GestureSensorConfig,
+    mouse: GestureSensorConfig,
+    wheel: GestureSensorConfig,
+    keyboard: GestureSensorConfig,
     gestureRef: PropTypes.any,
     onNext: PropTypes.func,
     onPrevious: PropTypes.func,
