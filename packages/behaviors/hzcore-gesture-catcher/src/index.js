@@ -37,6 +37,14 @@ import type {
 
 export type {GestureState, GestureCatcherConfig} from './types';
 
+export const GestureSensorConfig = PropTypes.oneOfType([
+  PropTypes.shape({
+    preventDefault: PropTypes.bool,
+    threshold: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
+  }),
+  PropTypes.bool,
+]);
+
 const gestureCatcherPropTypes = {
   gestureRef: PropTypes.shape({
     current: PropTypes.any,
@@ -44,10 +52,10 @@ const gestureCatcherPropTypes = {
   children: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   preventDefault: PropTypes.bool,
-  keyboard: PropTypes.bool,
-  mouse: PropTypes.bool,
-  touch: PropTypes.bool,
-  wheel: PropTypes.bool,
+  keyboard: GestureSensorConfig,
+  mouse: GestureSensorConfig,
+  touch: GestureSensorConfig,
+  wheel: GestureSensorConfig,
   onStart: PropTypes.func,
   onMove: PropTypes.func,
   onEnd: PropTypes.func,
