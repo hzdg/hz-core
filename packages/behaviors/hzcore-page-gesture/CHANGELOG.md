@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.3](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.2...@hzcore/page-gesture@0.1.3) (2018-08-31)
+
+
+### @hzcore/page-gesture
+
+* fix gesture sensor config prop types ([73b413e](https://github.com/hzdg/hz-core/commit/73b413e))
+
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.1...@hzcore/page-gesture@0.1.2) (2018-08-31)
 
 

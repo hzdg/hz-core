@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.3](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.2...@hzcore/gesture-catcher@0.1.3) (2018-08-31)
+
+
+### @hzcore/gesture-catcher
+
+* fix gesture sensor config prop types ([ab8313f](https://github.com/hzdg/hz-core/commit/ab8313f))
+
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.1...@hzcore/gesture-catcher@0.1.2) (2018-08-31)
 
 
