@@ -9,7 +9,7 @@ import {WHEEL, GESTURE_END} from './types';
 import type {Callbag, Observer, Subscription, WheelSensorConfig} from './types';
 
 // TODO: Find the smallest timeout that won't ever get tricked by inertia.
-const GESTURE_END_TIMEOUT = 120;
+const GESTURE_END_TIMEOUT = 60;
 const GESTURE_THRESHOLD = 40;
 
 const LEFT = 'left';
