@@ -1,7 +1,15 @@
-const {createConfig, babel, css, setDevTool} = require('webpack-blocks');
-const {generateJSReferences} = require('mini-html-webpack-plugin');
+/* eslint-disable global-require */
 const path = require('path');
 const fs = require('fs');
+const glob = require('glob');
+const {generateJSReferences} = require('mini-html-webpack-plugin');
+const {
+  createConfig,
+  babel,
+  css,
+  setDevTool,
+  resolve,
+} = require('webpack-blocks');
 
 const PROJECT_ROOT = __dirname;
 const WORKSPACES = require(path.join(PROJECT_ROOT, 'package.json')).workspaces;
@@ -25,13 +33,17 @@ const nameFromWorkspace = workspace =>
 const componentGlobFromWorkspace = workspace =>
   path.join(pathnameFromWorkspace(workspace), COMPONENT_GLOB);
 
-function resolve(filePath, {js, publicPath}) {
-  const jsReference = generateJSReferences(js, publicPath);
-  return fs
-    .readFileSync(filePath)
-    .toString()
-    .replace('<!-- jsReference -->', jsReference);
-}
+const packagesFromWorkspace = workspace =>
+  glob.sync(
+    path.join(pathnameFromWorkspace(workspace), `${NAMESPACE}-*/package.json`),
+  );
+
+const aliasForPackage = pkgPath => ({
+  [require(path.resolve(__dirname, pkgPath)).name]: path.resolve(
+    __dirname,
+    path.join(path.dirname(pkgPath), 'src'),
+  ),
+});
 
 module.exports = {
   components: 'packages/**/src/**.js',
@@ -39,6 +51,18 @@ module.exports = {
     setDevTool('cheap-module-source-map'),
     babel(),
     css(),
+    resolve({
+      alias: WORKSPACES.reduce(
+        (packages, workspace) => [
+          ...packages,
+          ...packagesFromWorkspace(workspace),
+        ],
+        [],
+      ).reduce(
+        (aliases, pkgPath) => ({...aliases, ...aliasForPackage(pkgPath)}),
+        {},
+      ),
+    }),
   ]),
   usageMode: 'expand',
   pagePerSection: true,
@@ -48,10 +72,10 @@ module.exports = {
     path.join(__dirname, 'conf', 'styleguide', 'styles.css'),
   ],
   template: ({js, publicPath}) =>
-    resolve(path.join(__dirname, 'conf', 'styleguide', 'template.html'), {
-      js,
-      publicPath,
-    }),
+    fs
+      .readFileSync(path.join(__dirname, 'conf', 'styleguide', 'template.html'))
+      .toString()
+      .replace('<!-- jsReference -->', generateJSReferences(js, publicPath)),
   theme: {
     color: {
       link: '#f38230',
