@@ -9,6 +9,7 @@ const {
   css,
   setDevTool,
   resolve,
+  match,
 } = require('webpack-blocks');
 
 const PROJECT_ROOT = __dirname;
@@ -49,7 +50,7 @@ module.exports = {
   components: 'packages/**/src/**.js',
   webpackConfig: createConfig([
     setDevTool('cheap-module-source-map'),
-    babel(),
+    match('*.js', {exclude: /node_modules\/(?!callbag.*)/}, [babel()]),
     css(),
     resolve({
       alias: WORKSPACES.reduce(
