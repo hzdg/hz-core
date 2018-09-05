@@ -32,6 +32,9 @@ module.exports = {
     }),
     commonjs({
       include: /node_modules/,
+      namedExports: {
+        lethargy: ['Lethargy'],
+      },
     }),
   ],
 };

@@ -37,6 +37,8 @@ import type {
 const defaultInitialState: GestureState = {
   x: 0,
   y: 0,
+  xSpin: 0,
+  ySpin: 0,
   xDelta: 0,
   yDelta: 0,
   xInitial: 0,
@@ -218,10 +220,10 @@ function reduceGestureState(
       nextState.gesturing = true;
       break;
     case WHEEL:
-      nextState.xInitial = event.clientX;
-      nextState.yInitial = event.clientY;
-      nextState.xPrev = event.clientX;
-      nextState.yPrev = event.clientY;
+      nextState.xInitial = event.clientX || event.originalEvent.clientX;
+      nextState.yInitial = event.clientY || event.originalEvent.clientY;
+      nextState.xPrev = event.clientX || event.originalEvent.clientX;
+      nextState.yPrev = event.clientY || event.originalEvent.clientY;
       nextState.xDelta =
         state.type === WHEEL
           ? state.xDelta - event.deltaX
@@ -233,6 +235,18 @@ function reduceGestureState(
           ? state.yDelta - event.deltaY
           : event.deltaY
             ? -event.deltaY
+            : 0;
+      nextState.xSpin =
+        state.type === WHEEL
+          ? state.xSpin + event.spinX
+          : event.spinX
+            ? event.spinX
+            : 0;
+      nextState.ySpin =
+        state.type === WHEEL
+          ? state.ySpin + event.spinY
+          : event.spinY
+            ? event.spinY
             : 0;
       nextState.xVelocity = event.deltaX ? -event.deltaX : 0;
       nextState.yVelocity = event.deltaY ? -event.deltaY : 0;

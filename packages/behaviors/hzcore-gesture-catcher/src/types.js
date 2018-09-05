@@ -119,6 +119,8 @@ export type GestureState = {
   y: number,
   xDelta: number,
   yDelta: number,
+  xSpin: number,
+  ySpin: number,
   xInitial: number,
   yInitial: number,
   xPrev: number,
