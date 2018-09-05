@@ -1,82 +1,54 @@
 /* eslint-disable no-duplicate-imports */
 // @flow
 import merge from 'callbag-merge';
-import pipe from 'callbag-pipe';
-import share from 'callbag-share';
-import subscribe from 'callbag-subscribe';
-import {fromEvent, preventDefault} from './callbags';
+import Sensor from './Sensor';
+import {fromEvent} from './callbags';
 import {TOUCH_START, TOUCH_MOVE, TOUCH_END} from './types';
 
-import type {Callbag, Observer, Subscription, TouchSensorConfig} from './types';
+import type {SensorConfig} from './types';
 
-export default class TouchSensor {
-  constructor(node: HTMLElement, config: TouchSensorConfig = {}) {
-    this.touchStart = share(fromEvent(node, TOUCH_START));
-    this.touchEnd = share(fromEvent(document, TOUCH_END));
-    this.touchMove = share(
-      config.preventDefault
-        ? pipe(
-            fromEvent(document, TOUCH_MOVE, {passive: false}),
-            preventDefault(),
-          )
-        : fromEvent(document, TOUCH_MOVE),
+export default class TouchSensor extends Sensor {
+  constructor(node: HTMLElement, config: SensorConfig) {
+    super(config);
+    this.source = merge(
+      fromEvent(node, TOUCH_START),
+      fromEvent(document, TOUCH_END),
+      fromEvent(document, TOUCH_MOVE, {passive: this.passive}),
     );
-    this.webkitHack = config.preventDefault ? new WebkitHack() : null;
+    this.webkitHack = this.preventDefault ? new WebkitHack() : null;
   }
 
-  touchStart: Callbag;
-  touchMove: Callbag;
-  touchEnd: Callbag;
   webkitHack: ?WebkitHack = null;
   gesturing: boolean = false;
 
-  state = (source: Callbag) => (start: 0, sink: Callbag) => {
-    if (start !== 0) return;
-    let talkback;
-    source(0, (type, data) => {
-      if (type === 0) {
-        talkback = data;
-        sink(type, data);
-      } else if (type === 1) {
-        switch (data.type) {
-          case TOUCH_START: {
-            if (this.gesturing) return talkback(1);
-            this.gesturing = true;
-            if (this.webkitHack) this.webkitHack.preventTouchMove();
-            return sink(1, data);
-          }
-          case TOUCH_MOVE: {
-            if (!this.gesturing) return talkback(1);
-            return sink(1, data);
-          }
-          case TOUCH_END: {
-            if (!this.gesturing) return talkback(1);
-            this.gesturing = false;
-            if (this.webkitHack) this.webkitHack.allowTouchMove();
-            return sink(1, data);
-          }
-        }
-      } else {
-        sink(type, data);
-      }
-    });
-  };
+  shouldPreventDefault(event: Event) {
+    return (
+      event instanceof MouseEvent &&
+      event.type === TOUCH_MOVE &&
+      super.shouldPreventDefault(event)
+    );
+  }
 
-  subscribe(
-    observer: ?(Observer | Function),
-    error: ?Function,
-    complete: ?Function,
-  ): Subscription {
-    if (typeof observer !== 'object' || observer === null) {
-      observer = {next: observer, error, complete};
+  onData(data: TouchEvent) {
+    switch (data.type) {
+      case TOUCH_START: {
+        if (this.gesturing) return null;
+        this.gesturing = true;
+        if (this.webkitHack) this.webkitHack.preventTouchMove();
+        return data;
+      }
+      case TOUCH_MOVE: {
+        if (!this.gesturing) return null;
+        if (this.shouldPreventDefault(data)) data.preventDefault();
+        return data;
+      }
+      case TOUCH_END: {
+        if (!this.gesturing) return null;
+        this.gesturing = false;
+        if (this.webkitHack) this.webkitHack.allowTouchMove();
+        return data;
+      }
     }
-    return {
-      unsubscribe: pipe(
-        merge(this.touchStart, this.touchMove, this.touchEnd),
-        this.state,
-        subscribe(observer),
-      ),
-    };
   }
 }
 

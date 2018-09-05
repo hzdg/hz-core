@@ -1,77 +1,48 @@
 /* eslint-disable no-duplicate-imports */
 // @flow
 import merge from 'callbag-merge';
-import pipe from 'callbag-pipe';
-import share from 'callbag-share';
-import subscribe from 'callbag-subscribe';
-import {fromEvent, preventDefault} from './callbags';
+import Sensor from './Sensor';
+import {fromEvent} from './callbags';
 import {MOUSE_DOWN, MOUSE_MOVE, MOUSE_UP} from './types';
 
-import type {Callbag, Observer, Subscription, MouseSensorConfig} from './types';
+import type {SensorConfig} from './types';
 
-export default class MouseSensor {
-  constructor(node: HTMLElement, config: MouseSensorConfig = {}) {
-    this.mouseDown = share(fromEvent(node, MOUSE_DOWN));
-    this.mouseUp = share(fromEvent(document, MOUSE_UP));
-    this.mouseMove = share(
-      config.preventDefault
-        ? pipe(
-            fromEvent(document, MOUSE_MOVE, {passive: false}),
-            preventDefault(),
-          )
-        : fromEvent(document, MOUSE_MOVE),
+export default class MouseSensor extends Sensor {
+  constructor(node: HTMLElement, config: SensorConfig) {
+    super(config);
+    this.source = merge(
+      fromEvent(node, MOUSE_DOWN),
+      fromEvent(document, MOUSE_UP),
+      fromEvent(document, MOUSE_MOVE, {passive: this.passive}),
     );
   }
 
-  mouseDown: Callbag;
-  mouseMove: Callbag;
-  mouseUp: Callbag;
   gesturing: boolean = false;
 
-  state = (source: Callbag) => (start: 0, sink: Callbag) => {
-    if (start !== 0) return;
-    let talkback;
-    source(0, (type, data) => {
-      if (type === 0) {
-        talkback = data;
-        sink(type, data);
-      } else if (type === 1) {
-        switch (data.type) {
-          case MOUSE_DOWN: {
-            if (this.gesturing) return talkback(1);
-            this.gesturing = true;
-            return sink(1, data);
-          }
-          case MOUSE_MOVE: {
-            if (!this.gesturing) return talkback(1);
-            return sink(1, data);
-          }
-          case MOUSE_UP: {
-            if (!this.gesturing) return talkback(1);
-            this.gesturing = false;
-            return sink(1, data);
-          }
-        }
-      } else {
-        sink(type, data);
-      }
-    });
-  };
+  shouldPreventDefault(event: Event) {
+    return (
+      event instanceof MouseEvent &&
+      event.type === MOUSE_MOVE &&
+      super.shouldPreventDefault(event)
+    );
+  }
 
-  subscribe(
-    observer: ?(Observer | Function),
-    error: ?Function,
-    complete: ?Function,
-  ): Subscription {
-    if (typeof observer !== 'object' || observer === null) {
-      observer = {next: observer, error, complete};
+  onData(data: MouseEvent) {
+    switch (data.type) {
+      case MOUSE_DOWN: {
+        if (this.gesturing) return null;
+        this.gesturing = true;
+        return data;
+      }
+      case MOUSE_MOVE: {
+        if (!this.gesturing) return null;
+        return data;
+      }
+      case MOUSE_UP: {
+        if (!this.gesturing) return null;
+        this.gesturing = false;
+        return data;
+      }
     }
-    return {
-      unsubscribe: pipe(
-        merge(this.mouseDown, this.mouseMove, this.mouseUp),
-        this.state,
-        subscribe(observer),
-      ),
-    };
   }
 }
