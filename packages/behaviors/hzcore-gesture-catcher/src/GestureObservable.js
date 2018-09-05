@@ -54,6 +54,7 @@ const defaultInitialState: GestureState = {
 };
 
 const defaultConfig = {
+  passive: false,
   preventDefault: false,
   keyboard: true,
   mouse: true,

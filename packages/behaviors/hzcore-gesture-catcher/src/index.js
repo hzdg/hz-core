@@ -39,6 +39,7 @@ export type {GestureState, GestureCatcherConfig} from './types';
 
 export const GestureSensorConfig = PropTypes.oneOfType([
   PropTypes.shape({
+    passive: PropTypes.bool,
     preventDefault: PropTypes.bool,
     threshold: PropTypes.oneOfType([PropTypes.bool, PropTypes.number]),
   }),
@@ -51,6 +52,7 @@ const gestureCatcherPropTypes = {
   }),
   children: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
+  passive: PropTypes.bool,
   preventDefault: PropTypes.bool,
   keyboard: GestureSensorConfig,
   mouse: GestureSensorConfig,
@@ -62,6 +64,7 @@ const gestureCatcherPropTypes = {
 };
 
 const defaultGestureCatcherProps = {
+  passive: false,
   preventDefault: false,
   disabled: false,
   gestureRef: null,
@@ -198,9 +201,10 @@ function getNode(node) {
 }
 
 function getObservableConfig(props: GestureCatcherProps): GestureCatcherConfig {
-  const {preventDefault, keyboard, mouse, touch, wheel} = props;
+  const {passive, preventDefault, keyboard, mouse, touch, wheel} = props;
   if (keyboard || mouse || touch || wheel) {
     return {
+      passive,
       preventDefault,
       keyboard,
       mouse,
@@ -208,6 +212,6 @@ function getObservableConfig(props: GestureCatcherProps): GestureCatcherConfig {
       wheel,
     };
   } else {
-    return {preventDefault};
+    return {passive, preventDefault};
   }
 }

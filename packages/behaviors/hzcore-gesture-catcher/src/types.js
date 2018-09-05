@@ -48,6 +48,7 @@ export const KEY_CODES_2_CODES = {
 
 export const CONFIG_SHAPE = [
   'disabled',
+  'passive',
   'preventDefault',
   'keyboard',
   'mouse',
@@ -83,30 +84,28 @@ export type ReactRef = {
   current: any,
 };
 
-export type MouseSensorConfig =
-  | {
-      preventDefault?: boolean,
-      threshold?: number | false,
-    }
-  | boolean;
+export interface SensorInterface {
+  source: Callbag;
+  onData(data: any): any;
+  shouldPreventDefault(data: any): boolean;
+}
 
-export type TouchSensorConfig =
-  | {
-      preventDefault?: boolean,
-      threshold?: number | false,
-    }
-  | boolean;
+export type SensorConfig = {
+  passive?: boolean,
+  preventDefault?: boolean,
+  threshold?: number | false,
+};
 
-export type WheelSensorConfig =
-  | {
-      preventDefault?: boolean,
-      threshold?: number | false,
-    }
-  | boolean;
+export type MouseSensorConfig = SensorConfig | boolean;
 
-export type KeyboardSensorConfig = {preventDefault?: boolean} | boolean;
+export type TouchSensorConfig = SensorConfig | boolean;
+
+export type WheelSensorConfig = SensorConfig | boolean;
+
+export type KeyboardSensorConfig = SensorConfig | boolean;
 
 export type GestureCatcherConfig = {
+  passive?: boolean,
   preventDefault?: boolean,
   keyboard?: KeyboardSensorConfig,
   mouse?: MouseSensorConfig,
