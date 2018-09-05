@@ -32,6 +32,7 @@
     "callbag-start-with": "^3.1.0",
     "callbag-subscribe": "^1.4.1",
     "callbag-take-until": "^1.1.0",
+    "lethargy": "^1.0.4",
     "shallowequal": "^1.1.0",
     "symbol-observable": "^1.2.0"
   }
