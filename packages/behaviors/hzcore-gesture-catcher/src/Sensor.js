@@ -24,21 +24,8 @@ export default class Sensor {
   source: Callbag;
   sensorStateReducer: Callbag = null;
 
-  static createSensorStateReducer(sensor: Sensor & SensorInterface) {
-    invariant(
-      typeof sensor.onData === 'function',
-      `Expected ${sensor.constructor.name} to have a onData method.`,
-    );
-    invariant(
-      typeof sensor.source === 'function',
-      `Expected ${sensor.constructor.name} to have a source callbag.`,
-    );
-    invariant(
-      typeof sensor.shouldPreventDefault === 'function',
-      `Expected ${
-        sensor.constructor.name
-      } to have a shouldPreventDefault method.`,
-    );
+  static createSensorStateReducer(sensor: SensorInterface) {
+    validateSensorInterface(sensor);
     const reducer = share(
       pipe(
         sensor.source,
@@ -66,10 +53,19 @@ export default class Sensor {
     return reducer;
   }
 
-  +shouldPreventDefault = (event: Event) =>
-    this.preventDefault &&
-    !event.defaultPrevented &&
-    typeof event.preventDefault === 'function';
+  shouldPreventDefault(event: Event) {
+    return (
+      this.preventDefault &&
+      !event.defaultPrevented &&
+      typeof event.preventDefault === 'function'
+    );
+  }
+
+  updateConfig({preventDefault, passive}: SensorConfig) {
+    this.preventDefault = Boolean(preventDefault);
+    passive = !this.preventDefault && Boolean(passive);
+    return passive === this.passive;
+  }
 
   push(data: any) {
     if (this.sensorStateReducer && this.sensorStateReducer.sink) {
@@ -97,4 +93,25 @@ export default class Sensor {
       ),
     };
   }
+}
+
+function validateSensorInterface(sensor: SensorInterface) {
+  invariant(
+    typeof sensor.source === 'function',
+    `Expected ${sensor.constructor.name} to have a source callbag.`,
+  );
+  invariant(
+    typeof sensor.onData === 'function',
+    `Expected ${sensor.constructor.name} to have a onData method.`,
+  );
+  invariant(
+    typeof sensor.shouldPreventDefault === 'function',
+    `Expected ${
+      sensor.constructor.name
+    } to have a shouldPreventDefault method.`,
+  );
+  invariant(
+    typeof sensor.updateConfig === 'function',
+    `Expected ${sensor.constructor.name} to have a updateConfig method.`,
+  );
 }

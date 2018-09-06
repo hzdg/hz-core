@@ -88,6 +88,7 @@ export interface SensorInterface {
   source: Callbag;
   onData(data: any): any;
   shouldPreventDefault(data: any): boolean;
+  updateConfig(config: SensorConfig): boolean; // `false` to means config cannot be applied.
 }
 
 export type SensorConfig = {

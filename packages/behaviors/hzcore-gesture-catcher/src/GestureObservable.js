@@ -1,4 +1,4 @@
-/* eslint-disable no-duplicate-imports */
+/* eslint-disable no-duplicate-imports, max-lines */
 // @flow
 import $$observable from 'symbol-observable';
 import flatten from 'callbag-flatten';
@@ -119,7 +119,7 @@ export default class GestureObservable {
     this.state = share(
       pipe(
         this.config.read,
-        map(currentConfig => merge(...createSources(node, currentConfig))),
+        map(this.createSourceConfigurator(node)),
         flatten,
         scan(reduceGestureState, initializeState(initialState)),
       ),
@@ -142,6 +142,77 @@ export default class GestureObservable {
 
   config: Callbag;
   state: Callbag;
+  source: Callbag;
+  mouseSensor: ?MouseSensor;
+  touchSensor: ?TouchSensor;
+  keyboardSensor: ?KeyboardSensor;
+  wheelSensor: ?WheelSensor;
+
+  createSourceConfigurator(node: HTMLElement) {
+    return ({mouse, touch, wheel, keyboard, ...all}: GestureCatcherConfig) => {
+      if (mouse) {
+        const mouseConfig = makeSensorConfig(all, mouse);
+        if (!this.mouseSensor || !this.mouseSensor.updateConfig(mouseConfig)) {
+          this.mouseSensor = new MouseSensor(node, mouseConfig);
+          this.source = null;
+        }
+      } else if (this.mouseSensor) {
+        this.mouseSensor = null;
+        this.source = null;
+      }
+
+      if (touch) {
+        const touchConfig = makeSensorConfig(all, touch);
+        if (!this.touchSensor || !this.touchSensor.updateConfig(touchConfig)) {
+          this.touchSensor = new TouchSensor(node, touchConfig);
+          this.source = null;
+        }
+      } else if (this.touchSensor) {
+        this.touchSensor = null;
+        this.source = null;
+      }
+
+      if (wheel) {
+        const wheelConfig = makeSensorConfig(all, wheel);
+        if (!this.wheelSensor || !this.wheelSensor.updateConfig(wheelConfig)) {
+          this.wheelSensor = new WheelSensor(node, wheelConfig);
+          this.source = null;
+        }
+      } else if (this.wheelSensor) {
+        this.wheelSensor = null;
+        this.source = null;
+      }
+
+      if (keyboard) {
+        const keyboardConfig = makeSensorConfig(all, keyboard);
+        if (
+          !this.keyboardSensor ||
+          !this.keyboardSensor.updateConfig(keyboardConfig)
+        ) {
+          this.keyboardSensor = new KeyboardSensor(node, keyboardConfig);
+          this.source = null;
+        }
+      } else if (this.keyboardSensor) {
+        this.keyboardSensor = null;
+        this.source = null;
+      }
+
+      if (!this.source) {
+        this.source = merge(
+          ...[
+            this.mouseSensor,
+            this.touchSensor,
+            this.keyboardSensor,
+            this.wheelSensor,
+          ]
+            .filter(sensor => Boolean(sensor))
+            .map(sensor => fromSensor(sensor)),
+        );
+      }
+
+      return this.source;
+    };
+  }
 
   updateConfig(config: GestureCatcherConfig) {
     this.config.write(config);
@@ -162,21 +233,6 @@ export default class GestureObservable {
       ),
     };
   }
-}
-
-function* createSources(
-  node: HTMLElement,
-  config: GestureCatcherConfig,
-): Generator<Callbag, *, *> {
-  const {mouse, touch, keyboard, wheel, ...all} = config;
-  if (mouse)
-    yield fromSensor(new MouseSensor(node, makeSensorConfig(all, mouse)));
-  if (touch)
-    yield fromSensor(new TouchSensor(node, makeSensorConfig(all, touch)));
-  if (wheel)
-    yield fromSensor(new WheelSensor(node, makeSensorConfig(all, wheel)));
-  if (keyboard)
-    yield fromSensor(new KeyboardSensor(node, makeSensorConfig(all, keyboard)));
 }
 
 function makeSensorConfig(base: Object, config: Object | boolean) {

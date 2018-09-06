@@ -99,6 +99,18 @@ export default class WheelSensor extends Sensor {
   deltaX: number = 0;
   deltaY: number = 0;
 
+  updateConfig(config: SensorConfig) {
+    const didUpdate = super.updateConfig(config);
+    if (didUpdate) {
+      if (config.threshold === false) {
+        this.threshold = 0;
+      } else if (typeof config.threshold === 'number') {
+        this.threshold = config.threshold;
+      }
+    }
+    return didUpdate;
+  }
+
   onData(data: WheelEvent) {
     // We're seeing a wheel event, so debounce the state reset,
     // in case it's part of an ongoing gesture.

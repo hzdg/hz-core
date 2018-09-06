@@ -29,6 +29,19 @@ export default class TouchSensor extends Sensor {
     );
   }
 
+  updateConfig(config: SensorConfig) {
+    const didUpdate = super.updateConfig(config);
+    if (didUpdate) {
+      if (!this.preventDefault && this.webkitHack) {
+        this.webkitHack.destroy();
+        this.webkitHack = null;
+      } else if (this.preventDefault && !this.webkitHack) {
+        this.webkitHack = new WebkitHack();
+      }
+    }
+    return didUpdate;
+  }
+
   onData(data: TouchEvent) {
     switch (data.type) {
       case TOUCH_START: {
