@@ -9,14 +9,17 @@ A vertical pagination example:
 ```js
 const {Spring, animated} = require('react-spring');
 const PAGE_SIZE = 500;
+const MAX_PAGES = 10;
 
 initialState = {index: 0};
 
 <PageGesture
   preventDefault
   orientation={PageGesture.VERTICAL}
-  onNext={() => setState({index: state.index + 1})}
+  onNext={() => { if (state.index < MAX_PAGES - 1) setState({index: state.index + 1}); }}
   onPrevious={() => { if (state.index > 0) setState({index: state.index - 1}); }}
+  onFirst={() => setState({index: 0})}
+  onLast={() => setState({index: MAX_PAGES - 1})}
 >
   {({ gestureRef, xDelta, yDelta, gesturing, action }) => (
     <div
@@ -40,7 +43,7 @@ initialState = {index: 0};
               transform: y.interpolate(v => `translateY(${v}px)`),
             }}
           >
-            {Array.apply(null, Array(state.index + 2)).map((_, i) => (
+            {Array.apply(null, Array(Math.min(MAX_PAGES, state.index + 2))).map((_, i) => (
               <Spring
                 key={i}
                 native
