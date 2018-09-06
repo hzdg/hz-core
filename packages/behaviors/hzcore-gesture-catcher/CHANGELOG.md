@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.4](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.3...@hzcore/gesture-catcher@0.1.4) (2018-09-06)
+
+
+### @hzcore/gesture-catcher
+
+* extract Sensor base class ([1670b80](https://github.com/hzdg/hz-core/commit/1670b80))
+* add wheel spin state and better intent ([e5e8dd7](https://github.com/hzdg/hz-core/commit/e5e8dd7))
+* allow seamless preventDefault changes ([5b42245](https://github.com/hzdg/hz-core/commit/5b42245))
+* add invariant dependency ([4892318](https://github.com/hzdg/hz-core/commit/4892318))
+* add lethargy dependency ([4f6539a](https://github.com/hzdg/hz-core/commit/4f6539a))
+* keyboard getures should not have deltas ([0598fda](https://github.com/hzdg/hz-core/commit/0598fda))
+* stop resubscriptions on config changes ([afbbf3b](https://github.com/hzdg/hz-core/commit/afbbf3b))
+* add `passive` prop ([2738136](https://github.com/hzdg/hz-core/commit/2738136))
+* remove unused preventDefault util ([a1cf3e4](https://github.com/hzdg/hz-core/commit/a1cf3e4))
+* reduce wheel gesture timeout ([b2ad2f2](https://github.com/hzdg/hz-core/commit/b2ad2f2))
+
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.1.3](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.2...@hzcore/gesture-catcher@0.1.3) (2018-08-31)
 
 

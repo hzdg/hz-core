@@ -3,6 +3,24 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.4](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.3...@hzcore/page-gesture@0.1.4) (2018-09-06)
+
+
+### @hzcore/page-gesture
+
+* mirror gesture-catcher passive prop ([d43dbf1](https://github.com/hzdg/hz-core/commit/d43dbf1))
+* give vertical example {first,last} behavior ([f02dab2](https://github.com/hzdg/hz-core/commit/f02dab2))
+
+### @hzcore/gesture-catcher
+
+* add a vertical pagination example ([4d08ae6](https://github.com/hzdg/hz-core/commit/4d08ae6))
+
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.1.3](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.2...@hzcore/page-gesture@0.1.3) (2018-08-31)
 
 
