@@ -276,6 +276,10 @@ function reduceGestureState(
   switch (type) {
     case KEY_DOWN:
       nextState.gesturing = true;
+      nextState.xDelta = 0;
+      nextState.yDelta = 0;
+      nextState.xVelocity = 0;
+      nextState.yVelocity = 0;
       break;
     case WHEEL:
       nextState.xInitial = event.clientX || event.originalEvent.clientX;
