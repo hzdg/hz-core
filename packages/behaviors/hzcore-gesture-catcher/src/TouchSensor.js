@@ -2,7 +2,7 @@
 // @flow
 import merge from 'callbag-merge';
 import Sensor from './Sensor';
-import {fromEvent} from './callbags';
+import fromEvent from './fromEvent';
 import {TOUCH_START, TOUCH_MOVE, TOUCH_END} from './types';
 
 import type {SensorConfig} from './types';

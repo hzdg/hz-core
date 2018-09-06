@@ -2,7 +2,7 @@
 // @flow
 import {Lethargy} from 'lethargy';
 import Sensor from './Sensor';
-import {fromEvent} from './callbags';
+import fromEvent from './fromEvent';
 import {WHEEL, GESTURE_END} from './types';
 
 import type {SensorConfig} from './types';

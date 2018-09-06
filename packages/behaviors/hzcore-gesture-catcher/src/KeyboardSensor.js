@@ -2,7 +2,7 @@
 // @flow
 import merge from 'callbag-merge';
 import Sensor from './Sensor';
-import {fromEvent} from './callbags';
+import fromEvent from './fromEvent';
 
 import {KEY_DOWN, KEY_UP, CODES, KEY_CODES_2_CODES} from './types';
 
