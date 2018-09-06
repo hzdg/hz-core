@@ -2,12 +2,12 @@
 // @flow
 import $$observable from 'symbol-observable';
 import flatten from 'callbag-flatten';
-import map from 'callbag-map';
 import merge from 'callbag-merge';
 import pipe from 'callbag-pipe';
 import scan from 'callbag-scan';
 import share from 'callbag-share';
 import subscribe from 'callbag-subscribe';
+import mapChanged from './mapChanged';
 import MouseSensor from './MouseSensor';
 import TouchSensor from './TouchSensor';
 import WheelSensor from './WheelSensor';
@@ -25,6 +25,7 @@ import {
   GESTURE_END,
 } from './types';
 
+import type Sensor from './Sensor';
 import type {
   Callbag,
   GestureCatcherConfig,
@@ -119,7 +120,7 @@ export default class GestureObservable {
     this.state = share(
       pipe(
         this.config.read,
-        map(this.createSourceConfigurator(node)),
+        mapChanged(this.createSourceConfigurator(node)),
         flatten,
         scan(reduceGestureState, initializeState(initialState)),
       ),
@@ -239,7 +240,7 @@ function makeSensorConfig(base: Object, config: Object | boolean) {
   return typeof config === 'object' ? {...base, ...config} : {...base};
 }
 
-function fromSensor(sensor) {
+function fromSensor(sensor: Sensor) {
   return (start, sink) => {
     if (start === 0) {
       const subscription = sensor.subscribe(v => sink(1, v));
