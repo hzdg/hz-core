@@ -35,14 +35,14 @@ export const PREVIOUS = 'previous';
 export const FIRST = 'first';
 export const LAST = 'last';
 
-import type {Node as ReactNode} from 'react';
-import type {GestureState, GestureCatcherConfig} from '@hzcore/gesture-catcher';
+import type {
+  GestureState,
+  GestureCatcherConfig,
+  GestureCatcherProps,
+} from '@hzcore/gesture-catcher';
 
-type PageGestureProps = GestureCatcherConfig & {
-  children: (state: PageGestureState) => ReactNode,
+type PageGestureProps = GestureCatcherProps & {
   orientation: typeof VERTICAL | typeof HORIZONTAL,
-  disabled?: ?boolean,
-  gestureRef?: any,
   onNext?: ?(state: PageGestureState) => void,
   onPrevious?: ?(state: PageGestureState) => void,
   onFirst?: ?(state: PageGestureState) => void,
@@ -71,7 +71,15 @@ export default class PageGesture extends Component<PageGestureProps> {
     mouse: GestureSensorConfig,
     wheel: GestureSensorConfig,
     keyboard: GestureSensorConfig,
-    gestureRef: PropTypes.any,
+    innerRef: PropTypes.oneOfType([
+      PropTypes.func,
+      PropTypes.shape({
+        current: PropTypes.node,
+      }),
+    ]),
+    onStart: PropTypes.func,
+    onMove: PropTypes.func,
+    onEnd: PropTypes.func,
     onNext: PropTypes.func,
     onPrevious: PropTypes.func,
     onFirst: PropTypes.func,
@@ -87,7 +95,10 @@ export default class PageGesture extends Component<PageGestureProps> {
     mouse: void 0,
     wheel: void 0,
     keyboard: void 0,
-    gestureRef: void 0,
+    innerRef: void 0,
+    onStart: void 0,
+    onMove: void 0,
+    onEnd: void 0,
     onNext: void 0,
     onPrevious: void 0,
     onFirst: void 0,
@@ -170,6 +181,9 @@ export default class PageGesture extends Component<PageGestureProps> {
     const {key} = gestureProps;
     this.gestureState = this.prevGestureState || key || CANCELED;
     this.dispatchAction(gestureProps);
+    if (typeof this.props.onEnd === 'function') {
+      this.props.onEnd(gestureProps);
+    }
   };
 
   handleGestureMove = (gestureProps: GestureState) => {
@@ -256,6 +270,9 @@ export default class PageGesture extends Component<PageGestureProps> {
     this.prevOrientation = orientation;
     this.prevGestureState = Math.abs(delta) >= threshold ? state : CANCELED;
     if (this.prevGestureState !== CANCELED) this.prevDelta = delta;
+    if (typeof this.props.onMove === 'function') {
+      this.props.onMove(gestureProps);
+    }
   };
 
   renderGesture = (gestureProps: GestureState) => {
@@ -268,6 +285,7 @@ export default class PageGesture extends Component<PageGestureProps> {
     return (
       <GestureCatcher
         {...config}
+        onStart={this.props.onStart}
         onMove={this.handleGestureMove}
         onEnd={this.handleGestureEnd}
       >
@@ -290,7 +308,7 @@ function getGestureConfig(props: PageGestureProps): GestureCatcherConfig {
   const {
     orientation,
     disabled,
-    gestureRef,
+    innerRef,
     passive,
     preventDefault,
     keyboard,
@@ -301,7 +319,7 @@ function getGestureConfig(props: PageGestureProps): GestureCatcherConfig {
   const config = {
     orientation,
     disabled,
-    gestureRef,
+    innerRef,
     passive,
     preventDefault,
     horizontal: orientation === HORIZONTAL,
