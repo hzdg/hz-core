@@ -1,5 +1,9 @@
 // @flow
-import type {Node as ReactNode} from 'react';
+import type {
+  Node as ReactNode,
+  ElementType as ReactElementType,
+  ElementRef as ReactElementRef,
+} from 'react';
 
 export const WHEEL = 'wheel';
 export const MOUSE_DOWN = 'mousedown';
@@ -80,9 +84,14 @@ export type Subscription = {
 };
 export type GestureEvent = any;
 
-export type ReactRef = {
-  current: any,
-};
+export type ReactRef<T = ReactElementType> = ReactElementRef<T>;
+export type ReactRefObject<T = ReactElementType> = {current: ?ReactRef<T>};
+export type ReactRefCallback<T = ReactElementType> = (
+  node: ?ReactRef<T>,
+) => void;
+export type ReactRefProp<T = ReactElementType> =
+  | ReactRefObject<T>
+  | ReactRefCallback<T>;
 
 export interface SensorInterface {
   source: Callbag;
@@ -133,12 +142,14 @@ export type GestureState = {
   type: ?GestureType,
 };
 
-export type GestureCatcherState = GestureState & {gestureRef: ReactRef};
+export type GestureCatcherState = GestureState;
 
 export type GestureCatcherProps = {
   ...GestureCatcherConfig,
-  children: (state: GestureCatcherState) => ReactNode,
-  gestureRef: ?ReactRef,
+  children: (
+    state: GestureState & {gestureRef: ReactRefCallback<>},
+  ) => ReactNode,
+  innerRef: ?ReactRefProp<>,
   disabled: ?boolean,
   onStart?: (state: GestureState) => void,
   onMove?: (state: GestureState) => void,

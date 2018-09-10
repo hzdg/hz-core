@@ -35,7 +35,11 @@ import type {
   GestureCatcherConfig,
 } from './types';
 
-export type {GestureState, GestureCatcherConfig} from './types';
+export type {
+  GestureState,
+  GestureCatcherConfig,
+  GestureCatcherProps,
+} from './types';
 
 export const GestureSensorConfig = PropTypes.oneOfType([
   PropTypes.shape({
@@ -47,9 +51,12 @@ export const GestureSensorConfig = PropTypes.oneOfType([
 ]);
 
 const gestureCatcherPropTypes = {
-  gestureRef: PropTypes.shape({
-    current: PropTypes.any,
-  }),
+  innerRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({
+      current: PropTypes.node,
+    }),
+  ]),
   children: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
   passive: PropTypes.bool,
@@ -67,7 +74,7 @@ const defaultGestureCatcherProps = {
   passive: false,
   preventDefault: false,
   disabled: false,
-  gestureRef: null,
+  innerRef: null,
   keyboard: void 0,
   mouse: void 0,
   touch: void 0,
@@ -82,6 +89,8 @@ const initialState = {
   y: 0,
   xDelta: 0,
   yDelta: 0,
+  xSpin: 0,
+  ySpin: 0,
   xInitial: 0,
   yInitial: 0,
   xPrev: 0,
@@ -92,7 +101,6 @@ const initialState = {
   key: null,
   repeat: null,
   type: null,
-  gestureRef: (React: any).createRef(),
 };
 
 const configChanged = (a, b) =>
@@ -104,15 +112,6 @@ export default class GestureCatcher extends Component<
 > {
   static propTypes = gestureCatcherPropTypes;
   static defaultProps = defaultGestureCatcherProps;
-  static getDerivedStateFromProps = (
-    props: GestureCatcherProps,
-    state: GestureCatcherState,
-  ) => {
-    if (props.gestureRef && props.gestureRef !== state.gestureRef) {
-      return {gestureRef: props.gestureRef};
-    }
-    return null;
-  };
 
   state: GestureCatcherState = {...initialState};
 
@@ -121,14 +120,8 @@ export default class GestureCatcher extends Component<
     this.subscribeIfNecessary();
   }
 
-  componentDidUpdate(
-    prevProps: GestureCatcherProps,
-    prevState: GestureCatcherState,
-  ) {
-    if (prevState.gestureRef !== this.state.gestureRef) {
-      this.unsubscribe();
-      this.subscribeIfNecessary();
-    } else if (this.gestureObservable && configChanged(prevProps, this.props)) {
+  componentDidUpdate(prevProps: GestureCatcherProps) {
+    if (this.gestureObservable && configChanged(prevProps, this.props)) {
       this.gestureObservable.updateConfig(getObservableConfig(this.props));
     }
   }
@@ -143,6 +136,24 @@ export default class GestureCatcher extends Component<
   subscription: any = null;
   updateScheduled: boolean | AnimationFrameID = false;
   nextState: ?GestureState;
+  gestureRef = React.createRef();
+
+  handleRef = (node: any) => {
+    if (this.gestureRef.current !== node) {
+      this.gestureRef.current = node;
+      this.unsubscribe();
+    }
+    if (this.props.innerRef) {
+      if (typeof this.props.innerRef === 'function') {
+        this.props.innerRef(node);
+      } else {
+        this.props.innerRef.current = node;
+      }
+    }
+    if (node) {
+      this.subscribeIfNecessary();
+    }
+  };
 
   unsubscribe() {
     if (this.subscription) {
@@ -152,8 +163,13 @@ export default class GestureCatcher extends Component<
   }
 
   subscribeIfNecessary() {
-    if (!this.subscription && this.mounted && !this.props.disabled) {
-      const node = getNode(this.state.gestureRef.current);
+    if (
+      !this.subscription &&
+      this.mounted &&
+      !this.props.disabled &&
+      this.gestureRef.current
+    ) {
+      const node = getNode(this.gestureRef.current);
       if (node) {
         const config = getObservableConfig(this.props);
         this.gestureObservable = GestureObservable.create(
@@ -191,11 +207,11 @@ export default class GestureCatcher extends Component<
 
   render() {
     const {children} = this.props;
-    return children(this.state);
+    return children({...this.state, gestureRef: this.handleRef});
   }
 }
 
-function getNode(node) {
+function getNode(node: any) {
   ({node = node.element || node} = node);
   return node;
 }
