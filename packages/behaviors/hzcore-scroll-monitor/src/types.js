@@ -1,9 +1,18 @@
 // @flow
-import type {Node as ReactNode} from 'react';
+import type {
+  Node as ReactNode,
+  ElementType as ReactElementType,
+  ElementRef as ReactElementRef,
+} from 'react';
 
-export type ReactRef = {
-  current: any,
-};
+export type ReactRef<T = ReactElementType> = ReactElementRef<T>;
+export type ReactRefObject<T = ReactElementType> = {current: ?ReactRef<T>};
+export type ReactRefCallback<T = ReactElementType> = (
+  node: ?ReactRef<T>,
+) => void;
+export type ReactRefProp<T = ReactElementType> =
+  | ReactRefObject<T>
+  | ReactRefCallback<T>;
 
 export const DOWN = 'down';
 export const UP = 'up';
@@ -97,12 +106,13 @@ export type ChangeHandler = (
   state: ScrollState & ScrollMonitorEventState,
 ) => void;
 
-export type ScrollMonitorState = ScrollState &
-  ScrollMonitorEventState & {scrollRef: ReactRef};
+export type ScrollMonitorState = ScrollState & ScrollMonitorEventState;
 
 export type ScrollMonitorProps = {
-  children: (state: ScrollMonitorState) => ReactNode,
-  scrollRef: ?ReactRef,
+  children: (
+    state: ScrollMonitorState & {scrollRef: ReactRefCallback<>},
+  ) => ReactNode,
+  innerRef: ?ReactRefProp<>,
   vertical: ?boolean,
   horizontal: ?boolean,
   direction: ?boolean,

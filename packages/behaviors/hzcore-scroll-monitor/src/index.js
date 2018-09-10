@@ -25,9 +25,12 @@ export const ScrollDirection = {UP, RIGHT, DOWN, LEFT};
 
 const scrollMonitorPropTypes = {
   children: PropTypes.func.isRequired,
-  scrollRef: PropTypes.shape({
-    current: PropTypes.any,
-  }),
+  innerRef: PropTypes.oneOfType([
+    PropTypes.func,
+    PropTypes.shape({
+      current: PropTypes.node,
+    }),
+  ]),
   vertical: PropTypes.bool,
   horizontal: PropTypes.bool,
   direction: PropTypes.bool,
@@ -82,7 +85,6 @@ const initialState = {
   horizontalDirection: null,
   verticalDirection: null,
   scrolling: null,
-  scrollRef: React.createRef(),
 };
 
 const configChanged = (a, b) =>
@@ -99,15 +101,6 @@ export default class ScrollMonitor extends Component<
     onChange: void 0,
     onEnd: void 0,
   };
-  static getDerivedStateFromProps = (
-    props: ScrollMonitorProps,
-    state: ScrollMonitorState,
-  ) => {
-    if (props.scrollRef && props.scrollRef !== state.scrollRef) {
-      return {scrollRef: props.scrollRef};
-    }
-    return null;
-  };
 
   state = {...initialState};
 
@@ -116,14 +109,8 @@ export default class ScrollMonitor extends Component<
     this.subscribeIfNecessary();
   }
 
-  componentDidUpdate(
-    prevProps: ScrollMonitorProps,
-    prevState: ScrollMonitorState,
-  ) {
-    if (
-      prevState.scrollRef !== this.state.scrollRef ||
-      configChanged(prevProps, this.props)
-    ) {
+  componentDidUpdate(prevProps: ScrollMonitorProps) {
+    if (configChanged(prevProps, this.props)) {
       this.unsubscribe();
       this.subscribeIfNecessary();
     }
@@ -137,6 +124,24 @@ export default class ScrollMonitor extends Component<
   uid: string = uuid().slice(0, 8);
   mounted: boolean = false;
   subscription: any = null;
+  scrollRef = React.createRef();
+
+  handleRef = (node: any) => {
+    if (this.scrollRef.current !== node) {
+      this.scrollRef.current = node;
+      this.unsubscribe();
+    }
+    if (this.props.innerRef) {
+      if (typeof this.props.innerRef === 'function') {
+        this.props.innerRef(node);
+      } else {
+        this.props.innerRef.current = node;
+      }
+    }
+    if (node) {
+      this.subscribeIfNecessary();
+    }
+  };
 
   unsubscribe() {
     if (this.subscription) {
@@ -146,8 +151,8 @@ export default class ScrollMonitor extends Component<
   }
 
   subscribeIfNecessary() {
-    if (!this.subscription && this.mounted) {
-      const target = getNode(this.state.scrollRef.current);
+    if (!this.subscription && this.mounted && this.scrollRef.current) {
+      const target = getNode(this.scrollRef.current);
       const scrollingElement = getNearestScrollNode(target);
       if (scrollingElement && target) {
         this.subscription = ScrollState.create(
@@ -165,6 +170,7 @@ export default class ScrollMonitor extends Component<
   render() {
     return this.props.children({
       ...this.state,
+      scrollRef: this.handleRef,
       uid: this.uid,
     });
   }
