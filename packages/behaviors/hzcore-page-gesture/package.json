@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/page-gesture",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "license": "MIT",
@@ -19,6 +19,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.54",
-    "@hzcore/gesture-catcher": "^0.1.4"
+    "@hzcore/gesture-catcher": "^0.1.5"
   }
 }

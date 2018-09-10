@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.5](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.4...@hzcore/page-gesture@0.1.5) (2018-09-10)
+
+
+### @hzcore/page-gesture
+
+* mirror GestureCatcher props directly ([1a079f2](https://github.com/hzdg/hz-core/commit/1a079f2))
+
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.1.4](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.3...@hzcore/page-gesture@0.1.4) (2018-09-06)
 
 

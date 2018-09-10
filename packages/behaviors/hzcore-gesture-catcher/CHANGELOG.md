@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.5](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.4...@hzcore/gesture-catcher@0.1.5) (2018-09-10)
+
+
+### @hzcore/gesture-catcher
+
+* replace gestureRef prop with innerRef ([c70dacd](https://github.com/hzdg/hz-core/commit/c70dacd))
+
+
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
 ## [0.1.4](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.3...@hzcore/gesture-catcher@0.1.4) (2018-09-06)
 
 
