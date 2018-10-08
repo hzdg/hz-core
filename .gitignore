@@ -7,3 +7,4 @@ packages/**/es
 packages/**/umd
 
 lerna-debug.log
+yarn-error.log
