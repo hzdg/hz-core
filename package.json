@@ -15,7 +15,8 @@
     "lint": "eslint ./scripts ./packages & flow check",
     "preversion": "yarn test && yarn build",
     "styleguide": "styleguidist server",
-    "test": "jest"
+    "test": "jest",
+    "create-package": "./scripts/create-package.sh"
   },
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
