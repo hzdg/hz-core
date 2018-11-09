@@ -1,5 +1,5 @@
 {
-  "name": "windowsize-monitor",
+  "name": "@hzcore/windowsize-monitor",
   "version": "0.1.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
