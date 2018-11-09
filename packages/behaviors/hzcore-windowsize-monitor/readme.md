@@ -1,4 +1,4 @@
-# WindowSizeMonitor
+# WindowsizeMonitor
 
 #### To use
 
@@ -8,9 +8,13 @@
 4. Component expects render-prop to be used
 
 ```
-<WindowSizeMonitor>
+<WindowsizeMonitor>
     {({width, height}) => (
-        <div style={{display: width > 1024 && height > 600px ? 'block' : 'none'}} />
+        <div style={{
+            height: '500px',
+            display: width > 1024 && height > 600 ? 'block' : 'none',
+            background: width > 1024 && height > 600 ? 'red' : 'black',
+        }} />
     )}
-</WindowSizeMonitor>
+</WindowsizeMonitor>
 ```

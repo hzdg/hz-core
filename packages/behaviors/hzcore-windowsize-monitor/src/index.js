@@ -27,7 +27,7 @@ const subscriber = {
   },
 };
 
-class ViewportSize extends PureComponent<Props, State> {
+class WindowsizeMonitor extends PureComponent<Props, State> {
   state = {
     width: 0,
     height: 0,
@@ -69,4 +69,4 @@ class ViewportSize extends PureComponent<Props, State> {
   }
 }
 
-export default ViewportSize;
+export default WindowsizeMonitor;
