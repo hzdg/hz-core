@@ -1,0 +1,22 @@
+{
+  "name": "windowsize-monitor",
+  "version": "0.1.0",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "umd"
+  ],
+  "peerDependencies": {
+    "react": "^16.3.1",
+    "react-dom": "^16.3.1"
+  },
+  "dependencies": {
+    "@babel/runtime": "7.1.5"
+  }
+}
