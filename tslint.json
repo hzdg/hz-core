@@ -1,0 +1,15 @@
+{
+  "extends": [
+    "tslint-plugin-prettier",
+    "tslint:latest",
+    "tslint-react",
+    "tslint-eslint-rules",
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "prettier": true,
+    "member-access": false,
+    "member-ordering": false,
+    "interface-name": false
+  }
+}

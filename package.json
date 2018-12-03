@@ -84,6 +84,11 @@
     "rollup-plugin-uglify-es": "0.0.1",
     "symbol-iterator": "1.0.2",
     "tapable": "^1.0.0",
+    "tslint": "5.11.0",
+    "tslint-config-prettier": "1.17.0",
+    "tslint-eslint-rules": "5.4.0",
+    "tslint-plugin-prettier": "2.0.1",
+    "tslint-react": "3.6.0",
     "webpack": "4.17.2",
     "webpack-blocks": "^1.0.0-rc.2",
     "yurnalist": "0.2.1"
