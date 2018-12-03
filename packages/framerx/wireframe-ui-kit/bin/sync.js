@@ -129,7 +129,7 @@ function activity(description, opts = {quiet: false, verbose: false}) {
       this._crud('delete', 'red', srcPath, destPath, isDir);
     },
   });
-};
+}
 
 async function getSrcPath(opts) {
   const reporter = activity('Finding source', opts);
@@ -172,7 +172,11 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
   const reporter = activity(`indexing ${shortpath(srcDir)}`, opts);
   const sourcePaths = patternsToWatch.map(fp => path.join(srcDir, fp));
   return new Promise((resolve, reject) => {
-    const watchOptions = {alwaysStat: true, usePolling: true};
+    const watchOptions = {
+      ignorePermissionErrors: true,
+      alwaysStat: true,
+      usePolling: true,
+    };
     const watcher = chokidar.watch(sourcePaths, watchOptions);
 
     watcher.on('all', (event, srcPath, srcStat) => {
