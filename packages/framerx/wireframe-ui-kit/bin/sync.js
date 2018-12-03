@@ -74,7 +74,7 @@ function withMethods(base, methods) {
   );
 }
 
-const activity = (description, opts = {quiet: false, verbose: false}) => {
+function activity(description, opts = {quiet: false, verbose: false}) {
   const reporter = report.createReporter({
     verbose: opts.verbose,
     isSlient: opts.quiet,
