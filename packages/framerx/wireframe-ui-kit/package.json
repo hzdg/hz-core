@@ -12,7 +12,7 @@
   "repository": "git@github.com:hzdg/hz-core.git",
   "scripts": {
     "sync": "./bin/sync.js",
-    "precommit": "yarn sync"
+    "start": "./bin/sync.js -w"
   },
   "devDependencies": {
     "@types/react": "^16.4.16",
