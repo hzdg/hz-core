@@ -183,8 +183,7 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
       const destPath = srcPath.replace(srcDir, destDir);
 
       switch (event) {
-        case 'add':
-        case 'addDir': {
+        case 'add': {
           if (fs.existsSync(destPath)) {
             const destStat = fs.statSync(destPath);
             if (srcStat.mtime.getTime() > destStat.mtime.getTime()) {
@@ -193,6 +192,20 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
             }
           } else {
             fs.copyFileSync(srcPath, destPath);
+            reporter.add(srcPath, destPath);
+          }
+          break;
+        }
+
+        case 'addDir': {
+          if (fs.existsSync(destPath)) {
+            const destStat = fs.statSync(destPath);
+            if (destStat.mode !== srcStat.mode) {
+              fs.chmodSync(destPath, srcStat.mode);
+              reporter.update(srcPath, destPath);
+            }
+          } else {
+            fs.mkdirSync(destPath, srcStat.mode);
             reporter.add(srcPath, destPath);
           }
           break;
@@ -208,10 +221,17 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
           break;
         }
 
-        case 'unlink':
-        case 'unlinkDir': {
+        case 'unlink': {
           if (fs.existsSync(destPath)) {
             fs.unlinkSync(destPath);
+            reporter.delete(srcPath, destPath);
+          }
+          break;
+        }
+
+        case 'unlinkDir': {
+          if (fs.existsSync(destPath)) {
+            fs.rmdirSync(destPath);
             reporter.delete(srcPath, destPath);
           }
           break;
