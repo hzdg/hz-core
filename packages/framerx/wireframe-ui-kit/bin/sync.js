@@ -21,6 +21,8 @@ const PATHS_TO_SYNC = [
   'yarn.lock',
 ];
 
+const PATHS_TO_IGNORE = ['.dat.nosync*'];
+
 const FRAMERX_CONTAINER_DIRNAME = 'container';
 
 const CWD = process.cwd();
@@ -176,6 +178,7 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
       ignorePermissionErrors: true,
       alwaysStat: true,
       usePolling: true,
+      ignored: PATHS_TO_IGNORE,
     };
     const watcher = chokidar.watch(sourcePaths, watchOptions);
 
