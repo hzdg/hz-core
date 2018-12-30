@@ -13,6 +13,7 @@ const HOME_DIR = require('os').homedir();
 const PATHS_TO_SYNC = [
   'code',
   'design',
+  'lib',
   'metadata',
   'node_modules',
   'package.json',
