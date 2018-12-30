@@ -178,7 +178,6 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
     const watchOptions = {
       ignorePermissionErrors: true,
       alwaysStat: true,
-      usePolling: true,
       ignored: PATHS_TO_IGNORE,
     };
     const watcher = chokidar.watch(sourcePaths, watchOptions);
