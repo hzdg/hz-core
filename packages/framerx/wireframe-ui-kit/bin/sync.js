@@ -21,7 +21,7 @@ const PATHS_TO_SYNC = [
   'yarn.lock',
 ];
 
-const PATHS_TO_IGNORE = ['.dat.nosync*'];
+const PATHS_TO_IGNORE = ['**/.dat.nosync*'];
 
 const FRAMERX_CONTAINER_DIRNAME = 'container';
 
