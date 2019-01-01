@@ -7,6 +7,7 @@ const glob = require('glob');
 const chokidar = require('chokidar');
 const report = require('yurnalist');
 const yargs = require('yargs');
+const XXHash = require('xxhash');
 
 const HOME_DIR = require('os').homedir();
 
@@ -43,6 +44,10 @@ const PROJECT_FILEPATH = fs.realpathSync(
 const AUTOSAVE_DIR = path.resolve(HOME_DIR, 'Library/Autosave Information/');
 
 const AUTOSAVE_PATTERN = path.join(AUTOSAVE_DIR, 'Framer-*/');
+
+function hash(data) {
+  return XXHash.hash(data, 0xedeede);
+}
 
 function shortpath(filepath, isDir) {
   if (!isDir && isDir !== false) {
@@ -171,7 +176,7 @@ async function getFramerXContainerPath(opts) {
   throw error;
 }
 
-function watch(patternsToWatch, srcDir, destDir, opts) {
+function watch(patternsToWatch, srcDir, destDir, hashes, opts) {
   const reporter = activity(`indexing ${shortpath(srcDir)}`, opts);
   const sourcePaths = patternsToWatch.map(fp => path.join(srcDir, fp));
   return new Promise((resolve, reject) => {
@@ -184,18 +189,26 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
 
     watcher.on('all', (event, srcPath, srcStat) => {
       const destPath = srcPath.replace(srcDir, destDir);
+      const commonPath = srcPath.replace(srcDir, '');
 
       switch (event) {
         case 'add': {
+          const srcData = fs.readFileSync(srcPath);
+          const srcHash = hash(srcData);
           if (fs.existsSync(destPath)) {
+            const destData = fs.readFileSync(destPath);
+            const destHash = hash(destData);
             const destStat = fs.statSync(destPath);
-            if (srcStat.mtime.getTime() > destStat.mtime.getTime()) {
-              fs.copyFileSync(srcPath, destPath);
+            if (srcHash !== destHash && srcStat.mtimeMs > destStat.mtimeMs) {
+              fs.writeFileSync(destPath, srcData);
               reporter.update(srcPath, destPath);
             }
           } else {
-            fs.copyFileSync(srcPath, destPath);
+            fs.writeFileSync(destPath, srcData);
             reporter.add(srcPath, destPath);
+          }
+          if (hashes) {
+            hashes[commonPath] = srcHash;
           }
           break;
         }
@@ -215,16 +228,20 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
         }
 
         case 'change': {
-          const destStat = fs.statSync(destPath);
-          if (destStat.size !== srcStat.size) {
-            const srcData = fs.readFileSync(srcPath, 'utf8');
+          const srcData = fs.readFileSync(srcPath);
+          const srcHash = hash(srcData);
+          if (!hashes || srcHash !== hashes[commonPath]) {
             fs.writeFileSync(destPath, srcData);
+            hashes[commonPath] = srcHash;
             reporter.update(srcPath, destPath);
           }
           break;
         }
 
         case 'unlink': {
+          if (hashes) {
+            delete hashes[commonPath];
+          }
           if (fs.existsSync(destPath)) {
             fs.unlinkSync(destPath);
             reporter.delete(srcPath, destPath);
@@ -261,9 +278,10 @@ function watch(patternsToWatch, srcDir, destDir, opts) {
 async function sync(opts = {watch: false, quiet: true, verbose: false}) {
   const srcDir = await getSrcPath(opts);
   const destDir = await getFramerXContainerPath(opts);
+  const hashes = opts.watch ? {} : null;
 
-  const srcWatcher = await watch(PATHS_TO_SYNC, srcDir, destDir, opts);
-  const destWatcher = await watch(PATHS_TO_SYNC, destDir, srcDir, opts);
+  const srcWatcher = await watch(PATHS_TO_SYNC, srcDir, destDir, hashes, opts);
+  const destWatcher = await watch(PATHS_TO_SYNC, destDir, srcDir, hashes, opts);
 
   if (opts.watch) {
     if (!opts.quiet) {
