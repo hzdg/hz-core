@@ -2,12 +2,15 @@
 
 /* eslint-disable no-duplicate-imports */
 // eslint-disable-next-line no-unused-vars
-import React, {PureComponent} from 'react';
+import React, {PureComponent, useState, useEffect} from 'react';
+
+import {throttle} from './utils';
 
 import type {Props, State} from './types';
 
 const events = new Set();
 const onResize = () => events.forEach(fn => fn());
+const isClient = typeof window !== undefined;
 
 const subscriber = {
   subscribe: handler => {
@@ -25,6 +28,35 @@ const subscriber = {
     };
     return subscription;
   },
+};
+
+export const useWindowSize = (
+  options: {throttleMs?: number} = {},
+  initialWidth: number = Infinity,
+  initialHeight: number = Infinity,
+): State => {
+  const {throttleMs = 100} = options;
+
+  const [size, setSize] = useState({
+    width: isClient ? window.innerWidth : initialWidth,
+    height: isClient ? window.innerHeight : initialHeight,
+  });
+
+  const handle = throttle(() => {
+    setSize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+  }, throttleMs);
+
+  useEffect(() => {
+    const subscription = subscriber.subscribe(handle);
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  return size;
 };
 
 class WindowsizeMonitor extends PureComponent<Props, State> {
