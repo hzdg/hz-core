@@ -1,3 +1,6 @@
 {
-  "extends": ["hzdg", "hzdg/jest", "hzdg/react"]
+  "extends": ["hzdg", "hzdg/jest", "hzdg/react"],
+  "env": {
+    "node": true
+  }
 }
