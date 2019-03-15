@@ -9,6 +9,7 @@ export default function useHover({
   mouseLeaveDelayMS = 0,
 }: Props): [boolean, ReturnedHoverProps] {
   const [isHovering, setIsHovering] = useState(false);
+
   let mouseEnterTimer;
   let mouseOutTimer;
 
@@ -20,7 +21,6 @@ export default function useHover({
         mouseEnterDelayMS,
       );
     },
-
     onMouseLeave: () => {
       clearTimeout(mouseEnterTimer);
       mouseOutTimer = setTimeout(() => setIsHovering(false), mouseLeaveDelayMS);
