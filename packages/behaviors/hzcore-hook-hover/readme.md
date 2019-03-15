@@ -1,4 +1,4 @@
-# useHover
+# hook-hover
 
 The hook component to get the hover/focus event props for a component.
 Use it any time you need to apply hover state or a focusable state.
