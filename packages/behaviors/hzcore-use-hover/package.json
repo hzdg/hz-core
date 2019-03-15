@@ -1,0 +1,23 @@
+{
+  "name": "@hzcore/use-hover",
+  "version": "0.0.1",
+  "author": "Andrey Morozov",
+  "license": "MIT",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "umd"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "7.1.5"
+  }
+}
