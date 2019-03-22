@@ -1,15 +1,13 @@
 # hook-hover
 
 The hook component to get the hover/focus event props for a component.
-Use it any time you need to apply hover state or a focusable state.
-Returns a boolean to determine whether the element is being hovered and
-2(optionally 4 event props, if `focusable` argument is passed to the function):
+Use it any time you need to apply hover state to any functional component.
+Returns a boolean to determine whether the element is being hovered and an
+object with 2 event props:
 
 ```
   onMouseEnter
   onMouseLeave
-  onBlur // optional
-  onFocus // optional
 ```
 
 #### To use (requires react v. 16.8+)
@@ -19,7 +17,6 @@ function Box() {
     const [isHovering, hoverProps] = useHover({
         mouseEnterDelayMS: 50,
         mouseLeaveDelayMS: 50,
-        focusable: true,
     });
     return (
         <div

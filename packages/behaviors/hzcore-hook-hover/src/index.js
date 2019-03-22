@@ -2,7 +2,7 @@
 
 import {useState} from 'react';
 
-import type {ReturnedHoverProps, Props} from './types.js';
+import type {ReturnedHoverProps, Props} from './types';
 
 export default function useHover({
   mouseEnterDelayMS = 0,
