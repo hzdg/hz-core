@@ -4553,6 +4553,13 @@ eslint-plugin-eslint-comments@3.1.1:
     escape-string-regexp "^1.0.5"
     ignore "^5.0.5"
 
+eslint-plugin-flowtype@3.4.2:
+  version "3.4.2"
+  resolved "http://npmregistry.hzdg.com/eslint-plugin-flowtype/-/eslint-plugin-flowtype-3.4.2.tgz#55475e10b05fd714d60bceebbbed596cb8706b16"
+  integrity sha512-sv6O6fiN3dIwhU4qRxfcyIpbKGVvsxwIQ6vgBLudpQKjH1rEyEFEOjGzGEUBTQP9J8LdTZm37OjiqZ0ZeFOa6g==
+  dependencies:
+    lodash "^4.17.11"
+
 eslint-plugin-import@2.16.0:
   version "2.16.0"
   resolved "http://npmregistry.hzdg.com/eslint-plugin-import/-/eslint-plugin-import-2.16.0.tgz#97ac3e75d0791c4fac0e15ef388510217be7f66f"
