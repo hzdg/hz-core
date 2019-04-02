@@ -5,6 +5,14 @@ export default {
   public: './static',
   files: '**/*.{md,mdx}',
   typescript: false,
+  ignore: ['**/changelog.*', '**/{animations,simple-actions}/**'],
+  menu: [
+    'About',
+    'Headless Components',
+    'Hooks',
+    'Styled Components',
+    'Utilities',
+  ],
   htmlContext: {
     favicon: 'public/favicon.ico',
   },

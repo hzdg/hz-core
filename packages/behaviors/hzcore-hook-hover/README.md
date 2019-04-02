@@ -1,3 +1,9 @@
+---
+name: useHover
+menu: Hooks
+route: use-hover
+---
+
 # hook-hover
 
 The hook component to get the hover/focus event props for a component.
@@ -34,13 +40,17 @@ function Box() {
 ```
 
 #### Known Issues
+
 `ERROR: Hooks can only be called inside the body of a function component.` First check React's [Invalid Hook Call Warning](https://reactjs.org/warnings/invalid-hook-call-warning.html) page first. Another possible solution would be to add the blow in your webpack config within resolve:
+
 ```
 alias: {
     react: path.resolve('PATH/TO/MY/node_modules/react'),
 },
 ```
+
 If you're using GatsbyJS, you can add the below in `gatsby-node.js`:
+
 ```
 exports.onCreateWebpackConfig = ({stage, actions}) => {
   actions.setWebpackConfig({
@@ -52,4 +62,5 @@ exports.onCreateWebpackConfig = ({stage, actions}) => {
   });
 };
 ```
+
 More info found in https://github.com/facebook/react/issues/13991

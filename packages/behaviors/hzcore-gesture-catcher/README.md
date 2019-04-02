@@ -1,5 +1,10 @@
-GestureCatcher
-==============
+---
+name: GestureCatcher
+menu: Headless Components
+route: gesture-catcher
+---
+
+# GestureCatcher
 
 A component that can detect gestures from mouse, touch, or keyboard inputs.
 This is useful for custom UI like carousels, screen navigations,
@@ -14,10 +19,10 @@ A basic example that shows off all possible gesture inputs
 
 ```js
 <GestureCatcher preventDefault>
-  {({gestureRef, ...props}) => (
-    <div tabIndex={1} ref={gestureRef}>
-      <pre>{JSON.stringify(props, null, 2)}</pre>
-    </div>
-  )}
+    {({gestureRef, ...props}) => (
+        <div tabIndex={1} ref={gestureRef}>
+            <pre>{JSON.stringify(props, null, 2)}</pre>
+        </div>
+    )}
 </GestureCatcher>
 ```

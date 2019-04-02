@@ -1,3 +1,9 @@
+---
+name: WindowsizeMonitor
+menu: Headless Components
+route: windowsize-monitor
+---
+
 # WindowsizeMonitor
 
 The component is used to determine the size(width & height) of the window. Some
