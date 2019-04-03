@@ -1,5 +1,6 @@
 .docz
 .env
+.netlify
 node_modules
 build
 dist
