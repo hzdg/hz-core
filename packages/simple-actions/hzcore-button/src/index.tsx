@@ -1,32 +1,28 @@
-// @flow
 import React, {Component} from 'react';
 
-// eslint-disable-next-line no-duplicate-imports
-import type {Element} from 'react';
+export interface State {
+  hover: boolean;
+}
 
-type State = {
-  hover: boolean,
-};
-
-type Props = {
+export interface Props {
   /**
    * A callback for handling Button hover state changes.
    * This may be useful (for example) for synchronizing
    * external state with the Button's hover state.
    */
-  onHoverChange?: (value: boolean) => void,
+  onHoverChange?: (value: boolean) => void;
   /**
    * The Button 'render prop'. This should take `RenderProps`
    * as it's only argument, and return a valid React Element.
    */
-  render: (props: RenderProps) => Element<*>,
-};
+  render: (props: RenderProps) => JSX.Element;
+}
 
-type RenderProps = State & {
+export type RenderProps = State & {
   /**
    * A callback for updating Button hover state.
    */
-  setHover: (value: boolean) => void,
+  setHover: (value: boolean) => void;
 };
 
 /**
@@ -47,10 +43,12 @@ class Button extends Component<Props, State> {
   }
 
   handleSetHover = (hover: boolean) => {
-    this.setState((state: State): ?State => {
-      if (hover === state.hover) return null;
-      return {...state, hover};
-    });
+    this.setState(
+      (state: State): State | null => {
+        if (hover === state.hover) return null;
+        return {...state, hover};
+      },
+    );
   };
 
   render() {

@@ -3,11 +3,13 @@
   "version": "0.0.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
+  "typings": "es/index.tsx",
   "license": "MIT",
   "private": true,
   "files": [
     "cjs",
     "es",
+    "src",
     "umd"
   ],
   "dependencies": {
