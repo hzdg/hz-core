@@ -1,46 +1,42 @@
-// @flow
 import React, {Component} from 'react';
 import {Motion, spring} from 'react-motion';
 
-// eslint-disable-next-line no-duplicate-imports
-import type {Element} from 'react';
+export type Direction = 'Up' | 'Down' | 'Left' | 'Right';
 
-type Direction = 'Up' | 'Down' | 'Left' | 'Right';
-
-type Props = {
+export interface Props {
   /**
    * The direction for the content to move into view. <br />
    * Valid Directions are: "Up", "Down", "Left", "Right"
    */
-  direction: Direction,
+  direction: Direction;
   /**
    * Control whether not item should be active
    */
-  activate?: boolean,
+  activate: boolean;
   /**
    * Initial position of content before it fades into view
    */
-  offsetPosition?: number,
+  offsetPosition: number;
   /**
    * The function "render prop". The props fed into this function are: <br />
    * `{...this.props, ...this.state, handlers}`
    */
-  render: (props: RenderProps) => Element<*>,
-};
+  render: (props: RenderProps) => JSX.Element;
+}
 
-type State = {
-  activate?: boolean,
-  isRest: boolean,
-};
+export interface State {
+  activate?: boolean;
+  isRest: boolean;
+}
 
 /**
  * RenderProps
  */
-type RenderProps = State & {
+export type RenderProps = State & {
   /**
    * A callback for updating Button active state.
    */
-  setActive: (activeValue: boolean) => void,
+  setActive: (activeValue: boolean) => void;
 };
 
 /**
@@ -58,7 +54,7 @@ class FadeIntoView extends Component<Props, State> {
     activate: this.props.activate,
   };
 
-  getDirectionStyle(transformNum: string) {
+  getDirectionStyle(transformNum: number) {
     switch (this.props.direction) {
       case 'Up':
         return `translateY(${transformNum}px)`;
@@ -78,10 +74,12 @@ class FadeIntoView extends Component<Props, State> {
   };
 
   handleSetActive = (activate: boolean) => {
-    this.setState((state: State): ?State => {
-      if (activate === state.activate) return null;
-      return {...state, activate};
-    });
+    this.setState(
+      (state: State): State | null => {
+        if (activate === state.activate) return null;
+        return {...state, activate};
+      },
+    );
   };
 
   render() {
