@@ -1,5 +1,4 @@
-/* eslint-disable max-lines */
-/* eslint-env jest */
+/* eslint-env jest, browser */
 import GestureObservable from '../GestureObservable';
 import {
   GestureHistory,

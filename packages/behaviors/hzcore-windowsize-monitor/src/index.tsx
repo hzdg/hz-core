@@ -1,19 +1,17 @@
-// @flow
-
-/* eslint-disable no-duplicate-imports */
-// eslint-disable-next-line no-unused-vars
 import React, {PureComponent, useState, useEffect} from 'react';
 
 import {throttle} from './utils';
 
-import type {Props, State} from './types';
+import {Props, State} from './types';
+
+export * from './types';
 
 const events = new Set();
 const onResize = () => events.forEach(fn => fn());
 const isClient = typeof window !== undefined;
 
 const subscriber = {
-  subscribe: handler => {
+  subscribe: (handler: () => void) => {
     if (events.size === 0) {
       window.addEventListener('resize', onResize);
     }

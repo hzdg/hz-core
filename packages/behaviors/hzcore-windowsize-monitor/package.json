@@ -3,6 +3,7 @@
   "version": "0.1.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
+  "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
@@ -10,6 +11,7 @@
   "files": [
     "cjs",
     "es",
+    "src",
     "umd"
   ],
   "peerDependencies": {
