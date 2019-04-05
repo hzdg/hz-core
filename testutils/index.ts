@@ -1,4 +1,3 @@
-// @flow
 export {default as sleep} from './sleep';
 export {default as hasProperty} from './hasProperty';
 export {default as getFlag} from './getFlag';

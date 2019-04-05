@@ -1,4 +1,4 @@
-/* eslint-env jest */
+/* eslint-env jest, browser */
 import KeyboardSequence from '../KeyboardSequence';
 
 beforeEach(() => {
@@ -46,11 +46,11 @@ test('KeyboardSequence.down() reveals subsequence', async () => {
   ];
 
   for (let i = 0; i < expectedOrder.length; i++) {
-    expect(handler).nthCalledWith(i + 1, expect.any(KeyboardEvent));
-    expect(handler).nthCalledWith(i + 1, expectedOrder[i]);
+    expect(handler).toHaveBeenNthCalledWith(i + 1, expect.any(KeyboardEvent));
+    expect(handler).toHaveBeenNthCalledWith(i + 1, expectedOrder[i]);
   }
 
-  expect(handler).lastCalledWith(expectedOrder);
+  expect(handler).toHaveBeenLastCalledWith(expectedOrder);
 });
 
 test('KeyboardSequence.repeat().up() builds on initialized down()', async () => {

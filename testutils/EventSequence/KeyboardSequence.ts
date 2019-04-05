@@ -1,4 +1,3 @@
-// @flow
 /* eslint-env jest */
 import {
   KEY_DOWN,
@@ -24,22 +23,19 @@ import {getFlag, getValue} from '..';
 
 type KeyboardEventType = typeof KEY_DOWN | typeof KEY_UP;
 
-type KeyboardEventInit = {
-  key?: string,
-  ctrlKey?: boolean,
-  shiftKey?: boolean,
-  altKey?: boolean,
-  metaKey?: boolean,
+type UnnormalizedKeyboardEventInit = KeyboardEventInit & {
+  keyCode?: number;
+  which?: number;
+  charCode?: number;
 };
 
-type KeyboardDownEventInit = {
-  ...KeyboardEventInit,
-  key: string,
+type KeyboardDownEventInit = UnnormalizedKeyboardEventInit & {
+  key: string;
 };
 
 type KeyboardDownSequence = EventSequence & {
-  repeat(): KeyboardDownSequence,
-  up(): KeyboardSequence,
+  repeat(): KeyboardDownSequence;
+  up(): KeyboardSequence;
 };
 
 function getCode(key: string): string {
@@ -48,7 +44,7 @@ function getCode(key: string): string {
   return `key${key.toUpperCase()}`;
 }
 
-function getKeyCode(key: string): string {
+function getKeyCode(key: string): number {
   const code = getCode(key);
   if (CODES.includes(code)) {
     return CODES_2_KEY_CODES[code];
@@ -56,14 +52,14 @@ function getKeyCode(key: string): string {
   return key.charCodeAt(0);
 }
 
-function getWhich(key: string): string {
+function getWhich(key: string): number {
   return getKeyCode(key);
 }
 
 function normalizeKeyboardEventInit(
-  init: KeyboardEventInit,
+  init: UnnormalizedKeyboardEventInit,
   from: KeyboardEvent,
-): Event$Init & KeyboardEventInit {
+): EventInit & UnnormalizedKeyboardEventInit {
   const key = getValue(init, 'key', from.key);
   return {
     key,
@@ -77,7 +73,6 @@ function normalizeKeyboardEventInit(
     metaKey: getFlag(init, 'metaKey', from.metaKey),
     location: getValue(init, 'location', from.location),
     repeat: getFlag(init, 'repeat', false),
-    isComposing: getValue(init, 'isComposing', from.isComposing),
     bubbles: true,
     cancelable: true,
     view: window,
@@ -86,8 +81,8 @@ function normalizeKeyboardEventInit(
 export default class KeyboardSequence extends EventSequence {
   static createNextEvent(
     type: KeyboardEventType,
-    init: KeyboardEventInit = {},
-    lastEvent?: ?KeyboardEvent,
+    init: UnnormalizedKeyboardEventInit = {},
+    lastEvent?: KeyboardEvent | undefined,
   ): KeyboardEvent {
     return new KeyboardEvent(
       type,

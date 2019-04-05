@@ -1,4 +1,3 @@
-// @flow
 /* eslint-env jest */
 import {WHEEL, DOM_DELTA_PIXEL, DOM_DELTA_LINE, DOM_DELTA_PAGE} from './types';
 import EventSequence from './EventSequence';
@@ -11,17 +10,6 @@ type WheelDeltaMode =
   | typeof DOM_DELTA_LINE
   | typeof DOM_DELTA_PAGE;
 
-type WheelEventInit = {
-  deltaX?: number,
-  deltaY?: number,
-  deltaZ?: number,
-  deltaMode?: WheelDeltaMode,
-  ctrlKey?: boolean,
-  shiftKey?: boolean,
-  altKey?: boolean,
-  metaKey?: boolean,
-};
-
 const DEFAULT_WHEEL_EVENT_INIT = {
   deltaX: 0,
   deltaY: 1,
@@ -33,10 +21,22 @@ const DEFAULT_WHEEL_EVENT_INIT = {
   metaKey: false,
 };
 
+function getDeltaMode(init: WheelEventInit, fromMode: number): WheelDeltaMode {
+  const deltaMode = getValue(init, 'deltaMode', fromMode);
+  if (
+    deltaMode === DOM_DELTA_PIXEL ||
+    deltaMode === DOM_DELTA_LINE ||
+    deltaMode === DOM_DELTA_PAGE
+  ) {
+    return deltaMode;
+  }
+  return DOM_DELTA_PIXEL;
+}
+
 function normalizeWheelEventInit(
   init: WheelEventInit,
   from: WheelEvent,
-): MouseEvent$MouseEventInit & WheelEventInit {
+): MouseEventInit & WheelEventInit {
   const deltaY = getValue(
     init,
     'deltaY',
@@ -56,7 +56,7 @@ function normalizeWheelEventInit(
     deltaX: getValue(init, 'deltaX', DEFAULT_WHEEL_EVENT_INIT.deltaX),
     deltaY,
     deltaZ: getValue(init, 'deltaZ', DEFAULT_WHEEL_EVENT_INIT.deltaZ),
-    deltaMode: getValue(init, 'deltaMode', from.deltaMode),
+    deltaMode: getDeltaMode(init, from.deltaMode),
   };
 }
 
@@ -64,7 +64,7 @@ export default class WheelSequence extends EventSequence {
   static createNextEvent(
     type: WheelEventType,
     init: WheelEventInit = {},
-    lastEvent?: ?WheelEvent,
+    lastEvent?: WheelEvent | null,
   ): WheelEvent {
     return new WheelEvent(
       type,

@@ -1,4 +1,3 @@
-// @flow
 /* eslint-env jest */
 import {MOUSE_DOWN, MOUSE_MOVE, MOUSE_UP} from './types';
 import EventSequence from './EventSequence';
@@ -6,30 +5,14 @@ import {getFlag, getValue} from '..';
 
 type MouseEventType = typeof MOUSE_DOWN | typeof MOUSE_MOVE | typeof MOUSE_UP;
 
-type MouseEventInit = {
-  screenX?: number,
-  screenY?: number,
-  clientX?: number,
-  clientY?: number,
-  ctrlKey?: boolean,
-  shiftKey?: boolean,
-  altKey?: boolean,
-  metaKey?: boolean,
-  button?: number,
-};
-
-type MouseMoveEventInit = {
-  screenX?: number,
-  screenY?: number,
-  clientX?: number,
-  clientY?: number,
-  x?: number,
-  y?: number,
+type UnnormalizedMouseEventInit = MouseEventInit & {
+  x?: number;
+  y?: number;
 };
 
 type MouseDownSequence = EventSequence & {
-  move(opts: MouseMoveEventInit): MouseDownSequence,
-  up(): MouseSequence,
+  move(opts: UnnormalizedMouseEventInit): MouseDownSequence;
+  up(): MouseSequence;
 };
 
 const DEFAULT_MOUSE_EVENT_INIT = {
@@ -45,9 +28,9 @@ const DEFAULT_MOUSE_EVENT_INIT = {
 };
 
 function normalizeMouseEventInit(
-  init: MouseEventInit | MouseMoveEventInit,
+  init: UnnormalizedMouseEventInit,
   from: MouseEvent,
-): MouseEvent$MouseEventInit {
+): MouseEventInit {
   const clientX = getValue(init, 'clientX', getValue(init, 'x', from.clientX));
   const clientY = getValue(init, 'clientY', getValue(init, 'y', from.clientY));
   const screenX = getValue(
@@ -79,8 +62,8 @@ function normalizeMouseEventInit(
 export default class MouseSequence extends EventSequence {
   static createNextEvent(
     type: MouseEventType,
-    init: MouseEventInit | MouseMoveEventInit = {},
-    lastEvent?: ?MouseEvent,
+    init: MouseEventInit | UnnormalizedMouseEventInit = {},
+    lastEvent?: MouseEvent | null,
   ): MouseEvent {
     return new MouseEvent(
       type,
@@ -96,7 +79,7 @@ export default class MouseSequence extends EventSequence {
       downOpts,
     ).expose({
       down: false,
-      move: (moveOpts: MouseMoveEventInit): MouseDownSequence =>
+      move: (moveOpts: UnnormalizedMouseEventInit): MouseDownSequence =>
         downSequence.dispatch(MOUSE_MOVE, moveOpts),
       up: (): MouseSequence => this.dispatch(MOUSE_UP),
     });

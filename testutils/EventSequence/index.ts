@@ -1,4 +1,3 @@
-// @flow
 /* eslint-env jest */
 export {default, default as EventSequence} from './EventSequence';
 export {default as MouseSequence} from './MouseSequence';

@@ -1,4 +1,3 @@
-// @flow
 import getValue from './getValue';
 
 export default function getFlag(

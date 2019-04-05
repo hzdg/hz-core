@@ -1,4 +1,4 @@
-/* eslint-env jest */
+/* eslint-env jest, browser */
 import GestureHistory from '../GestureHistory';
 
 test('GestureHistory gets accurate size', () => {

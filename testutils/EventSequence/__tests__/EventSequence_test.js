@@ -1,4 +1,4 @@
-/* eslint-env jest */
+/* eslint-env jest, browser */
 import EventSequence from '../EventSequence';
 
 beforeEach(() => {
@@ -20,10 +20,16 @@ test('EventSequence', async () => {
   node.removeEventListener('start', handler);
   node.removeEventListener('end', handler);
 
-  expect(handler).toBeCalledTimes(3);
-  expect(handler).nthCalledWith(1, expect.objectContaining({type: 'start'}));
-  expect(handler).nthCalledWith(2, expect.objectContaining({type: 'end'}));
-  expect(handler).lastCalledWith([
+  expect(handler).toHaveBeenCalledTimes(3);
+  expect(handler).toHaveBeenNthCalledWith(
+    1,
+    expect.objectContaining({type: 'start'}),
+  );
+  expect(handler).toHaveBeenNthCalledWith(
+    2,
+    expect.objectContaining({type: 'end'}),
+  );
+  expect(handler).toHaveBeenLastCalledWith([
     expect.objectContaining({type: 'start'}),
     expect.objectContaining({type: 'end'}),
   ]);

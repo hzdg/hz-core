@@ -1,4 +1,3 @@
-// @flow
 export const WHEEL = 'wheel';
 export const MOUSE_DOWN = 'mousedown';
 export const MOUSE_MOVE = 'mousemove';
@@ -50,7 +49,7 @@ export const CODES = [
   ESCAPE,
 ];
 
-export const CODES_2_KEY_CODES = {
+export const CODES_2_KEY_CODES: Record<string, number> = {
   [ENTER]: 13,
   [TAB]: 9,
   [SPACE]: 32,
