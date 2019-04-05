@@ -1,6 +1,6 @@
 {
   "extends": "eslint-config-hzdg/tsconfig",
   "compilerOptions": {
-    "target": "es5"
+    "target": "es6"
   }
 }
