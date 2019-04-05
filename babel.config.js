@@ -22,7 +22,7 @@ module.exports = {
         modules: false,
       },
     ],
-    '@babel/preset-flow',
+    '@babel/preset-typescript',
     '@babel/preset-react',
   ],
   plugins: [

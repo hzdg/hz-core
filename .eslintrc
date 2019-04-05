@@ -1,8 +1,6 @@
 {
-  "extends": ["hzdg", "hzdg/jest", "hzdg/react"],
-  "plugins": ["flowtype"],
+  "extends": ["hzdg", "hzdg/jest", "hzdg/react", "hzdg/typescript"],
   "env": {
     "node": true
-  },
-  "parser": "babel-eslint"
+  }
 }
