@@ -1,6 +1,7 @@
 {
   "extends": "eslint-config-hzdg/tsconfig",
   "compilerOptions": {
+    "moduleResolution": "node",
     "target": "es6"
   }
 }
