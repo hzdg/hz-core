@@ -1,15 +1,14 @@
-// @flow
 import Debug from 'debug';
 import {Observable, getViewportChanges} from './utils';
 
-import type {ViewportConfig, ObserverSet} from './types';
+import {ViewportConfig, ObserverSet, Observer, ViewportChange} from './types';
 
 type TargetMap = Map<Element, ObserverSet>;
 type IntersectionConfig = {
-  intersection: IntersectionObserver,
-  targets: TargetMap,
+  intersection: IntersectionObserver;
+  targets: TargetMap;
 };
-type IntersectionConfigs = {[key: ?string]: IntersectionConfig};
+type IntersectionConfigs = Record<string, IntersectionConfig>;
 type ElementMap = Map<HTMLElement | Document, IntersectionConfigs>;
 
 const debug = Debug('ScrollMonitor:viewport');
@@ -19,7 +18,7 @@ const elementMap: ElementMap = new Map();
 export function create(
   element: HTMLElement | Document,
   config: ViewportConfig,
-): Observable {
+): Observable<{intersection: ViewportChange}> {
   const {threshold, target} = config;
   const configs: IntersectionConfigs = elementMap.get(element) || {};
 
@@ -30,13 +29,15 @@ export function create(
 
   const key =
     threshold === null
-      ? null
+      ? '0'
       : Array.isArray(threshold)
-        ? threshold.join()
-        : typeof threshold === 'number' ? threshold.toString() : null;
+      ? threshold.join()
+      : typeof threshold === 'number'
+      ? threshold.toString()
+      : '0';
 
   if (!configs[key]) {
-    debug(`Creating observer for threshold ${(key: any)}`, element);
+    debug(`Creating observer for threshold ${key}`, element);
     configs[key] = createIntersectionConfig(element, threshold);
   }
 
@@ -54,38 +55,36 @@ export function create(
     }
     debug('Subscribing to viewport events', element, observer);
     observers.add(observer);
-    return {
-      unsubscribe() {
-        debug('Unsubscribing from viewport events', element, observer);
-        observers.delete(observer);
-        if (!observers.size) {
-          targets.delete(target);
-          if (!targets.size) {
-            debug('Disconnecting intersection', element, target, threshold);
-            intersection.disconnect();
-            delete configs[key];
-            if (!Object.keys(configs).length) {
-              debug('Cleaning up element map', element);
-              elementMap.delete(element);
-            }
+    return function unsubscribe() {
+      debug('Unsubscribing from viewport events', element, observer);
+      observers.delete(observer);
+      if (!observers.size) {
+        targets.delete(target);
+        if (!targets.size) {
+          debug('Disconnecting intersection', element, target, threshold);
+          intersection.disconnect();
+          delete configs[key];
+          if (!Object.keys(configs).length) {
+            debug('Cleaning up element map', element);
+            elementMap.delete(element);
           }
         }
-      },
+      }
     };
   });
 }
 
 function createIntersectionConfig(
   element: HTMLElement | Document,
-  threshold: ?(number | number[]),
+  threshold: number | number[] | null,
 ): IntersectionConfig {
   const targets = new Map();
 
-  function handleIntersectionChange(entries) {
+  function handleIntersectionChange(entries: IntersectionObserverEntry[]) {
     getViewportChanges(entries).forEach(intersection => {
       const observers = targets.get(intersection.target);
       if (observers) {
-        observers.forEach(observer => {
+        observers.forEach((observer: Observer) => {
           // FIXME: no array needed here any more.
           observer.next({intersection});
         });

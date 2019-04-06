@@ -1,13 +1,11 @@
-// @flow
-/* eslint-disable no-duplicate-imports */
 import Debug from 'debug';
 import ScrollObservable from './ScrollObservable';
 import ViewportObservable from './ViewportObservable';
 import EventState from './EventState';
 import {Observable} from './utils';
-import {SCROLL_PROPS} from './types';
+import {SCROLL_PROPS, Observer} from './types';
 
-import type {
+import {
   ObserverSet,
   Subscription,
   ScrollMonitorConfig,
@@ -19,7 +17,7 @@ import type {
 export function create(
   element: HTMLElement | Document,
   config: ScrollMonitorConfig,
-): Observable {
+): Observable<ScrollState> {
   const debug = Debug(`ScrollMonitor:uid:${config.uid}`);
   const observers: ObserverSet = new Set();
   const subscriptions: Set<Subscription> = new Set();
@@ -27,11 +25,11 @@ export function create(
   const eventState = EventState.create(config);
 
   let scrollState: ScrollState = {};
-  let updatePending: boolean = false;
+  let updatePending: boolean | number = false;
 
   function reset() {
     debug(`canceling update; clearing ${eventsToDispatch.size} events`);
-    window.cancelAnimationFrame(updatePending);
+    window.cancelAnimationFrame(updatePending as number);
     updatePending = false;
     eventsToDispatch.clear();
     scrollState = {};
@@ -93,7 +91,7 @@ export function create(
     // Dispatch the state change, or schedule a dispatch,
     // if not updating asynchronously (default).
     if (immediate) {
-      window.cancelAnimationFrame(updatePending);
+      window.cancelAnimationFrame(updatePending as number);
       updatePending = false;
       dispatch();
     } else if (!updatePending) {
@@ -106,7 +104,7 @@ export function create(
     }
   }
 
-  return new Observable(observer => {
+  return new Observable((observer: Observer) => {
     if (!observers.size) {
       if (SCROLL_PROPS.some(p => Boolean(config[p]))) {
         subscriptions.add(ScrollObservable.create(element).subscribe(update));
@@ -122,18 +120,16 @@ export function create(
     debug('Subscribing to scroll state', element, config);
     observers.add(observer);
 
-    return {
-      unsubscribe() {
-        debug('Unsubscribing from scroll state', element, config);
-        observers.delete(observer);
-        if (!observers.size) {
-          for (const sub of subscriptions) {
-            sub.unsubscribe();
-          }
-          subscriptions.clear();
-          reset();
+    return function unsubscribe() {
+      debug('Unsubscribing from scroll state', element, config);
+      observers.delete(observer);
+      if (!observers.size) {
+        for (const sub of subscriptions) {
+          sub.unsubscribe();
         }
-      },
+        subscriptions.clear();
+        reset();
+      }
     };
   });
 }

@@ -1,23 +1,22 @@
-// @flow
 import Debug from 'debug';
 import {Observable, getScrollRect} from './utils';
 
-import type {ObserverSet} from './types';
+import {ObserverSet, ScrollRect, Observer} from './types';
 
 // TODO: Find the smallest timeout that won't ever get tricked by inertia.
 const SCROLL_TIMEOUT = 60;
 const SCROLL = 'scroll';
-const LISTENER_OPTIONS = {passive: true};
+const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
 
 const debug = Debug('ScrollMonitor:scroll');
 
 const elements: Map<
   HTMLElement | Document,
-  {observers: ObserverSet, handler(event: Event): void},
+  {observers: ObserverSet; handler(event: Event): void}
 > = new Map();
 
-function createScrollHandler(element) {
-  let scrollTimeoutPending: ?(TimeoutID | false);
+function createScrollHandler(element: HTMLElement | Document) {
+  let scrollTimeoutPending: NodeJS.Timeout | false | null;
 
   const handleScrollTimeout = () => {
     if (scrollTimeoutPending) {
@@ -55,8 +54,10 @@ function createScrollHandler(element) {
   return handleScroll;
 }
 
-export function create(element: HTMLElement | Document): Observable {
-  return new Observable(observer => {
+export function create(
+  element: HTMLElement | Document,
+): Observable<{rect: ScrollRect}> {
+  return new Observable((observer: Observer) => {
     let elementConfig = elements.get(element);
     if (!elementConfig) {
       debug('Creating scroll event listener', element);
@@ -72,19 +73,17 @@ export function create(element: HTMLElement | Document): Observable {
     // Give the observer the current value;
     observer.next({scrolling: false, rect: getScrollRect(element)});
 
-    return {
-      unsubscribe() {
-        if (elementConfig) {
-          debug('Unsubscribing from scroll events', element, observer);
-          const {observers, handler} = elementConfig;
-          observers.delete(observer);
-          if (!observers.size) {
-            debug('No observers left! Cleaning up scroll listener...', element);
-            element.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
-            elements.delete(element);
-          }
+    return function unsubscribe() {
+      if (elementConfig) {
+        debug('Unsubscribing from scroll events', element, observer);
+        const {observers, handler} = elementConfig;
+        observers.delete(observer);
+        if (!observers.size) {
+          debug('No observers left! Cleaning up scroll listener...', element);
+          element.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
+          elements.delete(element);
         }
-      },
+      }
     };
   });
 }

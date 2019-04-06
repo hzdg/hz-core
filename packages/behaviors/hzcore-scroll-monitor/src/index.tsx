@@ -1,18 +1,30 @@
-// @flow
-/* eslint-disable no-duplicate-imports, react/no-unused-prop-types */
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import shallowEqual from 'shallowequal';
 import {uuid} from './utils';
 import ScrollState from './ScrollState';
 
-import {UP, RIGHT, DOWN, LEFT, CONFIG_SHAPE} from './types';
-
-import type {
+import {
+  UP,
+  RIGHT,
+  DOWN,
+  LEFT,
+  CONFIG_SHAPE,
   ScrollMonitorConfig,
   ScrollMonitorProps,
   ScrollMonitorState,
 } from './types';
+
+export {
+  UP,
+  RIGHT,
+  DOWN,
+  LEFT,
+  CONFIG_SHAPE,
+  ScrollMonitorConfig,
+  ScrollMonitorProps,
+  ScrollMonitorState,
+};
 
 // Uncomment to enable debugging.
 // TODO: Babel plugin to DCE debug statements in production.
@@ -87,12 +99,12 @@ const initialState = {
   scrolling: null,
 };
 
-const configChanged = (a, b) =>
+const configChanged = (a: any, b: any) =>
   CONFIG_SHAPE.some(k => !shallowEqual(a[k], b[k]));
 
 export default class ScrollMonitor extends Component<
   ScrollMonitorProps,
-  ScrollMonitorState,
+  ScrollMonitorState
 > {
   static propTypes = scrollMonitorPropTypes;
   static defaultProps = {
@@ -124,7 +136,7 @@ export default class ScrollMonitor extends Component<
   uid: string = uuid().slice(0, 8);
   mounted: boolean = false;
   subscription: any = null;
-  scrollRef = React.createRef();
+  scrollRef = React.createRef() as React.MutableRefObject<any>;
 
   handleRef = (node: any) => {
     if (this.scrollRef.current !== node) {
@@ -208,9 +220,10 @@ function getObservableConfig(
     config.bounds = bounds;
     // eslint-disable-next-line eqeqeq
     if (
-      viewport === true ||
-      typeof viewport === 'number' ||
-      Array.isArray(viewport)
+      (viewport === true ||
+        typeof viewport === 'number' ||
+        Array.isArray(viewport)) &&
+      node instanceof HTMLElement
     ) {
       config.viewport = {
         target: node,
@@ -223,12 +236,12 @@ function getObservableConfig(
   return config;
 }
 
-function getNode(node: any): ?Node {
+function getNode(node: any): Node | null {
   ({node = node.element || node} = node);
   return node;
 }
 
-function getNearestScrollNode(node): ?(HTMLElement | Document) {
+function getNearestScrollNode(node: any): HTMLElement | Document | null {
   node = getNode(node);
   if (node instanceof Document) return node;
   if (!(node instanceof HTMLElement)) return null;

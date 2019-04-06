@@ -1,5 +1,4 @@
 /* eslint-disable max-lines */
-// @flow
 import warning from 'warning';
 import Debug from 'debug';
 import shallowEqual from 'shallowequal';
@@ -15,10 +14,12 @@ import {
   HORIZONTAL_POSITION_CHANGE,
   IN_BOUNDS,
   IN_VIEWPORT,
+  ScrollMonitorDidChange,
+  isBoundsConfig,
+  isViewportConfig,
 } from './types';
 
-/* eslint-disable no-duplicate-imports */
-import type {
+import {
   BoundsConfig,
   BoundsRect,
   EventStateStore,
@@ -33,12 +34,11 @@ import type {
   ViewportConfig,
   ChangeHandler,
 } from './types';
-/* eslint-enable no-duplicate-imports */
 
 export function create(config: ScrollMonitorConfig): EventStateStore {
   const debug = Debug(`ScrollMonitor:uid:${config.uid}`);
   const configs = [];
-  const initialEventState = {};
+  const initialEventState: ScrollMonitorEventState = {};
   const changeHandler = config.onChange
     ? createDebouncedChangeHandler(config.onChange)
     : null;
@@ -164,12 +164,12 @@ export function create(config: ScrollMonitorConfig): EventStateStore {
  */
 function createEventConfig(
   event: ScrollMonitorEvent,
-  config: ?(BoundsConfig | ViewportConfig),
-  onUpdate: ?ChangeHandler,
+  config: BoundsConfig | ViewportConfig | null,
+  onUpdate: ChangeHandler | null,
   debug: Function,
 ): ScrollMonitorEventConfig {
   // Default shouldUpdate always does nothing.
-  let shouldUpdate = () => void 0;
+  let shouldUpdate: ScrollMonitorChangeChecker = () => undefined;
 
   switch (event) {
     case SCROLLING_CHANGE: {
@@ -193,19 +193,15 @@ function createEventConfig(
       break;
     }
     case IN_BOUNDS: {
-      if (config)
-        shouldUpdate = createBoundsChangeChecker(
-          ((config: any): BoundsConfig),
-          debug,
-        );
+      if (isBoundsConfig(config)) {
+        shouldUpdate = createBoundsChangeChecker(config, debug);
+      }
       break;
     }
     case IN_VIEWPORT: {
-      if (config)
-        shouldUpdate = createViewportChangeChecker(
-          ((config: any): ViewportConfig),
-          debug,
-        );
+      if (isViewportConfig(config)) {
+        shouldUpdate = createViewportChangeChecker(config, debug);
+      }
       break;
     }
     default: {
@@ -237,7 +233,7 @@ function createScrollingChangeChecker(
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?boolean => {
+  ): ScrollMonitorDidChange => {
     const {scrolling} = payload;
     if (scrolling == null) return false; // eslint-disable-line eqeqeq
     if (scrolling === eventState.scrolling) {
@@ -257,7 +253,7 @@ function createVerticalDirectionChangeChecker(
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?boolean => {
+  ): ScrollMonitorDidChange => {
     const {rect} = payload;
     if (!rect) return false;
     const {top} = rect;
@@ -285,7 +281,7 @@ function createHorizontalDirectionChangeChecker(
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?boolean => {
+  ): ScrollMonitorDidChange => {
     const {rect} = payload;
     if (!rect) return false;
     const {left} = rect;
@@ -309,7 +305,10 @@ function createHorizontalDirectionChangeChecker(
 function createVerticalPositionChangeChecker(
   debug: Function,
 ): ScrollMonitorChangeChecker {
-  return (payload: UpdatePayload, scrollState: ScrollState): ?boolean => {
+  return (
+    payload: UpdatePayload,
+    scrollState: ScrollState,
+  ): ScrollMonitorDidChange => {
     const {rect} = payload;
     if (!rect) return false;
     const {top} = rect;
@@ -323,7 +322,10 @@ function createVerticalPositionChangeChecker(
 function createHorizontalPositionChangeChecker(
   debug: Function,
 ): ScrollMonitorChangeChecker {
-  return (payload: UpdatePayload, scrollState: ScrollState): ?boolean => {
+  return (
+    payload: UpdatePayload,
+    scrollState: ScrollState,
+  ): ScrollMonitorDidChange => {
     const {rect} = payload;
     if (!rect) return false;
     const {left} = rect;
@@ -342,7 +344,7 @@ function createBoundsChangeChecker(
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?boolean => {
+  ): ScrollMonitorDidChange => {
     const {rect} = payload;
     if (!rect) return false;
     if (Array.isArray(config)) {
@@ -397,7 +399,7 @@ function createViewportChangeChecker(
     payload: UpdatePayload,
     scrollState: ScrollState,
     eventState: ScrollMonitorEventState,
-  ): ?boolean => {
+  ): ScrollMonitorDidChange => {
     const {intersection} = payload;
     if (!intersection) return;
     if (eventState.inViewport !== intersection.inViewport) {
