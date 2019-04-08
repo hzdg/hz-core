@@ -1,5 +1,4 @@
-/* eslint-disable react/no-multi-comp, no-duplicate-imports, max-lines */
-// @flow
+/* eslint-disable react/no-multi-comp, max-lines */
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import GestureCatcher, {
@@ -15,7 +14,13 @@ import GestureCatcher, {
   ARROW_DOWN,
   KEY_DOWN,
   WHEEL,
+  GestureState,
+  GestureCatcherConfig,
+  GestureCatcherProps,
+  GestureCatcherRenderProps,
+  GestureType,
 } from '@hzcore/gesture-catcher';
+import {ReactRefCallback} from '@hzcore/gesture-catcher/src/types';
 
 const GESTURE_THRESHOLD = 50;
 const GESTURING = 'GESTURING';
@@ -35,18 +40,15 @@ export const PREVIOUS = 'previous';
 export const FIRST = 'first';
 export const LAST = 'last';
 
-import type {
-  GestureState,
-  GestureCatcherConfig,
-  GestureCatcherProps,
-} from '@hzcore/gesture-catcher';
-
-type PageGestureProps = GestureCatcherProps & {
-  orientation: typeof VERTICAL | typeof HORIZONTAL,
-  onNext?: ?(state: PageGestureState) => void,
-  onPrevious?: ?(state: PageGestureState) => void,
-  onFirst?: ?(state: PageGestureState) => void,
-  onLast?: ?(state: PageGestureState) => void,
+export type PageGestureProps = GestureCatcherProps & {
+  orientation: typeof VERTICAL | typeof HORIZONTAL;
+  children: (
+    props: GestureCatcherRenderProps & {action: GestureAction | null},
+  ) => React.ReactNode;
+  onNext?: (state: PageGestureState) => void;
+  onPrevious?: (state: PageGestureState) => void;
+  onFirst?: (state: PageGestureState) => void;
+  onLast?: (state: PageGestureState) => void;
 };
 
 export type GestureAction =
@@ -55,9 +57,9 @@ export type GestureAction =
   | typeof FIRST
   | typeof LAST;
 
-export type PageGestureState = GestureState & {action: GestureAction};
+export type PageGestureState = GestureState & {action: GestureAction | null};
 
-type Orientation = typeof VERTICAL | typeof HORIZONTAL;
+export type Orientation = typeof VERTICAL | typeof HORIZONTAL;
 
 export default class PageGesture extends Component<PageGestureProps> {
   static propTypes = {
@@ -112,7 +114,7 @@ export default class PageGesture extends Component<PageGestureProps> {
   static FIRST = FIRST;
   static LAST = LAST;
 
-  get action(): ?GestureAction {
+  get action(): GestureAction | null {
     switch (this.props.orientation) {
       case HORIZONTAL: {
         switch (this.gestureState) {
@@ -151,14 +153,27 @@ export default class PageGesture extends Component<PageGestureProps> {
     return null;
   }
 
-  gestureState: ?GestureAction = null;
-  prevGestureState: ?GestureAction = null;
-  prevOrientation: ?Orientation = null;
+  gestureState:
+    | GestureState
+    | typeof GESTURING
+    | typeof CANCELED
+    | string
+    | null = null;
+  prevGestureState:
+    | GestureState
+    | typeof GESTURING
+    | typeof CANCELED
+    | string
+    | null = null;
+  prevOrientation: Orientation | null = null;
   prevDelta: number = 0;
 
   dispatchAction(gestureProps: GestureState) {
     const {onNext, onPrevious, onFirst, onLast} = this.props;
-    const state = {...gestureProps, action: this.action};
+    const state: PageGestureState = {
+      ...gestureProps,
+      action: this.action,
+    };
     switch (this.action) {
       case NEXT:
         if (typeof onNext === 'function') onNext(state);
@@ -206,9 +221,9 @@ export default class PageGesture extends Component<PageGestureProps> {
           ? UP
           : DOWN
         : xDelta < 0
-          ? LEFT
-          : RIGHT;
-    let state;
+        ? LEFT
+        : RIGHT;
+    let state = null;
     let delta;
     if (orientation === this.prevOrientation) {
       // Orientation has not changed, so compare to previous state
@@ -275,9 +290,12 @@ export default class PageGesture extends Component<PageGestureProps> {
     }
   };
 
-  renderGesture = (gestureProps: GestureState) => {
+  renderGesture = (gestureProps: GestureCatcherRenderProps) => {
     const {children} = this.props;
-    return children({...gestureProps, action: this.action});
+    return children({
+      ...gestureProps,
+      action: this.action,
+    });
   };
 
   render() {
@@ -295,10 +313,13 @@ export default class PageGesture extends Component<PageGestureProps> {
   }
 }
 
-function getThreshold(type: string, props: PageGestureProps) {
+function getThreshold(type: GestureType | null, props: PageGestureProps) {
   switch (type) {
     case WHEEL:
-      return (props.wheel && props.wheel.threshold) || GESTURE_THRESHOLD;
+      return (
+        (typeof props.wheel === 'object' && props.wheel.threshold) ||
+        GESTURE_THRESHOLD
+      );
     default:
       return GESTURE_THRESHOLD;
   }
