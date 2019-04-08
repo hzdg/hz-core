@@ -1,6 +1,8 @@
 {
   "extends": "eslint-config-hzdg/tsconfig",
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {"*": ["types/*"]},
     "moduleResolution": "node",
     "target": "es6"
   }

@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.0.0-beta.54",
+    "callbag": "1.2.0",
     "callbag-filter": "^1.0.1",
     "callbag-flatten": "^1.2.0",
     "callbag-map": "^1.0.1",

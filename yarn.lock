@@ -4239,7 +4239,7 @@ callbag-take-until@^1.1.0:
   resolved "http://npmregistry.hzdg.com/callbag-take-until/-/callbag-take-until-1.1.0.tgz#aac5b811ef952dabc41acc88e8529d8204eb7bfd"
   integrity sha512-xAckg6sMS6iCa4U9qYDT3rQDH+Rf7N7VzWpKMczgayLik56hosJERlqJkgT1t0jhTSiU474aNuvsFFvFbJn/lA==
 
-callbag@^1.1.0, callbag@^1.2.0:
+callbag@1.2.0, callbag@^1.1.0, callbag@^1.2.0:
   version "1.2.0"
   resolved "http://npmregistry.hzdg.com/callbag/-/callbag-1.2.0.tgz#45e73962a466056c6e5f86f5627b35cf0c4df101"
   integrity sha512-RMcVOk2oyA8CyCt/HsLEvnvvttKlaGVaG0uOo5IY7RpdiPLhStjxv5oYre33VJfT8kJE+cuKLSNHooz7yCUdhQ==
