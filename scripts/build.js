@@ -1,5 +1,4 @@
 #! /usr/bin/env node
-/* eslint-disable no-console, no-process-exit */
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
@@ -82,7 +81,6 @@ const buildModule = async (filename, src, dir, format) => {
   const dist = path.join(dir, format);
   await rmdir(dist);
   await mkdir(dist);
-  // eslint-disable-next-line prefer-const
   let {code, map} = await transformFile(filename, {envName: format});
   const basename = path.basename(filename);
   const filepath = path.join(
