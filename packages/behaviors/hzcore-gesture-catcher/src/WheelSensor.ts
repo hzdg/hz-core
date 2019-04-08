@@ -1,11 +1,7 @@
-/* eslint-disable no-duplicate-imports */
-// @flow
 import {Lethargy} from 'lethargy';
 import Sensor from './Sensor';
 import fromEvent from './fromEvent';
-import {WHEEL, GESTURE_END} from './types';
-
-import type {SensorConfig} from './types';
+import {WHEEL, GESTURE_END, SensorConfig} from './types';
 
 // TODO: Find the smallest timeout that won't ever get tricked by inertia.
 const GESTURE_END_TIMEOUT = 60;
@@ -16,7 +12,7 @@ const RIGHT = 'right';
 const UP = 'up';
 const DOWN = 'down';
 
-const direction = (x, y) =>
+const direction = (x: number, y: number) =>
   Math.abs(x) > Math.abs(y) ? (x > 0 ? LEFT : RIGHT) : y > 0 ? UP : DOWN;
 
 // Reasonable defaults
@@ -24,8 +20,14 @@ const LINE_HEIGHT = 40;
 const PAGE_HEIGHT = 800;
 const WHEEL_FACTOR = 120;
 
+type UnnormalizedWheelEvent = WheelEvent & {
+  wheelDelta: number;
+  wheelDeltaX: number;
+  wheelDeltaY: number;
+};
+
 // Based on https://github.com/facebookarchive/fixed-data-table/blob/3a9bf338b22406169e7261f85ddeda22ddce3b6f/src/vendor_upstream/dom/normalizeWheel.js
-function normalizeWheel(event: WheelEvent) {
+function normalizeWheel(event: UnnormalizedWheelEvent) {
   let {deltaX, deltaY} = event;
   const {deltaMode} = event;
 
@@ -90,8 +92,8 @@ export default class WheelSensor extends Sensor {
   }
 
   lethargy: Lethargy;
-  endTimeout: ?TimeoutID = null;
-  resetTimeout: ?TimeoutID = null;
+  endTimeout: NodeJS.Timeout | null = null;
+  resetTimeout: NodeJS.Timeout | null = null;
   threshold: number = GESTURE_THRESHOLD;
   intent: false | typeof DOWN | typeof UP | typeof LEFT | typeof RIGHT = false;
   accX: number = 0;
@@ -111,7 +113,7 @@ export default class WheelSensor extends Sensor {
     return didUpdate;
   }
 
-  onData(data: WheelEvent) {
+  onData(data: UnnormalizedWheelEvent) {
     // We're seeing a wheel event, so debounce the state reset,
     // in case it's part of an ongoing gesture.
     if (this.resetTimeout) clearTimeout(this.resetTimeout);
@@ -119,7 +121,7 @@ export default class WheelSensor extends Sensor {
 
     const normalized = normalizeWheel(data);
 
-    let intentional = this.lethargy.check(data);
+    let intentional = Boolean(this.lethargy.check(data));
 
     // If we've already identified a gesture intent,
     // check to see if this event indicates a new intention.

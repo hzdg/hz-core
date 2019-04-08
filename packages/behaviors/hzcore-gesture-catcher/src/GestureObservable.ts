@@ -1,5 +1,3 @@
-/* eslint-disable no-duplicate-imports, max-lines */
-// @flow
 import $$observable from 'symbol-observable';
 import flatten from 'callbag-flatten';
 import merge from 'callbag-merge';
@@ -23,17 +21,16 @@ import {
   TOUCH_END,
   WHEEL,
   GESTURE_END,
-} from './types';
-
-import type Sensor from './Sensor';
-import type {
-  Callbag,
   GestureCatcherConfig,
   GestureEvent,
   GestureState,
   Observer,
   Subscription,
+  SensorConfig,
 } from './types';
+
+import Sensor from './Sensor';
+import {Callbag, Sink, Source} from 'callbag';
 
 const defaultInitialState: GestureState = {
   x: 0,
@@ -90,13 +87,13 @@ class Config {
   }
 
   config: GestureCatcherConfig;
-  handlers: Set<Callbag>;
+  handlers: Set<(config: GestureCatcherConfig) => void>;
 
-  read = (start, sink: Callbag): Callbag => {
+  read = (start: 0 | 1 | 2, sink: Sink<any>): void => {
     if (start !== 0) return;
-    const handler = config => sink(1, config);
+    const handler = (config: GestureCatcherConfig) => sink(1, config);
     this.handlers.add(handler);
-    sink(0, stop => {
+    sink(0, (stop: 0 | 1 | 2) => {
       if (stop === 2) this.handlers.delete(handler);
     });
     if (this.config && this.handlers.has(handler)) {
@@ -132,7 +129,11 @@ export default class GestureObservable {
     config: GestureCatcherConfig,
     initialState: GestureState,
   ) {
-    return new this.prototype.constructor(node, config, initialState);
+    return new (this.prototype.constructor as typeof GestureObservable)(
+      node,
+      config,
+      initialState,
+    );
   }
 
   // rxjs interopt
@@ -141,13 +142,13 @@ export default class GestureObservable {
     return this;
   }
 
-  config: Callbag;
-  state: Callbag;
-  source: Callbag;
-  mouseSensor: ?MouseSensor;
-  touchSensor: ?TouchSensor;
-  keyboardSensor: ?KeyboardSensor;
-  wheelSensor: ?WheelSensor;
+  config: Config;
+  state: Callbag<any, any>;
+  source?: Source<any> | null;
+  mouseSensor?: MouseSensor | null;
+  touchSensor?: TouchSensor | null;
+  keyboardSensor?: KeyboardSensor | null;
+  wheelSensor?: WheelSensor | null;
 
   createSourceConfigurator(node: HTMLElement) {
     return ({mouse, touch, wheel, keyboard, ...all}: GestureCatcherConfig) => {
@@ -207,7 +208,7 @@ export default class GestureObservable {
             this.wheelSensor,
           ]
             .filter(sensor => Boolean(sensor))
-            .map(sensor => fromSensor(sensor)),
+            .map(sensor => fromSensor(sensor as Sensor)),
         );
       }
 
@@ -220,9 +221,9 @@ export default class GestureObservable {
   }
 
   subscribe(
-    observer: ?(Observer | Function),
-    error: ?Function,
-    complete: ?Function,
+    observer: Partial<Observer> | ((value: any) => void),
+    error?: (error: Error) => void,
+    complete?: () => void,
   ): Subscription {
     if (typeof observer !== 'object' || observer === null) {
       observer = {next: observer, error, complete};
@@ -236,15 +237,18 @@ export default class GestureObservable {
   }
 }
 
-function makeSensorConfig(base: Object, config: Object | boolean) {
+function makeSensorConfig(
+  base: SensorConfig,
+  config: SensorConfig | boolean,
+): SensorConfig {
   return typeof config === 'object' ? {...base, ...config} : {...base};
 }
 
-function fromSensor(sensor: Sensor) {
-  return (start, sink) => {
+function fromSensor(sensor: Sensor): Callbag<any, any> {
+  return (start: 0 | 1 | 2, sink: Sink<any>) => {
     if (start === 0) {
       const subscription = sensor.subscribe(v => sink(1, v));
-      sink(0, done => {
+      sink(0, (done: 0 | 1 | 2) => {
         if (done === 2) {
           subscription.unsubscribe();
         }
@@ -290,26 +294,26 @@ function reduceGestureState(
         state.type === WHEEL
           ? state.xDelta - event.deltaX
           : event.deltaX
-            ? -event.deltaX
-            : 0;
+          ? -event.deltaX
+          : 0;
       nextState.yDelta =
         state.type === WHEEL
           ? state.yDelta - event.deltaY
           : event.deltaY
-            ? -event.deltaY
-            : 0;
+          ? -event.deltaY
+          : 0;
       nextState.xSpin =
         state.type === WHEEL
           ? state.xSpin + event.spinX
           : event.spinX
-            ? event.spinX
-            : 0;
+          ? event.spinX
+          : 0;
       nextState.ySpin =
         state.type === WHEEL
           ? state.ySpin + event.spinY
           : event.spinY
-            ? event.spinY
-            : 0;
+          ? event.spinY
+          : 0;
       nextState.xVelocity = event.deltaX ? -event.deltaX : 0;
       nextState.yVelocity = event.deltaY ? -event.deltaY : 0;
       nextState.gesturing = true;

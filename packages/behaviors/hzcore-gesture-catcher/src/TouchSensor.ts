@@ -1,11 +1,7 @@
-/* eslint-disable no-duplicate-imports */
-// @flow
 import merge from 'callbag-merge';
 import Sensor from './Sensor';
 import fromEvent from './fromEvent';
-import {TOUCH_START, TOUCH_MOVE, TOUCH_END} from './types';
-
-import type {SensorConfig} from './types';
+import {TOUCH_START, TOUCH_MOVE, TOUCH_END, SensorConfig} from './types';
 
 export default class TouchSensor extends Sensor {
   constructor(node: HTMLElement, config: SensorConfig) {
@@ -18,7 +14,7 @@ export default class TouchSensor extends Sensor {
     this.webkitHack = this.preventDefault ? new WebkitHack() : null;
   }
 
-  webkitHack: ?WebkitHack = null;
+  webkitHack: WebkitHack | null = null;
   gesturing: boolean = false;
 
   shouldPreventDefault(event: Event) {
@@ -89,7 +85,7 @@ class WebkitHack {
     if (typeof window === 'undefined') return;
     window.removeEventListener('touchmove', this.handleTouchMove, {
       passive: false,
-    });
+    } as AddEventListenerOptions);
   }
 
   handleTouchMove = (event: TouchEvent) => {

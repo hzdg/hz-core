@@ -1,11 +1,7 @@
-/* eslint-disable no-duplicate-imports */
-// @flow
 import merge from 'callbag-merge';
 import Sensor from './Sensor';
 import fromEvent from './fromEvent';
-import {MOUSE_DOWN, MOUSE_MOVE, MOUSE_UP} from './types';
-
-import type {SensorConfig} from './types';
+import {MOUSE_DOWN, MOUSE_MOVE, MOUSE_UP, SensorConfig} from './types';
 
 export default class MouseSensor extends Sensor {
   constructor(node: HTMLElement, config: SensorConfig) {

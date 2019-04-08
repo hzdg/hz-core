@@ -1,16 +1,14 @@
-/* eslint-disable no-duplicate-imports */
-// @flow
 import pipe from 'callbag-pipe';
 import share from 'callbag-share';
 import subscribe from 'callbag-subscribe';
-import invariant from 'invariant';
+import {Callbag, Source, Sink} from 'callbag';
 
-import type {
-  Callbag,
+import {
   Observer,
   Subscription,
   SensorConfig,
   SensorInterface,
+  implementsSensorInterface,
 } from './types';
 
 export default class Sensor {
@@ -21,26 +19,25 @@ export default class Sensor {
 
   preventDefault: boolean = false;
   passive: boolean = false;
-  source: Callbag;
-  sensorStateReducer: Callbag = null;
+  source?: Source<any>;
+  sensorStateReducer: (Source<any> & {sink: Sink<any>}) | null = null;
 
   static createSensorStateReducer(sensor: SensorInterface) {
-    validateSensorInterface(sensor);
     const reducer = share(
-      pipe(
+      pipe<Source<any>, Callbag<any, any>>(
         sensor.source,
-        (source: Callbag) => (start: 0, sink: Callbag) => {
+        (source: Source<any>) => (start: 0 | 1 | 2, sink: Sink<any>) => {
           if (start !== 0) return;
-          let talkback;
+          let talkback: Callbag<any, any>;
           reducer.sink = sink; // For `pushState`.
-          source(0, (type, data) => {
+          (source as any)(0, (type: 0 | 1, data: any) => {
             if (type === 0) {
               talkback = data;
               sink(type, data);
             } else if (type === 1) {
               if (sensor.shouldPreventDefault(data)) data.preventDefault();
               const state = sensor.onData(data);
-              if (state === null) return talkback(1);
+              if (state === null) return (talkback as any)(1);
               sink(1, state);
             } else {
               delete reducer.sink;
@@ -49,7 +46,7 @@ export default class Sensor {
           });
         },
       ),
-    );
+    ) as Source<any> & {sink: Sink<any>};
     return reducer;
   }
 
@@ -68,50 +65,28 @@ export default class Sensor {
   }
 
   push(data: any) {
-    if (this.sensorStateReducer && this.sensorStateReducer.sink) {
+    if (this.sensorStateReducer && 'sink' in this.sensorStateReducer) {
       this.sensorStateReducer.sink(1, data);
     }
   }
 
   subscribe(
-    observer: ?(Observer | Function),
-    error: ?Function,
-    complete: ?Function,
+    observer: Partial<Observer> | ((value: any) => void),
+    error?: (error: Error) => void,
+    complete?: () => void,
   ): Subscription {
     if (typeof observer !== 'object' || observer === null) {
       observer = {next: observer, error, complete};
     }
-    if (!this.sensorStateReducer) {
-      this.sensorStateReducer = this.constructor.createSensorStateReducer(
-        (this: any),
-      );
+    if (!this.sensorStateReducer && implementsSensorInterface(this)) {
+      this.sensorStateReducer = (this
+        .constructor as typeof Sensor).createSensorStateReducer(this);
     }
     return {
       unsubscribe: pipe(
-        this.sensorStateReducer,
+        this.sensorStateReducer as Callbag<any, any>,
         subscribe(observer),
       ),
     };
   }
-}
-
-function validateSensorInterface(sensor: SensorInterface) {
-  invariant(
-    typeof sensor.source === 'function',
-    `Expected ${sensor.constructor.name} to have a source callbag.`,
-  );
-  invariant(
-    typeof sensor.onData === 'function',
-    `Expected ${sensor.constructor.name} to have a onData method.`,
-  );
-  invariant(
-    typeof sensor.shouldPreventDefault === 'function',
-    `Expected ${
-      sensor.constructor.name
-    } to have a shouldPreventDefault method.`,
-  );
-  invariant(
-    typeof sensor.updateConfig === 'function',
-    `Expected ${sensor.constructor.name} to have a updateConfig method.`,
-  );
 }

@@ -1,12 +1,15 @@
-/* eslint-disable no-duplicate-imports */
-// @flow
 import merge from 'callbag-merge';
 import Sensor from './Sensor';
 import fromEvent from './fromEvent';
 
-import {KEY_DOWN, KEY_UP, CODES, KEY_CODES_2_CODES} from './types';
-
-import type {SensorConfig, SensorInterface} from './types';
+import {
+  KEY_DOWN,
+  KEY_UP,
+  CODES,
+  KEY_CODES_2_CODES,
+  SensorConfig,
+  SensorInterface,
+} from './types';
 
 const getKeyCode = (event: KeyboardEvent) =>
   event.code || KEY_CODES_2_CODES[event.keyCode];
@@ -27,14 +30,14 @@ const isRepeatKey = (eventA: KeyboardEvent, eventB: KeyboardEvent) =>
   eventB.altKey === eventA.altKey &&
   eventB.metaKey === eventA.metaKey;
 
-function getNearestFocusableNode(node: ?Node): Node {
+function getNearestFocusableNode(node: Node | null): Node {
   if (node instanceof Document) return node;
   if (!(node instanceof HTMLElement)) return document;
   if (node.tabIndex >= 0) return node;
   return getNearestFocusableNode(node.parentNode);
 }
 
-export default class KeyboardSensor extends Sensor implements SensorInterface {
+export default class KeyboardSensor extends Sensor {
   constructor(node: HTMLElement, config: SensorConfig) {
     super(config);
     this.source = merge(
@@ -43,7 +46,7 @@ export default class KeyboardSensor extends Sensor implements SensorInterface {
     );
   }
 
-  gesturingKey: ?KeyboardEvent = null;
+  gesturingKey: KeyboardEvent | null = null;
 
   shouldPreventDefault(event: Event) {
     return (

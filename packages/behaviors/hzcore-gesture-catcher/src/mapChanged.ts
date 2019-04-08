@@ -1,12 +1,18 @@
-// @flow
-import type {Callbag} from './types';
+import {Callbag, Sink, Source, SourceFactory} from 'callbag';
 
-export default function mapChanged(fn: Function): Callbag {
-  let lastResult;
-  return (source: Callbag) => (start: 0, sink: Callbag) => {
+type MapFunction<T, R> = (value: T) => R;
+
+export default function mapChanged(
+  fn: MapFunction<any, any>,
+): SourceFactory<any> {
+  let lastResult: any;
+  return (source: Source<any>): Callbag<any, any> => (
+    start: 0 | 1 | 2,
+    sink: Sink<any>,
+  ) => {
     if (start !== 0) return;
+    let talkback: any;
     source(0, (type: 0 | 1 | 2, data: any) => {
-      let talkback;
       switch (type) {
         case 0: {
           talkback = data;

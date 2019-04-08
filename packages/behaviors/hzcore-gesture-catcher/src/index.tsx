@@ -1,10 +1,25 @@
-// @flow
-/* eslint-disable no-duplicate-imports */
-import React, {Component} from 'react';
+import React, {Component, MutableRefObject} from 'react';
 import PropTypes from 'prop-types';
 import shallowEqual from 'shallowequal';
 import GestureObservable from './GestureObservable';
 import {CONFIG_SHAPE} from './types';
+
+import {
+  GestureState,
+  GestureCatcherState,
+  GestureCatcherProps,
+  GestureCatcherConfig,
+  GestureCatcherRenderProps,
+  GestureType,
+} from './types';
+
+export {
+  GestureState,
+  GestureCatcherConfig,
+  GestureCatcherProps,
+  GestureCatcherRenderProps,
+  GestureType,
+};
 
 export {
   SPACE,
@@ -26,19 +41,6 @@ export {
   KEY_DOWN,
   KEY_UP,
   GESTURE_END,
-} from './types';
-
-import type {
-  GestureState,
-  GestureCatcherState,
-  GestureCatcherProps,
-  GestureCatcherConfig,
-} from './types';
-
-export type {
-  GestureState,
-  GestureCatcherConfig,
-  GestureCatcherProps,
 } from './types';
 
 export const GestureSensorConfig = PropTypes.oneOfType([
@@ -103,12 +105,12 @@ const initialState = {
   type: null,
 };
 
-const configChanged = (a, b) =>
+const configChanged = (a: any, b: any) =>
   CONFIG_SHAPE.some(k => !shallowEqual(a[k], b[k]));
 
 export default class GestureCatcher extends Component<
   GestureCatcherProps,
-  GestureCatcherState,
+  GestureCatcherState
 > {
   static propTypes = gestureCatcherPropTypes;
   static defaultProps = defaultGestureCatcherProps;
@@ -132,11 +134,11 @@ export default class GestureCatcher extends Component<
   }
 
   mounted: boolean = false;
-  gestureObservable: ?GestureObservable = null;
-  subscription: any = null;
-  updateScheduled: boolean | AnimationFrameID = false;
-  nextState: ?GestureState;
-  gestureRef = React.createRef();
+  gestureObservable?: GestureObservable;
+  subscription?: any;
+  updateScheduled: number | boolean = false;
+  nextState?: GestureState;
+  gestureRef = React.createRef() as MutableRefObject<any>;
 
   handleRef = (node: any) => {
     if (this.gestureRef.current !== node) {
@@ -172,19 +174,20 @@ export default class GestureCatcher extends Component<
       const node = getNode(this.gestureRef.current);
       if (node) {
         const config = getObservableConfig(this.props);
-        this.gestureObservable = GestureObservable.create(
+        const gestureObservable = GestureObservable.create(
           node,
           config,
           initialState,
         );
-        this.subscription = this.gestureObservable.subscribe(this.handleUpdate);
+        this.gestureObservable = gestureObservable;
+        this.subscription = gestureObservable.subscribe(this.handleUpdate);
       }
     }
   }
 
   updateNow = () => {
     this.updateScheduled = false;
-    if (this.mounted) {
+    if (this.mounted && this.nextState) {
       const nextState = {...this.nextState};
       this.setState(({gesturing}, {onStart, onMove, onEnd}) => {
         if (typeof onStart === 'function' && !gesturing && nextState.gesturing)
