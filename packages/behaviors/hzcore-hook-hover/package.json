@@ -5,12 +5,14 @@
   "license": "MIT",
   "main": "cjs/index.js",
   "module": "es/index.js",
+  "typings": "src/index.ts",
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
   },
   "files": [
     "cjs",
     "es",
+    "src",
     "umd"
   ],
   "peerDependencies": {

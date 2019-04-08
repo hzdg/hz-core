@@ -1,8 +1,8 @@
-// @flow
-
 import {useState} from 'react';
 
-import type {ReturnedHoverProps, Props} from './types';
+import {ReturnedHoverProps, Props} from './types';
+
+export {ReturnedHoverProps, Props};
 
 export default function useHover({
   mouseEnterDelayMS = 0,
@@ -10,8 +10,8 @@ export default function useHover({
 }: Props = {}): [boolean, ReturnedHoverProps] {
   const [isHovering, setIsHovering] = useState(false);
 
-  let mouseEnterTimer;
-  let mouseOutTimer;
+  let mouseEnterTimer: NodeJS.Timeout;
+  let mouseOutTimer: NodeJS.Timeout;
 
   const hoverProps = {
     onMouseEnter: () => {
