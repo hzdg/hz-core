@@ -9,8 +9,7 @@
   "files": [
     "cjs",
     "es",
-    "src",
-    "umd"
+    "src"
   ],
   "dependencies": {
     "react": "^16.2.0"
