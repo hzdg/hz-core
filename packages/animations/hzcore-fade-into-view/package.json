@@ -9,8 +9,7 @@
   "files": [
     "cjs",
     "es",
-    "src",
-    "umd"
+    "src"
   ],
   "license": "MIT"
 }
