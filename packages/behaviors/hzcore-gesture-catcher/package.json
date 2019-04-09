@@ -23,7 +23,7 @@
     "debug": "^3.1.0"
   },
   "dependencies": {
-    "@babel/runtime": "^7.0.0-beta.54",
+    "@babel/runtime": "^7.4.3",
     "callbag": "1.2.0",
     "callbag-filter": "^1.0.1",
     "callbag-flatten": "^1.2.0",
