@@ -33,7 +33,7 @@ export const CODES = [
   ARROW_UP,
   ARROW_RIGHT,
   ARROW_DOWN,
-] as const;
+];
 
 type Mutable<T> = {-readonly [P in keyof T]: T[P]};
 type MembersOf<A> = Mutable<A> extends (infer T)[] ? T : never;
