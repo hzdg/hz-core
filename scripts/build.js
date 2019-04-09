@@ -1,14 +1,14 @@
 #! /usr/bin/env node
+// @ts-check
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const rimraf = require('rimraf');
+// @ts-ignore
 const report = require('yurnalist');
 const babel = require('@babel/core');
+// @ts-ignore
 const project = require('@lerna/project');
-const {rollup} = require('rollup');
-const uglify = require('rollup-plugin-uglify-es');
-const rollupConfig = require('../rollup.config');
 
 const PROJECT_ROOT = process.cwd();
 const SRC_GLOB = '**/*.js';
@@ -17,6 +17,26 @@ const EXCLUDE_GLOBS = [
   '**/*_test.js',
 ];
 
+/**
+ * @typedef {Object} Workspace
+ * @property {string} name
+ * @property {string} location
+ * @property {Object[]} [devDependencies]
+ * @property {Object[]} [peerDependencies]
+ * @property {Boolean} [private]
+ */
+
+/**
+ * @typedef {Object} Pkg
+ * @property {Workspace} meta
+ * @property {string} name
+ * @property {string} dir
+ * @property {string} src
+ */
+
+/**
+ * @param {string} dirpath
+ */
 const rmdir = dirpath =>
   new Promise((resolve, reject) => {
     rimraf(dirpath, err => {
@@ -28,6 +48,9 @@ const rmdir = dirpath =>
     });
   });
 
+/**
+ * @param {string} dirpath
+ */
 const mkdir = dirpath =>
   new Promise((resolve, reject) => {
     fs.mkdir(dirpath, err => {
@@ -49,6 +72,10 @@ const mkdir = dirpath =>
     });
   });
 
+/**
+ * @param {string} filename
+ * @param {Object} [options]
+ */
 const transformFile = (filename, options) =>
   new Promise((resolve, reject) => {
     try {
@@ -69,6 +96,11 @@ const transformFile = (filename, options) =>
     }
   });
 
+/**
+ * @param {string} filename
+ * @param {string | Buffer} data
+ * @param {Object} [options]
+ */
 const writeFile = (filename, data, options) =>
   new Promise((resolve, reject) => {
     fs.writeFile(filename, data, {encoding: 'utf8', ...options}, err => {
@@ -77,6 +109,12 @@ const writeFile = (filename, data, options) =>
     });
   });
 
+/**
+ * @param {string} filename
+ * @param {string} src
+ * @param {string} dir
+ * @param {string} format
+ */
 const buildModule = async (filename, src, dir, format) => {
   const dist = path.join(dir, format);
   await rmdir(dist);
@@ -94,6 +132,9 @@ const buildModule = async (filename, src, dir, format) => {
   await writeFile(filepath, code);
 };
 
+/**
+ * @param {Pkg} pkg
+ */
 const buildModules = ({dir, src}) =>
   Promise.all(
     glob
@@ -106,38 +147,10 @@ const buildModules = ({dir, src}) =>
       ),
   );
 
-const buildBundle = async ({meta, src, dir}, env) => {
-  const dist = path.join(dir, 'umd');
-  await rmdir(dist);
-  await mkdir(dist);
-
-  const dev = env !== 'production';
-  const {output, ...config} = rollupConfig;
-  const bundle = await rollup({
-    ...config,
-    input: path.resolve(src, 'index.js'),
-    external: [
-      ...Object.keys(output.globals),
-      ...Object.keys(meta.devDependencies || {}),
-      ...Object.keys(meta.peerDependencies || {}),
-    ],
-    plugins: [...rollupConfig.plugins, ...(dev ? [] : [uglify()])],
-  });
-
-  const name = meta.name.replace(/@.+\/(.+)/, `hzcore-$1`);
-  await bundle.write({
-    ...output,
-    name,
-    file: path.join(dist, `${name}.${dev ? 'js' : 'min.js'}`),
-  });
-};
-
-const buildBundles = pkg =>
-  Promise.all([
-    buildBundle(pkg, 'development'),
-    buildBundle(pkg, 'production'),
-  ]);
-
+/**
+ * @param {Pkg} pkg
+ * @param {Object} activity
+ */
 const buildPackage = async (pkg, activity) => {
   if (pkg.meta.private) {
     report.info(`[${pkg.meta.name}] is private! Skipping build step ...`);
@@ -145,8 +158,6 @@ const buildPackage = async (pkg, activity) => {
     try {
       activity.tick(`[${pkg.meta.name}] Building modules ...`);
       await buildModules(pkg);
-      activity.tick(`[${pkg.meta.name}] Building UMD bundles ...`);
-      await buildBundles(pkg);
     } catch (error) {
       report.error(`[${pkg.meta.name}] There was an error!`);
       throw error;
@@ -158,44 +169,54 @@ const buildPackage = async (pkg, activity) => {
   }
 };
 
-const buildPackages = () =>
-  project
-    .getPackages(PROJECT_ROOT)
-    .then(workspaces =>
-      // Queue up a package build for each workspace.
-      workspaces
-        .map(pkg => ({
-          dir: pkg.location,
-          meta: pkg,
-          name: pkg.name,
-          src: path.join(pkg.location, 'src'),
-        }))
-        .reduce(
-          (buildQueue, pkg, step, {length: steps}) =>
-            buildQueue.then(() => {
-              report.step(step + 1, steps, `[${pkg.meta.name}]`);
-              const activity = report.activity();
-              return buildPackage(pkg, activity)
-                .then(() => activity.end())
-                .catch(err => {
-                  activity.end();
-                  throw err;
-                });
-            }),
-          Promise.resolve(),
-        ),
-    )
+/**
+ * @param {Workspace} workspace
+ * @returns {Pkg}
+ */
+const workspaceToPackage = workspace => {
+  return {
+    dir: workspace.location,
+    meta: workspace,
+    name: workspace.name,
+    src: path.join(workspace.location, 'src'),
+  };
+};
+
+/**
+ * @param {Workspace[]} workspaces
+ * @returns {Promise}
+ */
+const buildPackages = workspaces =>
+  // Queue up a package build for each workspace.
+  workspaces.map(workspaceToPackage).reduce(
+    (buildQueue, pkg, step, {length: steps}) =>
+      buildQueue.then(() => {
+        report.step(step + 1, steps, `[${pkg.meta.name}]`);
+        const activity = report.activity();
+        return buildPackage(pkg, activity)
+          .then(() => activity.end())
+          .catch(err => {
+            activity.end();
+            throw err;
+          });
+      }),
+    Promise.resolve(),
+  );
+
+const build = () => project.getPackages(PROJECT_ROOT).then(buildPackages);
+
+module.exports = build;
+
+// If this is module is being run as a script, invoke the build function.
+// @ts-ignore
+if (typeof require !== 'undefined' && require.main === module) {
+  build()
     .then(() => {
       report.success('All packages built!');
     })
+    // @ts-ignore
     .catch(err => {
       report.error((err.stack && err.stack) || err);
       process.exit(1);
     });
-
-module.exports = buildPackages;
-
-// If this is module is being run as a script, invoke the build function.
-if (typeof require !== 'undefined' && require.main === module) {
-  buildPackages();
 }

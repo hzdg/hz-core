@@ -95,12 +95,6 @@
     "react-spring": "^8.0.15",
     "react-test-renderer": "16.8.4",
     "rimraf": "2.6.3",
-    "rollup": "1.6.0",
-    "rollup-plugin-babel": "4.3.2",
-    "rollup-plugin-commonjs": "9.2.1",
-    "rollup-plugin-json": "^3.1.0",
-    "rollup-plugin-node-resolve": "4.0.1",
-    "rollup-plugin-uglify-es": "0.0.1",
     "symbol-iterator": "1.0.2",
     "typescript": "3.4.1",
     "yurnalist": "1.0.5"
