@@ -11,8 +11,7 @@
   "files": [
     "cjs",
     "es",
-    "src",
-    "umd"
+    "src"
   ],
   "peerDependencies": {
     "prop-types": "15.x.x",
