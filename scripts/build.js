@@ -11,7 +11,7 @@ const babel = require('@babel/core');
 const project = require('@lerna/project');
 
 const PROJECT_ROOT = process.cwd();
-const SRC_GLOB = '**/*.js';
+const SRC_GLOB = '**/*.{ts,tsx,js,jsx}';
 const EXCLUDE_GLOBS = [
   '**/@(__tests__|tests|examples|docs)/**/*',
   '**/*_test.js',
