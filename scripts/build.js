@@ -1,5 +1,6 @@
 #! /usr/bin/env node
 // @ts-check
+const {promisify} = require('util');
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
@@ -9,6 +10,9 @@ const report = require('yurnalist');
 const babel = require('@babel/core');
 // @ts-ignore
 const project = require('@lerna/project');
+
+const rmdir = promisify(rimraf);
+const writeFile = promisify(fs.writeFile);
 
 const PROJECT_ROOT = process.cwd();
 const SRC_GLOB = '**/*.{ts,tsx,js,jsx}';
@@ -36,20 +40,7 @@ const EXCLUDE_GLOBS = [
 
 /**
  * @param {string} dirpath
- */
-const rmdir = dirpath =>
-  new Promise((resolve, reject) => {
-    rimraf(dirpath, err => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-  });
-
-/**
- * @param {string} dirpath
+ * @returns {Promise<void>}
  */
 const mkdir = dirpath =>
   new Promise((resolve, reject) => {
@@ -75,6 +66,7 @@ const mkdir = dirpath =>
 /**
  * @param {string} filename
  * @param {Object} [options]
+ * @returns {Promise<babel.BabelFileResult | null>}
  */
 const transformFile = (filename, options) =>
   new Promise((resolve, reject) => {
@@ -97,33 +89,40 @@ const transformFile = (filename, options) =>
   });
 
 /**
- * @param {string} filename
- * @param {string | Buffer} data
- * @param {Object} [options]
+ *
+ * @param {string} code
  */
-const writeFile = (filename, data, options) =>
-  new Promise((resolve, reject) => {
-    fs.writeFile(filename, data, {encoding: 'utf8', ...options}, err => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
+const hasExports = code => Boolean(code) && /export/.test(code);
 
 /**
+ * @param {Pkg} pkg
  * @param {string} filename
- * @param {string} src
- * @param {string} dir
  * @param {string} format
+ * @returns {Promise<void>}
  */
-const buildModule = async (filename, src, dir, format) => {
-  const dist = path.join(dir, format);
+const buildModule = async (pkg, filename, format) => {
+  const dist = path.join(pkg.dir, format);
   await rmdir(dist);
   await mkdir(dist);
-  let {code, map} = await transformFile(filename, {envName: format});
+  const result = await transformFile(filename, {envName: format});
+  if (!result) {
+    throw new Error(`Could not transform file ${filename}`);
+  }
+  let {code, map} = result;
+  if (!code || !hasExports(code)) {
+    report.info(
+      `[${pkg.meta.name}] ${path.relative(
+        pkg.src,
+        filename,
+      )} has no exports! Skipping ${format} module ...`,
+    );
+    return;
+  }
+  if (!map) throw new Error(`No sourcemap found in transform of ${filename}`);
   const basename = path.basename(filename);
   const filepath = path.join(
     dist,
-    path.dirname(path.relative(src, filename)),
+    path.dirname(path.relative(pkg.src, filename)),
     basename,
   );
   code = `${code}\n//# sourceMappingURL=${basename}.map`;
@@ -134,15 +133,16 @@ const buildModule = async (filename, src, dir, format) => {
 
 /**
  * @param {Pkg} pkg
+ * @returns {Promise<[void, void][]>}
  */
-const buildModules = ({dir, src}) =>
+const buildModules = pkg =>
   Promise.all(
     glob
-      .sync(path.join(src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
+      .sync(path.join(pkg.src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
       .map(input =>
         Promise.all([
-          buildModule(input, src, dir, 'es'),
-          buildModule(input, src, dir, 'cjs'),
+          buildModule(pkg, input, 'es'),
+          buildModule(pkg, input, 'cjs'),
         ]),
       ),
   );
@@ -150,6 +150,7 @@ const buildModules = ({dir, src}) =>
 /**
  * @param {Pkg} pkg
  * @param {Object} activity
+ * @returns {Promise<void>}
  */
 const buildPackage = async (pkg, activity) => {
   if (pkg.meta.private) {
@@ -184,7 +185,7 @@ const workspaceToPackage = workspace => {
 
 /**
  * @param {Workspace[]} workspaces
- * @returns {Promise}
+ * @returns {Promise<void>}
  */
 const buildPackages = workspaces =>
   // Queue up a package build for each workspace.
@@ -203,16 +204,68 @@ const buildPackages = workspaces =>
     Promise.resolve(),
   );
 
-const build = () => project.getPackages(PROJECT_ROOT).then(buildPackages);
+/**
+ * @param {Pkg} pkg
+ * @param {Object} activity
+ * @returns {Promise<void>}
+ */
+const cleanPackage = async (pkg, activity) => {
+  try {
+    activity.tick(`[${pkg.meta.name}] Cleaning modules ...`);
+    await rmdir(path.join(pkg.dir, 'es'));
+    await rmdir(path.join(pkg.dir, 'cjs'));
+    await rmdir(path.join(pkg.dir, 'umd'));
+  } catch (error) {
+    report.error(`[${pkg.meta.name}] There was an error!`);
+    throw error;
+  }
+};
+
+/**
+ * @param {Workspace[]} workspaces
+ * @returns {Promise<void>}
+ */
+const cleanPackages = workspaces =>
+  // Queue up a package clean for each workspace.
+  workspaces.map(workspaceToPackage).reduce(
+    (cleanQueue, pkg, step, {length: steps}) =>
+      cleanQueue.then(() => {
+        report.step(step + 1, steps, `[${pkg.meta.name}]`);
+        const activity = report.activity();
+        return cleanPackage(pkg, activity)
+          .then(() => activity.end())
+          .catch(err => {
+            activity.end();
+            throw err;
+          });
+      }),
+    Promise.resolve(),
+  );
+
+/**
+ *
+ * @param {Object} [options]
+ * @param {Boolean} options.clean
+ * @returns {Promise<void>}
+ */
+async function build(options) {
+  const packages = await project.getPackages(PROJECT_ROOT);
+  if (options && options.clean) {
+    return cleanPackages(packages);
+  } else {
+    return buildPackages(packages);
+  }
+}
 
 module.exports = build;
 
 // If this is module is being run as a script, invoke the build function.
 // @ts-ignore
 if (typeof require !== 'undefined' && require.main === module) {
-  build()
+  const clean = process.argv.includes('--clean');
+  build({clean})
     .then(() => {
-      report.success('All packages built!');
+      report.success(`All packages ${clean ? 'clean' : 'built'}!`);
     })
     // @ts-ignore
     .catch(err => {
