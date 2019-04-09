@@ -11,8 +11,7 @@
   "files": [
     "cjs",
     "es",
-    "src",
-    "umd"
+    "src"
   ],
   "peerDependencies": {
     "react": "^16.3.1",
