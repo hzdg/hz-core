@@ -4153,10 +4153,10 @@ callbag-map@^1.0.1:
   dependencies:
     callbag "^1.1.0"
 
-callbag-merge@^3.1.0:
-  version "3.2.1"
-  resolved "http://npmregistry.hzdg.com/callbag-merge/-/callbag-merge-3.2.1.tgz#ed38250944a0a69d20294b7011de490284598806"
-  integrity sha512-MBdKtV6LbvckcQbSC72BhWGcD/SOIipmdB8DsEAuMvQtf5nTbu47fCJ8ZfzrN1EJrmZHorC0oo7zcfuP7UIswg==
+callbag-merge@^3.2.2:
+  version "3.2.2"
+  resolved "http://npmregistry.hzdg.com/callbag-merge/-/callbag-merge-3.2.2.tgz#87e4a9705dfcea109908296397834d648e8ea435"
+  integrity sha512-VeBE5Mh7LUxYwxaITKsHt3CmZeMMfpsjEamMD0Wf6ajrFE6FGa4aQnd7SZ5h0KSSTcivxe0UaT6x97f8Y9atzA==
   dependencies:
     callbag "^1.2.0"
 
