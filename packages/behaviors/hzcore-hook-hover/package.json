@@ -12,7 +12,8 @@
   "files": [
     "cjs",
     "es",
-    "src"
+    "src",
+    "!*/__test*"
   ],
   "peerDependencies": {
     "react": "^16.8.0",
