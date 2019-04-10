@@ -12,7 +12,7 @@
     "commit": "git-cz",
     "create-package": "./scripts/create-package.sh",
     "develop": "docz dev",
-    "lint": "eslint ./scripts ./packages & tsc --noEmit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./scripts ./packages & tsc --noEmit",
     "preparecommitmsg": "commit-template",
     "preversion": "yarn test && yarn build",
     "start": "yarn develop",
