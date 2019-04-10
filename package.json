@@ -12,10 +12,11 @@
     "commit": "git-cz",
     "create-package": "./scripts/create-package.sh",
     "develop": "docz dev",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./scripts ./packages & tsc --noEmit",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./scripts ./packages",
     "preparecommitmsg": "commit-template",
     "preversion": "yarn test && yarn build",
     "start": "yarn develop",
+    "typecheck": "tsc --noEmit",
     "test": "jest"
   },
   "husky": {
