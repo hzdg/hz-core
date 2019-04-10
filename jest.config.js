@@ -63,20 +63,18 @@ module.exports = {
   // ],
 
   // An array of file extensions your modules use
-  // moduleFileExtensions: [
-  //   "js",
-  //   "json",
-  //   "jsx",
-  //   "node"
-  // ],
+  moduleFileExtensions: ['js', 'json', 'jsx', 'node', 'ts', 'tsx'],
 
   // A map from regular expressions to module names that allow to stub out resources with a single module
   moduleNameMapper: {
-    'testutils(.*)$': '<rootDir>/testutils/$1',
+    'testutils(.*)$': '<rootDir>/testutils$1',
   },
 
   // An array of regexp pattern strings, matched against all module paths before considered 'visible' to the module loader
   // modulePathIgnorePatterns: [],
+
+  // An array of absolute paths to additional locations to search when resolving modules
+  modulePaths: ['<rootDir>'],
 
   // Activates notifications for test results
   // notify: false,
@@ -110,7 +108,7 @@ module.exports = {
   // restoreMocks: false,
 
   // The root directory that Jest should scan for tests and modules within
-  // rootDir: __dirname,
+  rootDir: __dirname,
 
   // A list of paths to directories that Jest should use to search for files in
   // roots: [
@@ -150,7 +148,7 @@ module.exports = {
   // ],
 
   // The regexp pattern Jest uses to detect test files
-  testRegex: '.*/__tests__/.*test.jsx?$',
+  testRegex: '.*/__tests__/.*test.(?:j|t)sx?$',
 
   // This option allows the use of a custom results processor
   // testResultsProcessor: null,

@@ -6278,6 +6278,15 @@ eslint-config-prettier@4.1.0:
   dependencies:
     get-stdin "^6.0.0"
 
+eslint-import-resolver-jest@2.1.1:
+  version "2.1.1"
+  resolved "http://npmregistry.hzdg.com/eslint-import-resolver-jest/-/eslint-import-resolver-jest-2.1.1.tgz#78c1934e3b5b77283326f036e089cc3b9fae6346"
+  integrity sha512-yzzZFN37CaMaCjmUZ4Zo7Pw5qCG/hDklVzxIeHYJZkbcdg0sL5MeLaOG8s3ndVBvv1PSdSq4jfkY0QXt/KPbTg==
+  dependencies:
+    find-root "^1.0.0"
+    micromatch "^3.1.6"
+    resolve "^1.5.0"
+
 eslint-import-resolver-node@^0.3.2:
   version "0.3.2"
   resolved "http://npmregistry.hzdg.com/eslint-import-resolver-node/-/eslint-import-resolver-node-0.3.2.tgz#58f15fb839b8d0576ca980413476aab2472db66a"
@@ -6855,7 +6864,7 @@ find-node-modules@2.0.0:
     findup-sync "^3.0.0"
     merge "^1.2.1"
 
-find-root@1.1.0:
+find-root@1.1.0, find-root@^1.0.0:
   version "1.1.0"
   resolved "http://npmregistry.hzdg.com/find-root/-/find-root-1.1.0.tgz#abcfc8ba76f708c42a97b3d685b7e9450bfb9ce4"
   integrity sha512-NKfW6bec6GfKc0SGx1e07QZY9PE99u0Bft/0rzSD5k3sO/vwkVUpDUKVm5Gpp5Ue3YfShPFTX2070tDs5kB9Ng==
@@ -9842,7 +9851,7 @@ micro-api-client@^3.3.0:
   resolved "http://npmregistry.hzdg.com/micro-api-client/-/micro-api-client-3.3.0.tgz#52dd567d322f10faffe63d19d4feeac4e4ffd215"
   integrity sha512-y0y6CUB9RLVsy3kfgayU28746QrNMpSm9O/AYGNsBgOkJr/X/Jk0VLGoO8Ude7Bpa8adywzF+MzXNZRFRsNPhg==
 
-micromatch@^3.0.4, micromatch@^3.1.10, micromatch@^3.1.4, micromatch@^3.1.8:
+micromatch@^3.0.4, micromatch@^3.1.10, micromatch@^3.1.4, micromatch@^3.1.6, micromatch@^3.1.8:
   version "3.1.10"
   resolved "http://npmregistry.hzdg.com/micromatch/-/micromatch-3.1.10.tgz#70859bc95c9840952f359a068a3fc49f9ecfac23"
   integrity sha512-MWikgl9n9M3w+bpsY3He8L+w9eF9338xRl8IAO5viDizwSzziFEyUzo2xrrloB64ADbTf8uA8vRqqttDTOmccg==

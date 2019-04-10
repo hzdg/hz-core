@@ -1,7 +1,0 @@
-{
-  "extends": ["hzdg", "hzdg/jest", "hzdg/react", "hzdg/typescript"],
-  "env": {
-    "node": true,
-    "es6": true
-  }
-}
