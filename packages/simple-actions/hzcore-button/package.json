@@ -9,7 +9,8 @@
   "files": [
     "cjs",
     "es",
-    "src"
+    "src",
+    "!*/__test*"
   ],
   "dependencies": {
     "react": "^16.2.0"
