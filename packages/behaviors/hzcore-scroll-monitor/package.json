@@ -12,7 +12,7 @@
     "cjs",
     "es",
     "src",
-    "umd"
+    "!*/__test*"
   ],
   "peerDependencies": {
     "prop-types": "15.x.x",
