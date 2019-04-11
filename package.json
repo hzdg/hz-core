@@ -13,7 +13,6 @@
     "create-package": "./scripts/create-package.sh",
     "develop": "docz dev",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx ./scripts ./packages",
-    "preparecommitmsg": "commit-template",
     "preversion": "yarn test && yarn build",
     "start": "yarn develop",
     "typecheck": "tsc --noEmit",
@@ -21,7 +20,8 @@
   },
   "husky": {
     "hooks": {
-      "commitmsg": "commitlint -E HUSKY_GIT_PARAMS"
+      "prepare-commit-msg": "commit-template",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
     }
   },
   "publishConfig": {
