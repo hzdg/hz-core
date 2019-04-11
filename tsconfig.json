@@ -2,9 +2,7 @@
   "extends": "eslint-config-hzdg/tsconfig",
   "compilerOptions": {
     "baseUrl": ".",
-    "paths": {"*": ["types/*"]},
-    "moduleResolution": "node",
-    "target": "es6"
+    "paths": {"*": ["types/*"]}
   },
   "exclude": ["**/es/**/*", "**/cjs/**/*", "**/umd/**/*"]
 }
