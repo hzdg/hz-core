@@ -1,7 +1,7 @@
 ---
 name: GestureCatcher
 menu: Headless Components
-route: gesture-catcher
+route: /gesture-catcher
 ---
 
 # GestureCatcher

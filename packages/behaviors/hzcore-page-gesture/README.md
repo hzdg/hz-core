@@ -1,7 +1,7 @@
 ---
 name: PageGesture
 menu: Headless Components
-route: page-gesture
+route: /page-gesture
 ---
 
 # PageGesture

@@ -1,7 +1,7 @@
 ---
 name: ScrollMonitor
 menu: Headless Components
-route: scroll-monitor
+route: /scroll-monitor
 ---
 
 # ScrollMonitor

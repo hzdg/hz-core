@@ -1,7 +1,7 @@
 ---
 name: useHover
 menu: Hooks
-route: use-hover
+route: /use-hover
 ---
 
 # hook-hover

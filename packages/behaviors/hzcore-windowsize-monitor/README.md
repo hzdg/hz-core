@@ -1,7 +1,7 @@
 ---
 name: WindowsizeMonitor
 menu: Headless Components
-route: windowsize-monitor
+route: /windowsize-monitor
 ---
 
 # WindowsizeMonitor
