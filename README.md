@@ -140,8 +140,6 @@ created by doing the following:
     ]
     ```
 
-## TODO: How to Write a Commit Message
-
 ## TODO: How to Write Components
 
 -   **Render Props** are a useful technique for components that are used mostly
