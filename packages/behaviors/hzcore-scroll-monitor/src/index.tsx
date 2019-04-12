@@ -12,7 +12,8 @@ import {
   CONFIG_SHAPE,
   ScrollMonitorConfig,
   ScrollMonitorProps,
-  ScrollMonitorState,
+  ScrollMonitorState, // eslint-disable-line import/named
+  Subscription,
 } from './types';
 
 export {
@@ -99,94 +100,12 @@ const initialState = {
   scrolling: null,
 };
 
-const configChanged = (a: any, b: any) =>
-  CONFIG_SHAPE.some(k => !shallowEqual(a[k], b[k]));
+type RecordOf<T> = Record<string, T[keyof T]>;
 
-export default class ScrollMonitor extends Component<
-  ScrollMonitorProps,
-  ScrollMonitorState
-> {
-  static propTypes = scrollMonitorPropTypes;
-  static defaultProps = {
-    ...defaultScrollMonitorConfig,
-    onStart: void 0,
-    onChange: void 0,
-    onEnd: void 0,
-  };
-
-  state = {...initialState};
-
-  componentDidMount() {
-    this.mounted = true;
-    this.subscribeIfNecessary();
-  }
-
-  componentDidUpdate(prevProps: ScrollMonitorProps) {
-    if (configChanged(prevProps, this.props)) {
-      this.unsubscribe();
-      this.subscribeIfNecessary();
-    }
-  }
-
-  componentWillUnmount() {
-    this.mounted = false;
-    this.unsubscribe();
-  }
-
-  uid: string = uuid().slice(0, 8);
-  mounted: boolean = false;
-  subscription: any = null;
-  scrollRef = React.createRef() as React.MutableRefObject<any>;
-
-  handleRef = (node: any) => {
-    if (this.scrollRef.current !== node) {
-      this.scrollRef.current = node;
-      this.unsubscribe();
-    }
-    if (this.props.innerRef) {
-      if (typeof this.props.innerRef === 'function') {
-        this.props.innerRef(node);
-      } else {
-        this.props.innerRef.current = node;
-      }
-    }
-    if (node) {
-      this.subscribeIfNecessary();
-    }
-  };
-
-  unsubscribe() {
-    if (this.subscription) {
-      this.subscription.unsubscribe();
-      this.subscription = null;
-    }
-  }
-
-  subscribeIfNecessary() {
-    if (!this.subscription && this.mounted && this.scrollRef.current) {
-      const target = getNode(this.scrollRef.current);
-      const scrollingElement = getNearestScrollNode(target);
-      if (scrollingElement && target) {
-        this.subscription = ScrollState.create(
-          scrollingElement,
-          getObservableConfig(this.props, this.uid, target),
-        ).subscribe(this.handleUpdate);
-      }
-    }
-  }
-
-  handleUpdate = (state: ScrollMonitorState) => {
-    if (this.mounted) this.setState(state);
-  };
-
-  render() {
-    return this.props.children({
-      ...this.state,
-      scrollRef: this.handleRef,
-      uid: this.uid,
-    });
-  }
-}
+const configChanged = (
+  a: RecordOf<ScrollMonitorProps>,
+  b: RecordOf<ScrollMonitorProps>,
+): boolean => CONFIG_SHAPE.some(k => !shallowEqual(a[k], b[k]));
 
 function getObservableConfig(
   {
@@ -218,7 +137,6 @@ function getObservableConfig(
     config.position = position;
     config.scrolling = scrolling;
     config.bounds = bounds;
-    // eslint-disable-next-line eqeqeq
     if (
       (viewport === true ||
         typeof viewport === 'number' ||
@@ -236,12 +154,19 @@ function getObservableConfig(
   return config;
 }
 
-function getNode(node: any): Node | null {
-  ({node = node.element || node} = node);
+type NodeLike = Node | {node: Node} | {element: Node};
+
+function getNode(node: NodeLike | null): Node | null {
+  if (node) {
+    node = 'node' in node ? node.node : node;
+    node = 'element' in node ? node.element : node;
+  }
   return node;
 }
 
-function getNearestScrollNode(node: any): HTMLElement | Document | null {
+function getNearestScrollNode(
+  node: NodeLike | null,
+): HTMLElement | Document | null {
   node = getNode(node);
   if (node instanceof Document) return node;
   if (!(node instanceof HTMLElement)) return null;
@@ -250,4 +175,90 @@ function getNearestScrollNode(node: any): HTMLElement | Document | null {
   if (overflowX === 'scroll' || overflowY === 'scroll') return node;
 
   return getNearestScrollNode(node.parentNode) || document;
+}
+
+export default class ScrollMonitor extends Component<
+  ScrollMonitorProps,
+  ScrollMonitorState
+> {
+  static propTypes = scrollMonitorPropTypes;
+  static defaultProps = {
+    ...defaultScrollMonitorConfig,
+    onStart: void 0,
+    onChange: void 0,
+    onEnd: void 0,
+  };
+
+  state = {...initialState};
+
+  componentDidMount(): void {
+    this.mounted = true;
+    this.subscribeIfNecessary();
+  }
+
+  componentDidUpdate(prevProps: RecordOf<ScrollMonitorProps>): void {
+    if (configChanged(prevProps, this.props)) {
+      this.unsubscribe();
+      this.subscribeIfNecessary();
+    }
+  }
+
+  componentWillUnmount(): void {
+    this.mounted = false;
+    this.unsubscribe();
+  }
+
+  uid: string = uuid().slice(0, 8);
+  mounted: boolean = false;
+  subscription: Subscription | null = null;
+  scrollRef = React.createRef() as React.MutableRefObject<HTMLElement>;
+
+  handleRef = (node: HTMLElement) => {
+    if (this.scrollRef.current !== node) {
+      this.scrollRef.current = node;
+      this.unsubscribe();
+    }
+    if (this.props.innerRef) {
+      if (typeof this.props.innerRef === 'function') {
+        this.props.innerRef(node);
+      } else {
+        this.props.innerRef.current = node;
+      }
+    }
+    if (node) {
+      this.subscribeIfNecessary();
+    }
+  };
+
+  unsubscribe(): void {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+      this.subscription = null;
+    }
+  }
+
+  subscribeIfNecessary(): void {
+    if (!this.subscription && this.mounted && this.scrollRef.current) {
+      const target = getNode(this.scrollRef.current);
+      const scrollingElement = getNearestScrollNode(target);
+      if (scrollingElement && target) {
+        this.subscription = ScrollState.create(
+          scrollingElement,
+          getObservableConfig(this.props, this.uid, target),
+        ).subscribe(this.handleUpdate);
+      }
+    }
+  }
+
+  handleUpdate = (state: ScrollMonitorState) => {
+    if (this.mounted) this.setState(state);
+  };
+
+  render(): JSX.Element {
+    return this.props.children({
+      ...this.state,
+      scrollRef: this.handleRef,
+      uid: this.uid,
+    });
+  }
 }

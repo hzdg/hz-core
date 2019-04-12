@@ -1,19 +1,57 @@
 import Debug from 'debug';
 import {Observable, getViewportChanges} from './utils';
 
-import {ViewportConfig, ObserverSet, Observer, ViewportChange} from './types';
+import {
+  ViewportConfig,
+  Observer,
+  ViewportChange,
+  /* eslint-disable import/named */
+  ObserverSet,
+  /* eslint-enable import/named */
+} from './types';
 
 type TargetMap = Map<Element, ObserverSet>;
-type IntersectionConfig = {
+interface IntersectionConfig {
   intersection: IntersectionObserver;
   targets: TargetMap;
-};
+}
 type IntersectionConfigs = Record<string, IntersectionConfig>;
 type ElementMap = Map<HTMLElement | Document, IntersectionConfigs>;
 
 const debug = Debug('ScrollMonitor:viewport');
 
 const elementMap: ElementMap = new Map();
+
+function createIntersectionConfig(
+  element: HTMLElement | Document,
+  threshold: number | number[] | null,
+): IntersectionConfig {
+  const targets = new Map();
+
+  function handleIntersectionChange(
+    entries: IntersectionObserverEntry[],
+  ): void {
+    getViewportChanges(entries).forEach(intersection => {
+      const observers = targets.get(intersection.target);
+      if (observers) {
+        observers.forEach((observer: Observer) => {
+          // FIXME: no array needed here any more.
+          observer.next({intersection});
+        });
+      }
+    });
+  }
+
+  return {
+    targets,
+    intersection: new IntersectionObserver(handleIntersectionChange, {
+      threshold: threshold || void 0,
+      root: element instanceof HTMLElement ? element : null,
+      // TODO: add rootMargin support?
+      // rootMargin?: string
+    }),
+  };
+}
 
 export function create(
   element: HTMLElement | Document,
@@ -73,34 +111,4 @@ export function create(
     };
   });
 }
-
-function createIntersectionConfig(
-  element: HTMLElement | Document,
-  threshold: number | number[] | null,
-): IntersectionConfig {
-  const targets = new Map();
-
-  function handleIntersectionChange(entries: IntersectionObserverEntry[]) {
-    getViewportChanges(entries).forEach(intersection => {
-      const observers = targets.get(intersection.target);
-      if (observers) {
-        observers.forEach((observer: Observer) => {
-          // FIXME: no array needed here any more.
-          observer.next({intersection});
-        });
-      }
-    });
-  }
-
-  return {
-    targets,
-    intersection: new IntersectionObserver(handleIntersectionChange, {
-      threshold: threshold || void 0,
-      root: element instanceof HTMLElement ? element : null,
-      // TODO: add rootMargin support?
-      // rootMargin?: string
-    }),
-  };
-}
-
 export default {create};

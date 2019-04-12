@@ -6,12 +6,14 @@ import {Observable} from './utils';
 import {SCROLL_PROPS, Observer} from './types';
 
 import {
-  ObserverSet,
   Subscription,
   ScrollMonitorConfig,
   ScrollMonitorEventConfig,
-  ScrollState,
   UpdatePayload,
+  /* eslint-disable import/named */
+  ObserverSet,
+  ScrollState,
+  /* eslint-enable import/named */
 } from './types';
 
 export function create(
@@ -27,7 +29,7 @@ export function create(
   let scrollState: ScrollState = {};
   let updatePending: boolean | number = false;
 
-  function reset() {
+  function reset(): void {
     debug(`canceling update; clearing ${eventsToDispatch.size} events`);
     window.cancelAnimationFrame(updatePending as number);
     updatePending = false;
@@ -35,7 +37,7 @@ export function create(
     scrollState = {};
   }
 
-  function dispatch() {
+  function dispatch(): void {
     if (!eventsToDispatch.size) return;
     const nextState = {...scrollState, ...eventState.state};
     debug(
@@ -54,7 +56,7 @@ export function create(
     eventsToDispatch.clear();
   }
 
-  function update(payload: UpdatePayload, immediate?: boolean) {
+  function update(payload: UpdatePayload, immediate?: boolean): void {
     // Update the callbacks that care about the impending state change.
     // Note that dispatches are asynchronous by default. This means that
     // some changes might add a callback to the map, while subsequent
@@ -104,7 +106,7 @@ export function create(
     }
   }
 
-  return new Observable((observer: Observer) => {
+  return new Observable<ScrollState>((observer: Observer) => {
     if (!observers.size) {
       if (SCROLL_PROPS.some(p => Boolean(config[p]))) {
         subscriptions.add(ScrollObservable.create(element).subscribe(update));

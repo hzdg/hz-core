@@ -1,7 +1,13 @@
 import Debug from 'debug';
 import {Observable, getScrollRect} from './utils';
 
-import {ObserverSet, ScrollRect, Observer} from './types';
+import {
+  ScrollRect,
+  Observer,
+  /* eslint-disable import/named */
+  ObserverSet,
+  /* eslint-enable import/named */
+} from './types';
 
 // TODO: Find the smallest timeout that won't ever get tricked by inertia.
 const SCROLL_TIMEOUT = 60;
@@ -15,10 +21,12 @@ const elements: Map<
   {observers: ObserverSet; handler(event: Event): void}
 > = new Map();
 
-function createScrollHandler(element: HTMLElement | Document) {
+function createScrollHandler(
+  element: HTMLElement | Document,
+): (scrollEvent: Event) => void {
   let scrollTimeoutPending: NodeJS.Timeout | false | null;
 
-  const handleScrollTimeout = () => {
+  const handleScrollTimeout = (): void => {
     if (scrollTimeoutPending) {
       clearTimeout(scrollTimeoutPending);
       scrollTimeoutPending = false;
@@ -31,7 +39,7 @@ function createScrollHandler(element: HTMLElement | Document) {
     }
   };
 
-  const handleScroll = (scrollEvent: Event) => {
+  const handleScroll = (scrollEvent: Event): void => {
     const target = scrollEvent.currentTarget;
     const elementConfig = elements.get(element);
     if (scrollTimeoutPending) {
@@ -57,7 +65,7 @@ function createScrollHandler(element: HTMLElement | Document) {
 export function create(
   element: HTMLElement | Document,
 ): Observable<{rect: ScrollRect}> {
-  return new Observable((observer: Observer) => {
+  return new Observable<{rect: ScrollRect}>((observer: Observer) => {
     let elementConfig = elements.get(element);
     if (!elementConfig) {
       debug('Creating scroll event listener', element);
