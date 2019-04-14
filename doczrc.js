@@ -6,7 +6,8 @@ export default {
   src: './packages',
   public: './static',
   files: '**/*.{md,mdx}',
-  typescript: false,
+  codeSandbox: false,
+  typescript: true,
   ignore: ['**/changelog.*', '**/{animations,simple-actions}/**'],
   menu: [
     'About',
