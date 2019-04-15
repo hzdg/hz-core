@@ -3,6 +3,7 @@
   "version": "0.1.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
+  "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"
@@ -10,13 +11,14 @@
   "files": [
     "cjs",
     "es",
-    "umd"
+    "src",
+    "!*/__test*"
   ],
   "peerDependencies": {
     "react": "^16.3.1",
     "react-dom": "^16.3.1"
   },
   "dependencies": {
-    "@babel/runtime": "7.1.5"
+    "@babel/runtime": "^7.4.3"
   }
 }

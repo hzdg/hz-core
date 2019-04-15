@@ -1,4 +1,4 @@
-/* eslint-env jest */
+/* eslint-env jest, browser */
 import WheelSequence from '../WheelSequence';
 
 beforeEach(() => {

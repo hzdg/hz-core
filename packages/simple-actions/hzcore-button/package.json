@@ -3,12 +3,14 @@
   "version": "0.0.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
+  "typings": "es/index.tsx",
   "license": "MIT",
   "private": true,
   "files": [
     "cjs",
     "es",
-    "umd"
+    "src",
+    "!*/__test*"
   ],
   "dependencies": {
     "react": "^16.2.0"

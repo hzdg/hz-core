@@ -1,34 +1,47 @@
 #! /usr/bin/env node
-/* eslint-disable no-console, no-process-exit */
+// @ts-check
+const {promisify} = require('util');
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
 const rimraf = require('rimraf');
+// @ts-ignore
 const report = require('yurnalist');
 const babel = require('@babel/core');
+// @ts-ignore
 const project = require('@lerna/project');
-const {rollup} = require('rollup');
-const uglify = require('rollup-plugin-uglify-es');
-const rollupConfig = require('../rollup.config');
+
+const rmdir = promisify(rimraf);
+const writeFile = promisify(fs.writeFile);
 
 const PROJECT_ROOT = process.cwd();
-const SRC_GLOB = '**/*.js';
+const SRC_GLOB = '**/*.{ts,tsx,js,jsx}';
 const EXCLUDE_GLOBS = [
   '**/@(__tests__|tests|examples|docs)/**/*',
   '**/*_test.js',
 ];
 
-const rmdir = dirpath =>
-  new Promise((resolve, reject) => {
-    rimraf(dirpath, err => {
-      if (err) {
-        reject(err);
-      } else {
-        resolve();
-      }
-    });
-  });
+/**
+ * @typedef {Object} Workspace
+ * @property {string} name
+ * @property {string} location
+ * @property {Object[]} [devDependencies]
+ * @property {Object[]} [peerDependencies]
+ * @property {Boolean} [private]
+ */
 
+/**
+ * @typedef {Object} Pkg
+ * @property {Workspace} meta
+ * @property {string} name
+ * @property {string} dir
+ * @property {string} src
+ */
+
+/**
+ * @param {string} dirpath
+ * @returns {Promise<void>}
+ */
 const mkdir = dirpath =>
   new Promise((resolve, reject) => {
     fs.mkdir(dirpath, err => {
@@ -50,6 +63,11 @@ const mkdir = dirpath =>
     });
   });
 
+/**
+ * @param {string} filename
+ * @param {Object} [options]
+ * @returns {Promise<babel.BabelFileResult | null>}
+ */
 const transformFile = (filename, options) =>
   new Promise((resolve, reject) => {
     try {
@@ -70,24 +88,41 @@ const transformFile = (filename, options) =>
     }
   });
 
-const writeFile = (filename, data, options) =>
-  new Promise((resolve, reject) => {
-    fs.writeFile(filename, data, {encoding: 'utf8', ...options}, err => {
-      if (err) reject(err);
-      else resolve();
-    });
-  });
+/**
+ *
+ * @param {string} code
+ */
+const hasExports = code => Boolean(code) && /export/.test(code);
 
-const buildModule = async (filename, src, dir, format) => {
-  const dist = path.join(dir, format);
+/**
+ * @param {Pkg} pkg
+ * @param {string} filename
+ * @param {string} format
+ * @returns {Promise<void>}
+ */
+const buildModule = async (pkg, filename, format) => {
+  const dist = path.join(pkg.dir, format);
   await rmdir(dist);
   await mkdir(dist);
-  // eslint-disable-next-line prefer-const
-  let {code, map} = await transformFile(filename, {envName: format});
+  const result = await transformFile(filename, {envName: format});
+  if (!result) {
+    throw new Error(`Could not transform file ${filename}`);
+  }
+  let {code, map} = result;
+  if (!code || !hasExports(code)) {
+    report.info(
+      `[${pkg.meta.name}] ${path.relative(
+        pkg.src,
+        filename,
+      )} has no exports! Skipping ${format} module ...`,
+    );
+    return;
+  }
+  if (!map) throw new Error(`No sourcemap found in transform of ${filename}`);
   const basename = path.basename(filename);
   const filepath = path.join(
     dist,
-    path.dirname(path.relative(src, filename)),
+    path.dirname(path.relative(pkg.src, filename)),
     basename,
   );
   code = `${code}\n//# sourceMappingURL=${basename}.map`;
@@ -96,50 +131,27 @@ const buildModule = async (filename, src, dir, format) => {
   await writeFile(filepath, code);
 };
 
-const buildModules = ({dir, src}) =>
+/**
+ * @param {Pkg} pkg
+ * @returns {Promise<[void, void][]>}
+ */
+const buildModules = pkg =>
   Promise.all(
     glob
-      .sync(path.join(src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
+      .sync(path.join(pkg.src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
       .map(input =>
         Promise.all([
-          buildModule(input, src, dir, 'es'),
-          buildModule(input, src, dir, 'cjs'),
+          buildModule(pkg, input, 'es'),
+          buildModule(pkg, input, 'cjs'),
         ]),
       ),
   );
 
-const buildBundle = async ({meta, src, dir}, env) => {
-  const dist = path.join(dir, 'umd');
-  await rmdir(dist);
-  await mkdir(dist);
-
-  const dev = env !== 'production';
-  const {output, ...config} = rollupConfig;
-  const bundle = await rollup({
-    ...config,
-    input: path.resolve(src, 'index.js'),
-    external: [
-      ...Object.keys(output.globals),
-      ...Object.keys(meta.devDependencies || {}),
-      ...Object.keys(meta.peerDependencies || {}),
-    ],
-    plugins: [...rollupConfig.plugins, ...(dev ? [] : [uglify()])],
-  });
-
-  const name = meta.name.replace(/@.+\/(.+)/, `hzcore-$1`);
-  await bundle.write({
-    ...output,
-    name,
-    file: path.join(dist, `${name}.${dev ? 'js' : 'min.js'}`),
-  });
-};
-
-const buildBundles = pkg =>
-  Promise.all([
-    buildBundle(pkg, 'development'),
-    buildBundle(pkg, 'production'),
-  ]);
-
+/**
+ * @param {Pkg} pkg
+ * @param {Object} activity
+ * @returns {Promise<void>}
+ */
 const buildPackage = async (pkg, activity) => {
   if (pkg.meta.private) {
     report.info(`[${pkg.meta.name}] is private! Skipping build step ...`);
@@ -147,8 +159,6 @@ const buildPackage = async (pkg, activity) => {
     try {
       activity.tick(`[${pkg.meta.name}] Building modules ...`);
       await buildModules(pkg);
-      activity.tick(`[${pkg.meta.name}] Building UMD bundles ...`);
-      await buildBundles(pkg);
     } catch (error) {
       report.error(`[${pkg.meta.name}] There was an error!`);
       throw error;
@@ -160,44 +170,106 @@ const buildPackage = async (pkg, activity) => {
   }
 };
 
-const buildPackages = () =>
-  project
-    .getPackages(PROJECT_ROOT)
-    .then(workspaces =>
-      // Queue up a package build for each workspace.
-      workspaces
-        .map(pkg => ({
-          dir: pkg.location,
-          meta: pkg,
-          name: pkg.name,
-          src: path.join(pkg.location, 'src'),
-        }))
-        .reduce(
-          (buildQueue, pkg, step, {length: steps}) =>
-            buildQueue.then(() => {
-              report.step(step + 1, steps, `[${pkg.meta.name}]`);
-              const activity = report.activity();
-              return buildPackage(pkg, activity)
-                .then(() => activity.end())
-                .catch(err => {
-                  activity.end();
-                  throw err;
-                });
-            }),
-          Promise.resolve(),
-        ),
-    )
+/**
+ * @param {Workspace} workspace
+ * @returns {Pkg}
+ */
+const workspaceToPackage = workspace => {
+  return {
+    dir: workspace.location,
+    meta: workspace,
+    name: workspace.name,
+    src: path.join(workspace.location, 'src'),
+  };
+};
+
+/**
+ * @param {Workspace[]} workspaces
+ * @returns {Promise<void>}
+ */
+const buildPackages = workspaces =>
+  // Queue up a package build for each workspace.
+  workspaces.map(workspaceToPackage).reduce(
+    (buildQueue, pkg, step, {length: steps}) =>
+      buildQueue.then(() => {
+        report.step(step + 1, steps, `[${pkg.meta.name}]`);
+        const activity = report.activity();
+        return buildPackage(pkg, activity)
+          .then(() => activity.end())
+          .catch(err => {
+            activity.end();
+            throw err;
+          });
+      }),
+    Promise.resolve(),
+  );
+
+/**
+ * @param {Pkg} pkg
+ * @param {Object} activity
+ * @returns {Promise<void>}
+ */
+const cleanPackage = async (pkg, activity) => {
+  try {
+    activity.tick(`[${pkg.meta.name}] Cleaning modules ...`);
+    await rmdir(path.join(pkg.dir, 'es'));
+    await rmdir(path.join(pkg.dir, 'cjs'));
+    await rmdir(path.join(pkg.dir, 'umd'));
+  } catch (error) {
+    report.error(`[${pkg.meta.name}] There was an error!`);
+    throw error;
+  }
+};
+
+/**
+ * @param {Workspace[]} workspaces
+ * @returns {Promise<void>}
+ */
+const cleanPackages = workspaces =>
+  // Queue up a package clean for each workspace.
+  workspaces.map(workspaceToPackage).reduce(
+    (cleanQueue, pkg, step, {length: steps}) =>
+      cleanQueue.then(() => {
+        report.step(step + 1, steps, `[${pkg.meta.name}]`);
+        const activity = report.activity();
+        return cleanPackage(pkg, activity)
+          .then(() => activity.end())
+          .catch(err => {
+            activity.end();
+            throw err;
+          });
+      }),
+    Promise.resolve(),
+  );
+
+/**
+ *
+ * @param {Object} [options]
+ * @param {Boolean} options.clean
+ * @returns {Promise<void>}
+ */
+async function build(options) {
+  const packages = await project.getPackages(PROJECT_ROOT);
+  if (options && options.clean) {
+    return cleanPackages(packages);
+  } else {
+    return buildPackages(packages);
+  }
+}
+
+module.exports = build;
+
+// If this is module is being run as a script, invoke the build function.
+// @ts-ignore
+if (typeof require !== 'undefined' && require.main === module) {
+  const clean = process.argv.includes('--clean');
+  build({clean})
     .then(() => {
-      report.success('All packages built!');
+      report.success(`All packages ${clean ? 'clean' : 'built'}!`);
     })
+    // @ts-ignore
     .catch(err => {
       report.error((err.stack && err.stack) || err);
       process.exit(1);
     });
-
-module.exports = buildPackages;
-
-// If this is module is being run as a script, invoke the build function.
-if (typeof require !== 'undefined' && require.main === module) {
-  buildPackages();
 }

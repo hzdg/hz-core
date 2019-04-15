@@ -1,4 +1,4 @@
-/* eslint-env jest */
+/* eslint-env jest, browser */
 import TouchSequence from '../TouchSequence';
 
 beforeEach(() => {
@@ -48,11 +48,11 @@ test('TouchSequence.start() reveals subsequence', async () => {
   ];
 
   for (let i = 0; i < expectedOrder.length; i++) {
-    expect(handler).nthCalledWith(i + 1, expect.any(TouchEvent));
-    expect(handler).nthCalledWith(i + 1, expectedOrder[i]);
+    expect(handler).toHaveBeenNthCalledWith(i + 1, expect.any(TouchEvent));
+    expect(handler).toHaveBeenNthCalledWith(i + 1, expectedOrder[i]);
   }
 
-  expect(handler).lastCalledWith(expectedOrder);
+  expect(handler).toHaveBeenLastCalledWith(expectedOrder);
 });
 
 test('TouchSequence.move().end() builds on initialized start()', async () => {
