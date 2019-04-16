@@ -114,5 +114,8 @@
     "typescript": "3.4.1",
     "validate-npm-package-name": "3.0.0",
     "yurnalist": "1.0.5"
+  },
+  "resolutions": {
+    "docz-plugin-netlify/**/docz-core": "^1.0.0"
   }
 }
