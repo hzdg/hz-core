@@ -84,7 +84,61 @@ Some examples:
 
 `🐛 (@hzcore/scroll-monitor) fix wheel delta and velocity`
 
-## TODO: How to Create a New Package
+## How to Create a New Package
+
+The quickest way to create a new package is to use our lil CLI wizard:
+
+```shell
+yarn create-package
+```
+
+This wizard will ask a few questions about the package,
+then generate the basic file structure for the package.
+
+If creating or modifying a package manually, try to adhere to
+the following conventions:
+
+-   it should live under `packages/<type>`, where `type` is one of
+    the existing package types. If your package doesn't seem to belong,
+    see [Creating a New Package Type](#creating-a-new-package-type).
+-   The package directory name should be `dash-case`.
+-   The package name (in `package.json`) should be `dash-case`.
+-   if it will be namespaced under `@hzcore`:
+    -   the package directory should be named `hzcore-<package-name>`.
+    -   the package name should be namespaced `@hzcore/<package-name>`.
+-   if the package exports a React Component, its name should be the
+    `dash-case` version of the `ComponentName`, i.e., `hzcore-component-name`.
+-   if the package exports a React hook, its name should be the `dash-case`
+    version of the `useThisHook`, with `use` replaced with `hook-`,
+    i.e. `hzcore-hook-this-hook`
+-   The package should include a `CHANGELOG.md`
+-   The package registry should be defined in `package.json` as:
+    ```json
+    "publishConfig": {
+      "registry": "http://npmregistry.hzdg.com"
+    }
+    ```
+
+### Creating a New Package Type
+
+If the existing package types (any of the directories under `packages`)
+do not seem to fit the package you would like to add a new type can be
+created by doing the following:
+
+-   make a new directory at `packages/<new-type>`, where `new-type`
+    is the camel-case name for the type of packages it will contain.
+-   Create a [yarn workspace] in the root `package.json`:
+    ```json
+    "workspaces": [
+      "packages/<new-type>/*",
+    ]
+    ```
+-   Create a [lerna package] in the root `lerna.json`:
+    ```json
+    "packages": [
+      "packages/<new-type>/*",
+    ]
+    ```
 
 ## TODO: How to Write a Commit Message
 
@@ -136,3 +190,5 @@ so all you should need to do to publish is a simple `git push`.
 [commitizen]: http://commitizen.github.io/cz-cli/
 [gitmoji]: https://gitmoji.carloscuesta.me/
 [changelog]: https://keepachangelog.com/
+[yarn workspace]: https://yarnpkg.com/lang/en/docs/workspaces/
+[lerna package]: https://github.com/lerna/lerna#lernajson
