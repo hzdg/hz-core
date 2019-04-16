@@ -33,7 +33,8 @@
     "packages/animations/*",
     "packages/behaviors/*",
     "packages/conventional-commits/*",
-    "packages/simple-actions/*"
+    "packages/simple-actions/*",
+    "packages/utilities/*"
   ],
   "config": {
     "commitizen": {
