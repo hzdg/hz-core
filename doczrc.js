@@ -1,3 +1,5 @@
+import doczPluginNetlify from 'docz-plugin-netlify';
+
 export default {
   title: 'HZ Core',
   description: "HZ's internal library of React Components",
@@ -35,4 +37,5 @@ export default {
       },
     },
   },
+  plugins: [doczPluginNetlify()],
 };
