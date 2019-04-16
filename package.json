@@ -69,6 +69,7 @@
     "commit-template": "1.0.0",
     "commitizen": "3.0.7",
     "docz": "1.0.0",
+    "docz-plugin-netlify": "1.1.4",
     "docz-theme-default": "1.0.0",
     "eslint": "5.15.1",
     "eslint-config-hzdg": "1.2.1",
