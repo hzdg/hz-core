@@ -21,13 +21,13 @@ route: ${route}
 ## Installation
 
 \`\`\`shell
-yarn add @hzcore/${name};
+yarn add @hzcore/${name}
 \`\`\`
 
 ## Usage
 
 \`\`\`js
-import ${isDefault ? main : `{${main}}`} from @hzcore/${name};
+import ${isDefault ? main : `{${main}}`} from '@hzcore/${name}';
 \`\`\`
 
 ## TODO: write some [docz](https://docz.site)!
