@@ -311,7 +311,7 @@ async function promptForOptions() {
       type: 'input',
       name: 'route',
       message: 'What do you want the route (slug) to be?',
-      default: `/${name}`,
+      default: `/${dashify(main)}`,
       validate: route => {
         if (!/^\//.test(route)) {
           return 'Route must start with a slash!';
