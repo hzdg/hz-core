@@ -14,7 +14,7 @@ export default function useRefCallback<T>(
    * Useful when the component needs to handle ref forwarding.
    */
   innerRef?: ((node: T | null) => void) | React.MutableRefObject<T | null>,
-): [(node: T | null) => void, React.RefObject<T | null>] {
+): [React.RefObject<T | null>, (node: T | null) => void] {
   const [currentNode, setNode] = useState<T | null>(null);
   const ref = useRef<T | null>(null);
   ref.current = currentNode;
@@ -30,5 +30,5 @@ export default function useRefCallback<T>(
       setNode(node);
     }
   }, []);
-  return [callback, ref];
+  return [ref, callback];
 }
