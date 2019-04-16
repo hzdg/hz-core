@@ -1,6 +1,6 @@
-import doczPluginNetlify from 'docz-plugin-netlify';
+const doczPluginNetlify = require('docz-plugin-netlify');
 
-export default {
+module.exports = {
   title: 'HZ Core',
   description: "HZ's internal library of React Components",
   src: './packages',

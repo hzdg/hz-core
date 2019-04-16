@@ -2989,6 +2989,11 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/dashify@1.0.0":
+  version "1.0.0"
+  resolved "http://npmregistry.hzdg.com/@types%2fdashify/-/dashify-1.0.0.tgz#19ade107e1e330344a65ad65f0e7e1875483d2e9"
+  integrity sha512-uyYom3SM48jvowobcby+1z3r/sDX+5N8lAdPoNLKYMhF819pNjV6K5g8lAUGrwj80n+P7Qf10GcA9h7aIO2GJw==
+
 "@types/debug@4.1.3":
   version "4.1.3"
   resolved "http://npmregistry.hzdg.com/@types%2fdebug/-/debug-4.1.3.tgz#4965a87531d7c6863f5b097b2c518b825e926cc7"
@@ -3007,6 +3012,14 @@
     "@types/events" "*"
     "@types/minimatch" "*"
     "@types/node" "*"
+
+"@types/inquirer@6.0.0":
+  version "6.0.0"
+  resolved "http://npmregistry.hzdg.com/@types%2finquirer/-/inquirer-6.0.0.tgz#bbf3c915f9266e30adf78fc2f3df72f205287aca"
+  integrity sha512-4evhNF+xgdnXNBKouwlZl4JW7uhv9t6JSCOOEg1s61T4QP+UbvyGWTSxj2SjAXz61ZvohJkepHU6p8KzHAClbg==
+  dependencies:
+    "@types/through" "*"
+    rxjs ">=6.4.0"
 
 "@types/invariant@2.2.29":
   version "2.2.29"
@@ -3034,6 +3047,13 @@
   version "3.0.3"
   resolved "http://npmregistry.hzdg.com/@types%2fminimatch/-/minimatch-3.0.3.tgz#3dca0e3f33b200fc7d1139c0cd96c1268cadfd9d"
   integrity sha512-tHq6qdbT9U1IRSGf14CL0pUlULksvY9OZ+5eEgl1N7t+OA3tGvNpxJCzuKQlsNgCVwbAs670L1vcVQi8j9HjnA==
+
+"@types/mkdirp@0.5.2":
+  version "0.5.2"
+  resolved "http://npmregistry.hzdg.com/@types%2fmkdirp/-/mkdirp-0.5.2.tgz#503aacfe5cc2703d5484326b1b27efa67a339c1f"
+  integrity sha512-U5icWpv7YnZYGsN4/cmh3WD2onMY0aJIiTE6+51TwJCttdHvtCYmkBNOobHlXwrJRL0nkH9jH4kD+1FAdMN4Tg==
+  dependencies:
+    "@types/node" "*"
 
 "@types/node@*":
   version "11.11.3"
@@ -3089,6 +3109,13 @@
   version "1.0.1"
   resolved "http://npmregistry.hzdg.com/@types%2fstack-utils/-/stack-utils-1.0.1.tgz#0a851d3bd96498fa25c33ab7278ed3bd65f06c3e"
   integrity sha512-l42BggppR6zLmpfU6fq9HEa2oGPEI8yrSPL3GITjfRInppYFahObbIQOQK3UGxEnyQpltZLaPe75046NOZQikw==
+
+"@types/through@*":
+  version "0.0.29"
+  resolved "http://npmregistry.hzdg.com/@types%2fthrough/-/through-0.0.29.tgz#72943aac922e179339c651fa34a4428a4d722f93"
+  integrity sha512-9a7C5VHh+1BKblaYiq+7Tfc+EOmjMdZaD1MYtkQjSoxgB69tBjW98ry6SKsi4zEIWztLOMRuL87A3bdT/Fc/4w==
+  dependencies:
+    "@types/node" "*"
 
 "@types/unist@*", "@types/unist@^2.0.0", "@types/unist@^2.0.2":
   version "2.0.3"
@@ -5947,6 +5974,11 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
+dashify@2.0.0:
+  version "2.0.0"
+  resolved "http://npmregistry.hzdg.com/dashify/-/dashify-2.0.0.tgz#fff270ca2868ca427fee571de35691d6e437a648"
+  integrity sha512-hpA5C/YrPjucXypHPPc0oJ1l9Hf6wWbiOL7Ik42cxnsUOhWiCB/fylKbKqqJalW9FgkNQCw16YO8uW9Hs0Iy1A==
+
 data-urls@^1.0.0:
   version "1.1.0"
   resolved "http://npmregistry.hzdg.com/data-urls/-/data-urls-1.1.0.tgz#15ee0582baa5e22bb59c77140da8f9c76963bbfe"
@@ -7835,7 +7867,7 @@ functional-red-black-tree@^1.0.1:
   resolved "http://npmregistry.hzdg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha1-GwqzvVU7Kg1jmdKcDj6gslIHgyc=
 
-fuse.js@^3.2.1:
+fuse.js@3.4.4, fuse.js@^3.2.1:
   version "3.4.4"
   resolved "http://npmregistry.hzdg.com/fuse.js/-/fuse.js-3.4.4.tgz#f98f55fcb3b595cf6a3e629c5ffaf10982103e95"
   integrity sha512-pyLQo/1oR5Ywf+a/tY8z4JygnIglmRxVUOiyFAbd11o9keUDpUJSMGRWJngcnkURj30kDHPmhoKY8ChJiz3EpQ==
@@ -8820,7 +8852,7 @@ init-package-json@^1.10.3:
     validate-npm-package-license "^3.0.1"
     validate-npm-package-name "^3.0.0"
 
-inquirer-autocomplete-prompt@^1.0.1:
+inquirer-autocomplete-prompt@1.0.1, inquirer-autocomplete-prompt@^1.0.1:
   version "1.0.1"
   resolved "http://npmregistry.hzdg.com/inquirer-autocomplete-prompt/-/inquirer-autocomplete-prompt-1.0.1.tgz#e4be98a9e727ea5160937e33f8724e70464e3c4d"
   integrity sha512-Y4V6ifAu9LNrNjcEtYq8YUKhrgmmufUn5fsDQqeWgHY8rEO6ZAQkNUiZtBm2kw2uUQlC9HdgrRCHDhTPPguH5A==
@@ -8886,6 +8918,25 @@ inquirer@6.2.1:
     rxjs "^6.1.0"
     string-width "^2.1.0"
     strip-ansi "^5.0.0"
+    through "^2.3.6"
+
+inquirer@6.3.1:
+  version "6.3.1"
+  resolved "http://npmregistry.hzdg.com/inquirer/-/inquirer-6.3.1.tgz#7a413b5e7950811013a3db491c61d1f3b776e8e7"
+  integrity sha512-MmL624rfkFt4TG9y/Jvmt8vdmOo836U7Y0Hxr2aFk3RelZEGX4Igk0KabWrcaaZaTv9uzglOqWh1Vly+FAWAXA==
+  dependencies:
+    ansi-escapes "^3.2.0"
+    chalk "^2.4.2"
+    cli-cursor "^2.1.0"
+    cli-width "^2.0.0"
+    external-editor "^3.0.3"
+    figures "^2.0.0"
+    lodash "^4.17.11"
+    mute-stream "0.0.7"
+    run-async "^2.2.0"
+    rxjs "^6.4.0"
+    string-width "^2.1.0"
+    strip-ansi "^5.1.0"
     through "^2.3.6"
 
 inquirer@^6.2.0, inquirer@^6.2.2:
@@ -9296,6 +9347,11 @@ is-utf8@^0.2.0, is-utf8@^0.2.1:
   version "0.2.1"
   resolved "http://npmregistry.hzdg.com/is-utf8/-/is-utf8-0.2.1.tgz#4b0da1442104d1b336340e80797e865cf39f7d72"
   integrity sha1-Sw2hRCEE0bM2NA6AeX6GXPOffXI=
+
+is-var-name@2.0.0:
+  version "2.0.0"
+  resolved "http://npmregistry.hzdg.com/is-var-name/-/is-var-name-2.0.0.tgz#28cad24d1e4021640bc54668b2de84a9f9b0d776"
+  integrity sha512-U+7mpdfaV4Qz2hDNy1Vt7TjWwdIp6br/w7CUlTnyMdsJq+IOSZrh+RsJNlSSckPAnTllhWxpiqC7VSxVTbcr2Q==
 
 is-whitespace-character@^1.0.0:
   version "1.0.2"
@@ -11094,7 +11150,7 @@ mixin-object@^2.0.1:
     for-in "^0.1.3"
     is-extendable "^0.1.1"
 
-mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0, mkdirp@~0.5.1:
+mkdirp@0.5.1, mkdirp@0.5.x, "mkdirp@>=0.5 0", mkdirp@^0.5.0, mkdirp@^0.5.1, mkdirp@~0.5.0, mkdirp@~0.5.1:
   version "0.5.1"
   resolved "http://npmregistry.hzdg.com/mkdirp/-/mkdirp-0.5.1.tgz#30057438eac6cf7f8c4767f38648d6697d75c903"
   integrity sha1-MAV0OOrGz3+MR2fzhkjWaX11yQM=
@@ -13830,7 +13886,7 @@ rx-lite@*, rx-lite@^4.0.8:
   resolved "http://npmregistry.hzdg.com/rx-lite/-/rx-lite-4.0.8.tgz#0b1e11af8bc44836f04a6407e92da42467b79444"
   integrity sha1-Cx4Rr4vESDbwSmQH6S2kJGe3lEQ=
 
-rxjs@^6.1.0, rxjs@^6.4.0:
+rxjs@>=6.4.0, rxjs@^6.1.0, rxjs@^6.4.0:
   version "6.4.0"
   resolved "http://npmregistry.hzdg.com/rxjs/-/rxjs-6.4.0.tgz#f3bb0fe7bda7fb69deac0c16f17b50b0b8790504"
   integrity sha512-Z9Yfa11F6B9Sg/BK9MnqnQ+aQYicPLtilXBp2yUtDt2JRCE0h26d33EnfO3ZxoNxG0T92OUucP3Ct7cpfkdFfw==
@@ -15680,7 +15736,7 @@ validate-npm-package-license@^3.0.1, validate-npm-package-license@^3.0.3:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-validate-npm-package-name@^3.0.0:
+validate-npm-package-name@3.0.0, validate-npm-package-name@^3.0.0:
   version "3.0.0"
   resolved "http://npmregistry.hzdg.com/validate-npm-package-name/-/validate-npm-package-name-3.0.0.tgz#5fa912d81eb7d0c74afc140de7317f0ca7df437e"
   integrity sha1-X6kS2B630MdK/BQN5zF/DKffQ34=
