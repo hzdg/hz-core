@@ -9,8 +9,6 @@ const inquirer = require('inquirer');
 // @ts-ignore
 const report = require('yurnalist');
 // @ts-ignore
-const project = require('@lerna/project');
-// @ts-ignore
 const autocompletePrompt = require('inquirer-autocomplete-prompt');
 // @ts-ignore
 const validatePackageName = require('validate-npm-package-name');
@@ -186,12 +184,11 @@ function autocomplete({name, message, choices, keys}) {
 /**
  * @returns Promise<{value: string}>
  */
-async function getTypeChoices() {
-  /** @type Workspace[] */
-  const packages = await project.getPackages(PROJECT_ROOT);
+function getTypeChoices() {
+  const {packages} = require(path.resolve(PROJECT_ROOT, 'lerna.json'));
   const types = new Set();
-  for (const {location} of packages) {
-    types.add(path.dirname(path.relative(PACKAGES, location)));
+  for (const packageLocation of packages) {
+    types.add(path.dirname(path.relative(PACKAGES, packageLocation)));
   }
   return Array.from(types).map(value => ({value}));
 }
