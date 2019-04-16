@@ -8,7 +8,7 @@
  */
 const TEST = ({isDefault, main}) => `
 /* eslint-env jest, browser */
-import ${isDefault ? main : `{${main}}`} from '../src/index';
+import ${isDefault ? main : `{${main}}`} from '../src';
 
 test('${main} is implemented', () => {
   expect(() => ${main}()).not.toThrow();
@@ -26,7 +26,7 @@ const TEST_REACT_COMPONENT = ({isDefault, main}) => `
 /* eslint-env jest, browser */
 import React from 'react';
 import {render} from 'react-testing-library';
-import ${isDefault ? main : `{${main}}`} from '../src/index';
+import ${isDefault ? main : `{${main}}`} from '../src';
 
 test('${main} is implemented', () => {
   const {container} = render(<${main} />);
@@ -45,7 +45,7 @@ const TEST_REACT_HOOK = ({isDefault, main}) => `
 /* eslint-env jest, browser */
 import React from 'react';
 import {render} from 'react-testing-library';
-import ${isDefault ? main : `{${main}}`} from '../src/index';
+import ${isDefault ? main : `{${main}}`} from '../src';
 
 test('${main} is implemented', () => {
   const ${main.replace(/^use/, '')}User = (): JSX.Element => {
