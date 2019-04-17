@@ -11,11 +11,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * replace scrollRef with innerRef ([dabd52c](https://github.com/hzdg/hz-core/commit/dabd52c))
 
 
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
 ## [0.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@0.1.0...@hzcore/scroll-monitor@0.1.1) (2018-08-29)
 
 

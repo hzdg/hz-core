@@ -11,11 +11,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * replace gestureRef prop with innerRef ([c70dacd](https://github.com/hzdg/hz-core/commit/c70dacd))
 
 
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
 ## [0.1.4](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.3...@hzcore/gesture-catcher@0.1.4) (2018-09-06)
 
 
@@ -33,11 +28,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * reduce wheel gesture timeout ([b2ad2f2](https://github.com/hzdg/hz-core/commit/b2ad2f2))
 
 
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
-
 ## [0.1.3](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.2...@hzcore/gesture-catcher@0.1.3) (2018-08-31)
 
 
@@ -45,11 +35,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 * fix gesture sensor config prop types ([ab8313f](https://github.com/hzdg/hz-core/commit/ab8313f))
 
-
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
 ## [0.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.1...@hzcore/gesture-catcher@0.1.2) (2018-08-31)
 
@@ -63,11 +48,6 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 * allow config changes to GestureObservable ([8bcd464](https://github.com/hzdg/hz-core/commit/8bcd464))
 * export the GestureCatcherConfig type ([0b538d0](https://github.com/hzdg/hz-core/commit/0b538d0))
 
-
-# Change Log
-
-All notable changes to this project will be documented in this file.
-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
 ## 0.1.1 (2018-08-29)
 
