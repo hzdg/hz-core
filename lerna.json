@@ -9,13 +9,8 @@
     },
     "publish": {
       "noPrivate": true,
-      "allowBranch": [
-        "master",
-        "0.1"
-      ],
-      "ignoreChanges": [
-        "*.md"
-      ],
+      "allowBranch": ["master", "0.1"],
+      "ignoreChanges": ["*.md", "*.mdx", "__tests__"],
       "message": "🔖 publish"
     },
     "init": {
