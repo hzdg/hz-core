@@ -8,7 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "lerna bootstrap && node ./scripts/build.js",
+    "build": "lerna bootstrap --loglevel=error && node ./scripts/build.js",
     "commit": "git-cz",
     "create-package": "./scripts/create-package.js",
     "develop": "docz dev",
@@ -16,7 +16,8 @@
     "preversion": "yarn test && yarn build",
     "start": "yarn develop",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest",
+    "test-publish": "node ./scripts/test-publish.js"
   },
   "husky": {
     "hooks": {
@@ -52,6 +53,7 @@
     "@babel/runtime": "7.4.3",
     "@commitlint/cli": "^7.5.2",
     "@lerna/project": "^3.13.1",
+    "@rauschma/stringio": "1.4.0",
     "@types/dashify": "1.0.0",
     "@types/debug": "4.1.3",
     "@types/glob": "7.1.1",
@@ -64,6 +66,7 @@
     "@types/react-motion": "0.0.28",
     "@types/rimraf": "2.0.2",
     "@types/shallowequal": "1.1.1",
+    "@types/stoppable": "1.1.0",
     "@types/warning": "3.0.0",
     "@types/zen-observable": "0.8.0",
     "@typescript-eslint/eslint-plugin": "1.6.0",
@@ -112,9 +115,11 @@
     "react-test-renderer": "16.8.4",
     "react-testing-library": "6.1.2",
     "rimraf": "2.6.3",
+    "stoppable": "1.1.0",
     "symbol-iterator": "1.0.2",
     "typescript": "3.4.1",
     "validate-npm-package-name": "3.0.0",
+    "verdaccio": "3.11.6",
     "yurnalist": "1.0.5"
   },
   "resolutions": {

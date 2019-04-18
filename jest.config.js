@@ -20,7 +20,7 @@ module.exports = {
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
 
   // The regexp pattern Jest uses to detect test files
-  testRegex: '.*/__tests__/.*test.(?:j|t)sx?$',
+  testRegex: '.*/__tests__/.*_test.(?:j|t)sx?$',
 
   // This option sets the URL for the jsdom environment. It is reflected in properties such as location.href
   testURL: 'http://localhost',
