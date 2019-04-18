@@ -95,15 +95,6 @@ const buildModule = async (pkg, filename, format) => {
     throw new Error(`Could not transform file ${filename}`);
   }
   let {code, map} = result;
-  if (!code || !hasExports(code)) {
-    report.info(
-      `[${pkg.meta.name}] ${path.relative(
-        pkg.src,
-        filename,
-      )} has no exports! Skipping ${format} module ...`,
-    );
-    return;
-  }
   if (!map) throw new Error(`No sourcemap found in transform of ${filename}`);
   const basename = path.basename(filename).replace(/\.(?:j|t)sx?$/, '.js');
   const filepath = path.join(
