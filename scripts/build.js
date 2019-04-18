@@ -4,14 +4,15 @@ const {promisify} = require('util');
 const fs = require('fs');
 const path = require('path');
 const glob = require('glob');
-const rimraf = require('rimraf');
+const retry = require('async-retry');
+const babel = require('@babel/core');
 // @ts-ignore
 const report = require('yurnalist');
-const babel = require('@babel/core');
 // @ts-ignore
 const project = require('@lerna/project');
 
-const rmdir = promisify(rimraf);
+const rmdir = promisify(require('rimraf'));
+const mkdir = promisify(require('mkdirp'));
 const writeFile = promisify(fs.writeFile);
 
 const PROJECT_ROOT = process.cwd();
@@ -37,31 +38,6 @@ const EXCLUDE_GLOBS = [
  * @property {string} dir
  * @property {string} src
  */
-
-/**
- * @param {string} dirpath
- * @returns {Promise<void>}
- */
-const mkdir = dirpath =>
-  new Promise((resolve, reject) => {
-    fs.mkdir(dirpath, err => {
-      if (err) {
-        if (err.code === 'EEXIST') {
-          resolve();
-        } else if (err.code === 'ENOENT') {
-          // Make the parent path, then try again.
-          mkdir(path.dirname(dirpath)).then(
-            () => mkdir(dirpath).then(resolve, reject),
-            reject,
-          );
-        } else {
-          reject(err);
-        }
-      } else {
-        resolve();
-      }
-    });
-  });
 
 /**
  * @param {string} filename
@@ -102,8 +78,18 @@ const hasExports = code => Boolean(code) && /export/.test(code);
  */
 const buildModule = async (pkg, filename, format) => {
   const dist = path.join(pkg.dir, format);
-  await rmdir(dist);
-  await mkdir(dist);
+  // HACK: Retry these fs ops a few times, cuz there are some
+  // weird edge case race conditions that sometimes pop up.
+  // It's a hack, i know, but, uh i also don't know.
+  await retry(
+    async () => {
+      await rmdir(dist);
+      await mkdir(dist);
+    },
+    {
+      retries: 3,
+    },
+  );
   const result = await transformFile(filename, {envName: format});
   if (!result) {
     throw new Error(`Could not transform file ${filename}`);
@@ -119,7 +105,7 @@ const buildModule = async (pkg, filename, format) => {
     return;
   }
   if (!map) throw new Error(`No sourcemap found in transform of ${filename}`);
-  const basename = path.basename(filename);
+  const basename = path.basename(filename).replace(/\.(?:j|t)sx?$/, '.js');
   const filepath = path.join(
     dist,
     path.dirname(path.relative(pkg.src, filename)),
@@ -127,8 +113,18 @@ const buildModule = async (pkg, filename, format) => {
   );
   code = `${code}\n//# sourceMappingURL=${basename}.map`;
   map.file = basename;
-  await writeFile(`${filepath}.map`, JSON.stringify(map));
-  await writeFile(filepath, code);
+  // HACK: Retry these fs ops a few times, cuz there are some
+  // weird edge case race conditions that sometimes pop up.
+  // It's a hack, i know, but, uh i also don't know.
+  await retry(
+    async () => {
+      await writeFile(`${filepath}.map`, JSON.stringify(map));
+      await writeFile(filepath, code);
+    },
+    {
+      retries: 3,
+    },
+  );
 };
 
 /**
