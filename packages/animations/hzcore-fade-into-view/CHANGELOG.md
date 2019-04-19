@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/fade-into-view@0.0.2...@hzcore/fade-into-view@0.0.3) (2019-04-19)
+
+
+### @hzcore/fade-into-view
+
+* remove UMD bundle ([e89dd33](https://github.com/hzdg/hz-core/commit/e89dd33))
+* migrate to typescript ([161b792](https://github.com/hzdg/hz-core/commit/161b792))
+
+
 ## 0.0.2 (2018-08-29)
 
 

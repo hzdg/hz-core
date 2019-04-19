@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/commitizen-config",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The hzcore commitizen confg",
   "license": "MIT",
   "publishConfig": {

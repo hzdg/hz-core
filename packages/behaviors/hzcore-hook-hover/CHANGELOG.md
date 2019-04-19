@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.4](https://github.com/hzdg/hz-core/compare/@hzcore/hook-hover@0.0.3...@hzcore/hook-hover@0.0.4) (2019-04-19)
+
+
+* organize behavior docs ([4d3b503](https://github.com/hzdg/hz-core/commit/4d3b503))
+* upgrade to docz@1.0.0 ([b41e84f](https://github.com/hzdg/hz-core/commit/b41e84f))
+
+### @hzcore/hook-hover
+
+* upgrade babel-runtime@^7.4.3 ([0b97d3f](https://github.com/hzdg/hz-core/commit/0b97d3f))
+* remove UMD bundle ([853fc4b](https://github.com/hzdg/hz-core/commit/853fc4b))
+* exclude tests from package ([db448ab](https://github.com/hzdg/hz-core/commit/db448ab))
+* migrate to typescript ([61a4d61](https://github.com/hzdg/hz-core/commit/61a4d61))
+
+
 ## [0.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/hook-hover@0.0.2...@hzcore/hook-hover@0.0.3) (2019-04-02)
 
 

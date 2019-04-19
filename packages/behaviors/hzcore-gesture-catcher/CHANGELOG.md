@@ -3,6 +3,28 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.6](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.5...@hzcore/gesture-catcher@0.1.6) (2019-04-19)
+
+
+* clean up Changelogs ([ed9212b](https://github.com/hzdg/hz-core/commit/ed9212b))
+* organize behavior docs ([4d3b503](https://github.com/hzdg/hz-core/commit/4d3b503))
+* upgrade to docz@1.0.0 ([b41e84f](https://github.com/hzdg/hz-core/commit/b41e84f))
+
+### @hzcore/gesture-catcher
+
+* add types for callbag and lethargy ([dcf9e67](https://github.com/hzdg/hz-core/commit/dcf9e67))
+* upgrade babel-runtime@^7.4.3 ([d84562e](https://github.com/hzdg/hz-core/commit/d84562e))
+* upgrade callbag-merge@^3.2.2 ([d865f04](https://github.com/hzdg/hz-core/commit/d865f04))
+* remove new `as const` syntax ([5e09df6](https://github.com/hzdg/hz-core/commit/5e09df6))
+* remove UMD bundle ([11d22af](https://github.com/hzdg/hz-core/commit/11d22af))
+* exclude tests from package ([2410f62](https://github.com/hzdg/hz-core/commit/2410f62))
+* migrate to typescript ([c857edd](https://github.com/hzdg/hz-core/commit/c857edd))
+
+### @hzcore/windowsize-monitor
+
+* migrate to typescript ([75759a8](https://github.com/hzdg/hz-core/commit/75759a8))
+
+
 ## [0.1.5](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.4...@hzcore/gesture-catcher@0.1.5) (2018-09-10)
 
 

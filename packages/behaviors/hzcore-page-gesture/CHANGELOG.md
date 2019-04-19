@@ -3,6 +3,21 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.6](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.5...@hzcore/page-gesture@0.1.6) (2019-04-19)
+
+
+* clean up Changelogs ([ed9212b](https://github.com/hzdg/hz-core/commit/ed9212b))
+* organize behavior docs ([4d3b503](https://github.com/hzdg/hz-core/commit/4d3b503))
+* upgrade to docz@1.0.0 ([b41e84f](https://github.com/hzdg/hz-core/commit/b41e84f))
+
+### @hzcore/page-gesture
+
+* upgrade babel-runtime@^7.4.3 ([ec39d23](https://github.com/hzdg/hz-core/commit/ec39d23))
+* remove UMD bundle ([da0fea9](https://github.com/hzdg/hz-core/commit/da0fea9))
+* exclude tests from package ([7cbd823](https://github.com/hzdg/hz-core/commit/7cbd823))
+* migrate to typescript ([984b5ec](https://github.com/hzdg/hz-core/commit/984b5ec))
+
+
 ## [0.1.5](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.4...@hzcore/page-gesture@0.1.5) (2018-09-10)
 
 
