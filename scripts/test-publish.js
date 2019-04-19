@@ -1,6 +1,6 @@
 #! /usr/bin/env node
 // @ts-check
-const {execSync, spawn} = require('child_process');
+const childProcess = require('child_process');
 const {onExit} = require('@rauschma/stringio');
 const path = require('path');
 const os = require('os');
@@ -16,7 +16,11 @@ const {default: verdaccio} = require('verdaccio');
 
 const writeFile = promisify(fs.writeFile);
 const readFile = promisify(fs.readFile);
+const stat = promisify(fs.stat);
+const readdir = promisify(fs.readdir);
 const rm = promisify(fs.unlink);
+
+const PROJECT_ROOT = process.cwd();
 
 /**
  * @typedef {Object} Pkg
@@ -40,6 +44,13 @@ const rm = promisify(fs.unlink);
  * @typedef {Object} Registry
  * @property {string} url
  * @property {() => void} stop
+ */
+
+/**
+ * @typedef {Object} Project
+ * @property {string} path
+ * @property {Pkg[]} installedPackages
+ * @property {() => Promise<void>} cleanup
  */
 
 const verdaccioConfig = {
@@ -71,11 +82,22 @@ const verdaccioConfig = {
  * @returns {Promise<void>}
  */
 async function run(command, args, options) {
-  const source = spawn(command, args, {
+  report.command(`${command} ${args.join(' ')}`);
+  const source = childProcess.spawn(command, args, {
     stdio: ['ignore', process.stdout, process.stderr],
     ...options,
   });
   return onExit(source);
+}
+
+/**
+ *
+ * @param {string} command
+ * @param {import('child_process').ExecSyncOptionsWithStringEncoding | undefined} [options]
+ */
+function execSync(command, options) {
+  report.command(command);
+  return childProcess.execSync(command, options);
 }
 
 /**
@@ -212,23 +234,87 @@ async function updatePackageRegistry(pkg, registry) {
 }
 
 /**
+ * @param {Pkg[]} pkgs
+ * @param {string} [root]
+ * @returns {Promise<Record<string, string>>}
+ */
+async function collectProjectFiles(pkgs, root) {
+  const templateRoot = root
+    ? path.resolve(PROJECT_ROOT, 'test-package', root)
+    : path.resolve(PROJECT_ROOT, 'test-package');
+  const templateFilenames = await readdir(templateRoot);
+  /** @type {Record<string, string>} */
+  const projectFiles = {};
+  const TemplatePattern = /%([^%]+)%/g;
+  const ExtPattern = /(\.[^.]+)(?:\.js)?$/;
+  for (const templateFilename of templateFilenames) {
+    const templatePath = path.resolve(templateRoot, templateFilename);
+    if ((await stat(templatePath)).isDirectory()) {
+      Object.assign(
+        projectFiles,
+        await collectProjectFiles(
+          pkgs,
+          root ? path.join(root, templateFilename) : templateFilename,
+        ),
+      );
+    } else if (TemplatePattern.test(templatePath)) {
+      const template = require(templatePath);
+      if (typeof template !== 'function') {
+        throw new Error(
+          `Expected ${templatePath} to export a template function, but got ${template}`,
+        );
+      }
+      for (const pkg of pkgs) {
+        const filepath = templateFilename
+          .replace(TemplatePattern, (pattern, match) =>
+            // @ts-ignore
+            match ? pkg[match] : pattern,
+          )
+          .replace('@hzcore/', '')
+          .replace(ExtPattern, '$1');
+        projectFiles[root ? path.join(root, filepath) : filepath] = template(
+          pkg,
+        );
+      }
+    } else {
+      const src = (await readFile(templatePath)).toString();
+      if (!src) {
+        throw new Error(`Could not read file at ${templatePath}`);
+      }
+      projectFiles[
+        root ? path.join(root, templateFilename) : templateFilename
+      ] = src;
+    }
+  }
+  return projectFiles;
+}
+
+/**
  *
  * @param {string} packagePath
+ * @param {Pkg[]} pkgs
  * @returns {Promise<() => Promise<void>>}
  */
-async function createTemporaryNodePackage(packagePath) {
+async function createTestProject(packagePath, pkgs) {
   const spinner = report.activity();
-  spinner.tick(`creating temporary node package`);
+  spinner.tick(`creating test project`);
+  await rmdir(packagePath);
   await mkdirp(packagePath);
+
   try {
-    await run('yarn', ['init', '-y'], {cwd: packagePath});
+    const projectFiles = await collectProjectFiles(pkgs);
+    for (const filepath in projectFiles) {
+      const targetPath = path.resolve(packagePath, filepath);
+      await mkdirp(path.dirname(targetPath));
+      await writeFile(targetPath, projectFiles[filepath]);
+    }
   } catch (e) {
     await rmdir(packagePath);
     spinner.end();
     throw e;
   }
   spinner.end();
-  report.success(`Created new package.json at ${packagePath}!`);
+  report.success(`Created test project at ${packagePath}!`);
   return async () => {
     await rmdir(packagePath);
   };
@@ -282,12 +368,12 @@ async function publishPkgs(pkgs, registry) {
  *
  * @param {Record<string, Pkg>} pkgs
  * @param {string} registry
- * @returns {Promise<void>}
+ * @returns {Promise<Project>}
  */
-async function testPublishedPkgs(pkgs, registry) {
+async function installPublishedPkgs(pkgs, registry) {
   const packagePath = path.join(os.tmpdir(), 'hzcore', 'test');
-  const cleanup = await createTemporaryNodePackage(packagePath);
   const publishedPkgs = Object.values(pkgs).filter(pkg => !pkg.private);
+  const cleanup = await createTestProject(packagePath, publishedPkgs);
   /** @type Set<string> */
   const pkgsToInstall = new Set();
   for (const pkg of publishedPkgs) {
@@ -297,7 +383,6 @@ async function testPublishedPkgs(pkgs, registry) {
     }
   }
 
-  let error;
   try {
     await run(
       'yarn',
@@ -312,34 +397,34 @@ async function testPublishedPkgs(pkgs, registry) {
       {cwd: packagePath},
     );
     report.success('installed packages!');
-    await run(
-      'jest',
-      ['--testRegex', '.*/__tests__/publish_smoketest.(?:j|t)sx?$'],
-      {
-        env: {
-          ...process.env,
-          PACKAGE_INSTALL_PATH: JSON.stringify(packagePath),
-          PACKAGES_TO_TEST: JSON.stringify(publishedPkgs),
-        },
-      },
-    );
-  } catch (e) {
-    error = e;
-  } finally {
+  } catch (error) {
     await cleanup();
-  }
-  if (error) {
     throw error;
   }
+  return {path: packagePath, installedPackages: publishedPkgs, cleanup};
 }
 
 /**
+ *
+ * @param {Record<string, Pkg>} pkgs
+ * @param {Project} project
+ * @returns {Promise<void>}
+ */
+async function testInstalledPackages(pkgs, project) {
+  await run('jest', [], {cwd: project.path});
+}
+
+/**
+ * @param {{open: string | false}} [options]
  * @returns {Promise<Record<string, Pkg> | undefined>}
  */
-async function testPublish() {
+async function testPublish(options) {
+  const openCmd = options ? options.open : false;
+  const shouldOpen = typeof openCmd == 'string';
   let error = false;
   let pkgsToPublish;
   let registry;
+  let project;
   try {
     // get list of packages that need publish and version them all temporarily.
     pkgsToPublish = await versionPkgs();
@@ -347,19 +432,34 @@ async function testPublish() {
     registry = await startRegistry();
     // publish packages to verdaccio
     await publishPkgs(pkgsToPublish, registry.url);
-    // run smoke tests for each package.
-    await testPublishedPkgs(pkgsToPublish, registry.url);
+
+    project = await installPublishedPkgs(pkgsToPublish, registry.url);
+
+    if (!shouldOpen) {
+      // run smoke tests for each package.
+      await testInstalledPackages(pkgsToPublish, project);
+    }
   } catch (e) {
     error = e;
   } finally {
     // stop the verdaccio server
-    if (registry) {
+    if (registry && (error || !shouldOpen)) {
       await registry.stop();
       report.info('Verdaccio server stopped!');
     }
-    // roll back the version commit
+    if (project && (error || !shouldOpen)) {
+      await project.cleanup();
+      report.info('Test project cleaned!');
+    }
     if (pkgsToPublish) {
+      // roll back the version commit
       await rollbackVersions(pkgsToPublish);
+    }
+
+    if (!error && shouldOpen && project && registry) {
+      report.info(`local registry available at ${registry.url}`);
+      report.info(`opening test project at ${project.path}`);
+      execSync(`${openCmd} ${project.path}`);
     }
   }
   if (error) throw error;
@@ -370,7 +470,10 @@ async function testPublish() {
 // then invoke the testPublish function.
 // @ts-ignore
 if (typeof require !== 'undefined' && require.main === module) {
-  testPublish()
+  const open = process.argv.includes('--open')
+    ? process.argv[process.argv.indexOf('--open') + 1] || 'code'
+    : false;
+  testPublish({open})
     .then(pkgs => {
       if (!pkgs) {
         report.warn('No packages were checked?');
