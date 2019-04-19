@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.5](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.4...@hzcore/windowsize-monitor@0.1.5) (2019-04-19)
+
+
+### @hzcore/windowsize-monitor
+
+* fixing memory leak(for real) ([e40a2d5](https://github.com/hzdg/hz-core/commit/e40a2d5))
+
+
 ## [0.1.4](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.3...@hzcore/windowsize-monitor@0.1.4) (2019-04-19)
 
 
