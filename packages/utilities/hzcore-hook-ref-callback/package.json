@@ -14,5 +14,8 @@
     "es",
     "src",
     "!*/__test*"
-  ]
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  }
 }
