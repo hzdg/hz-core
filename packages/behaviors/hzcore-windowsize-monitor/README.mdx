@@ -4,6 +4,9 @@ menu: Headless Components
 route: /windowsize-monitor
 ---
 
+import {Playground} from 'docz';
+import WindowsizeMonitor, {useWindowSize} from './src/index.tsx';
+
 # WindowsizeMonitor
 
 The component is used to determine the size(width & height) of the window. Some
@@ -18,20 +21,21 @@ purposes when using this hook/render prop in multiple components on the page.
 2. Import it in your module as `import {useWindowSize} from '@hzcore/windowsize-monitor'
 3. Use it!
 
-```jsx
-function BoxWithHook() {
-    const {width, height} = useWindowSize();
-    return (
-        <div
-            style={{
-                height: '500px',
-                display: width > 1024 && height > 600 ? 'block' : 'none',
-                background: width > 1024 && height > 600 ? 'red' : 'black',
-            }}
-        />
-    );
-}
-```
+<Playground>
+  {() => {
+    const Size = () => {
+      const {width, height} = useWindowSize();
+      return (
+        <pre style={{width: '100%', height: '100%'}}>
+          current width is {JSON.stringify(width, null, 2)}
+          <br />
+          current height is {JSON.stringify(height, null, 2)}
+        </pre>
+      );
+    };
+    return <Size />;
+  }}
+</Playground>
 
 #### To use with a render prop
 
@@ -39,16 +43,14 @@ function BoxWithHook() {
 2. Import it in your module. Use default import as `import WindowsizeMonitor from '@hzcore/windowsize-monitor'`
 3. Use it as a wrapper around component where you need to use window's width&height
 
-```jsx
-<WindowsizeMonitor>
+<Playground>
+  <WindowsizeMonitor>
     {({width, height}) => (
-        <div
-            style={{
-                height: '500px',
-                display: width > 1024 && height > 600 ? 'block' : 'none',
-                background: width > 1024 && height > 600 ? 'red' : 'black',
-            }}
-        />
+      <pre style={{width: '100%', height: '100%'}}>
+        current width is {JSON.stringify(width, null, 2)}
+        <br />
+        current height is {JSON.stringify(height, null, 2)}
+      </pre>
     )}
-</WindowsizeMonitor>
-```
+  </WindowsizeMonitor>
+</Playground>
