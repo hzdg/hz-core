@@ -42,8 +42,8 @@ export const useWindowSize = (
 
   const handle = throttle(() => {
     setSize({
-      width: window.innerWidth,
-      height: window.innerHeight,
+      width: isClient ? window.innerWidth : initialWidth,
+      height: isClient ? window.innerHeight : initialHeight,
     });
   }, throttleMs);
 
@@ -52,7 +52,7 @@ export const useWindowSize = (
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [handle]);
 
   return size;
 };
