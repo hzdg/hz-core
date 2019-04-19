@@ -7,7 +7,7 @@ import {Props, State} from './types';
 export * from './types';
 
 const events = new Set();
-const onResize = () => events.forEach(fn => fn());
+const onResize = (): void => events.forEach(fn => fn());
 const isClient = typeof window !== undefined;
 
 const subscriber = {
@@ -42,8 +42,8 @@ export const useWindowSize = (
 
   const handle = throttle(() => {
     setSize({
-      width: isClient ? window.innerWidth : initialWidth,
-      height: isClient ? window.innerHeight : initialHeight,
+      width: window.innerWidth,
+      height: window.innerHeight,
     });
   }, throttleMs);
 
@@ -52,7 +52,7 @@ export const useWindowSize = (
     return () => {
       subscription.unsubscribe();
     };
-  }, [handle]);
+  });
 
   return size;
 };
