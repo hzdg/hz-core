@@ -140,6 +140,47 @@ created by doing the following:
     ]
     ```
 
+## How to Publish
+
+We use [Lerna] to manage our packages, which helps make publishing easier.
+Still, it can be daunting to try to cut a release without knowing if it is
+going to work. To embolden us, hzcore has a [smoke test] to check if the new
+package versions are likely to publish successfully.
+
+### Publish 'smoke tests'
+
+To run the publish smoke tests:
+
+```shell
+yarn test-publish
+```
+
+It will take a few mins to run, but if it succeeds, you can feel pretty good
+that the next published versions will be ok.
+
+### Versioning
+
+By default, [Lerna] handles versioning and publishing together as part of the
+`lerna publish` flow. Lerna knows about [conventional commits], and it will
+use the change log since the last version of a package to decide what the next
+version should be.
+
+If you want to set the version yourself, you can do so by running
+`lerna version` and `lerna publish` separately.
+
+See [lerna changed] and [lerna version] for more.
+
+### Publishing
+
+All you should really need to do is run `lerna publish`, but there's a
+decent chance it will fail, due to our private repository setup and other
+idosyncracies with how lerna and NPM registries interact.
+
+If the versioning step succeeds (or if you ran `lerna version` separately),
+but `lerna publish` fails, you can try running `npm publish` in each package.
+
+See [lerna publish]
+
 ## TODO: How to Write Components
 
 -   **Render Props** are a useful technique for components that are used mostly
@@ -190,3 +231,7 @@ so all you should need to do to publish is a simple `git push`.
 [changelog]: https://keepachangelog.com/
 [yarn workspace]: https://yarnpkg.com/lang/en/docs/workspaces/
 [lerna package]: https://github.com/lerna/lerna#lernajson
+[smoke test]: https://en.wikipedia.org/wiki/Smoke_testing_(software)
+[lerna changed]: https://github.com/lerna/lerna/tree/master/commands/changed#readme
+[lerna version]: https://github.com/lerna/lerna/tree/master/commands/version#readme
+[lerna publish]: https://github.com/lerna/lerna/tree/master/commands/publish#readme
