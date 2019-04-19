@@ -158,6 +158,24 @@ yarn test-publish
 It will take a few mins to run, but if it succeeds, you can feel pretty good
 that the next published versions will be ok.
 
+### Publish 'smoke test' playground
+
+If you want to poke around with the packages that have been installed in the
+test project, you can run:
+
+```shell
+yarn test-publish --open [code|atom|...etc]
+```
+
+This will do everything the normal test does, except it won't run the tests.
+Instead, it will open the test project using the specified command
+(`code`, by default).
+
+You can then edit any of the test suites that were generated and try
+to test the packages with more rigor. This is a easy way to get a
+proper installed package playground to do some extra vetting
+of packages before a publish.
+
 ### Versioning
 
 By default, [Lerna] handles versioning and publishing together as part of the
