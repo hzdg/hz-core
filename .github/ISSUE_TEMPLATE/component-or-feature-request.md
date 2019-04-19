@@ -1,5 +1,5 @@
 ---
-name: Feature/Component Request
+name: Component or Feature Request
 about: Suggest a new feature or component for hz-core
 title: ''
 labels: 'Status: Requested'
