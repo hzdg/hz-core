@@ -1,5 +1,11 @@
+Hold on, are you:
+- requesting a new feature?
+- requesting a new component?
+- reporting a bug?
+- asking a question?
+- submitting a topic for discussion?
 
-Submitting a NEW COMPONENT or COMPONENT BUG? Please go to the below issues instead:
+If any of these hold true, please use one of the relevant issue templates instead:
+https://github.com/hzdg/hz-core/issues/new/choose
 
-NEW COMPONENT - https://github.com/hzdg/hz-core/issues/new?template=new_component.md
-COMPONENT BUG - https://github.com/hzdg/hz-core/issues/new?template=component_bug.md
+If not, proceed!
