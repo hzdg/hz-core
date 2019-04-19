@@ -135,6 +135,15 @@ async function collectPkgsToPublish() {
   if (!Object.keys(pkgsToPublish).length) {
     throw new Error('No packages need publishing!');
   }
+  if (Object.values(pkgsToPublish).every(pkg => pkg.private)) {
+    throw new Error(
+      `No public packages need publishing!\nChanged packages are:\n${Object.keys(
+        pkgsToPublish,
+      )
+        .map(n => `  ${n}`)
+        .join('\n')}`,
+    );
+  }
   return pkgsToPublish;
 }
 
@@ -146,6 +155,11 @@ async function getBranch() {
  * @returns {Promise<Record<string, Pkg>>}
  */
 async function versionPkgs() {
+  // NOTE: We will do this again after the version has happened,
+  // but we do it before versioning now to bail as early
+  // as possible if we don't have any publishable packages.
+  await collectPkgsToPublish();
+
   const gitBranch = await getBranch();
   await run('lerna', [
     'version',
@@ -323,11 +337,12 @@ async function createTestProject(packagePath, pkgs) {
 /**
  * @param {Record<string, Pkg>} pkgs
  * @param {string} registry
- * @returns {Promise<void>}
+ * @returns {Promise<Pkg[]>}
  */
 async function publishPkgs(pkgs, registry) {
   const spinner = report.activity();
   spinner.tick(`publishing packages`);
+  const publishedPkgs = [];
   for (const pkg of Object.values(pkgs)) {
     if (pkg.private) {
       report.warn(`skipping private package ${pkg.name}!`);
@@ -350,6 +365,7 @@ async function publishPkgs(pkgs, registry) {
         ],
         {cwd: pkg.location},
       );
+      publishedPkgs.push(pkg);
     } catch (e) {
       error = e;
     } finally {
@@ -362,21 +378,21 @@ async function publishPkgs(pkgs, registry) {
     report.success(`Published ${pkg.name} to ${registry}!`);
   }
   spinner.end();
+  return publishedPkgs;
 }
 
 /**
  *
- * @param {Record<string, Pkg>} pkgs
+ * @param {Pkg[]} pkgs
  * @param {string} registry
  * @returns {Promise<Project>}
  */
 async function installPublishedPkgs(pkgs, registry) {
   const packagePath = path.join(os.tmpdir(), 'hzcore', 'test');
-  const publishedPkgs = Object.values(pkgs).filter(pkg => !pkg.private);
-  const cleanup = await createTestProject(packagePath, publishedPkgs);
+  const cleanup = await createTestProject(packagePath, pkgs);
   /** @type Set<string> */
   const pkgsToInstall = new Set();
-  for (const pkg of publishedPkgs) {
+  for (const pkg of pkgs) {
     pkgsToInstall.add(`${pkg.name}@hzcore-dev`);
     for (const dep in pkg.peerDependencies) {
       pkgsToInstall.add(`${dep}@${pkg.peerDependencies[dep]}`);
@@ -401,7 +417,7 @@ async function installPublishedPkgs(pkgs, registry) {
     await cleanup();
     throw error;
   }
-  return {path: packagePath, installedPackages: publishedPkgs, cleanup};
+  return {path: packagePath, installedPackages: pkgs, cleanup};
 }
 
 /**
@@ -431,10 +447,12 @@ async function testPublish(options) {
     // spin up verdaccio
     registry = await startRegistry();
     // publish packages to verdaccio
-    await publishPkgs(pkgsToPublish, registry.url);
-
-    project = await installPublishedPkgs(pkgsToPublish, registry.url);
-
+    const publishedPkgs = await publishPkgs(pkgsToPublish, registry.url);
+    if (!publishedPkgs.length) {
+      throw new Error(`no packages were published!`);
+    }
+    // install published packages in a test project.
+    project = await installPublishedPkgs(publishedPkgs, registry.url);
     if (!shouldOpen) {
       // run smoke tests for each package.
       await testInstalledPackages(pkgsToPublish, project);
