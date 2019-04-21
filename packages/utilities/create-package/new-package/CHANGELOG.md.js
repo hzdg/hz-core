@@ -8,9 +8,8 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 `;
 
 /**
- * @param {import("../scripts/create-package").Options} options
  * @returns {string}
  */
-module.exports = function renderChangelog(options) {
+module.exports = function renderChangelog() {
   return CHANGELOG();
 };

@@ -26,10 +26,9 @@ const PACKAGE_JSON = options => `
 `;
 
 /**
- * @param {import("../scripts/create-package").Options} options
+ * @param {import("../bin/create-package").Options} options
  * @returns {string}
  */
 module.exports = function createPackageJson(options) {
-  const name = options.hzcore ? `@hzcore/${options.name}` : options.name;
-  return PACKAGE_JSON({name});
+  return PACKAGE_JSON(options);
 };
