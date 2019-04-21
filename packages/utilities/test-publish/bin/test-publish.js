@@ -20,8 +20,6 @@ const stat = promisify(fs.stat);
 const readdir = promisify(fs.readdir);
 const rm = promisify(fs.unlink);
 
-const PROJECT_ROOT = process.cwd();
-
 /**
  * @typedef {Object} Pkg
  * @property {string} name
