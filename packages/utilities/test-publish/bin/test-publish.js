@@ -254,8 +254,8 @@ async function updatePackageRegistry(pkg, registry) {
  */
 async function collectProjectFiles(pkgs, root) {
   const templateRoot = root
-    ? path.resolve(PROJECT_ROOT, 'test-package', root)
-    : path.resolve(PROJECT_ROOT, 'test-package');
+    ? path.resolve(__dirname, '../test-package', root)
+    : path.resolve(__dirname, '../test-package');
   const templateFilenames = await readdir(templateRoot);
   /** @type {Record<string, string>} */
   const projectFiles = {};

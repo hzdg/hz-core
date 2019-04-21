@@ -1,0 +1,29 @@
+{
+  "name": "create-package",
+  "description": "Create a new @hzcore- package",
+  "version": "0.0.1",
+  "bin": "bin/create-package.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "dependencies": {
+    "@types/dashify": "^1.0.0",
+    "@types/inquirer": "^6.0.0",
+    "@types/mkdirp": "^0.5.2",
+    "dashify": "^2.0.0",
+    "fuse.js": "^3.4.4",
+    "inquirer": "^6.3.1",
+    "inquirer-autocomplete-prompt": "^1.0.1",
+    "is-var-name": "^2.0.0",
+    "mkdirp": "^0.5.1",
+    "validate-npm-package-name": "^3.0.0",
+    "yurnalist": "^1.0.5"
+  },
+  "files": [
+    "bin",
+    "new-package",
+    "!*/__test*"
+  ]
+}

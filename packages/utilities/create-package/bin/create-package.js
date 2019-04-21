@@ -103,8 +103,8 @@ function renderTemplate(template, props) {
  */
 async function collectPackageFiles(options, root) {
   const templateRoot = root
-    ? path.resolve(PROJECT_ROOT, 'new-package', root)
-    : path.resolve(PROJECT_ROOT, 'new-package');
+    ? path.resolve(__dirname, '../new-package', root)
+    : path.resolve(__dirname, '../new-package');
   const templateFilenames = await readdir(templateRoot);
   const packageFiles = [];
   for (const templateFilename of templateFilenames) {

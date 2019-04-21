@@ -1,0 +1,26 @@
+{
+  "name": "build-packages",
+  "description": "Build @hzcore- packages",
+  "version": "0.0.1",
+  "bin": "bin/build-packages.js",
+  "license": "UNLICENSED",
+  "private": true,
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "dependencies": {
+    "@babel/core": "^7.4.3",
+    "@lerna/project": "^3.13.1",
+    "@types/async-retry": "^1.4.1",
+    "@types/mkdirp": "^0.5.2",
+    "@types/rimraf": "^2.0.2",
+    "async-retry": "^1.2.3",
+    "mkdirp": "^0.5.1",
+    "rimraf": "^2.6.3",
+    "yurnalist": "^1.0.5"
+  },
+  "files": [
+    "bin",
+    "!*/__test*"
+  ]
+}
