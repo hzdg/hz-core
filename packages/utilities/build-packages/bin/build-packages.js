@@ -65,12 +65,6 @@ const transformFile = (filename, options) =>
   });
 
 /**
- *
- * @param {string} code
- */
-const hasExports = code => Boolean(code) && /export/.test(code);
-
-/**
  * @param {Pkg} pkg
  * @param {string} filename
  * @param {string} format
