@@ -43,10 +43,10 @@ export interface ScrollMonitorEventState {
 }
 
 export interface ScrollRect {
-  top?: number | null;
-  left?: number | null;
-  width?: number | null;
-  height?: number | null;
+  top: number | null;
+  left: number | null;
+  width: number | null;
+  height: number | null;
 }
 
 export type ScrollState = ScrollRect & {

@@ -12,8 +12,14 @@ export class Observable<T> extends ZenObservable<T> {
 }
 
 export function getScrollRect(element: HTMLElement | Document): ScrollRect {
-  const scrollingElement =
-    'scrollingElement' in element ? element.scrollingElement : element;
+  let scrollingElement: Element;
+  if ('scrollingElement' in element && element.scrollingElement) {
+    scrollingElement = element.scrollingElement;
+  } else if ('body' in element) {
+    scrollingElement = element.body;
+  } else {
+    scrollingElement = element;
+  }
   invariant(
     scrollingElement,
     `The provided element ${element} is not a scrolling element!`,
@@ -23,7 +29,7 @@ export function getScrollRect(element: HTMLElement | Document): ScrollRect {
     scrollLeft: left,
     scrollWidth: width,
     scrollHeight: height,
-  } = scrollingElement as Element;
+  } = scrollingElement;
   return {top, left, width, height};
 }
 
