@@ -1,0 +1,165 @@
+---
+name: usePress
+menu: Hooks
+route: /use-press
+---
+
+import {Playground} from 'docz';
+import {useState} from 'react';
+import usePress from '@hzcore/hook-press';
+
+# usePress
+
+A [hook] that tracks events when the user presses the mouse button over a component.
+
+Main features:
+- Determines when an element is being pressed
+- Records the number of times an element has been pressed
+- Consumes a callback handler when an element is pressed
+
+---
+
+## Installation
+
+```shell
+yarn add @hzcore/hook-press
+```
+
+---
+
+## Options
+```js
+const {isPressed, pressCount, pressibleEl, pressProps} = usePress({defaultCount, handler});
+
+interface UsePressReturn {
+  // If element is pressed
+  isPressed: boolean;
+
+  // Number of how many times the element was pressed
+  pressCount: number;
+
+  // Listeners of the press event
+  pressProps: PressPropsReturn;
+
+  // Element reference
+  pressibleEl: object;
+}
+
+interface UsePressProps {
+  // Default count number to start from, optional, default = 0
+  defaultCount: number;
+
+  // Direct handler attached to the element, optional, default = null
+  handler: (args: {isPressed: boolean, pressCount: number}) => void;
+}
+```
+
+---
+
+## Usage
+
+### Simple Usage
+```js
+export default Button = () => {
+  const {isPressed, pressProps} = usePress();
+  return (
+    <button
+      style={{background: isPressed ? 'orange' : 'gray'}}
+      {...pressProps}
+    >
+      Press Me
+    </button>
+  );
+}
+```
+
+### Using Count
+<Playground>
+  {() => {
+
+    const plainStyles = {
+      color: 'white',
+      padding: '10px 20px',
+      fontSize: '16px',
+      borderRadius: '3px',
+      outline: 'none',
+      cursor: 'pointer',
+    }
+
+    const Button = () => {
+  
+      const {isPressed, pressCount, pressProps} = usePress({defaultCount: 7});
+
+      return (
+        <>
+          <button
+            style={{
+              background: isPressed ? '#f38230' : '#43454d',
+              ...plainStyles,
+            }}
+            {...pressProps}
+            ref={null}
+          >
+            Press Me
+          </button>
+          <p>I have been pressed {pressCount} time{pressCount > 1 ? 's': ''}.</p>
+        </>
+      );
+    }
+
+    return <Button />;
+  }}
+</Playground>
+
+
+### Using Handlers
+<Playground>
+  {() => {
+
+    const plainStyles = {
+      color: 'white',
+      padding: '10px 20px',
+      fontSize: '16px',
+      borderRadius: '3px',
+      outline: 'none',
+      cursor: 'pointer',
+    }
+
+    const Button = () => {
+      // Saving the current color of the button
+      const [color, setColor] = useState('#43454d');
+      
+      // Generate and set a random color for the button when clicked
+      const handleClick = (event, args) => {
+        const newColor = '#'+(Math.random()*0xFFFFFF<<0).toString(16);
+        setColor(newColor);
+      }
+
+      // Setting press features with a default count number as 1 
+      // and attaching the handler specific to this press
+      const {pressCount, pressProps} = usePress({handler: handleClick});
+
+      return (
+        <>
+          <button
+            style={{
+              background: color,
+              ...plainStyles,
+            }}
+            {...pressProps}
+          >
+            Press Me
+          </button>
+          <p>I have been pressed {pressCount} time{pressCount > 1 ? 's': ''}.</p>
+        </>
+      )
+    }
+
+    return <Button />;
+  }}
+</Playground>
+
+
+
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
