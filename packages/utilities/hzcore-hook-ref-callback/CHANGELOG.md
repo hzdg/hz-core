@@ -2,3 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+# 1.0.0 (2019-04-22)
+
+
+### @hzcore/hook-ref-callback
+
+* add hook-ref-callback package ([8587db0](https://github.com/hzdg/hz-core/commit/8587db0))
+* make public for publishing ([be7124d](https://github.com/hzdg/hz-core/commit/be7124d))
+* add react as a peer dep ([6923c89](https://github.com/hzdg/hz-core/commit/6923c89))
+* flip hook tuple to resemble useState ([35ef1d2](https://github.com/hzdg/hz-core/commit/35ef1d2))
+* document use cases ([ba404a7](https://github.com/hzdg/hz-core/commit/ba404a7))
+* initial implementation ([56be311](https://github.com/hzdg/hz-core/commit/56be311))

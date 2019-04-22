@@ -1,7 +1,7 @@
 {
   "name": "build-packages",
   "description": "Build @hzcore- packages",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "bin": "bin/build-packages.js",
   "license": "UNLICENSED",
   "private": true,
