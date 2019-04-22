@@ -8,24 +8,18 @@ What kinda stuff is in here, and how do i use it in my project?
 
 [Read the Docs!][docs]
 
-## Bugs
+## Issue Tracking
 
-If you're running into issues using HZ Core components,
-please [open an issue describing the problem][issues].
+### Bugs
 
-### TODO: Add bug report github template
+Found a bug? Check through the [current issues][issues] for any open related bugs. If none are found, [open a new bug report](https://github.com/hzdg/hz-core/issues/new/choose).
 
-## New Components
 
-Before creating a new package for a new component, please
-[create a new Github issue describing the new component][issues].
+### New Components
+Need a new component? Check through the [docs] for an existing component or the [issues] tracker for any current component requests. If none are found, [create a new Github issue describing the new component](https://github.com/hzdg/hz-core/issues/new/choose) before creating a new package.
 
-Make sure we don't already have an existing component for it
-by reviewing the [docs].
-
-### TODO: Add new component github template
-
-The rest of this document is about hacking on HZ core.
+### New Features
+Open a [new feature request](https://github.com/hzdg/hz-core/issues/new/choose) for any new features to add, whether it's new functionality for a component, or new deployment strategy for packages. Remember to first check through the [docs] or existing [issues] for any existing context on this feature.
 
 ---
 
