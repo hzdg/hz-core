@@ -49,3 +49,26 @@ export function uuid(): string {
     ((c as number) ^ (random() >> ((c as number) / 4))).toString(16),
   );
 }
+
+export type NodeLike = Node | {node: Node} | {element: Node};
+
+export function getNode(node: NodeLike | null): Node | null {
+  if (node) {
+    node = 'node' in node ? node.node : node;
+    node = 'element' in node ? node.element : node;
+  }
+  return node;
+}
+
+export function getNearestScrollNode(
+  node: NodeLike | null,
+): HTMLElement | Document | null {
+  node = getNode(node);
+  if (node instanceof Document) return node;
+  if (!(node instanceof HTMLElement)) return null;
+
+  const {overflowX, overflowY} = window.getComputedStyle(node);
+  if (overflowX === 'scroll' || overflowY === 'scroll') return node;
+
+  return getNearestScrollNode(node.parentNode) || document;
+}

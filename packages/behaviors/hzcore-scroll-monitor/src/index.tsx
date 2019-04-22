@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import PropTypes from 'prop-types';
 import shallowEqual from 'shallowequal';
-import {uuid} from './utils';
+import {uuid, getNode, getNearestScrollNode} from './utils';
 import ScrollState from './ScrollState';
 
 import {
@@ -152,29 +152,6 @@ function getObservableConfig(
     config.position = true;
   }
   return config;
-}
-
-type NodeLike = Node | {node: Node} | {element: Node};
-
-function getNode(node: NodeLike | null): Node | null {
-  if (node) {
-    node = 'node' in node ? node.node : node;
-    node = 'element' in node ? node.element : node;
-  }
-  return node;
-}
-
-function getNearestScrollNode(
-  node: NodeLike | null,
-): HTMLElement | Document | null {
-  node = getNode(node);
-  if (node instanceof Document) return node;
-  if (!(node instanceof HTMLElement)) return null;
-
-  const {overflowX, overflowY} = window.getComputedStyle(node);
-  if (overflowX === 'scroll' || overflowY === 'scroll') return node;
-
-  return getNearestScrollNode(node.parentNode) || document;
 }
 
 export default class ScrollMonitor extends Component<
