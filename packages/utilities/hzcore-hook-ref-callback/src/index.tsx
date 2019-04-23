@@ -1,5 +1,9 @@
 import React, {useCallback, useState, useRef} from 'react';
 
+export type InnerRef<T> =
+  | ((node: T | null) => void)
+  | React.MutableRefObject<T | null>;
+
 /**
  * A hook for components that need to know when a ref changes.
  *
@@ -13,7 +17,7 @@ export default function useRefCallback<T>(
    * An optional ref object or callback ref.
    * Useful when the component needs to handle ref forwarding.
    */
-  innerRef?: ((node: T | null) => void) | React.MutableRefObject<T | null>,
+  innerRef?: InnerRef<T> | null,
 ): [React.RefObject<T | null>, (node: T | null) => void] {
   const [currentNode, setNode] = useState<T | null>(null);
   const ref = useRef<T | null>(null);
