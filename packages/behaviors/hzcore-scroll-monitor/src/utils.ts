@@ -2,7 +2,14 @@ import ZenObservable from 'zen-observable';
 import $$observable from 'symbol-observable';
 import invariant from 'invariant';
 
-import {ScrollRect, ViewportChange} from './types';
+import {ViewportChange} from './types';
+
+export interface ScrollRect {
+  top: number | null;
+  left: number | null;
+  width: number | null;
+  height: number | null;
+}
 
 export class Observable<T> extends ZenObservable<T> {
   // rxjs interopt
