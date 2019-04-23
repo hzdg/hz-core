@@ -1,27 +1,21 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {getNearestScrollNode} from './utils';
-import useRefCallback from '@hzcore/hook-ref-callback';
+import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
 
 const SCROLL_TIMEOUT = 60;
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
 
-export interface UseScrollingConfig {
-  /**
-   * Whether or not to actively listen for changes in scrolling state.
-   */
-  disabled: boolean;
+export default function useScrolling(
   /**
    * An optional ref object or callback ref.
    * Useful when the component needs to handle ref forwarding.
    */
-  ref?:
-    | ((node: HTMLElement | null) => void)
-    | React.MutableRefObject<HTMLElement | null>;
-}
-
-export default function useScrolling(
-  {disabled, ref: innerRef}: UseScrollingConfig = {disabled: false},
+  innerRef?: InnerRef<HTMLElement> | null,
+  /**
+   * Whether or not to actively listen for changes in scrolling state.
+   */
+  disabled?: boolean,
 ): [boolean, (node: HTMLElement | null) => void] {
   let [scrolling, setScrolling] = useState(false);
   let [ref, refCallback] = useRefCallback(innerRef);

@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {getNearestScrollNode, getScrollRect} from './utils';
-import useRefCallback from '@hzcore/hook-ref-callback';
+import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
 
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
@@ -9,20 +9,6 @@ const INITIAL_SCROLL_POSITION: ScrollPosition = {top: null, left: null};
 export interface ScrollPosition {
   top: number | null;
   left: number | null;
-}
-
-export interface UseScrollPositionConfig {
-  /**
-   * Whether or not to actively listen for changes in scroll position.
-   */
-  disabled: boolean;
-  /**
-   * An optional ref object or callback ref.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  ref?:
-    | ((node: HTMLElement | null) => void)
-    | React.MutableRefObject<HTMLElement | null>;
 }
 
 function getScrollPosition(event: Event): ScrollPosition {
@@ -35,7 +21,15 @@ function getScrollPosition(event: Event): ScrollPosition {
 }
 
 export default function useScrollPosition(
-  {disabled, ref: innerRef}: UseScrollPositionConfig = {disabled: false},
+  /**
+   * An optional ref object or callback ref.
+   * Useful when the component needs to handle ref forwarding.
+   */
+  innerRef?: InnerRef<HTMLElement> | null,
+  /**
+   * Whether or not to actively listen for changes in scroll position.
+   */
+  disabled?: boolean,
 ): [ScrollPosition, (node: HTMLElement | null) => void] {
   let [scrollPosition, setScrollPosition] = useState(INITIAL_SCROLL_POSITION);
   let [ref, refCallback] = useRefCallback(innerRef);

@@ -1,6 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import {useState, useEffect} from 'react';
 import {getNearestScrollNode, getScrollRect} from './utils';
-import useRefCallback from '@hzcore/hook-ref-callback';
+import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
 import useScrollPosition, {ScrollPosition} from './useScrollPosition';
 
 const SCROLL = 'scroll';
@@ -22,20 +22,6 @@ export type HorizontalScrollDirection = typeof LEFT | typeof RIGHT;
 export interface ScrollDirection {
   vertical: VerticalScrollDirection | null;
   horizontal: HorizontalScrollDirection | null;
-}
-
-export interface UseScrollDirectionConfig {
-  /**
-   * Whether or not to actively listen for changes in scroll direction.
-   */
-  disabled: boolean;
-  /**
-   * An optional ref object or callback ref.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  ref?:
-    | ((node: HTMLElement | null) => void)
-    | React.MutableRefObject<HTMLElement | null>;
 }
 
 function getScrollDirection(
@@ -63,12 +49,20 @@ function getScrollDirection(
 }
 
 export default function useScrollDirection(
-  {disabled, ref: innerRef}: UseScrollDirectionConfig = {disabled: false},
+  /**
+   * An optional ref object or callback ref.
+   * Useful when the component needs to handle ref forwarding.
+   */
+  innerRef?: InnerRef<HTMLElement> | null,
+  /**
+   * Whether or not to actively listen for changes in scroll direction.
+   */
+  disabled?: boolean,
 ): [ScrollDirection, (node: HTMLElement | null) => void] {
-  const [scrollPosition, scrollPositionRefCallback] = useScrollPosition({
-    ref: innerRef,
+  const [scrollPosition, scrollPositionRefCallback] = useScrollPosition(
+    innerRef,
     disabled,
-  });
+  );
   const [ref, refCallback] = useRefCallback(scrollPositionRefCallback);
   const [scrollDirection, setScrollDirection] = useState(
     INITIAL_SCROLL_POSITION,
