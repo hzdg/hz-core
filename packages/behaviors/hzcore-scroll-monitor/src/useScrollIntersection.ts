@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
-import {getNearestScrollNode, getScrollRect, ScrollRect} from './utils';
 import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {getNearestScrollNode, getScrollRect, ScrollRect} from './utils';
 
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
@@ -19,9 +19,9 @@ type LeftBounds = Partial<Bounds> & Pick<Bounds, 'left'>;
 
 type BoundsRect = TopBounds | RightBounds | BottomBounds | LeftBounds;
 
-export type BoundsConfig = BoundsRect | BoundsRect[];
+export type ScrollIntersectionConfig = BoundsRect | BoundsRect[];
 
-export type InBounds = boolean | boolean[] | null;
+export type Intersects = boolean | boolean[] | null;
 
 function intersects(bounds: BoundsRect, rect: ScrollRect): boolean {
   const {
@@ -44,7 +44,10 @@ function intersects(bounds: BoundsRect, rect: ScrollRect): boolean {
   return inRangeVertical && inRangeHorizontal;
 }
 
-function getInBounds(event: Event, config?: BoundsConfig | null): InBounds {
+function getIntersects(
+  event: Event,
+  config?: ScrollIntersectionConfig | null,
+): Intersects {
   if (!config) return false;
   const target = event.currentTarget;
   if (target instanceof HTMLElement || target instanceof Document) {
@@ -58,22 +61,22 @@ function getInBounds(event: Event, config?: BoundsConfig | null): InBounds {
   return false;
 }
 
-function useScrollBounds(
-  boundsConfig: BoundsConfig,
+function useScrollIntersection(
+  config: ScrollIntersectionConfig,
   innerRef?: InnerRef<HTMLElement> | null,
   disabled?: boolean,
-): [InBounds, (node: HTMLElement | null) => void];
-function useScrollBounds(
-  boundsConfig?: BoundsConfig | null,
+): [Intersects, (node: HTMLElement | null) => void];
+function useScrollIntersection(
+  config?: ScrollIntersectionConfig | null,
   innerRef?: InnerRef<HTMLElement> | null,
-): [InBounds, (node: HTMLElement | null) => void];
-function useScrollBounds(
+): [Intersects, (node: HTMLElement | null) => void];
+function useScrollIntersection(
   /**
    * A rect or array of rects to check for intersection.
    * A rect should have at least one of `{top, right, left, bottom}`
    * set to a number.
    */
-  boundsConfig?: BoundsConfig | null,
+  config?: ScrollIntersectionConfig | null,
   /**
    * An optional ref object or callback ref.
    * Useful when the component needs to handle ref forwarding.
@@ -82,19 +85,18 @@ function useScrollBounds(
   /**
    * Whether or not to actively listen for changes in bounds intersection.
    */
-  disabled: boolean = !boundsConfig,
-): [InBounds, (node: HTMLElement | null) => void] {
+  disabled: boolean = !config,
+): [Intersects, (node: HTMLElement | null) => void] {
   const [ref, refCallback] = useRefCallback(innerRef);
-  const [inBounds, setInBounds] = useState<InBounds>(null);
+  const [intersects, setIntersects] = useState<Intersects>(null);
   const scrollingElement = getNearestScrollNode(ref.current);
 
   useEffect(() => {
     const handler = (event: Event): void => {
-      const nowInBounds = getInBounds(event, boundsConfig);
-      setInBounds(nowInBounds);
+      setIntersects(getIntersects(event, config));
     };
 
-    if (!disabled && scrollingElement && boundsConfig) {
+    if (!disabled && scrollingElement && config) {
       scrollingElement.addEventListener(SCROLL, handler, LISTENER_OPTIONS);
     }
     return () => {
@@ -102,9 +104,9 @@ function useScrollBounds(
         scrollingElement.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
       }
     };
-  }, [scrollingElement, disabled, boundsConfig]);
+  }, [scrollingElement, disabled, config]);
 
-  return [inBounds, refCallback];
+  return [intersects, refCallback];
 }
 
-export default useScrollBounds;
+export default useScrollIntersection;
