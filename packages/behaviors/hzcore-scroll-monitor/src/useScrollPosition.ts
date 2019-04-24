@@ -26,10 +26,6 @@ export default function useScrollPosition(
    * Useful when the component needs to handle ref forwarding.
    */
   innerRef?: InnerRef<HTMLElement> | null,
-  /**
-   * Whether or not to actively listen for changes in scroll position.
-   */
-  disabled?: boolean,
 ): [ScrollPosition, (node: HTMLElement | null) => void] {
   let [scrollPosition, setScrollPosition] = useState(INITIAL_SCROLL_POSITION);
   let [ref, refCallback] = useRefCallback(innerRef);
@@ -41,7 +37,7 @@ export default function useScrollPosition(
       setScrollPosition(position);
     };
 
-    if (!disabled && scrollingElement) {
+    if (scrollingElement) {
       scrollingElement.addEventListener(SCROLL, handler, LISTENER_OPTIONS);
     }
     return () => {
@@ -49,7 +45,7 @@ export default function useScrollPosition(
         scrollingElement.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
       }
     };
-  }, [scrollingElement, disabled]);
+  }, [scrollingElement]);
 
   return [scrollPosition, refCallback];
 }

@@ -64,7 +64,6 @@ function getIntersects(
 function useScrollIntersection(
   config: ScrollIntersectionConfig,
   innerRef?: InnerRef<HTMLElement> | null,
-  disabled?: boolean,
 ): [Intersects, (node: HTMLElement | null) => void];
 function useScrollIntersection(
   config?: ScrollIntersectionConfig | null,
@@ -82,10 +81,6 @@ function useScrollIntersection(
    * Useful when the component needs to handle ref forwarding.
    */
   innerRef?: InnerRef<HTMLElement> | null,
-  /**
-   * Whether or not to actively listen for changes in bounds intersection.
-   */
-  disabled: boolean = !config,
 ): [Intersects, (node: HTMLElement | null) => void] {
   const [ref, refCallback] = useRefCallback(innerRef);
   const [intersects, setIntersects] = useState<Intersects>(null);
@@ -96,7 +91,7 @@ function useScrollIntersection(
       setIntersects(getIntersects(event, config));
     };
 
-    if (!disabled && scrollingElement && config) {
+    if (scrollingElement && config) {
       scrollingElement.addEventListener(SCROLL, handler, LISTENER_OPTIONS);
     }
     return () => {
@@ -104,7 +99,7 @@ function useScrollIntersection(
         scrollingElement.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
       }
     };
-  }, [scrollingElement, disabled, config]);
+  }, [scrollingElement, config]);
 
   return [intersects, refCallback];
 }

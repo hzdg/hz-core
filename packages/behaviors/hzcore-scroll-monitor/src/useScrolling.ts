@@ -6,16 +6,18 @@ const SCROLL_TIMEOUT = 60;
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
 
+/**
+ * A React hook for components that care about whether or not
+ * the nearest scrollable container is scrolling.
+ *
+ * @returns {[boolean, (node: HTMLElement | null) => void]}
+ */
 export default function useScrolling(
   /**
    * An optional ref object or callback ref.
    * Useful when the component needs to handle ref forwarding.
    */
   innerRef?: InnerRef<HTMLElement> | null,
-  /**
-   * Whether or not to actively listen for changes in scrolling state.
-   */
-  disabled?: boolean,
 ): [boolean, (node: HTMLElement | null) => void] {
   let [scrolling, setScrolling] = useState(false);
   let [ref, refCallback] = useRefCallback(innerRef);
@@ -41,7 +43,7 @@ export default function useScrolling(
       scrollTimeoutPending = setTimeout(handleScrollTimeout, SCROLL_TIMEOUT);
     };
 
-    if (!disabled && scrollingElement) {
+    if (scrollingElement) {
       scrollingElement.addEventListener(SCROLL, handler, LISTENER_OPTIONS);
     }
     return () => {
@@ -53,7 +55,7 @@ export default function useScrolling(
         scrollTimeoutPending = false;
       }
     };
-  }, [scrollingElement, disabled]);
+  }, [scrollingElement]);
 
   return [scrolling, refCallback];
 }

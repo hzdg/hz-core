@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useState, useCallback, useMemo} from 'react';
 import PropTypes from 'prop-types';
 import {InnerRef} from '@hzcore/hook-ref-callback';
 import useScrolling from './useScrolling';
@@ -25,20 +25,20 @@ export interface ScrollMonitorRenderProps {
    *
    * Only set if the `ScrollMonitor` `scrolling` prop is `true`.
    */
-  scrolling: boolean;
+  scrolling?: boolean;
   /**
    * The current position of the nearest scrollable container.
    *
    * Only set if the `ScrollMonitor` `position` prop is `true`.
    */
-  position: ScrollPosition;
+  position?: ScrollPosition;
   /**
    * The latest vertical and horizontal direction of scroll
    * in the nearest scrollable container.
    *
    * Only set if the `ScrollMonitor` `direction` prop is `true`.
    */
-  direction: ScrollDirection;
+  direction?: ScrollDirection;
   /**
    * Whether or not the latest position of the nearest scrollable container
    * intersects with one or more defined areas.
@@ -47,7 +47,7 @@ export interface ScrollMonitorRenderProps {
    * area, or array of areas, of the form
    * `{top?: number, right?: number, bottom?: number, left?: number}`.
    */
-  intersects: Intersects;
+  intersects?: Intersects;
 }
 
 export interface ScrollMonitorProps {
@@ -101,14 +101,10 @@ export interface ScrollMonitorProps {
    * A callback for when scroll position changes.
    * Receives the latest scroll state, in the same form as the render prop.
    */
-  onChange?:
-    | ((
-        position: Pick<
-          ScrollMonitorRenderProps,
-          'scrolling' | 'position' | 'position' | 'direction' | 'intersects'
-        >,
-      ) => void)
-    | null;
+  onChange?: ((state: ScrollMonitorRenderProps) => void) | null;
+  /**
+   * A callback for when scrolling stops.
+   */
   onEnd?: (() => void) | null;
 }
 
@@ -121,29 +117,67 @@ export interface ScrollMonitorProps {
  * the nearest scrollable container.
  */
 function ScrollMonitor(props: ScrollMonitorProps): JSX.Element {
-  const {children: render, onStart, onChange, onEnd} = props;
-
-  const [scrolling, scrollingRef] = useScrolling(
-    props.innerRef,
-    !props.scrolling && !onStart && !onChange && !onEnd,
-  );
-
-  const [position, scrollPositionRef] = useScrollPosition(
-    scrollingRef,
-    !props.position && !onChange,
-  );
-
-  const [direction, scrollDirectionRef] = useScrollDirection(
-    scrollPositionRef,
-    !props.direction,
-  );
-
-  const [intersects, scrollRef] = useScrollIntersection(
+  const {innerRef} = props;
+  const [scrolling, scrollingRef] = useScrolling();
+  const [position, scrollPositionRef] = useScrollPosition();
+  const [direction, scrollDirectionRef] = useScrollDirection();
+  const [intersects, scrollIntersectionRef] = useScrollIntersection(
     props.intersects,
-    scrollDirectionRef,
   );
+
+  const scrollingEnabled =
+    props.scrolling || props.onStart || props.onChange || props.onEnd;
+  const positionEnabled = props.position || props.onChange;
+  const directionEnabled = props.direction;
+  const intersectionEnabled = props.intersects;
+
+  const scrollRef = useCallback(
+    (node: HTMLElement | null) => {
+      if (scrollingEnabled) scrollingRef(node);
+      if (positionEnabled) scrollPositionRef(node);
+      if (directionEnabled) scrollDirectionRef(node);
+      if (intersectionEnabled) scrollIntersectionRef(node);
+      if (typeof innerRef === 'function') {
+        innerRef(node);
+      } else if (innerRef && 'current' in innerRef) {
+        innerRef.current = node;
+      }
+    },
+    [
+      innerRef,
+      scrollingRef,
+      scrollPositionRef,
+      scrollDirectionRef,
+      scrollIntersectionRef,
+      scrollingEnabled,
+      positionEnabled,
+      directionEnabled,
+      intersectionEnabled,
+    ],
+  );
+
+  // Create the new state.
+  const state = useMemo(() => {
+    const state: ScrollMonitorRenderProps = {scrollRef};
+    if (scrollingEnabled) state.scrolling = scrolling;
+    if (positionEnabled) state.position = position;
+    if (directionEnabled) state.direction = direction;
+    if (intersectionEnabled) state.intersects = intersects;
+    return state;
+  }, [
+    scrollRef,
+    scrolling,
+    position,
+    direction,
+    intersects,
+    scrollingEnabled,
+    positionEnabled,
+    directionEnabled,
+    intersectionEnabled,
+  ]);
 
   // Call the `onStart` hook if the scroll container is scrolling.
+  const {onStart} = props;
   useEffect(() => {
     if (typeof onStart === 'function' && scrolling) {
       onStart();
@@ -151,22 +185,18 @@ function ScrollMonitor(props: ScrollMonitorProps): JSX.Element {
   }, [onStart, scrolling]);
 
   // Call the `onChange` hook if the scroll container is scrolling.
+  const {onChange} = props;
   useEffect(() => {
     if (typeof onChange === 'function' && scrolling) {
-      onChange({
-        scrolling,
-        position,
-        direction,
-        intersects,
-      });
+      onChange(state);
     }
-  }, [onChange, scrolling, position, direction, intersects]);
+  }, [onChange, scrolling, state]);
 
+  // Call the `onEnd` hook if the scroll container is not scrolling.
+  const {onEnd} = props;
   // Keep track whether or not the scroll container
   // was scrolling during the previous `onEnd` effect.
   const [wasScrolling, setWasScrolling] = useState(false);
-
-  // Call the `onEnd` hook if the scroll container is not scrolling.
   useEffect(() => {
     // Call the `onEnd` hook if scrolling just stopped.
     if (typeof onEnd === 'function' && wasScrolling && !scrolling) {
@@ -176,13 +206,9 @@ function ScrollMonitor(props: ScrollMonitorProps): JSX.Element {
     setWasScrolling(scrolling);
   }, [onEnd, wasScrolling, scrolling]);
 
-  return render({
-    scrollRef,
-    scrolling,
-    position,
-    direction,
-    intersects,
-  });
+  // Call the render prop with the current state.
+  const {children: render} = props;
+  return render(state);
 }
 
 ScrollMonitor.propTypes = {

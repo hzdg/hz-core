@@ -54,14 +54,9 @@ export default function useScrollDirection(
    * Useful when the component needs to handle ref forwarding.
    */
   innerRef?: InnerRef<HTMLElement> | null,
-  /**
-   * Whether or not to actively listen for changes in scroll direction.
-   */
-  disabled?: boolean,
 ): [ScrollDirection, (node: HTMLElement | null) => void] {
   const [scrollPosition, scrollPositionRefCallback] = useScrollPosition(
     innerRef,
-    disabled,
   );
   const [ref, refCallback] = useRefCallback(scrollPositionRefCallback);
   const [scrollDirection, setScrollDirection] = useState(
@@ -75,7 +70,7 @@ export default function useScrollDirection(
       setScrollDirection(direction);
     };
 
-    if (!disabled && scrollingElement) {
+    if (scrollingElement) {
       scrollingElement.addEventListener(SCROLL, handler, LISTENER_OPTIONS);
     }
     return () => {
@@ -83,7 +78,7 @@ export default function useScrollDirection(
         scrollingElement.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
       }
     };
-  }, [scrollPosition, scrollingElement, disabled]);
+  }, [scrollPosition, scrollingElement]);
 
   return [scrollDirection, refCallback];
 }
