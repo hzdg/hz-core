@@ -119,6 +119,24 @@ function writePackageJson({location}, pkgJson) {
 }
 
 /**
+ * @param {Record<string, Pkg>} pkgs
+ * @returns {Promise<void>}
+ */
+async function ensureCleanWorkingDirs(pkgs) {
+  for (const pkg of Object.values(pkgs)) {
+    const diff = execSync(`git diff --stat ${pkg.location}`).toString();
+    if (diff) {
+      throw new Error(
+        `${path.relative(
+          process.cwd(),
+          pkg.location,
+        )} has uncommited changes!\n${diff}`,
+      );
+    }
+  }
+}
+
+/**
  * @returns {Promise<Record<string, Pkg>>}
  */
 async function collectPkgsToPublish() {
@@ -155,9 +173,12 @@ async function getBranch() {
 async function versionPkgs() {
   // NOTE: We will do this again after the version has happened,
   // but we do it before versioning now to bail as early
-  // as possible if we don't have any publishable packages.
-  await collectPkgsToPublish();
-
+  // as possible if we don't have any publishable packages,
+  // or if we have uncommitted changes in any packages.
+  let pkgsToPublish = await collectPkgsToPublish();
+  await ensureCleanWorkingDirs(pkgsToPublish);
+  // Get the current branch. This is to override lerna's configuration,
+  // which normally only alows versioning/publishing from the default branch.
   const gitBranch = await getBranch();
   await run('lerna', [
     'version',
@@ -169,7 +190,7 @@ async function versionPkgs() {
     '--preid=dev',
     `--allow-branch=${gitBranch}`,
   ]);
-  const pkgsToPublish = await collectPkgsToPublish();
+  pkgsToPublish = await collectPkgsToPublish();
   report.success('Created new versions!');
   return pkgsToPublish;
 }
