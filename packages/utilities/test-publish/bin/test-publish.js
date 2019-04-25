@@ -26,6 +26,8 @@ const rm = promisify(fs.unlink);
  * @property {string} version
  * @property {boolean} private
  * @property {string} location
+ * @property {{[name: string]: string}} dependencies
+ * @property {{[name: string]: string}} devDependencies
  * @property {{[name: string]: string}} peerDependencies
  */
 
@@ -34,6 +36,8 @@ const rm = promisify(fs.unlink);
  * @property {string} name
  * @property {string} version
  * @property {boolean} private
+ * @property {{[name: string]: string}} dependencies
+ * @property {{[name: string]: string}} devDependencies
  * @property {{[name: string]: string}} peerDependencies
  * @property {{registry: string}} publishConfig
  */
@@ -137,30 +141,63 @@ async function ensureCleanWorkingDirs(pkgs) {
 }
 
 /**
+ * @param {Record<string, Pkg>} pkgs
+ * @param {Record<string, Pkg>} [publicPkgs]
  * @returns {Promise<Record<string, Pkg>>}
  */
-async function collectPkgsToPublish() {
+async function collectUnpublishedDeps(pkgs, publicPkgs) {
+  if (!publicPkgs) {
+    publicPkgs = {};
+    for (const pkg of JSON.parse(
+      execSync('lerna list --json --loglevel=error').toString(),
+    )) {
+      if (pkg.name in pkgs) continue;
+      publicPkgs[pkg.name] = pkg;
+    }
+  }
   /** @type Record<string, Pkg> */
-  const pkgsToPublish = {};
+  const unpublishedDeps = {};
+  if (Object.keys(pkgs).length <= 0) return unpublishedDeps;
+  for (const pkg of Object.values(pkgs)) {
+    for (const dep in pkg.dependencies) {
+      if (dep in publicPkgs && !(dep in unpublishedDeps)) {
+        const meta = await readPackageJson(publicPkgs[dep]);
+        unpublishedDeps[dep] = {...meta, ...publicPkgs[dep]};
+      }
+    }
+  }
+  const unpublishedNestedDeps = collectUnpublishedDeps(
+    unpublishedDeps,
+    publicPkgs,
+  );
+  return {...unpublishedDeps, ...unpublishedNestedDeps};
+}
+
+/**
+ * @returns {Promise<Record<string, Pkg>>}
+ */
+async function collectChangedPkgs() {
+  /** @type Record<string, Pkg> */
+  const changedPkgs = {};
   for (const pkg of JSON.parse(
     execSync('lerna changed --all --json --loglevel=error').toString(),
   )) {
     const meta = await readPackageJson(pkg);
-    pkgsToPublish[pkg.name] = {...meta, ...pkg};
+    changedPkgs[pkg.name] = {...meta, ...pkg};
   }
-  if (!Object.keys(pkgsToPublish).length) {
+  if (!Object.keys(changedPkgs).length) {
     throw new Error('No packages need publishing!');
   }
-  if (Object.values(pkgsToPublish).every(pkg => pkg.private)) {
+  if (Object.values(changedPkgs).every(pkg => pkg.private)) {
     throw new Error(
       `No public packages need publishing!\nChanged packages are:\n${Object.keys(
-        pkgsToPublish,
+        changedPkgs,
       )
         .map(n => `  ${n}`)
         .join('\n')}`,
     );
   }
-  return pkgsToPublish;
+  return changedPkgs;
 }
 
 async function getBranch() {
@@ -175,7 +212,7 @@ async function versionPkgs() {
   // but we do it before versioning now to bail as early
   // as possible if we don't have any publishable packages,
   // or if we have uncommitted changes in any packages.
-  let pkgsToPublish = await collectPkgsToPublish();
+  let pkgsToPublish = await collectChangedPkgs();
   await ensureCleanWorkingDirs(pkgsToPublish);
   // Get the current branch. This is to override lerna's configuration,
   // which normally only alows versioning/publishing from the default branch.
@@ -190,7 +227,7 @@ async function versionPkgs() {
     '--preid=dev',
     `--allow-branch=${gitBranch}`,
   ]);
-  pkgsToPublish = await collectPkgsToPublish();
+  pkgsToPublish = await collectChangedPkgs();
   report.success('Created new versions!');
   return pkgsToPublish;
 }
@@ -199,7 +236,7 @@ async function versionPkgs() {
  * @param {Record<string, Pkg>} pkgs
  * @returns {Promise<void>}
  */
-async function rollbackVersions(pkgs) {
+async function rollBackPkgs(pkgs) {
   const spinner = report.activity();
   spinner.tick('rolling back versions');
   for (const pkg in pkgs) {
@@ -361,13 +398,21 @@ async function createTestProject(packagePath, pkgs) {
 async function publishPkgs(pkgs, registry) {
   const spinner = report.activity();
   spinner.tick(`publishing packages`);
+  const unpublishedDeps = await collectUnpublishedDeps(pkgs);
+  if (Object.keys(unpublishedDeps).length > 0) {
+    await ensureCleanWorkingDirs(unpublishedDeps);
+  }
+  const allPkgsToPublish = Object.values(unpublishedDeps);
   const publishedPkgs = [];
   for (const pkg of Object.values(pkgs)) {
     if (pkg.private) {
       report.warn(`skipping private package ${pkg.name}!`);
       continue;
     }
+    allPkgsToPublish.push(pkg);
+  }
 
+  for (const pkg of allPkgsToPublish) {
     const cleanup = await createTemporaryNPMRC(pkg, registry);
     let error;
     try {
@@ -457,18 +502,27 @@ async function testPublish(options) {
   const openCmd = options ? options.open : false;
   const shouldOpen = typeof openCmd == 'string';
   let error = false;
+  /** @type {Record<string, Pkg> | undefined} */
   let pkgsToPublish;
+  /** @type {Record<string, Pkg> | undefined} */
+  let pkgsToRollBack;
+  /** @type {Registry | undefined} */
   let registry;
+  /** @type {Project | undefined} */
   let project;
   try {
     // get list of packages that need publish and version them all temporarily.
     pkgsToPublish = await versionPkgs();
+    pkgsToRollBack = {...pkgsToPublish};
     // spin up verdaccio
     registry = await startRegistry();
     // publish packages to verdaccio
     const publishedPkgs = await publishPkgs(pkgsToPublish, registry.url);
     if (!publishedPkgs.length) {
       throw new Error(`no packages were published!`);
+    }
+    for (const pkg of publishedPkgs) {
+      pkgsToRollBack[pkg.name] = pkg;
     }
     // install published packages in a test project.
     project = await installPublishedPkgs(publishedPkgs, registry.url);
@@ -488,9 +542,9 @@ async function testPublish(options) {
       await project.cleanup();
       report.info('Test project cleaned!');
     }
-    if (pkgsToPublish) {
-      // roll back the version commit
-      await rollbackVersions(pkgsToPublish);
+    if (pkgsToRollBack) {
+      // roll back the version and registry changes
+      await rollBackPkgs(pkgsToRollBack);
     }
 
     if (!error && shouldOpen && project && registry) {
