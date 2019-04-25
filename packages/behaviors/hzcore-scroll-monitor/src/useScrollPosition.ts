@@ -7,7 +7,15 @@ const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
 const INITIAL_SCROLL_POSITION: ScrollPosition = {top: null, left: null};
 
 export interface ScrollPosition {
+  /**
+   * The number of pixels the nearest scrollable container
+   * is scrolled vertically,
+   */
   top: number | null;
+  /**
+   * The number of pixels the nearest scrollable container
+   * is scrolled horizontally,
+   */
   left: number | null;
 }
 
@@ -20,6 +28,12 @@ function getScrollPosition(event: Event): ScrollPosition {
   return {top: null, left: null};
 }
 
+/**
+ * A React hook for components that care about
+ * the nearest scrollable container's scroll position..
+ *
+ * @returns {[ScrollPosition, (node: HTMLElement | null) => void]}
+ */
 export default function useScrollPosition(
   /**
    * An optional ref object or callback ref.

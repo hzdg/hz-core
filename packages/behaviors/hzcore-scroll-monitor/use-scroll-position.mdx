@@ -1,0 +1,125 @@
+---
+name: useScrollPosition
+menu: Hooks
+route: /use-scroll-position
+---
+
+import {Playground, Props} from 'docz';
+import useScrollPosition from './src/useScrollPosition';
+
+# useScrollPosition
+
+A React [hook] for components that care about
+the nearest scrollable container's scroll position.
+
+## Installation
+
+```shell
+yarn add @hzcore/scroll-monitor
+```
+
+## Usage
+
+```
+import {useScrollPosition} from '@hzcore/scroll-monitor';
+```
+
+### Signature
+
+```ts
+function useScrollPosition(
+  innerRef?: InnerRef<HTMLElement> | null,
+): [ScrollPosition, (node: HTMLElement | null) => void] {
+```
+
+### Arguments
+
+```ts
+innerRef?: InnerRef<HTMLElement> | null
+```
+
+An optional ref object or callback ref.
+Useful when the component needs to handle ref forwarding.
+
+### Returns
+
+```ts
+[ScrollPosition, (node: HTMLElement | null) => void] {
+```
+
+An array containing a `ScrollPosition` object and a callback `ref`.
+
+The callback `ref` should be passed to an underlying DOM node.
+Note that the node does not have to be scrollable itself,
+as `useScrollPosition` will traverse the DOM to find a scrollable parent
+to observe.
+
+The `ScrollPosition` object shape is:
+
+```ts
+interface ScrollPosition {
+  /**
+   * The number of pixels the nearest scrollable container
+   * is scrolled vertically,
+   */
+  top: number | null;
+  /**
+   * The number of pixels the nearest scrollable container
+   * is scrolled horizontally,
+   */
+  left: number | null;
+}
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const ScrollPositionUser = () => {
+      const [scrollPosition, ref] = useScrollPosition();
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(scrollPosition, null, 2)}
+        </div>
+      );
+    };
+    return <ScrollPositionUser />;
+  }}
+</Playground>
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useScrollPosition` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useScrollPosition`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value.
+  const [scrollPosition, ref] = useScrollPosition(forwardedRef);
+  // Note that we actually pass `ref` to the underlying component,
+  // not `forwardedRef`. We do this to make sure that
+  // `useScrollPosition` is notified when the ref value changes.
+  // This works because we passed `forwardedRef` to `useScrollPosition`,
+  // which will update the `forwardedRef` automatically.
+  return <div ref={ref}>{JSON.stringify(scrollPosition, null, 2)}</div>;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
