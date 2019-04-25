@@ -19,8 +19,29 @@ type LeftBounds = Partial<Bounds> & Pick<Bounds, 'left'>;
 
 type BoundsRect = TopBounds | RightBounds | BottomBounds | LeftBounds;
 
+/**
+ * One or more areas to check for intersection with
+ * the nearest scrollable container's scroll position.
+ *
+ * An area can be defined completely, i.e.,
+ *
+ *   {top: 0, right: 50, bottom: 50, left: 0}
+ *
+ * or partially, i.e.,
+ *
+ *   {right: 50, bottom: 50}
+ */
 export type ScrollIntersectionConfig = BoundsRect | BoundsRect[];
 
+/**
+ * Whether or not any of the configured areas currently intersect witho
+ * the nearest scrollable container's scroll position.
+ *
+ * If a single area has been configured, this will be one boolean.
+ * If an array of areas has been configured, this will be an array of booleans,
+ * where the index of each boolean corresponds to the index of the area in
+ * the configuration array.
+ */
 export type Intersects = boolean | boolean[] | null;
 
 function intersects(bounds: BoundsRect, rect: ScrollRect): boolean {
@@ -61,6 +82,13 @@ function getIntersects(
   return false;
 }
 
+/**
+ * A React hook for components that care about the interesction
+ * of the nearest scrollable container's scroll position
+ * with one or more areas of the scrollable area.
+ *
+ * @returns {[Intersects, (node: HTMLElement | null) => void]}
+ */
 function useScrollIntersection(
   config: ScrollIntersectionConfig,
   innerRef?: InnerRef<HTMLElement> | null,

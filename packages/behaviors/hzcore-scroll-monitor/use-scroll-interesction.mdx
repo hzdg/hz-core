@@ -1,0 +1,146 @@
+---
+name: useScrollIntersection
+menu: Hooks
+route: /use-scroll-intersection
+---
+
+import {Playground, Props} from 'docz';
+import useScrollIntersection from './src/useScrollIntersection';
+
+# useScrollIntersection
+
+A React [hook] for components that care about
+the intersection of the nearest scrollable container's scroll position
+with one or more areas of the scrollable area.
+
+## Installation
+
+```shell
+yarn add @hzcore/scroll-monitor
+```
+
+## Usage
+
+```
+import {useScrollIntersection} from '@hzcore/scroll-monitor';
+```
+
+### Signature
+
+```ts
+function useScrollIntersection(
+  config: ScrollIntersectionConfig,
+  innerRef?: InnerRef<HTMLElement> | null,
+): [Intersects, (node: HTMLElement | null) => void] {
+```
+
+### Arguments
+
+```ts
+config:
+  | {top?: number; right?: number; bottom?: number; left?: number}
+  | {top?: number; right?: number; bottom?: number; left?: number}[];
+```
+
+One or more areas to check for intersection with
+the nearest scrollable container's scroll position.
+
+An area can be defined completely, i.e.,
+
+`{top: 0, right: 50, bottom: 50, left: 0}`
+
+or partially, i.e.,
+
+`{right: 50, bottom: 50}`
+
+```ts
+innerRef?: InnerRef<HTMLElement> | null
+```
+
+An optional ref object or callback ref.
+Useful when the component needs to handle ref forwarding.
+
+### Returns
+
+```ts
+[(Intersects: boolean | boolean[]), (node: HTMLElement | null) => void]
+```
+
+An array containing an `Intersects` value, consisting of
+one intersection boolean or an array of booleans, and a callback `ref`.
+
+The callback `ref` should be passed to an underlying DOM node.
+Note that the node does not have to be scrollable itself,
+as `useScrollIntersection` will traverse the DOM to find a scrollable parent
+to observe.
+
+`Intersects` describes whether or not any of the configured areas
+currently intersect with the nearest scrollable container's scroll position.
+
+If a single area has been configured, `Intersects` will be one boolean.
+If an array of areas has been configured, this will be an array of booleans,
+where the index of each boolean corresponds to the index of the area in
+the configuration array.
+
+## Example
+
+<Playground>
+  {() => {
+    const IntersectionIndicator = ({intersects}) => (
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          width: '100%',
+          height: 250,
+          fontSize: '2em',
+          color: `${intersects ? 'white' : 'yellow'}`,
+          background: `${intersects ? 'green' : 'red'}`,
+        }}
+      >
+        {intersects ? 'intersecting' : 'not intersecting'}
+      </div>
+    );
+    const ScrollIntersectionUser = () => {
+      const [intersects, ref] = useScrollIntersection([
+        {bottom: 250},
+        {top: 250},
+      ]);
+      return (
+        <div ref={ref} style={{overflow: 'scroll', width: '100%', height: 250}}>
+          <IntersectionIndicator intersects={intersects && intersects[0]} />
+          <IntersectionIndicator intersects={intersects && intersects[1]} />
+        </div>
+      );
+    };
+    return <ScrollIntersectionUser />;
+  }}
+</Playground>
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useScrollIntersection` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useScrollIntersection`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value.
+  const [intersects, ref] = useScrollIntersection({top: 250}, forwardedRef);
+  // Note that we actually pass `ref` to the underlying component,
+  // not `forwardedRef`. We do this to make sure that
+  // `useScrollIntersection` is notified when the ref value changes.
+  // This works because we passed `forwardedRef` to `useScrollIntersection`,
+  // which will update the `forwardedRef` automatically.
+  return <div ref={ref}>{JSON.stringify(intersects, null, 2)}</div>;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
