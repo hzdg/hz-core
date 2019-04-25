@@ -62,9 +62,9 @@ describe('<ScrollMonitor>', () => {
       const {container} = render(
         <ScrollMonitor>{renderScrollState}</ScrollMonitor>,
       );
-      expect(getScrollState(container)).toMatchObject({scrolling: false});
+      expect(getScrollState(container).scrolling).not.toBeDefined();
       scrollTo(0, 0);
-      expect(getScrollState(container)).toMatchObject({scrolling: false});
+      expect(getScrollState(container).scrolling).not.toBeDefined();
     });
 
     test('it renders scrolling state', async () => {
@@ -86,15 +86,9 @@ describe('<ScrollMonitor>', () => {
       const {container} = render(
         <ScrollMonitor>{renderScrollState}</ScrollMonitor>,
       );
-      expect(getScrollState(container).position).toMatchObject({
-        top: null,
-        left: null,
-      });
+      expect(getScrollState(container).position).not.toBeDefined();
       scrollTo(0, 0);
-      expect(getScrollState(container).position).toMatchObject({
-        top: null,
-        left: null,
-      });
+      expect(getScrollState(container).position).not.toBeDefined();
     });
 
     test('it renders scroll position state', async () => {
@@ -123,15 +117,9 @@ describe('<ScrollMonitor>', () => {
       const {container} = render(
         <ScrollMonitor>{renderScrollState}</ScrollMonitor>,
       );
-      expect(getScrollState(container).direction).toMatchObject({
-        vertical: null,
-        horizontal: null,
-      });
+      expect(getScrollState(container).direction).not.toBeDefined();
       scrollTo(0, 0);
-      expect(getScrollState(container).direction).toMatchObject({
-        vertical: null,
-        horizontal: null,
-      });
+      expect(getScrollState(container).direction).not.toBeDefined();
     });
 
     test('it renders scroll direction state', async () => {
@@ -160,9 +148,9 @@ describe('<ScrollMonitor>', () => {
       const {container} = render(
         <ScrollMonitor>{renderScrollState}</ScrollMonitor>,
       );
-      expect(getScrollState(container).intersects).toBeNull();
+      expect(getScrollState(container).intersects).not.toBeDefined();
       scrollTo(0, 0);
-      expect(getScrollState(container).intersects).toBeNull();
+      expect(getScrollState(container).intersects).not.toBeDefined();
     });
 
     test('it renders scroll intersects state', async () => {
@@ -211,12 +199,14 @@ describe('<ScrollMonitor>', () => {
         return <ScrollMonitor {...state}>{renderScrollState}</ScrollMonitor>;
       };
 
-      render(<App />);
+      const {container} = render(<App />);
 
+      expect(getScrollState(container).scrolling).toBe(false);
       // Should not be called as no scrolling is happening.
       expect(onStart1).not.toHaveBeenCalled();
       // Start scrolling.
       scrollTo(0, 2);
+      expect(getScrollState(container).scrolling).toBe(true);
       // Should be called as scrolling has started.
       expect(onStart1).toHaveBeenCalledTimes(1);
       // Keep scrolling.
@@ -226,12 +216,14 @@ describe('<ScrollMonitor>', () => {
 
       // Run the timeout that resets scrolling to false.
       jest.runAllTimers();
+      expect(getScrollState(container).scrolling).toBe(false);
 
       // Should still only have been called once!
       expect(onStart1).toHaveBeenCalledTimes(1);
 
       // Start scrolling again.
       scrollTo(0, 6);
+      expect(getScrollState(container).scrolling).toBe(true);
       // Should be called a second time.
       expect(onStart1).toHaveBeenCalledTimes(2);
 
@@ -248,12 +240,15 @@ describe('<ScrollMonitor>', () => {
 
       // Run the timeout that resets scrolling to false.
       jest.runAllTimers();
+      expect(getScrollState(container).scrolling).toBe(false);
 
       // Change the callback identity again,
       const onStart3 = jest.fn();
       act(() => {
         setOnStart(onStart3);
       });
+
+      expect(getScrollState(container).scrolling).toBe(false);
 
       // This time expecting none of the callbacks to be called.
       expect(onStart1).toHaveBeenCalledTimes(2);
