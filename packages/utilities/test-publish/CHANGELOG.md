@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.2](https://github.com/hzdg/hz-core/compare/test-publish@1.0.1...test-publish@1.0.2) (2019-04-25)
+
+
+### test-publish
+
+* include unpublished dependencies in test publish ([f9327c5](https://github.com/hzdg/hz-core/commit/f9327c5))
+
+
 ## [1.0.1](https://github.com/hzdg/hz-core/compare/test-publish@1.0.0...test-publish@1.0.1) (2019-04-25)
 
 
