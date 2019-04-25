@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-ref-callback@1.0.0...@hzcore/hook-ref-callback@1.0.1) (2019-04-25)
+
+
+### @hzcore/hook-ref-callback
+
+* allow `innerRef` to be `null` ([92b0ba7](https://github.com/hzdg/hz-core/commit/92b0ba7))
+
+
 # 1.0.0 (2019-04-22)
 
 
