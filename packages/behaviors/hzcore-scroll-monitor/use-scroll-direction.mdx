@@ -1,0 +1,136 @@
+---
+name: useScrollDirection
+menu: Hooks
+route: /use-scroll-direction
+---
+
+import {Playground, Props} from 'docz';
+import useScrollDirection from './src/useScrollDirection';
+import styled from 'styled-components';
+
+# useScrollDirection
+
+A React [hook] for components that care about
+the nearest scrollable container's scroll direction.
+
+## Installation
+
+```shell
+yarn add @hzcore/scroll-monitor
+```
+
+## Usage
+
+```
+import {useScrollDirection} from '@hzcore/scroll-monitor';
+```
+
+### Signature
+
+```ts
+function useScrollDirection(
+  innerRef?: InnerRef<HTMLElement> | null,
+): [ScrollDirection, (node: HTMLElement | null) => void] {
+```
+
+### Arguments
+
+```ts
+innerRef?: InnerRef<HTMLElement> | null
+```
+
+An optional ref object or callback ref.
+Useful when the component needs to handle ref forwarding.
+
+### Returns
+
+```ts
+[ScrollDirection, (node: HTMLElement | null) => void] {
+```
+
+An array containing a `ScrollDirection` object and a callback `ref`.
+
+The callback `ref` should be passed to an underlying DOM node.
+Note that the node does not have to be scrollable itself,
+as `useScrollDirection` will traverse the DOM to find a scrollable parent
+to observe.
+
+The `ScrollDirection` object shape is:
+
+```ts
+interface ScrollDirection {
+  /**
+   * The direction the nearest scrollable container
+   * most recently scrolled vertically,
+   * where 'direction' is either 'up' or 'down'.
+   */
+  vertical: 'down' | 'up' | null;
+  /**
+   * The direction the nearest scrollable container
+   * most recently scrolled horizontally,
+   * where 'direction' is either 'left' or 'right'.
+   */
+  horizontal: 'left' | 'right' | null;
+}
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const ScrollDirectionUser = () => {
+      const [direction, ref] = useScrollDirection();
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+            color: `${
+              direction && direction.vertical == 'down' ? 'white' : 'yellow'
+            }`,
+            background: `${
+              direction && direction.vertical == 'down' ? 'green' : 'red'
+            }`,
+          }}
+        >
+          {direction && direction.vertical == 'down' ? 'down' : 'up'}
+        </div>
+      );
+    };
+    return <ScrollDirectionUser />;
+
+}}
+
+</Playground>
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useScrollDirection` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useScrollDirection`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value.
+  const [scrollDirection, ref] = useScrollDirection(forwardedRef);
+  // Note that we actually pass `ref` to the underlying component,
+  // not `forwardedRef`. We do this to make sure that
+  // `useScrollDirection` is notified when the ref value changes.
+  // This works because we passed `forwardedRef` to `useScrollDirection`,
+  // which will update the `forwardedRef` automatically.
+  return <div ref={ref}>{JSON.stringify(scrollDirection, null, 2)}</div>;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html

@@ -20,7 +20,17 @@ export type VerticalScrollDirection = typeof DOWN | typeof UP;
 export type HorizontalScrollDirection = typeof LEFT | typeof RIGHT;
 
 export interface ScrollDirection {
+  /**
+   * The direction the nearest scrollable container
+   * most recently scrolled vertically,
+   * where 'direction' is either 'up' or 'down'.
+   */
   vertical: VerticalScrollDirection | null;
+  /**
+   * The direction the nearest scrollable container
+   * most recently scrolled horizontally,
+   * where 'direction' is either 'left' or 'right'.
+   */
   horizontal: HorizontalScrollDirection | null;
 }
 
@@ -48,6 +58,12 @@ function getScrollDirection(
   return {vertical: null, horizontal: null};
 }
 
+/**
+ * A React hook for components that care about
+ * the nearest scrollable container's scroll direction.
+ *
+ * @returns {[ScrollDirection, (node: HTMLElement | null) => void]}
+ */
 export default function useScrollDirection(
   /**
    * An optional ref object or callback ref.
