@@ -69,7 +69,7 @@ export interface ScrollMonitorProps {
    */
   direction?: boolean | null;
   /**
-   * Whether or not to monitor scroll direction.
+   * Whether or not to monitor scroll position.
    *
    * If `true`, then scroll state will have a `position` value
    * like `{top: 10, left: 10}`.
