@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@0.1.3...@hzcore/scroll-monitor@1.0.0) (2019-04-25)
+
+
+### @hzcore/scroll-monitor
+
+* extract scrolling element utils ([84e0a91](https://github.com/hzdg/hz-core/commit/84e0a91))
+* fix *disabled tests ([7e00af6](https://github.com/hzdg/hz-core/commit/7e00af6))
+* add useScrollBounds hook ([6618582](https://github.com/hzdg/hz-core/commit/6618582))
+* add useScrollDirection hook ([a64d670](https://github.com/hzdg/hz-core/commit/a64d670))
+* add useScrolling hook ([b8f7128](https://github.com/hzdg/hz-core/commit/b8f7128))
+* add useScrollPosition hook ([badcc19](https://github.com/hzdg/hz-core/commit/badcc19))
+* export ScrollRect interface from utils ([5d6d70a](https://github.com/hzdg/hz-core/commit/5d6d70a))
+* fix useScrolling timeout management ([5fa743a](https://github.com/hzdg/hz-core/commit/5fa743a))
+* make hook arguments positional ([7a0724b](https://github.com/hzdg/hz-core/commit/7a0724b))
+* reimplement ScrollMonitor with hooks! ([afd967b](https://github.com/hzdg/hz-core/commit/afd967b))
+* useScrollBounds => useScrollIntersection ([04cedf7](https://github.com/hzdg/hz-core/commit/04cedf7))
+* add docs for useScrollDirection ([35cf78a](https://github.com/hzdg/hz-core/commit/35cf78a))
+* add docs for useScrollIntersection ([6c0c82c](https://github.com/hzdg/hz-core/commit/6c0c82c))
+* add docs for useScrollPosition ([625f5bb](https://github.com/hzdg/hz-core/commit/625f5bb))
+* add docs to useScrolling ([9a1b463](https://github.com/hzdg/hz-core/commit/9a1b463))
+* write docs for ScrollMonitor ([03ebf12](https://github.com/hzdg/hz-core/commit/03ebf12))
+* remove 'disabled' args for hooks ([56c9a32](https://github.com/hzdg/hz-core/commit/56c9a32))
+* fix lint errors introduced by TS ([705e058](https://github.com/hzdg/hz-core/commit/705e058))
+
+
 ## [0.1.3](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@0.1.2...@hzcore/scroll-monitor@0.1.3) (2019-04-19)
 
 
