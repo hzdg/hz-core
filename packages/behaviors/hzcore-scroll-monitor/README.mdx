@@ -41,6 +41,18 @@ yarn add @hzcore/scroll-monitor
 import ScrollMonitor from '@hzcore/scroll-monitor';
 ```
 
+## Example
+
+<Playground>
+  <ScrollMonitor scrolling direction position>
+    {state => (
+      <pre ref={state.scrollRef} style={{width: '100%', height: 250}}>
+        {JSON.stringify(state, null, 2)}
+      </pre>
+    )}
+  </ScrollMonitor>
+</Playground>
+
 ## Props
 
 ### children
