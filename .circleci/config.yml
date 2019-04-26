@@ -68,7 +68,7 @@ aliases:
   build_static_files: &build_static_files
     name: Build Static files
     command: |
-      ./node_modules/.bin/docz build
+      yarn build-docz
 
   deploy_docz: &deploy_docz
     command: |

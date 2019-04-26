@@ -8,17 +8,19 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "build": "lerna bootstrap --loglevel=error && build-packages",
-    "clean": "yarn build --clean",
-    "commit": "git-cz",
-    "create-package": "create-package",
-    "develop": "docz dev",
-    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./packages",
+    "build": "./node_modules/.bin/lerna bootstrap --loglevel=error && yarn build-packages",
+    "build-docz": "yarn build-packages && ./node_modules/.bin/docz build",
+    "build-packages": "./node_modules/.bin/build-packages",
+    "clean": "yarn build-packages --clean",
+    "commit": "./node_modules/.bin/git-cz",
+    "create-package": "./node_modules/.bin/create-package",
+    "develop": "yarn build-packages && ./node_modules/.bin/docz dev",
+    "lint": "./node_modules/.bin/eslint --ext .js,.jsx,.ts,.tsx ./packages",
     "preversion": "yarn test && yarn build",
     "start": "yarn develop",
-    "typecheck": "tsc --noEmit",
-    "test": "jest",
-    "test-publish": "test-publish"
+    "typecheck": "./node_modules/.bin/tsc --noEmit",
+    "test": "./node_modules/.bin/jest",
+    "test-publish": "./node_modules/.bin/test-publish"
   },
   "husky": {
     "hooks": {
