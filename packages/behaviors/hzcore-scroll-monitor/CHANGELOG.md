@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@1.0.0...@hzcore/scroll-monitor@1.0.1) (2019-04-26)
+
+
+### @hzcore/scroll-monitor
+
+* fix ScrollDirection type ([bbb8e38](https://github.com/hzdg/hz-core/commit/bbb8e38))
+* add basic ScrollMonitor example ([79ab449](https://github.com/hzdg/hz-core/commit/79ab449))
+* fix typo ([6609955](https://github.com/hzdg/hz-core/commit/6609955))
+
+
 # [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@0.1.3...@hzcore/scroll-monitor@1.0.0) (2019-04-25)
 
 
