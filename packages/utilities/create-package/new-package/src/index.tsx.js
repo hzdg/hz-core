@@ -43,7 +43,7 @@ export${isDefault ? ' default' : ''} function ${main}(props: ${main}Props): JSX.
 `;
 
 /**
- * @param {import("../../scripts/create-package").Options} options
+ * @param {import("../../bin/create-package").Options} options
  * @returns {string}
  */
 module.exports = function renderIndex(options) {

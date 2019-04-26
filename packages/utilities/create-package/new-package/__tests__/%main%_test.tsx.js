@@ -51,7 +51,7 @@ test('${main} is implemented', () => {
   const ${main.replace(/^use/, '')}User = (): JSX.Element => {
     ${main}();
     return <div />;
-  }
+  };
   const {container} = render(<${main.replace(/^use/, '')}User />);
   expect(container).toBeInTheDocument();
   throw new Error('implement ${main} and write some tests!');
@@ -59,7 +59,7 @@ test('${main} is implemented', () => {
 `;
 
 /**
- * @param {import("../../scripts/create-package").Options} options
+ * @param {import("../../bin/create-package").Options} options
  * @returns {string}
  */
 module.exports = function renderTest(options) {

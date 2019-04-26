@@ -34,7 +34,7 @@ import ${isDefault ? main : `{${main}}`} from '@hzcore/${name}';
 `;
 
 /**
- * @param {import("../scripts/create-package").Options} options
+ * @param {import("../bin/create-package").Options} options
  * @returns {string}
  */
 module.exports = function renderReadme(options) {
