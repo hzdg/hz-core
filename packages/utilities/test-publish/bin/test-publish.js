@@ -79,11 +79,25 @@ const verdaccioConfig = {
 
 /**
  * @param {string} command
+ * @returns {string}
+ */
+function resolveCommand(command) {
+  if (/^(?:\.|\/)/.test(command)) {
+    return command;
+  }
+  const nodeCommand = path.resolve('./node_modules/.bin', command);
+  if (fs.existsSync(nodeCommand)) return nodeCommand;
+  return command;
+}
+
+/**
+ * @param {string} command
  * @param {string[]} args
  * @param {import('child_process').SpawnOptions | undefined} [options]
  * @returns {Promise<void>}
  */
 async function run(command, args, options) {
+  command = resolveCommand(command);
   report.command(`${command} ${args.join(' ')}`);
   const source = childProcess.spawn(command, args, {
     stdio: ['ignore', process.stdout, process.stderr],
@@ -98,6 +112,9 @@ async function run(command, args, options) {
  * @param {import('child_process').ExecSyncOptionsWithStringEncoding | undefined} [options]
  */
 function execSync(command, options) {
+  command = command.replace(/(^[^\s]+)\s*(.*)$/, (str, cmd, args) =>
+    cmd ? `${resolveCommand(cmd)}${args ? ` ${args}` : ''}` : str,
+  );
   report.command(command);
   return childProcess.execSync(command, options);
 }
