@@ -1,4 +1,5 @@
 const doczPluginNetlify = require('docz-plugin-netlify');
+const {css} = require('styled-components');
 
 module.exports = {
   title: 'HZ Core',
@@ -20,7 +21,7 @@ module.exports = {
     favicon: 'public/favicon.ico',
   },
   themeConfig: {
-    showPlaygroundEditor: true,
+    showPlaygroundEditor: false,
     logo: {
       src: 'public/logo.svg',
       width: 150,
@@ -33,9 +34,18 @@ module.exports = {
       blockquoteBorder: 'rgb(190,141,190)',
     },
     styles: {
-      logo: {
-        alignItems: 'center',
-      },
+      logo: css`
+        align-items: center;
+      `,
+      playground: css`
+        padding: 0;
+        min-height: 100%;
+        display: flex;
+
+        & > div:only-child {
+          flex: 1;
+        }
+      `,
     },
   },
   plugins: [doczPluginNetlify()],

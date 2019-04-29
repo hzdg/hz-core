@@ -1,0 +1,150 @@
+---
+name: useSize
+menu: Hooks
+route: /use-size
+---
+
+import {Playground} from 'docz';
+import useSize from './src';
+
+# useSize
+
+A React [hook] for components that care about their size.
+
+## Installation
+
+```shell
+yarn add @hzcore/hook-size
+```
+
+## Usage
+
+```js
+import useSize from '@hzcore/hook-size';
+```
+
+### Signature
+
+```ts
+function useSize(
+  innerRef?: InnerRef<HTMLElement> | null,
+): [Size, (node: HTMLElement | null) => void] {
+```
+
+### Arguments
+
+```ts
+innerRef?: InnerRef<HTMLElement> | null
+```
+
+An optional ref object or callback ref.
+Useful when the component needs to handle ref forwarding.
+
+### Returns
+
+```ts
+[Size, (node: HTMLElement | null) => void] {
+```
+
+An array containing a `Size` object and a callback `ref`.
+
+The callback `ref` should be passed to the underlying DOM node to measure.
+
+The `Size` object shape is:
+
+```ts
+interface Size {
+  /** The x coordinate of the DOMRect's origin. */
+  x: number;
+  /** The y coordinate of the DOMRect's origin. */
+  y: number;
+  /** The width of the DOMRect. */
+  width: number;
+  /** The height of the DOMRect. */
+  height: number;
+  /**
+   * The top coordinate value of the DOMRect
+   * (has the same value as y, or y + height if height is negative.)
+   */
+  top: number;
+  /**
+   * The right coordinate value of the DOMRect
+   * (has the same value as x + width, or x if width is negative.)
+   */
+  right: number;
+  /**
+   * The bottom coordinate value of the DOMRect
+   * (has the same value as y + height, or y if height is negative.)
+   */
+  bottom: number;
+  /**
+   * The left coordinate value of the DOMRect
+   * (has the same value as x, or x + width if width is negative.)
+   */
+  left: number;
+  /**
+   * The DOMRect width as a percentage of the viewport width
+   * (where 0 is 0% and 1 is 100%.)
+   */
+  vw: number;
+  /**
+   * The DOMRect height as a percentage of the viewport height
+   * (where 0 is 0% and 1 is 100%.)
+   */
+  vh: number;
+}
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const SizeUser = () => {
+      const [size, ref] = useSize();
+      return (
+        <div
+          ref={ref}
+          style={{
+            width: '100%',
+            height: '100%',
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            border: '1px solid lime',
+          }}
+        >
+          <pre>{JSON.stringify(size, null, 2)}</pre>
+        </div>
+      );
+    };
+    return <SizeUser />;
+  }}
+</Playground>
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useSize` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useSize`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value.
+  const [size, ref] = useSize(forwardedRef);
+  // Note that we actually pass `ref` to the underlying component,
+  // not `forwardedRef`. We do this to make sure that
+  // `useSize` is notified when the ref value changes.
+  // This works because we passed `forwardedRef` to `useSize`,
+  // which will update the `forwardedRef` automatically.
+  return <div ref={ref}>{JSON.stringify(size, null, 2)}</div>;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
