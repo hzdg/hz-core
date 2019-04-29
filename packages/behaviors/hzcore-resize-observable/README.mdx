@@ -1,0 +1,54 @@
+---
+name: ResizeObservable
+menu: Utilities
+route: /resize-observable
+---
+
+import {Playground} from 'docz';
+
+# ResizeObservable
+
+An [Observable] wrapper for [ResizeObserver]
+
+Uses the [zen-observable] implementation of Observable.
+
+## Installation
+
+```shell
+yarn add @hzcore/resize-observable
+```
+
+## Usage
+
+```js
+import ResizeObservable from '@hzcore/resize-observable';
+```
+
+Create an observable by passing the element
+you wish to observe to `ResizeObservable.create`:
+
+```js
+const element = document.getElementById('some-element-that-might-change-size');
+const observable = ResizeObservable.create(element);
+```
+
+Then subscribe to it to receive an updated [DOMRect]
+whenever the element's size changes:
+
+```js
+const subscription = observable.subscribe(rect => {
+  // do something with the rect!
+});
+```
+
+Then, whenever you are done watching the element, simply unsubscribe:
+
+```js
+//...sometime later
+subscription.unsubscribe();
+```
+
+[resizeobserver]: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+[zen-observable]: https://github.com/zenparsing/zen-observable
+[observable]: https://github.com/tc39/proposal-observable
+[domrect]: https://developer.mozilla.org/en-US/docs/Web/API/DOMRect

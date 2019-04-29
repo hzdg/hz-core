@@ -1,0 +1,23 @@
+{
+  "name": "@hzcore/resize-observable",
+  "description": "An Observable wrapper for ResizeObserver",
+  "version": "0.0.1",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "!*/__test*"
+  ],
+  "dependencies": {
+    "invariant": "^2.2.4",
+    "resize-observer-polyfill": "^1.5.1",
+    "zen-observable": "^0.8.14"
+  }
+}
