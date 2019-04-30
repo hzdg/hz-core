@@ -14,11 +14,12 @@ What kinda stuff is in here, and how do i use it in my project?
 
 Found a bug? Check through the [current issues][issues] for any open related bugs. If none are found, [open a new bug report](https://github.com/hzdg/hz-core/issues/new/choose).
 
-
 ### New Components
+
 Need a new component? Check through the [docs] for an existing component or the [issues] tracker for any current component requests. If none are found, [create a new Github issue describing the new component](https://github.com/hzdg/hz-core/issues/new/choose) before creating a new package.
 
 ### New Features
+
 Open a [new feature request](https://github.com/hzdg/hz-core/issues/new/choose) for any new features to add, whether it's new functionality for a component, or new deployment strategy for packages. Remember to first check through the [docs] or existing [issues] for any existing context on this feature.
 
 ---
@@ -120,7 +121,7 @@ do not seem to fit the package you would like to add a new type can be
 created by doing the following:
 
 -   make a new directory at `packages/<new-type>`, where `new-type`
-    is the camel-case name for the type of packages it will contain.
+    is the dash-case name for the type of packages it will contain.
 -   Create a [yarn workspace] in the root `package.json`:
     ```json
     "workspaces": [
@@ -166,7 +167,7 @@ Instead, it will open the test project using the specified command
 (`code`, by default).
 
 You can then edit any of the test suites that were generated and try
-to test the packages with more rigor. This is a easy way to get a
+to test the packages with more rigor. This is an easy way to get a
 proper installed package playground to do some extra vetting
 of packages before a publish.
 
