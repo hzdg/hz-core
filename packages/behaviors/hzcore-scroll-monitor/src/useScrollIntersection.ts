@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
-import {getNearestScrollNode, getScrollRect, ScrollRect} from './utils';
+import {getScrollRect, ScrollRect, useNearestScrollNode} from './utils';
 
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
@@ -65,7 +65,7 @@ function intersects(bounds: BoundsRect, rect: ScrollRect): boolean {
   return inRangeVertical && inRangeHorizontal;
 }
 
-function getIntersects(
+export function getIntersects(
   event: Event,
   config?: ScrollIntersectionConfig | null,
 ): Intersects {
@@ -111,8 +111,8 @@ function useScrollIntersection(
   innerRef?: InnerRef<HTMLElement> | null,
 ): [Intersects, (node: HTMLElement | null) => void] {
   const [ref, refCallback] = useRefCallback(innerRef);
+  const scrollingElement = useNearestScrollNode(ref);
   const [intersects, setIntersects] = useState<Intersects>(null);
-  const scrollingElement = getNearestScrollNode(ref.current);
 
   useEffect(() => {
     const handler = (event: Event): void => {

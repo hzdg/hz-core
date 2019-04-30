@@ -1,4 +1,5 @@
 import invariant from 'invariant';
+import {useMemo} from 'react';
 
 export interface ScrollRect {
   top: number | null;
@@ -50,4 +51,11 @@ export function getNearestScrollNode(
   if (overflowX === 'scroll' || overflowY === 'scroll') return node;
 
   return getNearestScrollNode(node.parentNode) || document;
+}
+
+export function useNearestScrollNode(
+  ref: React.RefObject<Element | null>,
+): HTMLElement | Document | null {
+  const {current} = ref;
+  return useMemo(() => getNearestScrollNode(current), [current]);
 }

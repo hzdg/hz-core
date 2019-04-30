@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
-import {getNearestScrollNode, getScrollRect} from './utils';
 import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {getScrollRect, useNearestScrollNode} from './utils';
 
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
@@ -19,7 +19,7 @@ export interface ScrollPosition {
   left: number | null;
 }
 
-function getScrollPosition(event: Event): ScrollPosition {
+export function getScrollPosition(event: Event): ScrollPosition {
   const target = event.currentTarget;
   if (target instanceof HTMLElement || target instanceof Document) {
     const rect = getScrollRect(target);
@@ -43,7 +43,7 @@ export default function useScrollPosition(
 ): [ScrollPosition, (node: HTMLElement | null) => void] {
   let [scrollPosition, setScrollPosition] = useState(INITIAL_SCROLL_POSITION);
   let [ref, refCallback] = useRefCallback(innerRef);
-  const scrollingElement = getNearestScrollNode(ref.current);
+  const scrollingElement = useNearestScrollNode(ref);
 
   useEffect(() => {
     const handler = (event: Event): void => {

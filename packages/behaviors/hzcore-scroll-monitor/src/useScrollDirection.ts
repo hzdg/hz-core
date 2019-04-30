@@ -1,11 +1,11 @@
-import {useState, useEffect} from 'react';
-import {getNearestScrollNode, getScrollRect} from './utils';
+import {useState, useEffect, useRef} from 'react';
 import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
-import useScrollPosition, {ScrollPosition} from './useScrollPosition';
+import {ScrollPosition, getScrollPosition} from './useScrollPosition';
+import {useNearestScrollNode} from './utils';
 
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
-const INITIAL_SCROLL_POSITION: ScrollDirection = {
+const INITIAL_SCROLL_DIRECTION: ScrollDirection = {
   vertical: null,
   horizontal: null,
 };
@@ -34,28 +34,29 @@ export interface ScrollDirection {
   horizontal: HorizontalScrollDirection | null;
 }
 
-function getScrollDirection(
-  event: Event,
+export function getScrollDirection(
   position: ScrollPosition,
+  lastPosition: ScrollPosition | null,
 ): ScrollDirection {
-  const target = event.currentTarget;
-  if (target instanceof HTMLElement || target instanceof Document) {
-    const rect = getScrollRect(target);
+  if (lastPosition) {
     const vertical =
       typeof position.top === 'number' &&
-      typeof rect.top === 'number' &&
-      rect.top < position.top
-        ? UP
-        : DOWN;
+      typeof lastPosition.top === 'number' &&
+      lastPosition.top < position.top
+        ? DOWN
+        : UP;
     const horizontal =
       typeof position.left === 'number' &&
-      typeof rect.left === 'number' &&
-      rect.left < position.left
-        ? LEFT
-        : RIGHT;
+      typeof lastPosition.left === 'number' &&
+      lastPosition.left < position.left
+        ? RIGHT
+        : LEFT;
+    return {vertical, horizontal};
+  } else {
+    const vertical = typeof position.top === 'number' ? DOWN : UP;
+    const horizontal = typeof position.left === 'number' ? RIGHT : LEFT;
     return {vertical, horizontal};
   }
-  return {vertical: null, horizontal: null};
 }
 
 /**
@@ -71,18 +72,18 @@ export default function useScrollDirection(
    */
   innerRef?: InnerRef<HTMLElement> | null,
 ): [ScrollDirection, (node: HTMLElement | null) => void] {
-  const [scrollPosition, scrollPositionRefCallback] = useScrollPosition(
-    innerRef,
-  );
-  const [ref, refCallback] = useRefCallback(scrollPositionRefCallback);
+  const [ref, refCallback] = useRefCallback(innerRef);
+  const scrollingElement = useNearestScrollNode(ref);
+  const scrollPosition = useRef<ScrollPosition | null>(null);
   const [scrollDirection, setScrollDirection] = useState(
-    INITIAL_SCROLL_POSITION,
+    INITIAL_SCROLL_DIRECTION,
   );
-  const scrollingElement = getNearestScrollNode(ref.current);
 
   useEffect(() => {
     const handler = (event: Event): void => {
-      const direction = getScrollDirection(event, scrollPosition);
+      const position = getScrollPosition(event);
+      const direction = getScrollDirection(position, scrollPosition.current);
+      scrollPosition.current = position;
       setScrollDirection(direction);
     };
 

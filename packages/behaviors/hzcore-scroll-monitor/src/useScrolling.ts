@@ -1,6 +1,6 @@
-import {useState, useEffect, useRef, useCallback, useMemo} from 'react';
-import {getNearestScrollNode} from './utils';
+import {useState, useEffect, useRef, useCallback} from 'react';
 import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {useNearestScrollNode} from './utils';
 
 const SCROLL_TIMEOUT = 60;
 const SCROLL = 'scroll';
@@ -23,11 +23,8 @@ export default function useScrolling(
   let [scrolling, setScrolling] = useState(false);
 
   // Keep a ref to the nearest scrollable container.
-  let [{current}, refCallback] = useRefCallback(innerRef);
-  const scrollingElement = useMemo(() => getNearestScrollNode(current), [
-    current,
-  ]);
-
+  let [ref, refCallback] = useRefCallback(innerRef);
+  const scrollingElement = useNearestScrollNode(ref);
   // Keep a ref to a timeout id.
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
