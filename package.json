@@ -9,7 +9,7 @@
   "private": true,
   "scripts": {
     "build": "./node_modules/.bin/lerna bootstrap --loglevel=error && yarn build-packages",
-    "build-docz": "yarn build-packages && ./node_modules/.bin/docz build",
+    "build-docz": "yarn build && ./node_modules/.bin/docz build",
     "build-packages": "./node_modules/.bin/build-packages",
     "clean": "yarn build-packages --clean",
     "commit": "./node_modules/.bin/git-cz",
