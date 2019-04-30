@@ -19,15 +19,15 @@ test('useSize gets the initial size', async () => {
   const {container} = render(<SizeUser />);
   expect(container).toBeInTheDocument();
   expect(getSize(container)).toMatchObject({
-    x: null,
-    y: null,
-    top: null,
-    right: null,
-    bottom: null,
-    left: null,
-    width: null,
-    height: null,
-    vw: null,
-    vh: null,
+    x: 0,
+    y: 0,
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    width: 0,
+    height: 0,
+    vw: 0,
+    vh: 0,
   });
 });
