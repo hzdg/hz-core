@@ -40,7 +40,6 @@ test('useRefCallback accepts an innerRef callback', () => {
     return <div ref={setRef} data-testid="ref" />;
   };
   const {container} = render(<RefCallbackUser />);
-  expect(innerRefCallback).toHaveBeenCalledWith(null);
   expect(innerRefCallback).toHaveBeenLastCalledWith(
     getByTestId(container, 'ref'),
   );

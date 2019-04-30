@@ -19,20 +19,22 @@ export default function useRefCallback<T>(
    */
   innerRef?: InnerRef<T> | null,
 ): [React.RefObject<T | null>, (node: T | null) => void] {
-  const [currentNode, setNode] = useState<T | null>(null);
+  const [, f] = useState(false);
+  const forceUpdate = useCallback(() => f(v => !v), []);
   const ref = useRef<T | null>(null);
-  ref.current = currentNode;
-  if (innerRef) {
-    if (typeof innerRef === 'function') {
-      innerRef(currentNode);
-    } else {
-      innerRef.current = currentNode;
-    }
-  }
-  const callback = useCallback((node: T | null) => {
-    if (ref.current !== node) {
-      setNode(node);
-    }
-  }, []);
+  const callback = useCallback(
+    (node: T | null) => {
+      if (typeof innerRef === 'function') {
+        innerRef(node);
+      } else if (innerRef && 'current' in innerRef) {
+        innerRef.current = node;
+      }
+      if (ref.current !== node) {
+        ref.current = node;
+        forceUpdate();
+      }
+    },
+    [innerRef, forceUpdate],
+  );
   return [ref, callback];
 }
