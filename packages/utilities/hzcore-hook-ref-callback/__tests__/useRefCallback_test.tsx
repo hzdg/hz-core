@@ -1,5 +1,5 @@
 /* eslint-env jest, browser */
-import React, {useRef} from 'react';
+import React from 'react';
 import {render, getByTestId} from 'react-testing-library';
 import useRefCallback from '../src';
 
@@ -19,28 +19,38 @@ test('useRefCallback rerenders with a ref', () => {
   expect(refs[1].current).toBe(getByTestId(container, 'ref'));
 });
 
-test('useRefCallback accepts an innerRef Ref Object', () => {
-  let innerRef: React.RefObject<HTMLElement> | undefined;
-  const RefCallbackUser = (): JSX.Element => {
-    innerRef = useRef(null);
-    const [, setRef] = useRefCallback(innerRef);
-    return <div ref={setRef} data-testid="ref" />;
-  };
-  const {container} = render(<RefCallbackUser />);
-  expect(innerRef).toBeDefined();
-  expect((innerRef as React.RefObject<HTMLElement>).current).toBe(
-    getByTestId(container, 'ref'),
+test('useRefCallback accepts and updates an innerRef Ref Object', () => {
+  const innerRef1 = React.createRef();
+  const innerRef2 = React.createRef();
+  // eslint-disable-next-line react/display-name
+  const RefCallbackUser = React.forwardRef(
+    (_, forwardedRef): JSX.Element => {
+      const [, setRef] = useRefCallback(forwardedRef);
+      return <div ref={setRef} data-testid="ref" />;
+    },
   );
+  const {container} = render(<RefCallbackUser ref={innerRef1} />);
+  expect(innerRef1.current).toBe(getByTestId(container, 'ref'));
+  render(<RefCallbackUser ref={innerRef2} />, {container});
+  expect(innerRef2.current).toBe(getByTestId(container, 'ref'));
 });
 
-test('useRefCallback accepts an innerRef callback', () => {
-  const innerRefCallback = jest.fn();
-  const RefCallbackUser = (): JSX.Element => {
-    const [, setRef] = useRefCallback(innerRefCallback);
-    return <div ref={setRef} data-testid="ref" />;
-  };
-  const {container} = render(<RefCallbackUser />);
-  expect(innerRefCallback).toHaveBeenLastCalledWith(
+test('useRefCallback accepts and updates an innerRef callback', () => {
+  const innerRefCallback1 = jest.fn();
+  const innerRefCallback2 = jest.fn();
+  // eslint-disable-next-line react/display-name
+  const RefCallbackUser = React.forwardRef(
+    (_, forwardedRef): JSX.Element => {
+      const [, setRef] = useRefCallback(forwardedRef);
+      return <div ref={setRef} data-testid="ref" />;
+    },
+  );
+  const {container} = render(<RefCallbackUser ref={innerRefCallback1} />);
+  expect(innerRefCallback1).toHaveBeenLastCalledWith(
+    getByTestId(container, 'ref'),
+  );
+  render(<RefCallbackUser ref={innerRefCallback2} />, {container});
+  expect(innerRefCallback2).toHaveBeenLastCalledWith(
     getByTestId(container, 'ref'),
   );
 });
