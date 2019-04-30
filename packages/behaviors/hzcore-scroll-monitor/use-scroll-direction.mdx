@@ -5,8 +5,9 @@ route: /use-scroll-direction
 ---
 
 import {Playground, Props} from 'docz';
-import useScrollDirection from './src/useScrollDirection';
-import styled from 'styled-components';
+import {useScrollDirection, ScrollDirection} from './src';
+import {animated, config, useSpring} from 'react-spring';
+import useSize from '@hzcore/hook-size';
 
 # useScrollDirection
 
@@ -74,12 +75,14 @@ interface ScrollDirection {
 }
 ```
 
-## Example
+## Examples
+
+### Basic
 
 <Playground>
   {() => {
     const ScrollDirectionUser = () => {
-      const [direction, ref] = useScrollDirection();
+      const [{vertical}, ref] = useScrollDirection();
       return (
         <div
           ref={ref}
@@ -90,22 +93,66 @@ interface ScrollDirection {
             width: '100%',
             height: 250,
             fontSize: '2em',
-            color: `${
-              direction && direction.vertical == 'down' ? 'white' : 'yellow'
-            }`,
-            background: `${
-              direction && direction.vertical == 'down' ? 'green' : 'red'
-            }`,
+            color: `${vertical == ScrollDirection.DOWN ? 'white' : 'yellow'}`,
+            background: `${vertical == ScrollDirection.DOWN ? 'green' : 'red'}`,
           }}
         >
-          {direction && direction.vertical == 'down' ? 'down' : 'up'}
+          {vertical == ScrollDirection.DOWN ? 'down' : 'up'}
         </div>
       );
     };
     return <ScrollDirectionUser />;
+  }}
+</Playground>
 
-}}
+### [Scroll Up Bar](AKA 'Peak-a-boo') using [react-spring]
 
+<Playground>
+  {() => {
+    const ScrollUpBar = () => {
+      const [{height}, sizeRef] = useSize();
+      const [{vertical}, ref] = useScrollDirection(sizeRef);
+      const transform = useSpring({
+        config: config.stiff,
+        transform: `translateY(${
+          vertical === ScrollDirection.UP ? 0 : -height
+        }px)`,
+      });
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            position: 'relative',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+            color: 'lightgray',
+            overflow: 'hidden',
+          }}
+        >
+          <animated.div
+            ref={ref}
+            style={{
+              position: 'absolute',
+              top: 0,
+              right: 0,
+              left: 0,
+              background: 'green',
+              padding: '0 20px',
+              color: 'white',
+              ...transform,
+            }}
+          >
+            Scroll down to hide me!
+          </animated.div>
+          <span>Scroll up to show the bar!</span>
+        </div>
+      );
+    };
+    return <ScrollUpBar />;
+  }}
 </Playground>
 
 ## Usage with Ref Forwarding
@@ -134,3 +181,5 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
 [callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[scroll up bar]: http://usabilitypost.com/2014/05/24/the-scroll-up-bar/
+[react-spring]: https://www.react-spring.io/
