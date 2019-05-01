@@ -20,6 +20,7 @@ const PACKAGE_JSON = options => `
     "cjs",
     "es",
     "src",
+    "types",
     "!*/__test*"
   ]
 }
