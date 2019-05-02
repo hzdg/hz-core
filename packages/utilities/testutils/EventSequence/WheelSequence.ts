@@ -60,8 +60,11 @@ function normalizeWheelEventInit(
   };
 }
 
-export default class WheelSequence extends EventSequence {
-  static createNextEvent(
+export default class WheelSequence extends EventSequence<
+  WheelEvent,
+  WheelEventInit
+> {
+  createNextEvent(
     type: WheelEventType,
     init: WheelEventInit = {},
     lastEvent?: WheelEvent | null,
@@ -74,7 +77,7 @@ export default class WheelSequence extends EventSequence {
       ),
     );
   }
-  wheel(wheelOpts: WheelEventInit): WheelSequence {
+  wheel(wheelOpts?: WheelEventInit): WheelSequence {
     const downSequence: WheelSequence = this.dispatch(WHEEL, wheelOpts);
     return downSequence;
   }

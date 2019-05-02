@@ -33,10 +33,12 @@ type KeyboardDownEventInit = UnnormalizedKeyboardEventInit & {
   key: string;
 };
 
-type KeyboardDownSequence = EventSequence & {
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+
+interface KeyboardDownSequence extends Omit<KeyboardSequence, 'down'> {
   repeat(): KeyboardDownSequence;
   up(): KeyboardSequence;
-};
+}
 
 function getCode(key: string): string {
   if (key === ' ') return SPACE;
@@ -50,10 +52,6 @@ function getKeyCode(key: string): number {
     return CODES_2_KEY_CODES[code];
   }
   return key.charCodeAt(0);
-}
-
-function getWhich(key: string): number {
-  return getKeyCode(key);
 }
 
 function normalizeKeyboardEventInit(
@@ -78,8 +76,11 @@ function normalizeKeyboardEventInit(
     view: window,
   };
 }
-export default class KeyboardSequence extends EventSequence {
-  static createNextEvent(
+export default class KeyboardSequence extends EventSequence<
+  KeyboardEvent,
+  UnnormalizedKeyboardEventInit
+> {
+  createNextEvent(
     type: KeyboardEventType,
     init: UnnormalizedKeyboardEventInit = {},
     lastEvent?: KeyboardEvent | undefined,

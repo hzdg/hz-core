@@ -16,10 +16,12 @@ type UnnormalizedTouchEventInit = TouchEventInit & {
   y?: number;
 };
 
-type TouchStartSequence = EventSequence & {
-  move(opts: TouchEventInit): TouchStartSequence;
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+
+interface TouchStartSequence extends Omit<TouchSequence, 'start'> {
+  move(opts?: UnnormalizedTouchEventInit): TouchStartSequence;
   end(): TouchSequence;
-};
+}
 
 const DEFAULT_TOUCH_INIT: TouchInit = {
   target: window,
@@ -28,14 +30,6 @@ const DEFAULT_TOUCH_INIT: TouchInit = {
   clientY: 0,
   screenX: 0,
   screenY: 0,
-};
-
-const DEFAULT_TOUCH_EVENT_INIT: TouchEventInit = {
-  touches: [createTouch(DEFAULT_TOUCH_INIT)],
-  ctrlKey: false,
-  shiftKey: false,
-  altKey: false,
-  metaKey: false,
 };
 
 /**
@@ -47,26 +41,13 @@ function createTouch(touchInit: TouchInit): Touch {
   return touchInit as Touch;
 }
 
-function normalizeTouchInitList(
-  init: UnnormalizedTouchInit[],
-  from: TouchList,
-): TouchInit[] {
-  invariant(
-    init.length === from.length,
-    `Cannot normalize ${init.length} touches from ${from}`,
-  );
-
-  return init.map((touchInit, i) => {
-    const fromTouch = getTouchAt(from, i);
-    invariant(
-      fromTouch,
-      `Cannot normalize touch ${touchInit.identifier} from ${from}`,
-    );
-    // We assert `fromTouch` as `Touch` under the assumption that
-    // the preceeding invariant will throw if that is not the case.
-    return normalizeTouchInit(touchInit, fromTouch as Touch);
-  });
-}
+const DEFAULT_TOUCH_EVENT_INIT: TouchEventInit = {
+  touches: [createTouch(DEFAULT_TOUCH_INIT)],
+  ctrlKey: false,
+  shiftKey: false,
+  altKey: false,
+  metaKey: false,
+};
 
 function normalizeTouchInit(
   init: UnnormalizedTouchInit,
@@ -94,6 +75,27 @@ function normalizeTouchInit(
   };
 }
 
+function normalizeTouchInitList(
+  init: UnnormalizedTouchInit[],
+  from: TouchList,
+): TouchInit[] {
+  invariant(
+    init.length === from.length,
+    `Cannot normalize ${init.length} touches from ${from}`,
+  );
+
+  return init.map((touchInit, i) => {
+    const fromTouch = getTouchAt(from, i);
+    invariant(
+      fromTouch,
+      `Cannot normalize touch ${touchInit.identifier} from ${from}`,
+    );
+    // We assert `fromTouch` as `Touch` under the assumption that
+    // the preceeding invariant will throw if that is not the case.
+    return normalizeTouchInit(touchInit, fromTouch as Touch);
+  });
+}
+
 function normalizeTouchEventInit(
   init: UnnormalizedTouchEventInit,
   from: TouchEvent,
@@ -115,8 +117,11 @@ function normalizeTouchEventInit(
   };
 }
 
-export default class TouchSequence extends EventSequence {
-  static createNextEvent(
+export default class TouchSequence extends EventSequence<
+  TouchEvent,
+  UnnormalizedTouchEventInit
+> {
+  createNextEvent(
     type: TouchEventType,
     init: UnnormalizedTouchEventInit = {},
     lastEvent?: TouchEvent | null,
@@ -129,16 +134,16 @@ export default class TouchSequence extends EventSequence {
       ),
     );
   }
-  start(startOpts: UnnormalizedTouchInit | TouchEventInit): TouchStartSequence {
-    const downSequence: TouchStartSequence = this.dispatch(
-      TOUCH_START,
-      startOpts,
-    ).expose({
+
+  start(
+    startOpts?: UnnormalizedTouchInit | TouchEventInit,
+  ): TouchStartSequence {
+    const startSequence = this.dispatch(TOUCH_START, startOpts).expose({
       start: false,
-      move: (moveOpts: TouchEventInit): TouchStartSequence =>
-        downSequence.dispatch(TOUCH_MOVE, moveOpts),
-      end: (): TouchSequence => this.dispatch(TOUCH_END),
+      move: (moveOpts: UnnormalizedTouchEventInit) =>
+        startSequence.dispatch(TOUCH_MOVE, moveOpts),
+      end: () => this.dispatch(TOUCH_END),
     });
-    return downSequence;
+    return startSequence;
   }
 }

@@ -1,10 +1,9 @@
-import {$$iterator} from 'symbol-iterator';
-
-export default class GestureHistory {
-  history: Event[] = [];
+export default class GestureHistory<T>
+  implements ZenObservable.Observer<T>, Iterable<T> {
+  history: T[] = [];
   _error: Error | null = null;
   _complete: boolean = false;
-  next = (value: Event) => {
+  next = (value: T) => {
     this.history.push(value);
   };
   error = (error: Error) => {
@@ -13,20 +12,19 @@ export default class GestureHistory {
   complete = () => {
     this._complete = true;
   };
-  nth(i: number): Event | null {
+  nth(i: number): T | null {
     return this.history[i - 1];
   }
   get size(): number {
     return this.history.length;
   }
-  get first(): Event | null {
+  get first(): T | null {
     return this.history[0];
   }
-  get last(): Event | null {
+  get last(): T | null {
     return this.history[this.history.length - 1];
   }
-  // $FlowFixMe: Computed property keys not supported.
-  *[$$iterator]() {
+  *[Symbol.iterator](): Iterator<T> {
     let i = 0;
     while (i < this.history.length) {
       yield this.history[i++];

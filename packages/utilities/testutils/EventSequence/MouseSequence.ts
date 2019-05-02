@@ -10,10 +10,12 @@ type UnnormalizedMouseEventInit = MouseEventInit & {
   y?: number;
 };
 
-type MouseDownSequence = EventSequence & {
-  move(opts: UnnormalizedMouseEventInit): MouseDownSequence;
+type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
+
+interface MouseDownSequence extends Omit<MouseSequence, 'down'> {
+  move(opts?: UnnormalizedMouseEventInit): MouseDownSequence;
   up(): MouseSequence;
-};
+}
 
 const DEFAULT_MOUSE_EVENT_INIT = {
   screenX: 0,
@@ -59,10 +61,13 @@ function normalizeMouseEventInit(
   };
 }
 
-export default class MouseSequence extends EventSequence {
-  static createNextEvent(
+export default class MouseSequence extends EventSequence<
+  MouseEvent,
+  UnnormalizedMouseEventInit
+> {
+  createNextEvent(
     type: MouseEventType,
-    init: MouseEventInit | UnnormalizedMouseEventInit = {},
+    init: UnnormalizedMouseEventInit = {},
     lastEvent?: MouseEvent | null,
   ): MouseEvent {
     return new MouseEvent(
@@ -73,15 +78,13 @@ export default class MouseSequence extends EventSequence {
       ),
     );
   }
-  down(downOpts: MouseEventInit): MouseDownSequence {
-    const downSequence: MouseDownSequence = this.dispatch(
-      MOUSE_DOWN,
-      downOpts,
-    ).expose({
+
+  down(downOpts?: UnnormalizedMouseEventInit): MouseDownSequence {
+    const downSequence = this.dispatch(MOUSE_DOWN, downOpts).expose({
       down: false,
-      move: (moveOpts: UnnormalizedMouseEventInit): MouseDownSequence =>
+      move: (moveOpts: UnnormalizedMouseEventInit) =>
         downSequence.dispatch(MOUSE_MOVE, moveOpts),
-      up: (): MouseSequence => this.dispatch(MOUSE_UP),
+      up: () => this.dispatch(MOUSE_UP),
     });
     return downSequence;
   }
