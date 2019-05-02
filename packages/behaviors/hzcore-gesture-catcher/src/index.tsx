@@ -1,7 +1,7 @@
 import React, {Component, MutableRefObject} from 'react';
 import PropTypes from 'prop-types';
 import shallowEqual from 'shallowequal';
-import GestureObservable from './GestureObservable';
+import GestureObservable from '@hzcore/gesture-observable';
 import {CONFIG_SHAPE} from './types';
 
 import {

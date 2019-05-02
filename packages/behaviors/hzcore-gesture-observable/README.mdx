@@ -1,0 +1,57 @@
+---
+name: GestureObservable
+menu: Utilities
+route: /gesture-observable
+---
+
+# GestureObservable
+
+An [Observable] for gestures.
+
+Uses the [zen-observable] implementation of Observable.
+
+## Installation
+
+```shell
+yarn add @hzcore/gesture-observable
+```
+
+## Usage
+
+```js
+import GestureObservable from '@hzcore/gesture-observable';
+```
+
+Create an observable by passing the element
+you wish to observe and gesture configuration to `GestureObservable.create`:
+
+```js
+const element = document.getElementById('some-element-that-might-change-size');
+const observable = ResizeObservable.create(element, {
+  keyboard: boolean;
+  mouse: boolean;
+  touch: boolean;
+  wheel: boolean;
+});
+```
+
+Then subscribe to it to receive an updated [DOMRect]
+whenever the element's size changes:
+
+```js
+const subscription = observable.subscribe(rect => {
+  // do something with the rect!
+});
+```
+
+Then, whenever you are done watching the element, simply unsubscribe:
+
+```js
+//...sometime later
+subscription.unsubscribe();
+```
+
+[resizeobserver]: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
+[zen-observable]: https://github.com/zenparsing/zen-observable
+[observable]: https://github.com/tc39/proposal-observable
+[domrect]: https://developer.mozilla.org/en-US/docs/Web/API/DOMRect

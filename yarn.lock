@@ -4241,21 +4241,21 @@ call-me-maybe@^1.0.1:
   resolved "http://npmregistry.hzdg.com/call-me-maybe/-/call-me-maybe-1.0.1.tgz#26d208ea89e37b5cbde60250a15f031c16a4d66b"
   integrity sha1-JtII6onje1y95gJQoV8DHBak1ms=
 
-callbag-filter@^1.0.1:
+callbag-filter@^1.1.0:
   version "1.1.0"
   resolved "http://npmregistry.hzdg.com/callbag-filter/-/callbag-filter-1.1.0.tgz#d3116bf839702e859ee7e76eb9525925a6bff8b3"
   integrity sha512-m6ZHEd9JYHBAYJAdeqgt3gIKSoZOizfJTxIPd8EvDwY8Dr44+slm090WvCrrlz2SZoU8mCqpmZ8TFrGKXHo/yw==
   dependencies:
     callbag "^1.1.0"
 
-callbag-flatten@^1.2.0:
-  version "1.4.0"
-  resolved "http://npmregistry.hzdg.com/callbag-flatten/-/callbag-flatten-1.4.0.tgz#2857c5efe39bc519bc4f245f206a0beee81a50b0"
-  integrity sha512-2JM/jA0Ijnuu15kqcdepVd8Iv/L3VytTFOjP0rk/BKc4/yvUUPkQfR3U2QM6Uq+DO/roOWMfrVKaMAxsZ8ciww==
+callbag-from-event@^1.2.1:
+  version "1.2.1"
+  resolved "http://npmregistry.hzdg.com/callbag-from-event/-/callbag-from-event-1.2.1.tgz#8f321e3bed1fa48ab82879667eadee24c56bc097"
+  integrity sha512-rFZoDPqyjSxMSe2ikAfjxa76GhnTg16H36yNJNyPdrbsRvP2bYVGs32N+ddzB9qsnIBzJlwhgiHOv9Uav0HHXg==
   dependencies:
     callbag "^1.1.0"
 
-callbag-map@^1.0.1:
+callbag-map@^1.1.0:
   version "1.1.0"
   resolved "http://npmregistry.hzdg.com/callbag-map/-/callbag-map-1.1.0.tgz#6ddd28a3f634fbd2394ef136a181b4ba5e3b062c"
   integrity sha512-/xFzvJCtx1xulZpFeI4wq+ZD7tkg417XOeJ3wS9v8bHLLpt+fHKXgbZ8TBnnIxywJN6Uu/ZhL+c1DzUG6KXYFQ==
@@ -4269,43 +4269,38 @@ callbag-merge@^3.2.2:
   dependencies:
     callbag "^1.2.0"
 
-callbag-pipe@^1.1.1:
+callbag-pipe@^1.2.0:
   version "1.2.0"
   resolved "http://npmregistry.hzdg.com/callbag-pipe/-/callbag-pipe-1.2.0.tgz#7c00f47774da0096a7c5afa8a14f7873b5be1daf"
   integrity sha512-M+LdHUK0qJkm4CRe+I870ZzD/SnzcpTsfJRzFoB2hOkNXlrVdoj002KMkfdS4pHMfV6egzZFd8j+xJu6C4kwEQ==
 
-callbag-scan@^1.0.1:
+callbag-scan@^1.1.0:
   version "1.1.0"
   resolved "http://npmregistry.hzdg.com/callbag-scan/-/callbag-scan-1.1.0.tgz#09e5bea479b849d51c0087be81a28044f9c5ddf3"
   integrity sha512-5Aw9LR8b4Fg/gC++lWrq9sXEqgO0c5Gk+HWaFhFoVqgujSUVRxFw+c4bLw1eExWrBX6OeBDbVZ/2rMr/E0q9cQ==
   dependencies:
     callbag "^1.1.0"
 
-callbag-share@^1.1.1:
+callbag-share@^1.2.0:
   version "1.2.0"
   resolved "http://npmregistry.hzdg.com/callbag-share/-/callbag-share-1.2.0.tgz#5ed2333ebf4cc952d878348bf11f649894a6b989"
   integrity sha512-Gt+D5lfJ/j3X5/3PiMPL8hHDPBmeQILZl2QYu+YJtSFz6PlNGQSL45aD4e4uoxMvhMZY9NpMHh7KRWia9PZA+g==
   dependencies:
     callbag "^1.1.0"
 
-callbag-start-with@^3.1.0:
-  version "3.1.0"
-  resolved "http://npmregistry.hzdg.com/callbag-start-with/-/callbag-start-with-3.1.0.tgz#58c7f7cb3f3f44049e130166c2cf884c76e332ac"
-  integrity sha512-jeEvUoZqZj8ZVMgST7ci9wCH33e9vaARQCFrPy/8et0HYL6RNzgwi3BmfcIy63d6vpqGbciYex/3T4TiFxGgyA==
+callbag-subject@^1.0.2:
+  version "1.0.2"
+  resolved "http://npmregistry.hzdg.com/callbag-subject/-/callbag-subject-1.0.2.tgz#63923185000bcb10ec12d03491102aa43df93080"
+  integrity sha512-pMIKoXxJdO6SypymWQyLJHW/idY0esgT68I6xjYQjGZch0IVPlM5Bd+YSJaQ17fGLJEvK3HsaRaDuU8nmAqWOQ==
 
-callbag-subscribe@^1.4.1:
+callbag-subscribe@^1.5.1:
   version "1.5.1"
   resolved "http://npmregistry.hzdg.com/callbag-subscribe/-/callbag-subscribe-1.5.1.tgz#1ecf12b1f041a6ae84bd071cbbaf8014eed2acc5"
   integrity sha512-CRj2jKfcRvG8gap2ehsm/NxZVAjnwUApI+0ZY3bu6nyFfhhOzH+4RWpB/4RSJUZNN3ZILdSgAKQiUov/7ov9BQ==
   dependencies:
     callbag "^1.2.0"
 
-callbag-take-until@^1.1.0:
-  version "1.1.0"
-  resolved "http://npmregistry.hzdg.com/callbag-take-until/-/callbag-take-until-1.1.0.tgz#aac5b811ef952dabc41acc88e8529d8204eb7bfd"
-  integrity sha512-xAckg6sMS6iCa4U9qYDT3rQDH+Rf7N7VzWpKMczgayLik56hosJERlqJkgT1t0jhTSiU474aNuvsFFvFbJn/lA==
-
-callbag@1.2.0, callbag@^1.1.0, callbag@^1.2.0:
+callbag@^1.1.0, callbag@^1.2.0:
   version "1.2.0"
   resolved "http://npmregistry.hzdg.com/callbag/-/callbag-1.2.0.tgz#45e73962a466056c6e5f86f5627b35cf0c4df101"
   integrity sha512-RMcVOk2oyA8CyCt/HsLEvnvvttKlaGVaG0uOo5IY7RpdiPLhStjxv5oYre33VJfT8kJE+cuKLSNHooz7yCUdhQ==
@@ -14585,11 +14580,6 @@ symbol-iterator@1.0.2:
   version "1.0.2"
   resolved "http://npmregistry.hzdg.com/symbol-iterator/-/symbol-iterator-1.0.2.tgz#eb519e54b758225cf59ead0db7229001800758b3"
   integrity sha512-aLauyV8sli6i0XQdJo5uBsO8KvAAd50M+l/3/uktVG9xnYUmOV4mPrfT5JFlWS7drPLgUzFze5YP9vMQM7E09w==
-
-symbol-observable@^1.2.0:
-  version "1.2.0"
-  resolved "http://npmregistry.hzdg.com/symbol-observable/-/symbol-observable-1.2.0.tgz#c22688aed4eab3cdc2dfeacbb561660560a00804"
-  integrity sha512-e900nM8RRtGhlV36KGEU9k65K3mPb1WV70OdjfxlG2EAuM1noi/E/BaW/uMhL7bPEssK8QV57vN3esixjUvcXQ==
 
 symbol-tree@^3.2.2:
   version "3.2.2"

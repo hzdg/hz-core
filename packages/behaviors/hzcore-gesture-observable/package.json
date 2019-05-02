@@ -1,0 +1,33 @@
+{
+  "name": "@hzcore/gesture-observable",
+  "version": "0.0.1",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "types",
+    "!*/__test*"
+  ],
+  "dependencies": {
+    "callbag": "^1.2.0",
+    "callbag-filter": "^1.1.0",
+    "callbag-from-event": "^1.2.1",
+    "callbag-map": "^1.1.0",
+    "callbag-merge": "^3.2.2",
+    "callbag-pipe": "^1.2.0",
+    "callbag-scan": "^1.1.0",
+    "callbag-share": "^1.2.0",
+    "callbag-subject": "^1.0.2",
+    "callbag-subscribe": "^1.5.1",
+    "invariant": "^2.2.4",
+    "lethargy": "^1.0.4",
+    "zen-observable": "^0.8.14"
+  }
+}

@@ -1,5 +1,5 @@
 /* eslint-env jest, browser */
-import GestureObservable from '../GestureObservable';
+import GestureObservable, {GestureState, GestureObservableConfig} from '../src';
 import {
   GestureHistory,
   MouseSequence,
@@ -8,31 +8,28 @@ import {
   KeyboardSequence,
 } from 'testutils/EventSequence';
 
-let subscription;
-let node;
-
-const unsubscribe = () =>
-  (subscription = subscription && subscription.unsubscribe());
-
-const mount = (el = document.createElement('div')) =>
-  (node = document.body.appendChild(el));
-
-const unmount = () => (node = node && node.remove());
+let subscription: ZenObservable.Subscription | null;
+let node: HTMLDivElement;
 
 beforeEach(() => {
-  mount();
+  node = document.createElement('div');
+  document.body.appendChild(node);
 });
 
 afterEach(() => {
-  unsubscribe();
-  unmount();
+  node.remove();
+  if (subscription) {
+    subscription.unsubscribe();
+    subscription = null;
+  }
 });
 
 test('GestureObservable observes mouse gestures', async () => {
-  const history = new GestureHistory();
-  const gesture = new GestureObservable(node, {mouse: true});
+  const history = new GestureHistory<GestureState>();
+  const gesture = GestureObservable.create(node, {mouse: true});
   subscription = gesture.subscribe(history);
-  await MouseSequence.create(node)
+
+  await new MouseSequence(node)
     .down()
     .move({x: 5})
     .move({x: 3, y: 5})
@@ -40,7 +37,6 @@ test('GestureObservable observes mouse gestures', async () => {
   expect(history.size).toBe(4);
   expect(Array.from(history)).toMatchObject([
     {
-      key: null,
       gesturing: true,
       x: 0,
       xDelta: 0,
@@ -49,7 +45,6 @@ test('GestureObservable observes mouse gestures', async () => {
       yVelocity: 0,
     },
     {
-      key: null,
       gesturing: true,
       x: 5,
       xInitial: 0,
@@ -63,7 +58,6 @@ test('GestureObservable observes mouse gestures', async () => {
       yVelocity: 0,
     },
     {
-      key: null,
       gesturing: true,
       x: 3,
       xInitial: 0,
@@ -77,7 +71,6 @@ test('GestureObservable observes mouse gestures', async () => {
       yVelocity: 5,
     },
     {
-      key: null,
       gesturing: false,
       x: 3,
       xInitial: 0,
@@ -95,9 +88,9 @@ test('GestureObservable observes mouse gestures', async () => {
 
 test('GestureObservable observes touch gestures', async () => {
   const history = new GestureHistory();
-  const gesture = new GestureObservable(node, {touch: true});
+  const gesture = GestureObservable.create(node, {touch: true});
   subscription = gesture.subscribe(history);
-  await TouchSequence.create(node)
+  await new TouchSequence(node)
     .start()
     .move({x: 5})
     .move({x: 3, y: 5})
@@ -105,7 +98,6 @@ test('GestureObservable observes touch gestures', async () => {
   expect(history.size).toBe(4);
   expect(Array.from(history)).toMatchObject([
     {
-      key: null,
       gesturing: true,
       x: 0,
       xInitial: 0,
@@ -119,7 +111,6 @@ test('GestureObservable observes touch gestures', async () => {
       yVelocity: 0,
     },
     {
-      key: null,
       gesturing: true,
       x: 5,
       xInitial: 0,
@@ -133,7 +124,6 @@ test('GestureObservable observes touch gestures', async () => {
       yVelocity: 0,
     },
     {
-      key: null,
       gesturing: true,
       x: 3,
       xInitial: 0,
@@ -147,7 +137,6 @@ test('GestureObservable observes touch gestures', async () => {
       yVelocity: 5,
     },
     {
-      key: null,
       gesturing: false,
       x: 3,
       xInitial: 0,
@@ -166,9 +155,9 @@ test('GestureObservable observes touch gestures', async () => {
 test('GestureObservable observes wheel gestures', async () => {
   jest.useFakeTimers();
   const history = new GestureHistory();
-  const gesture = new GestureObservable(node, {wheel: true});
+  const gesture = GestureObservable.create(node, {wheel: true});
   subscription = gesture.subscribe(history);
-  await WheelSequence.create(node)
+  await new WheelSequence(node)
     .wheel()
     .wheel({deltaX: 5})
     .wheel({deltaX: 3, deltaY: 5});
@@ -177,28 +166,27 @@ test('GestureObservable observes wheel gestures', async () => {
   expect(Array.from(history)).toMatchObject([
     {
       type: 'wheel',
-      key: null,
-      repeat: null,
       gesturing: true,
       x: 0,
       xInitial: 0,
       xPrev: 0,
+      xSpin: 0,
       xDelta: 0,
       xVelocity: 0,
       y: 0,
       yInitial: 0,
       yPrev: 0,
+      ySpin: 1,
       yDelta: -1,
       yVelocity: -1,
     },
     {
       type: 'wheel',
-      key: null,
-      repeat: null,
       gesturing: true,
       x: 0,
       xInitial: 0,
       xPrev: 0,
+      xSpin: 1,
       xDelta: -5,
       xVelocity: -5,
       y: 0,
@@ -209,33 +197,33 @@ test('GestureObservable observes wheel gestures', async () => {
     },
     {
       type: 'wheel',
-      key: null,
-      repeat: null,
       gesturing: true,
       x: 0,
       xInitial: 0,
       xPrev: 0,
+      xSpin: 2,
       xDelta: -8,
       xVelocity: -3,
       y: 0,
       yInitial: 0,
       yPrev: 0,
+      ySpin: 2,
       yDelta: -6,
       yVelocity: -5,
     },
     {
       type: 'gestureend',
-      key: null,
-      repeat: null,
       gesturing: false,
       x: 0,
       xInitial: 0,
       xPrev: 0,
       xDelta: -8,
+      xSpin: 2,
       xVelocity: -3,
       y: 0,
       yInitial: 0,
       yPrev: 0,
+      ySpin: 2,
       yDelta: -6,
       yVelocity: -5,
     },
@@ -244,9 +232,9 @@ test('GestureObservable observes wheel gestures', async () => {
 
 test('GestureObservable observes keyboard gestures', async () => {
   const history = new GestureHistory();
-  const gesture = new GestureObservable(node, {keyboard: true});
+  const gesture = GestureObservable.create(node, {keyboard: true});
   subscription = gesture.subscribe(history);
-  await KeyboardSequence.create(node)
+  await new KeyboardSequence(node)
     .space()
     .repeat()
     .up();
@@ -300,20 +288,18 @@ test('GestureObservable observes keyboard gestures', async () => {
 test('GestureObservable observes all inputs by default', async () => {
   jest.useFakeTimers();
   const history = new GestureHistory();
-  const gesture = new GestureObservable(node);
+  const gesture = GestureObservable.create(node);
   subscription = gesture.subscribe(history);
-  await MouseSequence.create(node)
+  await new MouseSequence(node)
     .down()
     .move()
     .up();
-  await TouchSequence.create(node)
+  await new TouchSequence(node)
     .start()
     .move()
     .end();
-  await WheelSequence.create(node).wheel();
-  await KeyboardSequence.create(node)
-    .space()
-    .up();
+  await new WheelSequence(node).wheel();
+  await new KeyboardSequence(node).space().up();
   jest.runAllTimers();
   expect(history.size).toBe(10);
 });
@@ -323,20 +309,20 @@ test.each([['mouse', 3], ['touch', 3], ['wheel', 2], ['keyboard', 2]])(
   async (inputType, expectedUpdates) => {
     jest.useFakeTimers();
     const history = new GestureHistory();
-    const gesture = new GestureObservable(node, {[inputType]: true});
+    const gesture = GestureObservable.create(node, ({
+      [inputType]: true,
+    } as unknown) as GestureObservableConfig);
     subscription = gesture.subscribe(history);
-    await MouseSequence.create(node)
+    await new MouseSequence(node)
       .down()
       .move()
       .up();
-    await TouchSequence.create(node)
+    await new TouchSequence(node)
       .start()
       .move()
       .end();
-    await WheelSequence.create(node).wheel();
-    await KeyboardSequence.create(node)
-      .space()
-      .up();
+    await new WheelSequence(node).wheel();
+    await new KeyboardSequence(node).space().up();
     jest.runAllTimers();
     expect(history.size).toBe(expectedUpdates);
   },
