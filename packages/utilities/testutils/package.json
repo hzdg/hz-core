@@ -1,0 +1,15 @@
+{
+  "name": "testutils",
+  "description": "Utilities for testing hzcore packages",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "license": "UNLISCENSED",
+  "private": true,
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "**/*.{js,jsx,ts,tsx}",
+    "!**/__test*"
+  ]
+}

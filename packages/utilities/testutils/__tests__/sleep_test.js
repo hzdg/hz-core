@@ -14,7 +14,7 @@ test.each`
 `(`sleep($duration)`, async ({duration, expected}) => {
   const callback = jest.fn();
   const task = sleep(duration).then(callback);
-  expect(callback).not.toBeCalled();
+  expect(callback).not.toHaveBeenCalled();
   if (expected) {
     expect(setTimeout).toHaveBeenLastCalledWith(expect.any(Function), duration);
     jest.advanceTimersByTime(expected);
