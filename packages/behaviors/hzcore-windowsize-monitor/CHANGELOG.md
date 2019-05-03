@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.7](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.6...@hzcore/windowsize-monitor@0.1.7) (2019-05-03)
+
+
+### @hzcore/hook-size
+
+* and not or ([4d8848b](https://github.com/hzdg/hz-core/commit/4d8848b))
+
+
 ## [0.1.6](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.5...@hzcore/windowsize-monitor@0.1.6) (2019-05-03)
 
 
