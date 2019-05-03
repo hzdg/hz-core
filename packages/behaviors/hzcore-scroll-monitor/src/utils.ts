@@ -1,6 +1,11 @@
 import invariant from 'invariant';
 import {useMemo} from 'react';
 
+const isClient =
+  typeof window !== 'undefined' &&
+  typeof Document !== 'undefined' &&
+  typeof HTMLElement !== 'undefined';
+
 export interface ScrollRect {
   top: number | null;
   left: number | null;
@@ -41,8 +46,9 @@ export function getNode(node: NodeLike | null): Node | null {
 }
 
 export function getNearestScrollNode(
-  node: NodeLike | null,
+  node: Node | null,
 ): HTMLElement | Document | null {
+  if (!isClient) return null;
   node = getNode(node);
   if (node instanceof Document) return node;
   if (!(node instanceof HTMLElement)) return null;
