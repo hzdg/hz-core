@@ -8,7 +8,7 @@ export * from './types';
 
 const events = new Set();
 const onResize = (): void => events.forEach(fn => fn());
-const isClient = typeof window !== undefined || typeof window !== 'undefined';
+const isClient = typeof window !== undefined && typeof window !== 'undefined';
 
 const subscriber = {
   subscribe: (handler: () => void) => {
