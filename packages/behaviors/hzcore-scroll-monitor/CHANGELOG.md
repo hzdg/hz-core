@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.4](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@1.0.3...@hzcore/scroll-monitor@1.0.4) (2019-05-03)
+
+
+### @hzcore/scroll-monitor
+
+* fixing another window undefined instance ([e632c15](https://github.com/hzdg/hz-core/commit/e632c15))
+
+
 ## [1.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@1.0.2...@hzcore/scroll-monitor@1.0.3) (2019-05-01)
 
 
