@@ -1,7 +1,7 @@
 {
   "name": "create-package",
   "description": "Create a new @hzcore- package",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "bin": "bin/create-package.js",
   "license": "UNLICENSED",
   "private": true,

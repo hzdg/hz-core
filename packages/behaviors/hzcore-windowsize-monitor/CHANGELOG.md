@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.6](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.5...@hzcore/windowsize-monitor@0.1.6) (2019-05-03)
+
+
+### @hzcore/windowsize-monitor
+
+* improving window undefined check ([d6ad247](https://github.com/hzdg/hz-core/commit/d6ad247))
+
+
 ## [0.1.5](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.4...@hzcore/windowsize-monitor@0.1.5) (2019-04-19)
 
 
