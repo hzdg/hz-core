@@ -8,7 +8,7 @@ export * from './types';
 
 const events = new Set();
 const onResize = (): void => events.forEach(fn => fn());
-const isClient = typeof window !== undefined;
+const isClient = typeof window !== undefined || typeof window !== 'undefined';
 
 const subscriber = {
   subscribe: (handler: () => void) => {
@@ -30,9 +30,9 @@ const subscriber = {
 
 export const useWindowSize = (
   options: {throttleMs?: number} = {},
-  initialWidth: number = Infinity,
-  initialHeight: number = Infinity,
-): State => {
+  initialWidth: number = 0,
+  initialHeight: number = 0,
+): State | undefined => {
   const {throttleMs = 100} = options;
 
   const [size, setSize] = useState({
@@ -64,7 +64,7 @@ class WindowsizeMonitor extends PureComponent<Props, State> {
     height: 0,
   };
 
-  componentDidMount() {
+  componentDidMount(): void {
     // we need this for static site generators to not complain about
     // undefined window
     if (typeof window !== undefined) {
@@ -73,27 +73,26 @@ class WindowsizeMonitor extends PureComponent<Props, State> {
     }
   }
 
-  componentWillUnmount() {
+  componentWillUnmount(): void {
     if (this.subscription) {
       this.subscription.unsubscribe();
       this.subscription = null;
     }
   }
 
-  // eslint-disable-next-line
-  getDimensions() {
+  getDimensions(): State {
     const width = window.innerWidth;
     const height = window.innerHeight;
     return {width, height};
   }
 
-  subscription: any = null;
+  subscription: null | {unsubscribe: () => void} = null;
 
   updateDimensions = () => {
     this.setState(this.getDimensions());
   };
 
-  render() {
+  render(): JSX.Element {
     return this.props.children({
       ...this.state,
     });
