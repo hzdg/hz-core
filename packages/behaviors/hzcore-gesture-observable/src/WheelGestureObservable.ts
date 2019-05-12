@@ -174,10 +174,7 @@ function normalizeWheel(event: UnnormalizedWheelEvent): WheelGestureEvent {
  */
 export type WheelGestureType = typeof WHEEL | typeof GESTURE_END;
 
-/**
- * A snapshot of a previous or in-progress wheel gesture.
- */
-export interface WheelGestureState {
+interface WheelGestureBaseState {
   /** The latest x position for the gesture. */
   x: number;
   /** The latest y position for the gesture. */
@@ -208,7 +205,27 @@ export interface WheelGestureState {
   type: WheelGestureType | null;
 }
 
-const DEFAULT_INITIAL_STATE: WheelGestureState = {
+/**
+ * A snapshot of an in-progress wheel gesture.
+ */
+export interface WheelGestureState extends WheelGestureBaseState {
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: typeof WHEEL;
+}
+
+/**
+ * The last snapshot of a completed wheel gesture.
+ */
+export interface WheelGestureEndState extends WheelGestureBaseState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: typeof GESTURE_END;
+}
+
+const DEFAULT_INITIAL_STATE: WheelGestureBaseState = {
   x: 0,
   y: 0,
   xSpin: 0,
@@ -238,56 +255,36 @@ function parseConfig(
 }
 
 function reduceGestureState(
-  state: WheelGestureState,
+  state: WheelGestureBaseState,
   event: WheelGestureEvent | GestureEndEvent,
-): WheelGestureState {
-  const nextState = {
-    ...state,
-    type: event.type,
-    x: 'clientX' in event ? event.clientX : state.x,
-    y: 'clientY' in event ? event.clientY : state.y,
-  };
-
+): WheelGestureBaseState | WheelGestureState | WheelGestureEndState {
   switch (event.type) {
     case WHEEL:
-      nextState.xInitial = event.clientX || event.originalEvent.clientX;
-      nextState.yInitial = event.clientY || event.originalEvent.clientY;
-      nextState.xPrev = event.clientX || event.originalEvent.clientX;
-      nextState.yPrev = event.clientY || event.originalEvent.clientY;
-      nextState.xDelta =
-        state.type === WHEEL
-          ? state.xDelta - event.deltaX
-          : event.deltaX
-          ? -event.deltaX
-          : 0;
-      nextState.yDelta =
-        state.type === WHEEL
-          ? state.yDelta - event.deltaY
-          : event.deltaY
-          ? -event.deltaY
-          : 0;
-      nextState.xSpin =
-        state.type === WHEEL
-          ? state.xSpin + event.spinX
-          : event.spinX
-          ? event.spinX
-          : 0;
-      nextState.ySpin =
-        state.type === WHEEL
-          ? state.ySpin + event.spinY
-          : event.spinY
-          ? event.spinY
-          : 0;
-      nextState.xVelocity = event.deltaX ? -event.deltaX : 0;
-      nextState.yVelocity = event.deltaY ? -event.deltaY : 0;
-      nextState.gesturing = true;
-      break;
+      return {
+        ...state,
+        x: 'clientX' in event ? event.clientX : state.x,
+        y: 'clientY' in event ? event.clientY : state.y,
+        xInitial: event.clientX || event.originalEvent.clientX,
+        yInitial: event.clientY || event.originalEvent.clientY,
+        xPrev: event.clientX || event.originalEvent.clientX,
+        yPrev: event.clientY || event.originalEvent.clientY,
+        xDelta: state.xDelta - event.deltaX,
+        yDelta: state.yDelta - event.deltaY,
+        xSpin: state.xSpin + event.spinX,
+        ySpin: state.ySpin + event.spinY,
+        xVelocity: event.deltaX ? -event.deltaX : 0,
+        yVelocity: event.deltaY ? -event.deltaY : 0,
+        gesturing: true,
+        type: event.type,
+      };
     case GESTURE_END:
-      nextState.gesturing = false;
-      break;
+      return {
+        ...state,
+        gesturing: false,
+        type: event.type,
+      };
   }
-  state = nextState;
-  return state;
+  throw new Error(`Could not handle event ${event}`);
 }
 
 /**
@@ -298,7 +295,7 @@ export function createSource(
   element: Element,
   /** Configuration for the wheel gesture source. */
   config?: Partial<WheelGestureObservableConfig> | null,
-): Source<WheelGestureState> {
+): Source<WheelGestureState | WheelGestureEndState> {
   invariant(
     element instanceof Element,
     `An Element is required, but received ${element}`,
@@ -410,7 +407,7 @@ export function createSource(
  * Also uses a `gestureend` event to indicate when the intent
  * to end a wheel gesture has been detected. This is useful
  * because there is no native representation of a 'wheelend' event
- * (like you get from touch with 'touchend' or mouse with 'mouseup'),
+ * (like you get from touch with 'touchend' or wheel with 'wheelup'),
  * which makes it difficult to decide when to resolve a guess
  * for a gesturing user's intention.
  */
@@ -419,8 +416,8 @@ export function create(
   element: Element,
   /** Configuration for the WheelGestureObservable. */
   config?: Partial<WheelGestureObservableConfig> | null,
-): Observable<WheelGestureState> {
+): Observable<WheelGestureState | WheelGestureEndState> {
   return asObservable(createSource(element, config));
 }
 
-export default {create};
+export default {create, createSource};

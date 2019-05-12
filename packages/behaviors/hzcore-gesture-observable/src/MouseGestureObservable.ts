@@ -44,10 +44,7 @@ export type MouseGestureType =
   | typeof MOUSE_MOVE
   | typeof MOUSE_UP;
 
-/**
- * A snapshot of a previous or in-progress mouse gesture.
- */
-export interface MouseGestureState {
+interface MouseGestureBaseState {
   /** The latest x position for the gesture. */
   x: number;
   /** The latest y position for the gesture. */
@@ -74,7 +71,27 @@ export interface MouseGestureState {
   type: MouseGestureType | null;
 }
 
-const DEFAULT_INITIAL_STATE: MouseGestureState = {
+/**
+ * A snapshot of an in-progress mouse gesture.
+ */
+export interface MouseGestureState extends MouseGestureBaseState {
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: typeof MOUSE_DOWN | typeof MOUSE_MOVE;
+}
+
+/**
+ * The last snapshot of a completed mouse gesture.
+ */
+export interface MouseGestureEndState extends MouseGestureBaseState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: typeof MOUSE_UP;
+}
+
+const DEFAULT_INITIAL_STATE: MouseGestureBaseState = {
   x: 0,
   y: 0,
   xDelta: 0,
@@ -102,41 +119,46 @@ function parseConfig(
 }
 
 function reduceGestureState(
-  state: MouseGestureState,
+  state: MouseGestureBaseState,
   event: MouseGestureEvent,
-): MouseGestureState {
-  const nextState = {
-    ...state,
-    type: event.type,
-    x: event.clientX,
-    y: event.clientY,
-  };
-
+): MouseGestureBaseState | MouseGestureState | MouseGestureEndState {
   switch (event.type) {
     case MOUSE_DOWN:
-      nextState.xInitial = event.clientX;
-      nextState.yInitial = event.clientY;
-      nextState.xPrev = event.clientX;
-      nextState.yPrev = event.clientY;
-      nextState.xDelta = 0;
-      nextState.yDelta = 0;
-      nextState.gesturing = true;
-      break;
+      return {
+        ...state,
+        x: event.clientX,
+        y: event.clientY,
+        xInitial: event.clientX,
+        yInitial: event.clientY,
+        xPrev: event.clientX,
+        yPrev: event.clientY,
+        xDelta: 0,
+        yDelta: 0,
+        gesturing: true,
+        type: event.type,
+      };
     case MOUSE_MOVE:
-      nextState.xPrev = state.x;
-      nextState.yPrev = state.y;
-      nextState.xDelta = event.clientX - state.xInitial;
-      nextState.yDelta = event.clientY - state.yInitial;
-      nextState.xVelocity = event.clientX - state.x;
-      nextState.yVelocity = event.clientY - state.y;
-      nextState.gesturing = true;
-      break;
+      return {
+        ...state,
+        x: event.clientX,
+        y: event.clientY,
+        xPrev: state.x,
+        yPrev: state.y,
+        xDelta: event.clientX - state.xInitial,
+        yDelta: event.clientY - state.yInitial,
+        xVelocity: event.clientX - state.x,
+        yVelocity: event.clientY - state.y,
+        gesturing: true,
+        type: event.type,
+      };
     case MOUSE_UP:
-      nextState.gesturing = false;
-      break;
+      return {
+        ...state,
+        gesturing: false,
+        type: event.type,
+      };
   }
-  state = nextState;
-  return state;
+  throw new Error(`Could not handle event ${event}`);
 }
 
 /**
@@ -147,7 +169,7 @@ export function createSource(
   element: Element,
   /** Configuration for the mouse gesture source. */
   config?: Partial<MouseGestureObservableConfig> | null,
-): Source<MouseGestureState> {
+): Source<MouseGestureState | MouseGestureEndState> {
   invariant(
     element instanceof Element,
     `An Element is required, but received ${element}`,
@@ -209,8 +231,8 @@ export const create = (
   element: Element,
   /** Configuration for the MouseGestureObservable. */
   config?: Partial<MouseGestureObservableConfig> | null,
-): Observable<MouseGestureState> => {
+): Observable<MouseGestureState | MouseGestureEndState> => {
   return asObservable(createSource(element, config));
 };
 
-export default {create};
+export default {create, createSource};

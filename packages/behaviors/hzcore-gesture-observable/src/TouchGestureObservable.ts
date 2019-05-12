@@ -44,10 +44,7 @@ export type TouchGestureType =
   | typeof TOUCH_MOVE
   | typeof TOUCH_END;
 
-/**
- * A snapshot of a previous or in-progress touch gesture.
- */
-export interface TouchGestureState {
+interface TouchGestureBaseState {
   /** The latest x position for the gesture. */
   x: number;
   /** The latest y position for the gesture. */
@@ -74,7 +71,27 @@ export interface TouchGestureState {
   type: TouchGestureType | null;
 }
 
-const DEFAULT_INITIAL_STATE: TouchGestureState = {
+/**
+ * A snapshot of an in-progress touch gesture.
+ */
+export interface TouchGestureState extends TouchGestureBaseState {
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: typeof TOUCH_START | typeof TOUCH_MOVE;
+}
+
+/**
+ * The last snapshot of a completed touch gesture.
+ */
+export interface TouchGestureEndState extends TouchGestureBaseState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: typeof TOUCH_END;
+}
+
+const DEFAULT_INITIAL_STATE: TouchGestureBaseState = {
   x: 0,
   y: 0,
   xDelta: 0,
@@ -102,41 +119,46 @@ function parseConfig(
 }
 
 function reduceGestureState(
-  state: TouchGestureState,
+  state: TouchGestureBaseState,
   event: TouchGestureEvent,
-): TouchGestureState {
-  const nextState = {
-    ...state,
-    type: event.type,
-    x: event.touches[0].clientX,
-    y: event.touches[0].clientY,
-  };
-
+): TouchGestureBaseState | TouchGestureState | TouchGestureEndState {
   switch (event.type) {
     case TOUCH_START:
-      nextState.xInitial = event.touches[0].clientX;
-      nextState.yInitial = event.touches[0].clientY;
-      nextState.xPrev = event.touches[0].clientX;
-      nextState.yPrev = event.touches[0].clientY;
-      nextState.xDelta = 0;
-      nextState.yDelta = 0;
-      nextState.gesturing = true;
-      break;
+      return {
+        ...state,
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+        xInitial: event.touches[0].clientX,
+        yInitial: event.touches[0].clientY,
+        xPrev: event.touches[0].clientX,
+        yPrev: event.touches[0].clientY,
+        xDelta: 0,
+        yDelta: 0,
+        gesturing: true,
+        type: event.type,
+      };
     case TOUCH_MOVE:
-      nextState.xPrev = state.x;
-      nextState.yPrev = state.y;
-      nextState.xDelta = event.touches[0].clientX - state.xInitial;
-      nextState.yDelta = event.touches[0].clientY - state.yInitial;
-      nextState.xVelocity = event.touches[0].clientX - state.x;
-      nextState.yVelocity = event.touches[0].clientY - state.y;
-      nextState.gesturing = true;
-      break;
+      return {
+        ...state,
+        x: event.touches[0].clientX,
+        y: event.touches[0].clientY,
+        xPrev: state.x,
+        yPrev: state.y,
+        xDelta: event.touches[0].clientX - state.xInitial,
+        yDelta: event.touches[0].clientY - state.yInitial,
+        xVelocity: event.touches[0].clientX - state.x,
+        yVelocity: event.touches[0].clientY - state.y,
+        gesturing: true,
+        type: event.type,
+      };
     case TOUCH_END:
-      nextState.gesturing = false;
-      break;
+      return {
+        ...state,
+        gesturing: false,
+        type: event.type,
+      };
   }
-  state = nextState;
-  return state;
+  throw new Error(`Could not handle event ${event}`);
 }
 
 const WEBKIT_HACK_OPTIONS: AddEventListenerOptions = {passive: false};
@@ -197,7 +219,7 @@ export function createSource(
   element: Element,
   /** Configuration for the touch gesture source. */
   config?: Partial<TouchGestureObservableConfig> | null,
-): Source<TouchGestureState> {
+): Source<TouchGestureState | TouchGestureEndState> {
   invariant(
     element instanceof Element,
     `An Element is required, but received ${element}`,
@@ -262,8 +284,8 @@ export function create(
   element: Element,
   /** Configuration for the TouchGestureObservable. */
   config?: Partial<TouchGestureObservableConfig> | null,
-): Observable<TouchGestureState> {
+): Observable<TouchGestureState | TouchGestureEndState> {
   return asObservable(createSource(element, config));
 }
 
-export default {create};
+export default {create, createSource};

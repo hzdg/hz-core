@@ -162,7 +162,9 @@ An Observable of touch gestures.
 ```ts
 import {TouchGestureObservable} from '@hzcore/gesture-observable';
 
-const observable: Observable<TouchGestureState> = TouchGestureObservable.create(
+const observable: Observable<
+  TouchGestureState | TouchGestureEndState
+> = TouchGestureObservable.create(
   /** The DOM element to observe for touch events. */
   element: Element,
   /** Configuration for the TouchGestureObservable. */
@@ -189,7 +191,7 @@ interface TouchGestureObservableConfig {
 
 ### Touch Gesture State
 
-A snapshot of a previous or in-progress touch gesture.
+A snapshot of an in-progress touch gesture.
 
 ```ts
 interface TouchGestureState {
@@ -213,10 +215,23 @@ interface TouchGestureState {
   xVelocity: number;
   /** The latest velocity of the gesture in the y dimension. */
   yVelocity: number;
-  /** Whether or not a gesture is ongoing. */
-  gesturing: boolean;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
   /** The type of event last associated with a gesture. */
-  type: 'touchstart' | 'touchmove' | 'touchend' | null;
+  type: 'touchstart' | 'touchmove';
+}
+```
+
+### Touch Gesture End State
+
+The last snapshot of a completed touch gesture.
+
+```ts
+interface TouchGestureEndState extends TouchGestureState {
+  /** Indicates a gesture is no longer ongoing. \*/
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. \*/
+  type: 'touchend';
 }
 ```
 
@@ -229,7 +244,9 @@ An Observable of mouse gestures.
 ```ts
 import {MouseGestureObservable} from '@hzcore/gesture-observable';
 
-const observable: Observable<MouseGestureState> = MouseGestureObservable.create(
+const observable: Observable<
+  MouseGestureState | MouseGestureEndState
+> = MouseGestureObservable.create(
   /** The DOM element to observe for mouse events. */
   element: Element,
   /** Configuration for the MouseGestureObservable. */
@@ -256,7 +273,7 @@ interface MouseGestureObservableConfig {
 
 ### Mouse Gesture State
 
-A snapshot of a previous or in-progress mouse gesture.
+A snapshot of an in-progress mouse gesture.
 
 ```ts
 interface MouseGestureState {
@@ -280,10 +297,23 @@ interface MouseGestureState {
   xVelocity: number;
   /** The latest velocity of the gesture in the y dimension. */
   yVelocity: number;
-  /** Whether or not a gesture is ongoing. */
-  gesturing: boolean;
-  /** The type of event last associated with a gesture. */
-  type: 'mousedown' | 'mousemove' | 'mouseup' | null;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'mousedown' | 'mousemove';
+}
+```
+
+### Mouse Gesture End State
+
+The last snapshot of a completed mouse gesture.
+
+```ts
+interface MouseGestureEndState extends MouseGestureState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: 'mouseup';
 }
 ```
 
@@ -309,7 +339,9 @@ for a gesturing user's intention.
 ```ts
 import {WheelGestureObservable} from '@hzcore/gesture-observable';
 
-const observable: Observable<WheelGestureState> = WheelGestureObservable.create(
+const observable: Observable<
+  WheelGestureState | WheelGestureEndState
+> = WheelGestureObservable.create(
   /** The DOM element to observe for wheel events. */
   element: Element,
   /** Configuration for the WheelGestureObservable. */
@@ -342,7 +374,7 @@ interface WheelGestureObservableConfig {
 
 ### Wheel Gesture State
 
-A snapshot of a previous or in-progress wheel gesture.
+A snapshot of an in-progress wheel gesture.
 
 ```ts
 interface WheelGestureState {
@@ -370,10 +402,23 @@ interface WheelGestureState {
   xVelocity: number;
   /** The latest velocity of the gesture in the y dimension. */
   yVelocity: number;
-  /** Whether or not a gesture is ongoing. */
-  gesturing: boolean;
-  /** The type of event last associated with a gesture. */
-  type: 'wheel' | 'gestureend' | null;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'wheel';
+}
+```
+
+### Wheel Gesture End State
+
+The last snapshot of a completed wheel gesture.
+
+```ts
+interface WheelGestureEndState extends WheelGestureState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: 'gestureend';
 }
 ```
 
@@ -386,7 +431,9 @@ An Observable of keyboard gestures.
 ```ts
 import {KeyboardGestureObservable} from '@hzcore/gesture-observable';
 
-const observable: Observable<KeyboardGestureState> = KeyboardGestureObservable.create(
+const observable: Observable<
+  KeyboardGestureState | KeyboardGestureEndState
+> = KeyboardGestureObservable.create(
   /** The DOM element to observe for keyboard events. */
   element: Element,
   /** Configuration for the KeyboardGestureObservable. */
@@ -413,7 +460,7 @@ interface KeyboardGestureObservableConfig {
 
 ### Keyboard Gesture State
 
-A snapshot of a previous or in-progress keyboard gesture.
+A snapshot of an in-progress keyboard gesture.
 
 ```ts
 interface KeyboardGestureState {
@@ -437,8 +484,8 @@ interface KeyboardGestureState {
   xVelocity: number;
   /** The latest velocity of the gesture in the y dimension. */
   yVelocity: number;
-  /** Whether or not a gesture is ongoing. */
-  gesturing: boolean;
+  /** Whether or not the key that triggered the gesture is repeating. */
+  repeat: boolean;
   /** The key that triggered the gesture. */
   key:
     | 'Space'
@@ -451,10 +498,23 @@ interface KeyboardGestureState {
     | 'ArrowRight'
     | 'ArrowDown'
     | null;
-  /** Whether or not the key that triggered the gesture is repeating. */
-  repeat: boolean | null;
-  /** The type of event last associated with a gesture. */
-  type: 'keydown' | 'keyup' | null;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'keydown';
+}
+```
+
+### Keyboard Gesture End State
+
+The last snapshot of a completed keyboard gesture.
+
+```ts
+interface KeyboardGestureEndState extends KeyboardGestureState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: 'keyup';
 }
 ```
 

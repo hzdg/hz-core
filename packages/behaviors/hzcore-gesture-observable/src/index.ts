@@ -1,32 +1,22 @@
 import Observable from 'zen-observable';
 import invariant from 'invariant';
 import merge from 'callbag-merge';
-import * as Wheel from './WheelGestureObservable';
-import * as Mouse from './MouseGestureObservable';
-import * as Touch from './TouchGestureObservable';
-import * as Keyboard from './KeyboardGestureObservable';
 import asObservable from './asObservable';
+import * as WheelGestureObservable from './WheelGestureObservable';
+import * as MouseGestureObservable from './MouseGestureObservable';
+import * as TouchGestureObservable from './TouchGestureObservable';
+import * as KeyboardGestureObservable from './KeyboardGestureObservable';
 
 export {
-  WHEEL,
-  GESTURE_END,
-  default as WheelGestureObservable,
-} from './WheelGestureObservable';
+  WheelGestureObservable,
+  MouseGestureObservable,
+  TouchGestureObservable,
+  KeyboardGestureObservable,
+};
 
-export {
-  MOUSE_DOWN,
-  MOUSE_MOVE,
-  MOUSE_UP,
-  default as MouseGestureObservable,
-} from './MouseGestureObservable';
-
-export {
-  TOUCH_START,
-  TOUCH_MOVE,
-  TOUCH_END,
-  default as TouchGestureObservable,
-} from './TouchGestureObservable';
-
+export {WHEEL, GESTURE_END} from './WheelGestureObservable';
+export {MOUSE_DOWN, MOUSE_MOVE, MOUSE_UP} from './MouseGestureObservable';
+export {TOUCH_START, TOUCH_MOVE, TOUCH_END} from './TouchGestureObservable';
 export {
   KEY_DOWN,
   KEY_UP,
@@ -39,36 +29,64 @@ export {
   ARROW_UP,
   ARROW_RIGHT,
   ARROW_DOWN,
-  default as KeyboardGestureObservable,
 } from './KeyboardGestureObservable';
+
+export type WheelGestureType = WheelGestureObservable.WheelGestureType;
+export type WheelGestureEvent = WheelGestureObservable.WheelGestureEvent;
+export type GestureEndEvent = WheelGestureObservable.GestureEndEvent;
+export type WheelGestureState = WheelGestureObservable.WheelGestureState;
+export type WheelGestureEndState = WheelGestureObservable.WheelGestureEndState;
+export type WheelGestureObservableConfig = WheelGestureObservable.WheelGestureObservableConfig;
+
+export type MouseGestureType = MouseGestureObservable.MouseGestureType;
+export type MouseGestureEvent = MouseGestureObservable.MouseGestureEvent;
+export type MouseGestureState = MouseGestureObservable.MouseGestureState;
+export type MouseGestureEndState = MouseGestureObservable.MouseGestureEndState;
+export type MouseGestureObservableConfig = MouseGestureObservable.MouseGestureObservableConfig;
+
+export type TouchGestureType = TouchGestureObservable.TouchGestureType;
+export type TouchGestureEvent = TouchGestureObservable.TouchGestureEvent;
+export type TouchGestureState = TouchGestureObservable.TouchGestureState;
+export type TouchGestureEndState = TouchGestureObservable.TouchGestureEndState;
+export type TouchGestureObservableConfig = TouchGestureObservable.TouchGestureObservableConfig;
+
+export type KeyboardGestureType = KeyboardGestureObservable.KeyboardGestureType;
+export type KeyboardGestureEvent = KeyboardGestureObservable.KeyboardGestureEvent;
+export type KeyboardGestureState = KeyboardGestureObservable.KeyboardGestureState;
+export type KeyboardGestureEndState = KeyboardGestureObservable.KeyboardGestureEndState;
+export type KeyboardGestureObservableConfig = KeyboardGestureObservable.KeyboardGestureObservableConfig;
 
 /**
  * An event associated with a gesture.
  */
 export type GestureEvent =
-  | Mouse.MouseGestureEvent
-  | Touch.TouchGestureEvent
-  | Keyboard.KeyboardGestureEvent
-  | Wheel.WheelGestureEvent
-  | Wheel.GestureEndEvent;
+  | MouseGestureEvent
+  | TouchGestureEvent
+  | KeyboardGestureEvent
+  | WheelGestureEvent
+  | GestureEndEvent;
 
 /**
  * An event type associated with a gesture.
  */
 export type GestureType =
-  | Mouse.MouseGestureType
-  | Touch.TouchGestureType
-  | Keyboard.KeyboardGestureType
-  | Wheel.WheelGestureType;
+  | MouseGestureType
+  | TouchGestureType
+  | KeyboardGestureType
+  | WheelGestureType;
 
 /**
  * A snapshot of a previous or in-progress gesture.
  */
 export type GestureState =
-  | Mouse.MouseGestureState
-  | Touch.TouchGestureState
-  | Keyboard.KeyboardGestureState
-  | Wheel.WheelGestureState;
+  | MouseGestureState
+  | MouseGestureEndState
+  | TouchGestureState
+  | TouchGestureEndState
+  | KeyboardGestureState
+  | KeyboardGestureEndState
+  | WheelGestureState
+  | WheelGestureEndState;
 
 interface GestureSourceConfig {
   /** Whether or not to observe keyboard gestures. Defaults to `true`. */
@@ -82,22 +100,22 @@ interface GestureSourceConfig {
 }
 
 type MouseEnabledConfig = Partial<
-  GestureSourceConfig & Mouse.MouseGestureObservableConfig
+  GestureSourceConfig & MouseGestureObservableConfig
 > & {
   mouse: true;
 };
 type TouchEnabledConfig = Partial<
-  GestureSourceConfig & Touch.TouchGestureObservableConfig
+  GestureSourceConfig & TouchGestureObservableConfig
 > & {
   touch: true;
 };
 type KeyboardEnabledConfig = Partial<
-  GestureSourceConfig & Keyboard.KeyboardGestureObservableConfig
+  GestureSourceConfig & KeyboardGestureObservableConfig
 > & {
   keyboard: true;
 };
 type WheelEnabledConfig = Partial<
-  GestureSourceConfig & Wheel.WheelGestureObservableConfig
+  GestureSourceConfig & WheelGestureObservableConfig
 > & {
   wheel: true;
 };
@@ -120,7 +138,7 @@ const DEFAULT_CONFIG: GestureObservableConfig = {
   wheel: true,
 };
 
-function parseConfig(
+export function parseConfig(
   config?: GestureObservableConfig | null,
 ): GestureObservableConfig {
   if (!config) {
@@ -159,16 +177,16 @@ export function create(
 
   const sources = [];
   if (config.mouse) {
-    sources.push(Mouse.createSource(element, config));
+    sources.push(MouseGestureObservable.createSource(element, config));
   }
   if (config.touch) {
-    sources.push(Touch.createSource(element, config));
+    sources.push(TouchGestureObservable.createSource(element, config));
   }
   if (config.wheel) {
-    sources.push(Wheel.createSource(element, config));
+    sources.push(WheelGestureObservable.createSource(element, config));
   }
   if (config.keyboard) {
-    sources.push(Keyboard.createSource(element, config));
+    sources.push(KeyboardGestureObservable.createSource(element, config));
   }
 
   const gestureState = merge(...sources);

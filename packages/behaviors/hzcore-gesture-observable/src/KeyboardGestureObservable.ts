@@ -118,10 +118,7 @@ function getNearestFocusableNode(node: Node | null): Node {
  */
 export type KeyboardGestureType = typeof KEY_DOWN | typeof KEY_UP;
 
-/**
- * A snapshot of a previous or in-progress keyboard gesture.
- */
-export interface KeyboardGestureState {
+interface KeyboardGestureBaseState {
   /** The latest x position for the gesture. */
   x: number;
   /** The latest y position for the gesture. */
@@ -142,17 +139,37 @@ export interface KeyboardGestureState {
   xVelocity: number;
   /** The latest velocity of the gesture in the y dimension. */
   yVelocity: number;
-  /** Whether or not a gesture is ongoing. */
-  gesturing: boolean;
   /** The key that triggered the gesture. */
   key: MembersOf<typeof CODES> | null;
   /** Whether or not the key that triggered the gesture is repeating. */
   repeat: boolean | null;
+  /** Whether or not a gesture is ongoing. */
+  gesturing: boolean;
   /** The type of event last associated with a gesture. */
   type: KeyboardGestureType | null;
 }
 
-const DEFAULT_INITIAL_STATE: KeyboardGestureState = {
+/**
+ * A snapshot of an in-progress keyboard gesture.
+ */
+export interface KeyboardGestureState extends KeyboardGestureBaseState {
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: typeof KEY_DOWN;
+}
+
+/**
+ * The last snapshot of a completed keyboard gesture.
+ */
+export interface KeyboardGestureEndState extends KeyboardGestureBaseState {
+  /** Indicates a gesture is no longer ongoing. */
+  gesturing: false;
+  /** The type of event associated with the end of a gesture. */
+  type: typeof KEY_UP;
+}
+
+const DEFAULT_INITIAL_STATE: KeyboardGestureBaseState = {
   x: 0,
   y: 0,
   xDelta: 0,
@@ -182,30 +199,32 @@ function parseConfig(
 }
 
 function reduceGestureState(
-  state: KeyboardGestureState,
+  state: KeyboardGestureBaseState,
   event: KeyboardGestureEvent,
-): KeyboardGestureState {
-  const nextState = {
-    ...state,
-    type: event.type,
-    key: getKeyCode(event),
-    repeat: event.repeat,
-  };
-
+): KeyboardGestureBaseState | KeyboardGestureState | KeyboardGestureEndState {
   switch (event.type) {
     case KEY_DOWN:
-      nextState.gesturing = true;
-      nextState.xDelta = 0;
-      nextState.yDelta = 0;
-      nextState.xVelocity = 0;
-      nextState.yVelocity = 0;
-      break;
+      return {
+        ...state,
+        gesturing: true,
+        xDelta: 0,
+        yDelta: 0,
+        xVelocity: 0,
+        yVelocity: 0,
+        type: event.type,
+        key: getKeyCode(event),
+        repeat: event.repeat,
+      };
     case KEY_UP:
-      nextState.gesturing = false;
-      break;
+      return {
+        ...state,
+        gesturing: false,
+        type: event.type,
+        key: getKeyCode(event),
+        repeat: event.repeat,
+      };
   }
-  state = nextState;
-  return state;
+  throw new Error(`Could not handle event ${event}`);
 }
 
 /**
@@ -216,7 +235,7 @@ export function createSource(
   element: Element,
   /** Configuration for the keyboard gesture source. */
   config?: Partial<KeyboardGestureObservableConfig> | null,
-): Source<KeyboardGestureState> {
+): Source<KeyboardGestureState | KeyboardGestureEndState> {
   invariant(
     element instanceof Element,
     `An Element is required, but received ${element}`,
@@ -281,8 +300,8 @@ export function create(
   element: Element,
   /** Configuration for the KeyboardGestureObservable. */
   config?: Partial<KeyboardGestureObservableConfig> | null,
-): Observable<KeyboardGestureState> {
+): Observable<KeyboardGestureState | KeyboardGestureEndState> {
   return asObservable(createSource(element, config));
 }
 
-export default {create};
+export default {create, createSource};
