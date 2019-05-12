@@ -1,0 +1,213 @@
+---
+name: useMouseGesture
+menu: Hooks
+route: /use-mouse-gesture
+---
+
+import {Playground, Props} from 'docz';
+import useMouseGesture from './src/useMouseGesture';
+
+# useMouseGesture
+
+A React [hook] for components that want to handle mouse gesture intent.
+
+## Installation
+
+```shell
+yarn add @hzcore/gesture-catcher
+```
+
+## Usage
+
+```
+import {useMouseGesture} from '@hzcore/gesture-catcher';
+```
+
+### Signature
+
+```ts
+function useMouseGesture(
+  handler: MouseGestureChangeHandler | MouseGestureHandlers,
+  config?: MouseGestureConfig | null,
+): (node: HTMLElement | null) => void;
+```
+
+### handler `handler: MouseGestureChangeHandler | MouseGestureHandlers,`
+
+A function to handle mouse gesture updates, or a configuration of handlers,
+like `{onStart?, onMove?, onEnd?}`.
+
+See [MouseGestureChangeHandler], [MouseGestureHandlers],
+[MouseGestureState], and [MouseGestureEndState] for more.
+
+### config `config?: MouseGestureConfig | null,`
+
+An optional object describing how to configure mouse gesture detection.
+
+See [MouseGestureConfig] for more.
+
+### returns `(node: HTMLElement | null) => void`
+
+A [callback ref] that should be passed to an underlying DOM node.
+
+## MouseGestureChangeHandler
+
+A function that handles changes to an ongoing or finished mouse gesture.
+Receives [MouseGestureState] or [MouseGestureEndState] objects.
+
+```ts
+type MouseGestureChangeHandler = (
+  state: MouseGestureState | MouseGestureEndState,
+) => void;
+```
+
+## MouseGestureHandlers
+
+An object with optional `onStart`, `onMove`, and/or `onEnd` methods.
+If defined, `onStart` and `onMove` will recieve [MouseGestureState] objects,
+while `onEnd` will receive [MouseGestureEndState] objects.
+
+```ts
+interface MouseGestureHandlers {
+  onStart?: (state: MouseGestureState) => void;
+  onMove?: (state: MouseGestureState) => void;
+  onEnd?: (state: MouseGestureEndState) => void;
+}
+```
+
+## MouseGestureConfig
+
+An object describing configuration for observing mouse gestures.
+This is optionally provided to [useMouseGesture].
+
+```ts
+interface MouseGestureConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `mousemove` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to mouse events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+  /**
+   * An optional ref object or callback ref.
+   * Useful when the component needs to handle ref forwarding.
+   */
+  ref?: InnerRef<HTMLElement> | null
+```
+
+## MouseGestureState
+
+An object describing the latest state of an ongoing mouse gesture.
+
+It is passed to the [MouseGestureChangeHandler]
+or `onStart` and `onMove` [MouseGestureHandlers] provided to [useMouseGesture].
+
+```ts
+interface MouseGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'mousedown' | 'mousemove';
+}
+```
+
+## MouseGestureEndState
+
+An object describing the last state of a previous mouse gesture.
+
+It is passed to the [MouseGestureChangeHandler]
+or `onEnd` [MouseGestureHandlers] provided to [useMouseGesture].
+
+```ts
+interface MouseGestureEndState extends MouseGestureState {
+  /** Indicates a gesture is complete */
+  gesturing: false;
+  /** The type of event associated with the end of the gesture. */
+  type: 'mouseup';
+}
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const MouseGestureUser = () => {
+      const [gesture, setGesture] = React.useState('clicky draggy!');
+      const config = React.useMemo(() => ({preventDefault: true}), []);
+      const ref = useMouseGesture(setGesture, config);
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(gesture, null, 2)}
+        </div>
+      );
+    };
+    return <MouseGestureUser />;
+  }}
+</Playground>
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useMouseGesture` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useMouseGesture`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value.
+  const ref = useMouseGesture(setGesture, {ref: forwardedRef});
+  // Note that we actually pass `ref` to the underlying component,
+  // not `forwardedRef`. We do this to make sure that
+  // `useMouseGesture` is notified when the ref value changes.
+  // This works because we passed `forwardedRef` to `useGesture`,
+  // which will update the `forwardedRef` automatically.
+  return <div ref={ref}>{JSON.stringify(gesture, null, 2)}</div>;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[usemousegesture]: #usage
+[mousegesturechangehandler]: #mousegesturechangehandler
+[mousegesturehandlers]: #mousegesturehandlers
+[mousegestureconfig]: #mousegestureconfig
+[mousegesturestate]: #mousegesturestate
+[mousegestureendstate]: #mousegestureendstate
