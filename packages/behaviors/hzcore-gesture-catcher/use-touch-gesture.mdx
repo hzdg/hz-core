@@ -1,0 +1,216 @@
+---
+name: useTouchGesture
+menu: Hooks
+route: /use-touch-gesture
+---
+
+import {Playground, Props} from 'docz';
+import useTouchGesture from './src/useTouchGesture';
+
+# useTouchGesture
+
+A React [hook] for components that want to handle touch gesture intent.
+
+## Installation
+
+```shell
+yarn add @hzcore/gesture-catcher
+```
+
+## Usage
+
+```
+import {useTouchGesture} from '@hzcore/gesture-catcher';
+```
+
+### Signature
+
+```ts
+function useTouchGesture(
+  handler: TouchGestureChangeHandler | TouchGestureHandlers,
+  config?: TouchGestureConfig | null,
+): (node: HTMLElement | null) => void;
+```
+
+### handler `handler: TouchGestureChangeHandler | TouchGestureHandlers,`
+
+A function to handle touch gesture updates, or a configuration of handlers,
+like `{onStart?, onMove?, onEnd?}`.
+
+See [TouchGestureChangeHandler], [TouchGestureHandlers],
+[TouchGestureState], and [TouchGestureEndState] for more.
+
+### config `config?: TouchGestureConfig | null,`
+
+An optional object describing how to configure touch gesture detection.
+
+See [TouchGestureConfig] for more.
+
+### returns `(node: HTMLElement | null) => void`
+
+A [callback ref] that should be passed to an underlying DOM node.
+
+## TouchGestureChangeHandler
+
+A function that handles changes to an ongoing or finished touch gesture.
+Receives [TouchGestureState] or [TouchGestureEndState] objects.
+
+```ts
+type TouchGestureChangeHandler = (
+  state: TouchGestureState | TouchGestureEndState,
+) => void;
+```
+
+## TouchGestureHandlers
+
+An object with optional `onStart`, `onMove`, and/or `onEnd` methods.
+If defined, `onStart` and `onMove` will recieve [TouchGestureState] objects,
+while `onEnd` will receive [TouchGestureEndState] objects.
+
+```ts
+interface TouchGestureHandlers {
+  onStart?: (state: TouchGestureState) => void;
+  onMove?: (state: TouchGestureState) => void;
+  onEnd?: (state: TouchGestureEndState) => void;
+}
+```
+
+## TouchGestureConfig
+
+An object describing configuration for observing touch gestures.
+This is optionally provided to [useTouchGesture].
+
+```ts
+interface TouchGestureConfig {
+  /**
+   * Whether or not to prevent the default action
+   * for `touchmove` events during a gesture.
+   */
+  preventDefault: boolean;
+  /**
+   * Whether or not to listen to touch events passively.
+   * If `true`, then `preventDefault` will have no effect.
+   */
+  passive: boolean;
+  /**
+   * An optional ref object or callback ref.
+   * Useful when the component needs to handle ref forwarding.
+   */
+  ref?: InnerRef<HTMLElement> | null
+```
+
+## TouchGestureState
+
+An object describing the latest state of an ongoing touch gesture.
+
+It is passed to the [TouchGestureChangeHandler]
+or `onStart` and `onMove` [TouchGestureHandlers] provided to [useTouchGesture].
+
+```ts
+interface TouchGestureState {
+  /** The latest x position for the gesture. */
+  x: number;
+  /** The latest y position for the gesture. */
+  y: number;
+  /** The cumulative change of the gesture in the x dimension. */
+  xDelta: number;
+  /** The cumulative change of the gesture in the y dimension. */
+  yDelta: number;
+  /** The initial x position for the gesture. */
+  xInitial: number;
+  /** The initial y position for the gesture. */
+  yInitial: number;
+  /** The previous x position for the gesture. */
+  xPrev: number;
+  /** The previous y position for the gesture. */
+  yPrev: number;
+  /** The latest velocity of the gesture in the x dimension. */
+  xVelocity: number;
+  /** The latest velocity of the gesture in the y dimension. */
+  yVelocity: number;
+  /** Indicates a gesture is ongoing. */
+  gesturing: true;
+  /** The type of event associated with the gesture. */
+  type: 'touchstart' | 'touchmove';
+}
+```
+
+## TouchGestureEndState
+
+An object describing the last state of a previous touch gesture.
+
+It is passed to the [TouchGestureChangeHandler]
+or `onEnd` [TouchGestureHandlers] provided to [useTouchGesture].
+
+```ts
+interface TouchGestureEndState extends TouchGestureState {
+  /** Indicates a gesture is complete */
+  gesturing: false;
+  /** The type of event associated with the end of the gesture. */
+  type: 'touchend';
+}
+```
+
+## Example
+
+> Use a touch-enabled device or [touch emulation] to see the below example!
+
+<Playground>
+  {() => {
+    const TouchGestureUser = () => {
+      const [gesture, setGesture] = React.useState('touchy draggy!');
+      const config = React.useMemo(() => ({preventDefault: true}), []);
+      const ref = useTouchGesture(setGesture, config);
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(gesture, null, 2)}
+        </div>
+      );
+    };
+    return <TouchGestureUser />;
+  }}
+</Playground>
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useTouchGesture` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useTouchGesture`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value.
+  const ref = useTouchGesture(setGesture, {ref: forwardedRef});
+  // Note that we actually pass `ref` to the underlying component,
+  // not `forwardedRef`. We do this to make sure that
+  // `useTouchGesture` is notified when the ref value changes.
+  // This works because we passed `forwardedRef` to `useGesture`,
+  // which will update the `forwardedRef` automatically.
+  return <div ref={ref}>{JSON.stringify(gesture, null, 2)}</div>;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[touch emulation]: https://developers.google.com/web/tools/chrome-devtools/device-mode/
+[usetouchgesture]: #usage
+[touchgesturechangehandler]: #touchgesturechangehandler
+[touchgesturehandlers]: #touchgesturehandlers
+[touchgestureconfig]: #touchgestureconfig
+[touchgesturestate]: #touchgesturestate
+[touchgestureendstate]: #touchgestureendstate
