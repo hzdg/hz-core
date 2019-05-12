@@ -305,7 +305,7 @@ export function createSource(
   let resetTimeout: NodeJS.Timeout | null = null;
 
   let {threshold = GESTURE_THRESHOLD, passive} = parseConfig(config);
-  if (threshold === false) {
+  if (!threshold) {
     threshold = 0;
   }
 
@@ -368,16 +368,19 @@ export function createSource(
     accX += event.deltaX;
     accY += event.deltaY;
 
-    if (threshold && Math.max(Math.abs(accX), Math.abs(accY)) >= threshold) {
+    if (Math.max(Math.abs(accX), Math.abs(accY)) >= threshold) {
       // If we have a defined gesture threshold,
       // and the accumulated magnitude is above the threshold,
       // declare a gesture intent.
       intent = direction(accX, accY);
     }
 
-    // Schedule an end event.
-    endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
-    return true;
+    if (intent) {
+      // Schedule an end event.
+      endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
+      return true;
+    }
+    return false;
   };
 
   return share(
