@@ -1,0 +1,234 @@
+---
+name: useGesture
+menu: Hooks
+route: /use-gesture
+---
+
+import {Playground, Props} from 'docz';
+import useGesture from './src/useGesture';
+
+# useGesture
+
+A React [hook] for components that want to handle gesture intent.
+
+> This hook is a 'merge' of the separate input-specific gesture hooks.
+>
+> If you are only looking to handle one or a few input sources, see:
+>
+> - [useMouseGesture]
+> - [useWheelGesture]
+> - [useTouchGesture]
+> - [useKeyboardGesture]
+
+## Installation
+
+```shell
+yarn add @hzcore/gesture-catcher
+```
+
+## Usage
+
+```
+import {useGesture} from '@hzcore/gesture-catcher';
+```
+
+### Signature
+
+```ts
+function useGesture(
+  handler: GestureChangeHandler | GestureHandlers,
+  config?: GestureConfig | null,
+): (node: HTMLElement | null) => void;
+```
+
+### handler `handler: GestureChangeHandler | GestureHandlers,`
+
+A function to handle gesture updates, or a configuration of handlers,
+like `{onStart?, onMove?, onEnd?}`.
+
+See [GestureChangeHandler], [GestureHandlers],
+[GestureState], and [GestureEndState] for more.
+
+### config `config?: GestureConfig | null,`
+
+An optional object describing how to configure mouse gesture detection.
+
+See [GestureConfig] for more.
+
+### returns `(node: HTMLElement | null) => void`
+
+A [callback ref] that should be passed to an underlying DOM node.
+
+## GestureChangeHandler
+
+A function that handles changes to an ongoing or finished gesture.
+Receives [GestureState] or [GestureEndState] objects.
+
+```ts
+type GestureChangeHandler = (state: GestureState | GestureEndState) => void;
+```
+
+## GestureHandlers
+
+An object with optional `onStart`, `onMove`, and/or `onEnd` methods.
+If defined, `onStart` and `onMove` will recieve [GestureState] objects,
+while `onEnd` will receive [GestureEndState] objects.
+
+```ts
+interface GestureHandlers {
+  onStart?: (state: GestureState) => void;
+  onMove?: (state: GestureState) => void;
+  onEnd?: (state: GestureEndState) => void;
+}
+```
+
+## GestureConfig
+
+An object describing configuration for observing gestures.
+This is optionally provided to [useGesture].
+
+This is an [intersection] of the configuration shapes
+for the separate input-specific hooks.
+
+For specifics on configuration for inputs, see:
+
+- [MouseGestureConfig]
+- [TouchGestureConfig]
+- [WheelGestureConfig]
+- [KeyboardGestureConfig]
+
+```ts
+type GestureConfig = MouseGestureConfig &
+  WheelGestureConfig &
+  TouchGestureConfig &
+  KeyboardGestureConfig;
+```
+
+## GestureState
+
+An object describing the latest state of an ongoing gesture.
+
+It is passed to the [GestureChangeHandler]
+or `onStart` and `onMove` [GestureHandlers] provided to [useGesture].
+
+This is a [union] of the input-specific gesture states.
+
+For specifics on input states, see:
+
+- [MouseGestureState]
+- [TouchGestureState]
+- [WheelGestureState]
+- [KeyboardGestureState]
+
+```ts
+type GestureState =
+  | MouseGestureState
+  | TouchGestureState
+  | WheelGestureState
+  | KeyboardGestureState;
+```
+
+## GestureEndState
+
+An object describing the last state of a previous gesture.
+
+It is passed to the [GestureChangeHandler]
+or `onEnd` [GestureHandlers] provided to [useGesture].
+
+This is a [union] of the input-specific gesture end states.
+
+For specifics on input end states, see:
+
+- [MouseGestureEndState]
+- [TouchGestureEndState]
+- [WheelGestureEndState]
+- [KeyboardGestureEndState]
+
+```ts
+type GestureEndState =
+  | MouseGestureEndState
+  | TouchGestureEndState
+  | WheelGestureEndState
+  | KeyboardGestureEndState;
+```
+
+## Example
+
+<Playground>
+  {() => {
+    const GestureUser = () => {
+      const [gesture, setGesture] = React.useState(
+        'try mouse dragging, touch dragging, wheel or touchpad, or arrow keys!',
+      );
+      const config = React.useMemo(() => ({preventDefault: true}), []);
+      const ref = useGesture(setGesture, config);
+      return (
+        <div
+          ref={ref}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            width: '100%',
+            height: 250,
+            fontSize: '2em',
+          }}
+        >
+          {JSON.stringify(gesture, null, 2)}
+        </div>
+      );
+    };
+    return <GestureUser />;
+  }}
+</Playground>
+
+## Usage with Ref Forwarding
+
+Sometimes a component needs to [forward a ref] to its children.
+To support this case, `useGesture` accepts an optional ref argument:
+
+```js
+const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
+  // We pass `forwardedRef` (which may be a ref object or a callack ref)
+  // to `useGesture`. Note that the returned `ref` will _not_ be
+  // the same as `forwardedRef`, but they _will_ get the same value.
+  const ref = useGesture(setGesture, {ref: forwardedRef});
+  // Note that we actually pass `ref` to the underlying component,
+  // not `forwardedRef`. We do this to make sure that
+  // `useGesture` is notified when the ref value changes.
+  // This works because we passed `forwardedRef` to `useGesture`,
+  // which will update the `forwardedRef` automatically.
+  return <div ref={ref}>{JSON.stringify(gesture, null, 2)}</div>;
+});
+```
+
+[hook]: https://reactjs.org/docs/hooks-overview.html
+[ref]: https://reactjs.org/docs/refs-and-the-dom.html
+[useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[union]: https://www.typescriptlang.org/docs/handbook/advanced-types.html#union-types
+[intersection]: https://www.typescriptlang.org/docs/handbook/advanced-types.html#intersection-types
+[usegesture]: #usage
+[gesturechangehandler]: #gesturechangehandler
+[gesturehandlers]: #gesturehandlers
+[gestureconfig]: #gestureconfig
+[gesturestate]: #gesturestate
+[gestureendstate]: #gestureendstate
+[usemousegesture]: /use-mouse-gesture
+[usewheelgesture]: /use-wheel-gesture
+[usetouchgesture]: /use-touch-gesture
+[usekeyboardgesture]: /use-keyboard-gesture
+[mousegesturestate]: /use-mouse-gesture#mousegesturestate
+[touchgesturestate]: /use-touch-gesture#touchgesturestate
+[wheelgesturestate]: /use-wheel-gesture#wheelgesturestate
+[keyboardgesturestate]: /use-keyboard-gesture#keyboardgesturestate
+[mousegestureendstate]: /use-mouse-gesture#mousegestureendstate
+[touchgestureendstate]: /use-touch-gesture#touchgestureendstate
+[wheelgestureendstate]: /use-wheel-gesture#wheelgestureendstate
+[keyboardgestureendstate]: /use-keyboard-gesture#keyboardgestureendstate
+[mousegestureconfig]: /use-mouse-gesture#mousegestureconfig
+[touchgestureconfig]: /use-touch-gesture#touchgestureconfig
+[wheelgestureconfig]: /use-wheel-gesture#wheelgestureconfig
+[keyboardgestureconfig]: /use-keyboard-gesture#keyboardgestureconfig
