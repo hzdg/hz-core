@@ -3,7 +3,7 @@
   "version": "0.1.6",
   "main": "cjs/index.js",
   "module": "es/index.js",
-  "typings": "src/index.tsx",
+  "typings": "src/index.ts",
   "license": "MIT",
   "publishConfig": {
     "registry": "http://npmregistry.hzdg.com"

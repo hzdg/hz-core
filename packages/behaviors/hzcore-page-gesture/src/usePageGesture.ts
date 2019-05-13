@@ -1,7 +1,6 @@
 import {useCallback, useRef, useMemo} from 'react';
 
 const GESTURE_THRESHOLD = 50;
-const UNKNOWN = 'UNKNOWN';
 const LEFT = 'LEFT';
 const RIGHT = 'RIGHT';
 const UP = 'UP';
@@ -19,6 +18,9 @@ export const ARROW_UP = 'ArrowUp';
 export const ARROW_RIGHT = 'ArrowRight';
 export const ARROW_DOWN = 'ArrowDown';
 
+/**
+ * Possible key presses that might be mapped to pagination actions.
+ */
 export type GestureKey =
   | typeof SPACE
   | typeof PAGE_UP
@@ -34,33 +36,58 @@ export type GestureKey =
 export const HORIZONTAL = 'horizontal';
 export const VERTICAL = 'vertical';
 
+/**
+ * Possible orientations for pagination g
+ */
+export type Orientation = typeof VERTICAL | typeof HORIZONTAL;
+
 // Pagination actions
 export const NEXT = 'next';
 export const PREVIOUS = 'previous';
 export const FIRST = 'first';
 export const LAST = 'last';
 export const CANCELED = 'canceled';
+export const UNKNOWN = 'unknown';
 
+/**
+ * Possible pagination actions that might be assigned to gestures.
+ */
 export type PaginationAction =
   | typeof NEXT
   | typeof PREVIOUS
   | typeof FIRST
   | typeof LAST
-  | typeof CANCELED;
+  | typeof CANCELED
+  | typeof UNKNOWN;
 
+/**
+ * Possible 'intentions' that might assigned to an ongoing gesture.
+ * These may be mapped to pagination actions after a gesture has completed.
+ */
 type GestureIntent =
   | GestureKey
   | GestureDirection
   | typeof UNKNOWN
   | typeof CANCELED;
 
+/**
+ * Determine a pagination action to assign to a completed gesture
+ * based on the orientation and the determined 'intent' of the gesture.
+ */
 function getAction(
-  orientation: typeof HORIZONTAL | typeof VERTICAL,
-  gestureState: GestureIntent | null,
+  /**
+   * The orientation of the pages.
+   */
+  orientation: Orientation,
+  /**
+   * The 'intent' of the gesture, as calculated from the input states
+   * passed to the page gesture callback.
+   */
+  gestureIntent: GestureIntent | null,
 ): PaginationAction {
   switch (orientation) {
     case HORIZONTAL: {
-      switch (gestureState) {
+      switch (gestureIntent) {
         case LEFT:
         case ARROW_RIGHT:
           return NEXT;
@@ -75,7 +102,7 @@ function getAction(
       break;
     }
     case VERTICAL: {
-      switch (gestureState) {
+      switch (gestureIntent) {
         case UP:
         case ARROW_DOWN:
         case PAGE_DOWN:
@@ -96,42 +123,95 @@ function getAction(
   return CANCELED;
 }
 
-export type Orientation = typeof VERTICAL | typeof HORIZONTAL;
-
+/**
+ * Configuration for page gestures.
+ */
 export interface PageGestureConfig {
-  orientation?: typeof VERTICAL | typeof HORIZONTAL;
+  /**
+   * The axis along which pagination gestures should be detected.
+   * Either `vertical` or `horizontal`.
+   *
+   * Defaults to `horizontal` (x-axis).
+   */
+  orientation?: Orientation;
+  /**
+   * How far a gesture must have cumulatively moved in a direction along the
+   * axis of orientation in order to be assigned a pagination intent.
+   * This value is an absolute distance.
+   *
+   * Defaults to 50.
+   */
   threshold?: number;
 }
 
+/**
+ * A callback for when pagination state changes.
+ * Receives a pagination action.
+ */
 export type PaginationChangeHandler = (action: PaginationAction) => void;
 
+/**
+ * A configuration of pagination handlers, like
+ * `{onNext?, onPrevious?, onFirst?, onLast?}`.
+ */
 export interface PaginationHandlers {
+  /**
+   * A callback for when a NEXT pagination action occurs.
+   */
   onNext?: () => void;
+  /**
+   * A callback for when a PREVIOUS pagination action occurs.
+   */
   onPrevious?: () => void;
+  /**
+   * A callback for when a FIRST pagination action occurs.
+   */
   onFirst?: () => void;
+  /**
+   * A callback for when a LAST pagination action occurs.
+   */
   onLast?: () => void;
 }
 
+/**
+ * An input that looks like a key press.
+ */
 export interface KeyGestureLike {
   key: GestureKey;
   gesturing: boolean;
 }
 
+/**
+ * An input that looks like a horizontal swipe or drag.
+ */
 export interface HorizontalGestureLike {
   xDelta: number;
   gesturing: boolean;
 }
 
+/**
+ * An input that looks like a vertical swipe or drag.
+ */
 export interface VerticalGestureLike {
   yDelta: number;
   gesturing: boolean;
 }
 
+/**
+ * An input that looks like either a swipe or drag, or a key press.
+ */
 export type GestureLike =
   | KeyGestureLike
   | HorizontalGestureLike
   | VerticalGestureLike;
 
+/**
+ * A callback for determining pagination intent
+ * from a 'gesture-like' input.
+ *
+ * Pass this callback input state, i.e.,
+ * from a gesture hook like `useMouseGesture`.
+ */
 export interface FromInputState {
   (state: GestureLike): void;
 }
