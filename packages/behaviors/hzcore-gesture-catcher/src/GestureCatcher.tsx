@@ -143,6 +143,8 @@ function useConfigFor(
   }, [disabled, preventDefault, passive, config, shouldUse]);
 }
 
+export {useConfigFor};
+
 /**
  * A React component for monitoring and interacting with gestures.
  *
