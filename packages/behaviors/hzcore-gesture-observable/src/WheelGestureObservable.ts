@@ -260,23 +260,41 @@ function reduceGestureState(
 ): WheelGestureBaseState | WheelGestureState | WheelGestureEndState {
   switch (event.type) {
     case WHEEL:
-      return {
-        ...state,
-        x: 'clientX' in event ? event.clientX : state.x,
-        y: 'clientY' in event ? event.clientY : state.y,
-        xInitial: event.clientX || event.originalEvent.clientX,
-        yInitial: event.clientY || event.originalEvent.clientY,
-        xPrev: event.clientX || event.originalEvent.clientX,
-        yPrev: event.clientY || event.originalEvent.clientY,
-        xDelta: state.xDelta - event.deltaX,
-        yDelta: state.yDelta - event.deltaY,
-        xSpin: state.xSpin + event.spinX,
-        ySpin: state.ySpin + event.spinY,
-        xVelocity: event.deltaX ? -event.deltaX : 0,
-        yVelocity: event.deltaY ? -event.deltaY : 0,
-        gesturing: true,
-        type: event.type,
-      };
+      if (state.gesturing) {
+        return {
+          ...state,
+          x: event.clientX || event.originalEvent.clientX || state.x,
+          y: event.clientY || event.originalEvent.clientY || state.y,
+          xPrev: state.x,
+          yPrev: state.y,
+          xDelta: state.xDelta - event.deltaX,
+          yDelta: state.yDelta - event.deltaY,
+          xSpin: state.xSpin + event.spinX,
+          ySpin: state.ySpin + event.spinY,
+          xVelocity: -event.deltaX,
+          yVelocity: -event.deltaY,
+          gesturing: true,
+          type: event.type,
+        };
+      } else {
+        return {
+          ...state,
+          x: event.clientX || event.originalEvent.clientX || 0,
+          y: event.clientY || event.originalEvent.clientY || 0,
+          xInitial: event.clientX || event.originalEvent.clientX || 0,
+          yInitial: event.clientY || event.originalEvent.clientY || 0,
+          xPrev: event.clientX || event.originalEvent.clientX || 0,
+          yPrev: event.clientY || event.originalEvent.clientY || 0,
+          xDelta: event.deltaX,
+          yDelta: event.deltaY,
+          xSpin: event.spinX,
+          ySpin: event.spinY,
+          xVelocity: event.deltaX ? -event.deltaX : 0,
+          yVelocity: event.deltaY ? -event.deltaY : 0,
+          gesturing: true,
+          type: event.type,
+        };
+      }
     case GESTURE_END:
       return {
         ...state,
