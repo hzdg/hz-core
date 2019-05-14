@@ -1,7 +1,7 @@
 declare module 'lethargy' {
-  type ScrollUp = 1;
-  type ScrollDown = -1;
-  type ScrollDirection = ScrollUp | ScrollDown;
+  export type ScrollUp = 1;
+  export type ScrollDown = -1;
+  export type ScrollDirection = ScrollUp | ScrollDown;
 
   /**
    * Lethargy is a tiny JavaScript library to help
@@ -10,7 +10,7 @@ declare module 'lethargy' {
    *
    * See https://github.com/d4nyll/lethargy for more.
    */
-  class Lethargy {
+  export class Lethargy {
     constructor(
       /**
        * Specifies the length of the rolling average.
@@ -37,7 +37,7 @@ declare module 'lethargy' {
        * Valid values are decimals from 0, but should ideally be
        * between 0.05 and 0.3.
        *
-       * Default is `1.1`.
+       * Default is `0.1`.
        */
       tolerance?: number,
       /**

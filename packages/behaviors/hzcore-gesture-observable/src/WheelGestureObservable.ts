@@ -319,86 +319,59 @@ export function createSource(
     `An Element is required, but received ${element}`,
   );
 
-  let endTimeout: NodeJS.Timeout | null = null;
-  let resetTimeout: NodeJS.Timeout | null = null;
-
   let {threshold = GESTURE_THRESHOLD, passive} = parseConfig(config);
   if (!threshold) {
     threshold = 0;
   }
 
-  let lethargy = new Lethargy();
   let intent:
     | false
     | typeof DOWN
     | typeof UP
     | typeof LEFT
     | typeof RIGHT = false;
+  let endTimeout: NodeJS.Timeout | null = null;
+  let gesturing = false;
   let accX = 0;
   let accY = 0;
 
-  const reset = (): void => {
+  const endEvents = createSubject<GestureEndEvent>();
+  const lethargy = new Lethargy(8, threshold, 0.1, GESTURE_END_TIMEOUT);
+
+  const gestureEnd = (): void => {
+    if (endTimeout) {
+      clearTimeout(endTimeout);
+      endTimeout = null;
+    }
     accX = 0;
     accY = 0;
     intent = false;
-    lethargy = new Lethargy();
-  };
-
-  const endEvents = createSubject<GestureEndEvent>();
-
-  const gestureEnd = (): void => {
+    gesturing = false;
     endEvents(1, {type: GESTURE_END});
   };
 
   const filterEvents = (event: WheelGestureEvent): boolean => {
-    // We're seeing a wheel event, so debounce the state reset,
-    // in case it's part of an ongoing gesture.
-    if (resetTimeout) clearTimeout(resetTimeout);
-    resetTimeout = setTimeout(reset, GESTURE_END_TIMEOUT);
-
-    let intentional = Boolean(lethargy.check(event.originalEvent));
-
-    // If we've already identified a gesture intent,
-    // check to see if this event indicates a new intention.
-    if (intent && !intentional) {
-      // If the direction of this event is not the same
-      // as the previously identified intent,
-      // assume it is intentional.
-      intentional = intent !== direction(event.deltaX, event.deltaY);
-
-      if (intentional) {
-        // This event appears to be intentional,
-        // but we've already identified an intended gesture,
-        // so reset the gesture state to try and figure out
-        // the new intention.
-        reset();
-      } else {
-        // This event probably isn't intentional
-        // (i.e., trackpad inertia), so ignore it.
-        return false;
-      }
+    // Assume we're gesturing if this wheel event seems intentional
+    // (as opposed to inertial).
+    gesturing = Boolean(lethargy.check(event.originalEvent));
+    if (!gesturing && intent) {
+      // If we aren't gesturing, but we have an assigned gesture intent,
+      // Check if the intent has changed.
+      // If it has, assume we're still gesturing.
+      gesturing =
+        intent !== direction(accX + event.deltaX, accY + event.deltaY);
     }
-
-    // We're still gesturing, so debounce the end event.
-    if (endTimeout) clearTimeout(endTimeout);
-
-    // Update state with the event deltas.
-    accX += event.deltaX;
-    accY += event.deltaY;
-
-    if (Math.max(Math.abs(accX), Math.abs(accY)) >= threshold) {
-      // If we have a defined gesture threshold,
-      // and the accumulated magnitude is above the threshold,
-      // declare a gesture intent.
+    if (gesturing) {
+      // We're gesturing, so assign an intent for the gesture,
+      // based on the cumulative change of the gesture.
+      accX += event.deltaX;
+      accY += event.deltaY;
       intent = direction(accX, accY);
-    }
-
-    if (intent) {
-      // Schedule an end event.
+      // Debounce the gesture end event.
+      if (endTimeout) clearTimeout(endTimeout);
       endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
-      return true;
     }
-    return false;
+    return gesturing;
   };
 
   return share(
