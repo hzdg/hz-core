@@ -110,7 +110,7 @@ import {
   LAST,
 } from '@hzcore/page-gesture';
 function usePagination(numPages) {
-  const [index, setIndex] = React.useState(0);
+  const [index, setPage] = React.useState(0);
   const handleGesture = usePageGesture(action => {
     switch (action) {
       case NEXT:
@@ -304,67 +304,8 @@ A vertical example using [gesture] detection and [react-spring] transitions.
   {() => {
     const PAGE_SIZE = 500; // Size of a page in px
     const TOTAL_PAGES = 10; // Total number of pages
-    /**
-     * A hook to calculate a y translation for the list of pages.
-     * @param {number} currentIndex - The current page index.
-     * @param {boolean} gesturing - Whether or not some gesture is active.
-     * @return {[transform, handler]} - A tuple of react-spring-animated
-     *         transform and a callback for updating the transform
-     *         based on gesture state.
-     */
-    const useTransform = (currentIndex, gesturing) => {
-      const [transform, setTransform] = useSpring(() => ({
-        config: springConfig.stiff,
-        transform: `translateY(${currentIndex * -PAGE_SIZE}px)`,
-      }));
-      React.useEffect(() => {
-        if (!gesturing) {
-          setTransform({
-            immediate: false,
-            transform: `translateY(${currentIndex * -PAGE_SIZE}px)`,
-          });
-        }
-      }, [currentIndex, gesturing]);
-      const gestureHandler = React.useCallback(
-        gesture => {
-          if (gesture.gesturing) {
-            setTransform({
-              immediate: true,
-              transform: `translateY(${(gesture.yDelta || 0) +
-                currentIndex * -PAGE_SIZE}px)`,
-            });
-          }
-        },
-        [currentIndex],
-      );
-      return [transform, gestureHandler];
-    };
-    /**
-     * A hook for managing pagination.
-     * @param {boolean} gesturing - Whether or not a gesture is active.
-     * @return {[currentIndex, handler]} - A tuple of the current page index
-     *         and a callback for updating the index based on gesture state.
-     */
-    const usePagination = gesturing => {
-      const [currentIndex, setIndex] = React.useState(0);
-      const {paginationConfig, paginationHandlers} = React.useMemo(
-        () => ({
-          paginationConfig: {orientation: VERTICAL},
-          paginationHandlers: {
-            onNext: () => setIndex(i => Math.min(i + 1, TOTAL_PAGES - 1)),
-            onPrevious: () => setIndex(i => Math.max(i - 1, 0)),
-            onFirst: () => setIndex(0),
-            onLast: () => setIndex(TOTAL_PAGES - 1),
-          },
-        }),
-        [],
-      );
-      const gestureHandler = usePageGesture(
-        paginationHandlers,
-        paginationConfig,
-      );
-      return [currentIndex, gestureHandler];
-    };
+    const PAGE_CONFIFG = {orientation: VERTICAL};
+    const GESTURE_CONFIG = {preventDefault: true, threshold: 0};
     /**
      * A Page component.
      * Shows the page number and highlights when active.
@@ -393,19 +334,48 @@ A vertical example using [gesture] detection and [react-spring] transitions.
      * and a react-spring transform to animate page and gesture transitions.
      */
     const PageGestureUser = () => {
-      const [gesturing, setGesturing] = React.useState(false);
-      const [page, setPage] = usePagination(gesturing);
-      const [transform, setTransform] = useTransform(page, gesturing);
+      const page = React.useRef(0);
+      const [, flipUpdateBit] = React.useState(false);
+      const forceUpdate = React.useCallback(() => flipUpdateBit(v => !v), []);
+      const [transform, setTransform] = useSpring(() => ({
+        config: springConfig.stiff,
+        transform: `translateY(${page.current * -PAGE_SIZE}px)`,
+      }));
+      const pageHandler = React.useCallback(
+        action => {
+          switch (action) {
+            case NEXT:
+              page.current = Math.min(TOTAL_PAGES - 1, page.current + 1);
+              break;
+            case PREVIOUS:
+              page.current = Math.max(0, page.current - 1);
+              break;
+            case FIRST:
+              page.current = 0;
+              break;
+            case LAST:
+              page.current = TOTAL_PAGES - 1;
+              break;
+          }
+          setTransform({
+            transform: `translateY(${page.current * -PAGE_SIZE}px)`,
+          });
+          forceUpdate();
+        },
+        [page, setTransform, forceUpdate],
+      );
+      const updatePagination = usePageGesture(pageHandler, PAGE_CONFIFG);
       const gestureHandler = React.useCallback(
         gesture => {
-          setGesturing(gesture.gesturing);
-          setTransform(gesture);
-          setPage(gesture);
+          setTransform({
+            transform: `translateY(${gesture.yDelta +
+              page.current * -PAGE_SIZE}px)`,
+          });
+          updatePagination(gesture);
         },
-        [setTransform, setPage],
+        [page, updatePagination],
       );
-      const gestureConfig = React.useMemo(() => ({preventDefault: true}), []);
-      const ref = useGesture(gestureHandler, gestureConfig);
+      const ref = useGesture(gestureHandler, GESTURE_CONFIG);
       return (
         <div
           tabIndex={1}
@@ -414,7 +384,7 @@ A vertical example using [gesture] detection and [react-spring] transitions.
         >
           <animated.div style={{height: '100%', ...transform}}>
             {Array.apply(null, Array(TOTAL_PAGES)).map((_, i) => (
-              <Page key={i} label={i} active={i === page} />
+              <Page key={i} label={i} active={i === page.current} />
             ))}
           </animated.div>
         </div>
