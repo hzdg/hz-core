@@ -341,7 +341,7 @@ export function createSource(
   let accY = 0;
 
   const endEvents = createSubject<GestureEndEvent>();
-  const lethargy = new Lethargy(8, threshold, 0.1, GESTURE_END_TIMEOUT);
+  const lethargy = new Lethargy(8, threshold, 0, GESTURE_END_TIMEOUT);
 
   const gestureEnd = (): void => {
     if (endTimeout) {
@@ -390,7 +390,7 @@ export function createSource(
     if (shouldPreventDefault(event.originalEvent)) {
       event.originalEvent.preventDefault();
     }
-    return gesturing;
+    return gesturing || Boolean(intent);
   };
 
   return share(
