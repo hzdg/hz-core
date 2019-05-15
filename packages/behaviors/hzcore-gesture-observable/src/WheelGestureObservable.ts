@@ -319,9 +319,14 @@ export function createSource(
     `An Element is required, but received ${element}`,
   );
 
-  let {threshold = GESTURE_THRESHOLD, passive} = parseConfig(config);
+  let {threshold = GESTURE_THRESHOLD, preventDefault, passive} = parseConfig(
+    config,
+  );
   if (!threshold) {
     threshold = 0;
+  }
+  if (!passive && preventDefault) {
+    passive = false;
   }
 
   let intent:
@@ -350,6 +355,17 @@ export function createSource(
     endEvents(1, {type: GESTURE_END});
   };
 
+  const shouldPreventDefault = (event: UnnormalizedWheelEvent): boolean => {
+    return (
+      event instanceof WheelEvent &&
+      event.type === WHEEL &&
+      preventDefault &&
+      !passive &&
+      !event.defaultPrevented &&
+      typeof event.preventDefault === 'function'
+    );
+  };
+
   const filterEvents = (event: WheelGestureEvent): boolean => {
     // Assume we're gesturing if this wheel event seems intentional
     // (as opposed to inertial).
@@ -370,6 +386,9 @@ export function createSource(
       // Debounce the gesture end event.
       if (endTimeout) clearTimeout(endTimeout);
       endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
+    }
+    if (shouldPreventDefault(event.originalEvent)) {
+      event.originalEvent.preventDefault();
     }
     return gesturing;
   };
