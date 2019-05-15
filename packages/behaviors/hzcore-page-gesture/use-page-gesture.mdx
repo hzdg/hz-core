@@ -14,6 +14,7 @@ import {
   LAST,
 } from '@hzcore/page-gesture';
 import {useGesture} from '@hzcore/gesture-catcher';
+import useSize from '@hzcore/hook-size';
 import {useSpring, animated, config as springConfig} from 'react-spring';
 
 # usePageGesture
@@ -298,6 +299,115 @@ interface VerticalGestureLike {
 
 ## Example
 
+A horizontal example using [size] and [gesture] detection
+and [react-spring] transitions.
+
+<Playground>
+  {() => {
+    const PAGE_SIZE = 500; // Size of a page in px
+    const TOTAL_PAGES = 10; // Total number of pages
+    const GESTURE_CONFIG = {preventDefault: true, threshold: 0};
+    /**
+     * A Page component.
+     * Shows the page number and highlights when active.
+     */
+    const Page = ({label, active}) => {
+      const color = useSpring({
+        backgroundColor: active ? 'blue' : 'lightgray',
+        color: active ? 'lightblue' : 'gray',
+      });
+      return (
+        <animated.div
+          style={{
+            display: 'flex',
+            flex: 1,
+            flexBasis: `${100 / TOTAL_PAGES}%`,
+            justifyContent: 'center',
+            alignItems: 'center',
+            ...color,
+          }}
+        >
+          <h1 style={{fontFamily: 'sans-serif', fontSize: '500px'}}>{label}</h1>
+        </animated.div>
+      );
+    };
+    const HorizontalPageGestureUser = () => {
+      const page = React.useRef(0);
+      const pageWidth = React.useRef(0);
+      const [, flipUpdateBit] = React.useState(false);
+      const forceUpdate = React.useCallback(() => flipUpdateBit(v => !v), []);
+      const [pageSize, pageSizeRef] = useSize();
+      pageWidth.current = pageSize.width;
+      const [transform, setTransform] = useSpring(() => ({
+        config: springConfig.stiff,
+        transform: `translateX(${page.current * -pageWidth.current}px)`,
+      }));
+      const pageHandler = React.useCallback(
+        action => {
+          switch (action) {
+            case NEXT:
+              page.current = Math.min(TOTAL_PAGES - 1, page.current + 1);
+              break;
+            case PREVIOUS:
+              page.current = Math.max(0, page.current - 1);
+              break;
+            case FIRST:
+              page.current = 0;
+              break;
+            case LAST:
+              page.current = TOTAL_PAGES - 1;
+              break;
+          }
+          setTransform({
+            transform: `translateX(${page.current * -pageWidth.current}px)`,
+          });
+          forceUpdate();
+        },
+        [page, pageWidth, setTransform, forceUpdate],
+      );
+      const updatePagination = usePageGesture(pageHandler);
+      const handleGesture = React.useCallback(
+        gesture => {
+          setTransform({
+            immediate: gesture.gesturing,
+            transform: `translateX(${gesture.xDelta +
+              page.current * -pageWidth.current}px)`,
+          });
+          updatePagination(gesture);
+        },
+        [updatePagination, setTransform],
+      );
+      const gestureRef = useGesture(handleGesture, GESTURE_CONFIG);
+      return (
+        <div
+          tabIndex={1}
+          ref={pageSizeRef}
+          style={{
+            overflow: 'hidden',
+            width: pageSize.width ? pageSize.width : '100%',
+            height: PAGE_SIZE,
+          }}
+        >
+          <animated.div
+            ref={gestureRef}
+            style={{
+              display: 'flex',
+              width: pageSize.width * TOTAL_PAGES,
+              height: PAGE_SIZE,
+              ...transform,
+            }}
+          >
+            {Array.apply(null, Array(TOTAL_PAGES)).map((_, i) => (
+              <Page key={i} label={i} active={i === page.current} />
+            ))}
+          </animated.div>
+        </div>
+      );
+    };
+    return <HorizontalPageGestureUser />;
+  }}
+</Playground>
+
 A vertical example using [gesture] detection and [react-spring] transitions.
 
 <Playground>
@@ -396,6 +506,7 @@ A vertical example using [gesture] detection and [react-spring] transitions.
 
 [hook]: https://reactjs.org/docs/hooks-overview.html
 [pagination]: https://en.wikipedia.org/wiki/Pagination
+[size]: /use-size
 [gesture]: /use-gesture
 [key presses]: /use-keyboard-gesture
 [keyboard]: /use-keyboard-gesture
