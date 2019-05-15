@@ -16,6 +16,7 @@
     "!*/__test*"
   ],
   "dependencies": {
+    "@babel/runtime": "^7.4.4",
     "callbag": "^1.2.0",
     "callbag-filter": "^1.1.0",
     "callbag-from-event": "^1.2.1",
