@@ -6,6 +6,7 @@ const path = require('path');
 const glob = require('glob');
 const retry = require('async-retry');
 const babel = require('@babel/core');
+const chalk = require('chalk').default;
 // @ts-ignore
 const report = require('yurnalist');
 // @ts-ignore
@@ -14,6 +15,7 @@ const project = require('@lerna/project');
 const rmdir = promisify(require('rimraf'));
 const mkdir = promisify(require('mkdirp'));
 const writeFile = promisify(fs.writeFile);
+const stat = promisify(fs.stat);
 
 const PROJECT_ROOT = process.cwd();
 const SRC_GLOB = '**/*.{ts,tsx,js,jsx}';
@@ -38,6 +40,56 @@ const EXCLUDE_GLOBS = [
  * @property {string} dir
  * @property {string} src
  */
+
+/**
+ * @typedef {Object} BuildOptions
+ * @property {Boolean} [clean]
+ * @property {Boolean} [force]
+ */
+
+class ActivityReporter {
+  /** @param {Activity} activity */
+  constructor(activity) {
+    this._activity = activity;
+  }
+  /**
+   * @param {'built' | 'skipped' | 'cleaned'} result
+   * @param {string} [reason]
+   */
+  _report(result, reason) {
+    if (this._activity._result) {
+      throw new Error(`Activity already ${this._activity._result}`);
+    }
+    this._activity._result = result;
+    if (reason) this._activity._reason = reason;
+  }
+  /** @param {string} [reason] */
+  skip(reason) {
+    this._report('skipped', reason);
+  }
+  /** @param {string} [reason] */
+  build(reason) {
+    this._report('built', reason);
+  }
+  /** @param {string} [reason] */
+  clean(reason) {
+    this._report('cleaned', reason);
+  }
+}
+
+class Activity {
+  /** @param {string} name */
+  constructor(name) {
+    this._name = name;
+    /** @type {'built' | 'skipped' | 'cleaned' | null} */
+    this._result = null;
+    /** @type {string | undefined} */
+    this._reason;
+  }
+  start() {
+    return new ActivityReporter(this);
+  }
+}
 
 /**
  * @param {string} filename
@@ -130,24 +182,97 @@ const buildModules = pkg =>
 
 /**
  * @param {Pkg} pkg
- * @param {Object} activity
+ * @param {string} filename
+ * @param {string} format
+ * @returns {Promise<string | undefined>}
+ */
+const isStale = async (pkg, filename, format) => {
+  const dist = path.join(pkg.dir, format);
+  const basename = path.basename(filename).replace(/\.(?:j|t)sx?$/, '.js');
+  const filepath = path.join(
+    dist,
+    path.dirname(path.relative(pkg.src, filename)),
+    basename,
+  );
+  const srcStat = await stat(filename);
+  const pkgStat = await stat(path.join(pkg.dir, 'package.json'));
+  // Reasons src should be considered stale:
+  try {
+    // ...if it is newer than the output file
+    const destStat = await stat(filepath);
+    if (destStat.mtime <= srcStat.mtime) {
+      return `${path.basename(filepath)} outdated!`;
+    }
+    // ...if the associated package.json is newer than the output file
+    if (destStat.mtime <= pkgStat.mtime) {
+      return `package.json updated!`;
+    }
+  } catch {
+    return `${path.basename(filepath)} missing!`;
+  }
+
+  try {
+    // ...if it is newer than the output sourcemap
+    const mapStat = await stat(`${filepath}.map`);
+    if (mapStat.mtime <= srcStat.mtime) {
+      return `${path.basename(`${filepath}.map`)} outdated!`;
+    }
+    // ...if the associated package.json is newer than the output sourcemap
+    if (mapStat.mtime <= pkgStat.mtime) {
+      return `package.json updated!`;
+    }
+  } catch {
+    return `${path.basename(`${filepath}.map`)} missing!`;
+  }
+
+  // we got this far, so maybe it's safe to assume the build
+  // is up-to-date for this file.
+  return;
+};
+
+/**
+ * @param {Pkg} pkg
+ * @returns {Promise<string | undefined>}
+ */
+const needsBuild = async pkg =>
+  (await Promise.all(
+    glob
+      .sync(path.join(pkg.src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
+      .map(async input =>
+        (await Promise.all([
+          isStale(pkg, input, 'es'),
+          isStale(pkg, input, 'cjs'),
+        ])).find(Boolean),
+      ),
+  )).find(Boolean);
+
+/**
+ * @param {Pkg} pkg
+ * @param {ActivityReporter} activity
+ * @param {boolean} [force]
  * @returns {Promise<void>}
  */
-const buildPackage = async (pkg, activity) => {
+const buildPackage = async (pkg, activity, force) => {
   if (pkg.meta.private) {
-    report.info(`[${pkg.meta.name}] is private! Skipping build step ...`);
+    activity.skip('package is private!');
   } else if (fs.existsSync(pkg.src)) {
-    try {
-      activity.tick(`[${pkg.meta.name}] Building modules ...`);
-      await buildModules(pkg);
-    } catch (error) {
-      report.error(`[${pkg.meta.name}] There was an error!`);
-      throw error;
+    let stale;
+    if (!force) {
+      stale = await needsBuild(pkg);
+    }
+    if (force || stale) {
+      try {
+        await buildModules(pkg);
+      } catch (error) {
+        report.error(`[${pkg.meta.name}] There was an error!`);
+        throw error;
+      }
+      activity.build(!force ? stale : undefined);
+    } else {
+      activity.skip('up to date!');
     }
   } else {
-    report.info(
-      `[${pkg.meta.name}] No src dir found! Assuming no build step ...`,
-    );
+    activity.skip('no src dir found!');
   }
 };
 
@@ -166,36 +291,44 @@ const workspaceToPackage = workspace => {
 
 /**
  * @param {Workspace[]} workspaces
- * @returns {Promise<void>}
+ * @param {boolean} [force]
+ * @returns {Promise<Activity[]>}
  */
-const buildPackages = workspaces =>
+const buildPackages = (workspaces, force) => {
+  /** @type Promise<Activity[]> */
+  let buildQueue = Promise.resolve([]);
+  const tick = report.progress(workspaces.length);
   // Queue up a package build for each workspace.
-  workspaces.map(workspaceToPackage).reduce(
-    (buildQueue, pkg, step, {length: steps}) =>
-      buildQueue.then(() => {
-        report.step(step + 1, steps, `[${pkg.meta.name}]`);
-        const activity = report.activity();
-        return buildPackage(pkg, activity)
-          .then(() => activity.end())
-          .catch(err => {
-            activity.end();
-            throw err;
-          });
-      }),
-    Promise.resolve(),
-  );
+  workspaces.forEach(workspace => {
+    const pkg = workspaceToPackage(workspace);
+    buildQueue = buildQueue.then(activities => {
+      /** @type Activity */
+      const activity = new Activity(pkg.name);
+      activities.push(activity);
+      return buildPackage(pkg, activity.start(), force)
+        .then(() => {
+          tick();
+          return activities;
+        })
+        .catch(err => {
+          throw err;
+        });
+    });
+  });
+  return buildQueue;
+};
 
 /**
  * @param {Pkg} pkg
- * @param {Object} activity
+ * @param {ActivityReporter} activity
  * @returns {Promise<void>}
  */
 const cleanPackage = async (pkg, activity) => {
   try {
-    activity.tick(`[${pkg.meta.name}] Cleaning modules ...`);
     await rmdir(path.join(pkg.dir, 'es'));
     await rmdir(path.join(pkg.dir, 'cjs'));
     await rmdir(path.join(pkg.dir, 'umd'));
+    activity.clean();
   } catch (error) {
     report.error(`[${pkg.meta.name}] There was an error!`);
     throw error;
@@ -204,37 +337,42 @@ const cleanPackage = async (pkg, activity) => {
 
 /**
  * @param {Workspace[]} workspaces
- * @returns {Promise<void>}
+ * @returns {Promise<Activity[]>}
  */
-const cleanPackages = workspaces =>
+const cleanPackages = workspaces => {
+  /** @type Promise<Activity[]> */
+  let cleanQueue = Promise.resolve([]);
+  const tick = report.progress(workspaces.length);
   // Queue up a package clean for each workspace.
-  workspaces.map(workspaceToPackage).reduce(
-    (cleanQueue, pkg, step, {length: steps}) =>
-      cleanQueue.then(() => {
-        report.step(step + 1, steps, `[${pkg.meta.name}]`);
-        const activity = report.activity();
-        return cleanPackage(pkg, activity)
-          .then(() => activity.end())
-          .catch(err => {
-            activity.end();
-            throw err;
-          });
-      }),
-    Promise.resolve(),
-  );
+  workspaces.forEach(workspace => {
+    const pkg = workspaceToPackage(workspace);
+    cleanQueue = cleanQueue.then(activities => {
+      const activity = new Activity(pkg.name);
+      activities.push(activity);
+      return cleanPackage(pkg, activity.start())
+        .then(() => {
+          tick();
+          return activities;
+        })
+        .catch(err => {
+          throw err;
+        });
+    });
+  });
+  return cleanQueue;
+};
 
 /**
  *
- * @param {Object} [options]
- * @param {Boolean} options.clean
- * @returns {Promise<void>}
+ * @param {BuildOptions} [options]
+ * @returns {Promise<void | Activity[]>}
  */
 async function build(options) {
   const packages = await project.getPackages(PROJECT_ROOT);
   if (options && options.clean) {
     return cleanPackages(packages);
   } else {
-    return buildPackages(packages);
+    return buildPackages(packages, options && options.force);
   }
 }
 
@@ -244,11 +382,45 @@ module.exports = build;
 // @ts-ignore
 if (typeof require !== 'undefined' && require.main === module) {
   const clean = process.argv.includes('--clean');
-  build({clean})
-    .then(() => {
-      report.success(`All packages ${clean ? 'clean' : 'built'}!`);
+  const force = process.argv.includes('--force');
+  const verbose = process.argv.includes('--verbose');
+  build({clean, force})
+    .then(activities => {
+      let skipped = 0;
+      let built = 0;
+      let cleaned = 0;
+      if (Array.isArray(activities)) {
+        activities.forEach(activity => {
+          if (activity._result) {
+            switch (activity._result) {
+              case 'skipped':
+                skipped += 1;
+                break;
+              case 'built':
+                built += 1;
+                break;
+              case 'cleaned':
+                cleaned += 1;
+                break;
+            }
+            if (verbose) {
+              report.log(
+                `${chalk[activity._result === 'built' ? 'green' : 'yellow'](
+                  activity._result,
+                )} ${activity._name}${
+                  activity._reason ? ` ${chalk.dim(activity._reason)}` : ''
+                }`,
+              );
+            }
+          }
+        });
+      }
+      if (!verbose && skipped) {
+        report.log(`${chalk.yellow('skipped')} ${skipped} packages`);
+      }
+      if (cleaned) report.success(`cleaned ${cleaned} packages!`);
+      if (built) report.success(`built ${built} packages!`);
     })
-    // @ts-ignore
     .catch(err => {
       report.error((err.stack && err.stack) || err);
       process.exit(1);
