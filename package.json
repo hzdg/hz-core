@@ -70,6 +70,7 @@
     "babel-core": "^7.0.0-0",
     "babel-eslint": "^10.0.1",
     "babel-jest": "^24.7.1",
+    "chalk": "^2.4.2",
     "commit-template": "^1.0.0",
     "commitizen": "^3.0.7",
     "docz": "^1.1.0",
@@ -105,6 +106,7 @@
     "react-spring": "^8.0.15",
     "react-test-renderer": "^16.8.4",
     "react-testing-library": "^6.1.2",
+    "semver": "^6.0.0",
     "symbol-iterator": "^1.0.2",
     "typescript": "^3.4.1"
   },
