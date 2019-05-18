@@ -9,6 +9,7 @@ const {promisify} = require('util');
 const rmdir = promisify(require('rimraf'));
 const mkdirp = promisify(require('mkdirp'));
 const stoppable = require('stoppable');
+const yargs = require('yargs');
 // @ts-ignore
 const report = require('yurnalist');
 // @ts-ignore
@@ -512,7 +513,7 @@ async function testInstalledPackages(pkgs, project) {
 }
 
 /**
- * @param {{open: string | false}} [options]
+ * @param {{open: string | undefined}} [options]
  * @returns {Promise<Record<string, Pkg> | undefined>}
  */
 async function testPublish(options) {
@@ -578,9 +579,25 @@ async function testPublish(options) {
 // then invoke the testPublish function.
 // @ts-ignore
 if (typeof require !== 'undefined' && require.main === module) {
-  const open = process.argv.includes('--open')
-    ? process.argv[process.argv.indexOf('--open') + 1] || 'code'
-    : false;
+  const options = yargs
+    .usage(
+      '\nCollects changed packages and publishes them to a test registry.\n\n' +
+        `Also runs a suite of basic 'smoke tests' for each package.\n\n` +
+        'If the --open option is specified, also opens the test project\n' +
+        `using the specified command, or 'code' if none is provided.`,
+    )
+    .example('$0', 'Run the publish tests for all changed packages')
+    .example('$0 --open', 'Open the test project in vscode')
+    .example('$0 --open atom', 'Open the test project in atom')
+    .alias('help', 'h')
+    .option('open', {
+      alias: 'o',
+      description: 'Open the created test project with the specified command',
+      type: 'string',
+      coerce: s => (s.trim() ? s : 'code'),
+    }).argv;
+
+  const {open} = options;
   testPublish({open})
     .then(pkgs => {
       if (!pkgs) {
