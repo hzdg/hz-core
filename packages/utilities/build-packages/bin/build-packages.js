@@ -301,7 +301,10 @@ const workspaceToPackage = workspace => {
 const buildPackages = (workspaces, force) => {
   /** @type Promise<Activity[]> */
   let buildQueue = Promise.resolve([]);
-  const tick = report.progress(workspaces.length);
+  let count = 0;
+  const total = workspaces.length;
+  const spinner = report.activity();
+  spinner.tick(chalk.dim(`[${count}/${total}]`));
   // Queue up a package build for each workspace.
   workspaces.forEach(workspace => {
     const pkg = workspaceToPackage(workspace);
@@ -311,15 +314,20 @@ const buildPackages = (workspaces, force) => {
       activities.push(activity);
       return buildPackage(pkg, activity.start(), force)
         .then(() => {
-          tick();
+          count += 1;
+          spinner.tick(chalk.dim(`[${count}/${total}]`));
           return activities;
         })
         .catch(err => {
+          spinner.end();
           throw err;
         });
     });
   });
-  return buildQueue;
+  return buildQueue.then(activities => {
+    spinner.end();
+    return activities;
+  });
 };
 
 /**
