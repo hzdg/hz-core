@@ -7,6 +7,7 @@ const glob = require('glob');
 const retry = require('async-retry');
 const babel = require('@babel/core');
 const chalk = require('chalk').default;
+const yargs = require('yargs');
 // @ts-ignore
 const report = require('yurnalist');
 // @ts-ignore
@@ -43,8 +44,11 @@ const EXCLUDE_GLOBS = [
 
 /**
  * @typedef {Object} BuildOptions
- * @property {Boolean} [clean]
- * @property {Boolean} [force]
+ * @property {Boolean | undefined} [version]
+ * @property {Boolean | undefined} [clean]
+ * @property {Boolean | undefined} [force]
+ * @property {Boolean | undefined} [verbose]
+ * @property {Boolean | undefined} [help]
  */
 
 class ActivityReporter {
@@ -208,7 +212,7 @@ const isStale = async (pkg, filename, format) => {
       return `package.json updated!`;
     }
   } catch {
-    return `${path.basename(filepath)} missing!`;
+    return `${path.basename(filepath)} outdated!`;
   }
 
   try {
@@ -222,7 +226,7 @@ const isStale = async (pkg, filename, format) => {
       return `package.json updated!`;
     }
   } catch {
-    return `${path.basename(`${filepath}.map`)} missing!`;
+    return `${path.basename(`${filepath}.map`)} outdated!`;
   }
 
   // we got this far, so maybe it's safe to assume the build
@@ -381,9 +385,35 @@ module.exports = build;
 // If this is module is being run as a script, invoke the build function.
 // @ts-ignore
 if (typeof require !== 'undefined' && require.main === module) {
-  const clean = process.argv.includes('--clean');
-  const force = process.argv.includes('--force');
-  const verbose = process.argv.includes('--verbose');
+  const options = yargs
+    .usage(
+      '\nBuilds all public packages found in workspaces.\n\n' +
+        'If the --clean option is specified, removes artifacts\n' +
+        'from a previous build instead of building.',
+    )
+    .example('$0 --clean', 'Clean up previous build artifacts')
+    .example('$0 --verbose', 'Find out why packages are being skipped')
+    .example('$0 --force', 'Force all packages to rebuild')
+    .alias('help', 'h')
+    .option('clean', {
+      alias: 'c',
+      description: 'Clean up build artifacts in all packages',
+      boolean: true,
+    })
+    .option('force', {
+      alias: 'f',
+      description: 'Force a build of all packages',
+      boolean: true,
+      conflicts: 'clean',
+    })
+    .option('verbose', {
+      alias: 'v',
+      description: 'Show more info about a build',
+      boolean: true,
+    }).argv;
+
+  const {clean, force, verbose} = options;
+
   build({clean, force})
     .then(activities => {
       let skipped = 0;
@@ -416,10 +446,19 @@ if (typeof require !== 'undefined' && require.main === module) {
         });
       }
       if (!verbose && skipped) {
-        report.log(`${chalk.yellow('skipped')} ${skipped} packages`);
+        report.log(
+          `${chalk.yellow('skipped')} ${skipped} package${
+            skipped > 1 ? 's' : ''
+          }! ${chalk.dim('(use --verbose to see why)')}`,
+        );
       }
-      if (cleaned) report.success(`cleaned ${cleaned} packages!`);
-      if (built) report.success(`built ${built} packages!`);
+      if (cleaned) {
+        report.success(`cleaned ${cleaned} package${cleaned > 1 ? 's' : ''}!`);
+      } else if (built) {
+        report.success(`built ${built} package${built > 1 ? 's' : ''}!`);
+      } else {
+        report.success(`packages already built!`);
+      }
     })
     .catch(err => {
       report.error((err.stack && err.stack) || err);

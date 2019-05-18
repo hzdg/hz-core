@@ -108,7 +108,8 @@
     "react-testing-library": "^6.1.2",
     "semver": "^6.0.0",
     "symbol-iterator": "^1.0.2",
-    "typescript": "^3.4.1"
+    "typescript": "^3.4.1",
+    "yargs": "^13.2.2"
   },
   "resolutions": {
     "docz-plugin-netlify/**/docz-core": "^1.1.0",
