@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/windowsize-monitor",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",

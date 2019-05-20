@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.1.8](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.7...@hzcore/windowsize-monitor@0.1.8) (2019-05-20)
+
+
+### @hzcore/windowsize-monitor
+
+* fix useWindowSize return type ([3214171](https://github.com/hzdg/hz-core/commit/3214171))
+
+
 ## [0.1.7](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.6...@hzcore/windowsize-monitor@0.1.7) (2019-05-03)
 
 
