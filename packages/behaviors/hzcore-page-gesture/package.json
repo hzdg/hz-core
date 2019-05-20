@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/page-gesture",
-  "version": "0.1.6",
+  "version": "1.0.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",
@@ -20,8 +20,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/gesture-catcher": "*",
-    "@hzcore/hook-ref-callback": "*",
+    "@hzcore/gesture-catcher": "^1.0.0",
+    "@hzcore/hook-ref-callback": "^1.0.4",
     "prop-types": "15.x.x"
   }
 }

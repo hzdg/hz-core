@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.6...@hzcore/page-gesture@1.0.0) (2019-05-20)
+
+
+### @hzcore/page-gesture
+
+* add usePageGesture hook ([2e4e773](https://github.com/hzdg/hz-core/commit/2e4e773))
+* add @hzcore/hook-ref-callback dep ([ebb5369](https://github.com/hzdg/hz-core/commit/ebb5369))
+* implement PageGesture in terms of hooks ([e274d26](https://github.com/hzdg/hz-core/commit/e274d26))
+* upgrade/fix dependencies ([6c02546](https://github.com/hzdg/hz-core/commit/6c02546))
+* add horizontal usePageGesture example ([1589a96](https://github.com/hzdg/hz-core/commit/1589a96))
+* fix usePageGesture example ([302e147](https://github.com/hzdg/hz-core/commit/302e147))
+* improve example ([d0d24a6](https://github.com/hzdg/hz-core/commit/d0d24a6))
+
+
 ## [0.1.6](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.5...@hzcore/page-gesture@0.1.6) (2019-04-19)
 
 

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.4](https://github.com/hzdg/hz-core/compare/test-publish@1.0.3...test-publish@1.0.4) (2019-05-20)
+
+
+### test-publish
+
+* add help info ([4818bb3](https://github.com/hzdg/hz-core/commit/4818bb3))
+
+
 ## [1.0.3](https://github.com/hzdg/hz-core/compare/test-publish@1.0.2...test-publish@1.0.3) (2019-04-26)
 
 

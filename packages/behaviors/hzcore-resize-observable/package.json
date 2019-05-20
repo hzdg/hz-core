@@ -1,7 +1,7 @@
 {
   "name": "@hzcore/resize-observable",
   "description": "An Observable wrapper for ResizeObserver",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",

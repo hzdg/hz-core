@@ -1,7 +1,7 @@
 {
   "name": "@hzcore/hook-size",
   "description": "A React hook for components that care about their size.",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -17,8 +17,8 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/hook-ref-callback": "^1.0.3",
-    "@hzcore/resize-observable": "^1.0.0",
+    "@hzcore/hook-ref-callback": "^1.0.4",
+    "@hzcore/resize-observable": "^1.0.1",
     "@hzcore/windowsize-monitor": "^0.1.7"
   }
 }

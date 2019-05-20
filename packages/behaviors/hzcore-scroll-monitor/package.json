@@ -1,7 +1,7 @@
 {
   "name": "@hzcore/scroll-monitor",
   "description": "A React component and set of hooks for monitoring and interacting with scroll position",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzcore/hook-ref-callback": "^1.0.3",
+    "@hzcore/hook-ref-callback": "^1.0.4",
     "invariant": "^2.2.4"
   }
 }

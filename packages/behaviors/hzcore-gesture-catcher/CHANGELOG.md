@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.6...@hzcore/gesture-catcher@1.0.0) (2019-05-20)
+
+
+### @hzcore/gesture-catcher
+
+* add useGesture hook ([202c6fb](https://github.com/hzdg/hz-core/commit/202c6fb))
+* add useKeyboardGesture hook ([42889af](https://github.com/hzdg/hz-core/commit/42889af))
+* add useMouseGesture hook ([2c1e91a](https://github.com/hzdg/hz-core/commit/2c1e91a))
+* add useTouchGesture hook ([90c200a](https://github.com/hzdg/hz-core/commit/90c200a))
+* add useWheelGesture hook ([2d66cc4](https://github.com/hzdg/hz-core/commit/2d66cc4))
+* add @hzcore/hook-ref-callback dep ([7e32c98](https://github.com/hzdg/hz-core/commit/7e32c98))
+* fix type exports ([df6b49c](https://github.com/hzdg/hz-core/commit/df6b49c))
+* implement GestureCatcher in terms of hooks ([2d6d60c](https://github.com/hzdg/hz-core/commit/2d6d60c))
+* upgrade/fix dependencies ([96f74ef](https://github.com/hzdg/hz-core/commit/96f74ef))
+
+### @hzcore/gesture-observable
+
+* extract GestureObservable package ([96f7bb2](https://github.com/hzdg/hz-core/commit/96f7bb2))
+
+
 ## [0.1.6](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.5...@hzcore/gesture-catcher@0.1.6) (2019-04-19)
 
 
