@@ -16,6 +16,7 @@
     "!*/__test*"
   ],
   "dependencies": {
+    "@babel/runtime": "^7.4.4",
     "@hzcore/hook-ref-callback": "^1.0.3",
     "@hzcore/resize-observable": "^1.0.0",
     "@hzcore/windowsize-monitor": "^0.1.7"
