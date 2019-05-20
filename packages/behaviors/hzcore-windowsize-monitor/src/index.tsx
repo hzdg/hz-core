@@ -32,7 +32,7 @@ export const useWindowSize = (
   options: {throttleMs?: number} = {},
   initialWidth: number = 0,
   initialHeight: number = 0,
-): State | undefined => {
+): State => {
   const {throttleMs = 100} = options;
 
   const [size, setSize] = useState({
