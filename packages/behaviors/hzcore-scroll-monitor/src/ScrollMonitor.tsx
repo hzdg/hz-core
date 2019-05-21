@@ -119,11 +119,16 @@ export interface ScrollMonitorProps {
 function ScrollMonitor(props: ScrollMonitorProps): JSX.Element {
   const {innerRef} = props;
   const [scrolling, scrollingRef] = useScrolling();
-  const [position, scrollPositionRef] = useScrollPosition();
   const [direction, scrollDirectionRef] = useScrollDirection();
   const [intersects, scrollIntersectionRef] = useScrollIntersection(
     props.intersects,
   );
+
+  const [position, setPosition] = useState<ScrollPosition>({
+    top: null,
+    left: null,
+  });
+  const scrollPositionRef = useScrollPosition(setPosition);
 
   const scrollingEnabled =
     props.scrolling || props.onStart || props.onChange || props.onEnd;

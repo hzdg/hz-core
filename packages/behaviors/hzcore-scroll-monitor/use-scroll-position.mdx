@@ -28,31 +28,17 @@ import {useScrollPosition} from '@hzcore/scroll-monitor';
 
 ```ts
 function useScrollPosition(
+  handler: (position: ScrollPosition) => void,
   innerRef?: InnerRef<HTMLElement> | null,
-): [ScrollPosition, (node: HTMLElement | null) => void] {
+): (node: HTMLElement | null) => void {
 ```
 
 ### Arguments
 
-```ts
-innerRef?: InnerRef<HTMLElement> | null
-```
+### handler: `handler: (position: ScrollPosition) => void,`
 
-An optional ref object or callback ref.
-Useful when the component needs to handle ref forwarding.
-
-### Returns
-
-```ts
-[ScrollPosition, (node: HTMLElement | null) => void] {
-```
-
-An array containing a `ScrollPosition` object and a callback `ref`.
-
-The callback `ref` should be passed to an underlying DOM node.
-Note that the node does not have to be scrollable itself,
-as `useScrollPosition` will traverse the DOM to find a scrollable parent
-to observe.
+A function to handle scroll position updates.
+Receives the latest `ScrollPosition`.
 
 The `ScrollPosition` object shape is:
 
@@ -71,12 +57,25 @@ interface ScrollPosition {
 }
 ```
 
+### innerRef `innerRef?: InnerRef<HTMLElement> | null`
+
+An optional ref object or callback ref.
+Useful when the component needs to handle ref forwarding.
+
+### returns `(node: HTMLElement | null) => void`
+
+A [callback ref] that should be passed to an underlying DOM node.
+Note that the node does not have to be scrollable itself,
+as `useScrollPosition` will traverse the DOM to find a scrollable parent
+to observe.
+
 ## Example
 
 <Playground>
   {() => {
     const ScrollPositionUser = () => {
-      const [scrollPosition, ref] = useScrollPosition();
+      const [position, setPosition] = React.useState(null);
+      const ref = useScrollPosition(setPosition);
       return (
         <div
           ref={ref}
@@ -89,7 +88,7 @@ interface ScrollPosition {
             fontSize: '2em',
           }}
         >
-          {JSON.stringify(scrollPosition, null, 2)}
+          {JSON.stringify(position, null, 2)}
         </div>
       );
     };
@@ -107,13 +106,13 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // We pass `forwardedRef` (which may be a ref object or a callack ref)
   // to `useScrollPosition`. Note that the returned `ref` will _not_ be
   // the same as `forwardedRef`, but they _will_ get the same value.
-  const [scrollPosition, ref] = useScrollPosition(forwardedRef);
+  const ref = useScrollPosition(setPosition, forwardedRef);
   // Note that we actually pass `ref` to the underlying component,
   // not `forwardedRef`. We do this to make sure that
   // `useScrollPosition` is notified when the ref value changes.
   // This works because we passed `forwardedRef` to `useScrollPosition`,
   // which will update the `forwardedRef` automatically.
-  return <div ref={ref}>{JSON.stringify(scrollPosition, null, 2)}</div>;
+  return <div ref={ref}>{JSON.stringify(position, null, 2)}</div>;
 });
 ```
 
