@@ -1,9 +1,10 @@
-import {useState, useEffect} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
-import {getScrollRect, ScrollRect, useNearestScrollNode} from './utils';
-
-const SCROLL = 'scroll';
-const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
+import {useState, useEffect, useRef, createRef} from 'react';
+import {
+  getScrollRect,
+  ScrollRect,
+  useNearestScrollNodeRef,
+  useScrollEffect,
+} from './utils';
 
 export interface Bounds {
   top: number;
@@ -34,10 +35,10 @@ export type BoundsRect = TopBounds | RightBounds | BottomBounds | LeftBounds;
 export type ScrollIntersectionConfig = BoundsRect | BoundsRect[];
 
 /**
- * Whether or not any of the configured areas currently intersect witho
+ * Whether or not any of the configured areas currently intersect with
  * the nearest scrollable container's scroll position.
  *
- * If a single area has been configured, this will be one boolean.
+ * If a single area has been configured, this will be a boolean.
  * If an array of areas has been configured, this will be an array of booleans,
  * where the index of each boolean corresponds to the index of the area in
  * the configuration array.
@@ -65,6 +66,18 @@ function intersects(bounds: BoundsRect, rect: ScrollRect): boolean {
   return inRangeVertical && inRangeHorizontal;
 }
 
+/**
+ * `getIntersects` returns an `Intersects` value for
+ * a given `Event` target and `ScrollIntersectionConfig`.
+ *
+ * `Intersects` describes whether or not any of the configured areas
+ * currently intersect with the scroll position for the given `Event` target.
+ *
+ * If a single area has been configured in `ScrollIntersectionConfig`,
+ * `Intersects` will be a boolean. If an array of areas has been configured,
+ * this will be an array of booleans, where the index of each boolean
+ * corresponds to the index of the area in the configuration array.
+ */
 export function getIntersects(
   event: Event,
   config?: ScrollIntersectionConfig | null,
@@ -83,53 +96,57 @@ export function getIntersects(
 }
 
 /**
- * A React hook for components that care about the interesction
- * of the nearest scrollable container's scroll position
- * with one or more areas of the scrollable area.
+ * `useScrollIntersection` is a React hook for components
+ * that care about the interesction of the nearest scrollable container's
+ * scroll position with one or more areas of the scrollable area.
  *
- * @returns {[Intersects, (node: HTMLElement | null) => void]}
+ * Returns an array containing an `Intersects` value,
+ * consisting of one intersection boolean or an array of booleans,
+ * and a `RefObject`.
+ *
+ * `Intersects` describes whether or not any of the configured areas
+ * currently intersect with the nearest scrollable container's scroll position.
+ * If a single area has been configured, `Intersects` will be one boolean.
+ * If an array of areas has been configured, this will be an array of booleans,
+ * where the index of each boolean corresponds to the index of the area in
+ * the configuration array.
+ *
+ * The `RefObject` should be passed to an underlying DOM node.
+ * Note that the node does not have to be scrollable itself,
+ * as `useScrollIntersection` will traverse the DOM to find a scrollable parent
+ * to observe.
  */
-function useScrollIntersection(
-  config: ScrollIntersectionConfig,
-  innerRef?: InnerRef<HTMLElement> | null,
-): [Intersects, (node: HTMLElement | null) => void];
-function useScrollIntersection(
-  config?: ScrollIntersectionConfig | null,
-  innerRef?: InnerRef<HTMLElement> | null,
-): [Intersects, (node: HTMLElement | null) => void];
-function useScrollIntersection(
+export default function useScrollIntersection(
   /**
    * A rect or array of rects to check for intersection.
    * A rect should have at least one of `{top, right, left, bottom}`
    * set to a number.
    */
-  config?: ScrollIntersectionConfig | null,
+  config: ScrollIntersectionConfig,
   /**
-   * An optional ref object or callback ref.
+   * An optional ref to use. If provided, this ref object will be
+   * passed through as the returned value for `useScrollIntersection`.
    * Useful when the component needs to handle ref forwarding.
    */
-  innerRef?: InnerRef<HTMLElement> | null,
-): [Intersects, (node: HTMLElement | null) => void] {
-  const [ref, refCallback] = useRefCallback(innerRef);
-  const scrollingElement = useNearestScrollNode(ref);
-  const [intersects, setIntersects] = useState<Intersects>(null);
-
+  ref: React.RefObject<HTMLElement> = createRef<HTMLElement>(),
+): [Intersects, React.RefObject<HTMLElement>] {
+  // Keep track of changes to intersection config.
+  const intersectionConfig = useRef(config);
   useEffect(() => {
-    const handler = (event: Event): void => {
-      setIntersects(getIntersects(event, config));
-    };
+    intersectionConfig.current = config;
+  }, [config]);
 
-    if (scrollingElement && config) {
-      scrollingElement.addEventListener(SCROLL, handler, LISTENER_OPTIONS);
-    }
-    return () => {
-      if (scrollingElement) {
-        scrollingElement.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
-      }
-    };
-  }, [scrollingElement, config]);
+  // Keep track of whether or not any configured areas
+  // interesect the scroll position.
+  const [intersects, setIntersects] = useState<Intersects>(null);
+  const scrollRef = useNearestScrollNodeRef(ref);
+  useScrollEffect(
+    scrollRef,
+    (event: Event): void => {
+      setIntersects(getIntersects(event, intersectionConfig.current));
+    },
+    [],
+  );
 
-  return [intersects, refCallback];
+  return [intersects, ref];
 }
-
-export default useScrollIntersection;

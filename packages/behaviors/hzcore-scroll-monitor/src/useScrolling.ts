@@ -1,77 +1,86 @@
-import {useState, useEffect, useRef, useCallback} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
-import {useNearestScrollNode} from './utils';
+import {useState, useEffect, useRef, useCallback, createRef} from 'react';
+import {useNearestScrollNodeRef, useScrollEffect} from './utils';
 
 const SCROLL_TIMEOUT = 60;
-const SCROLL = 'scroll';
-const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
 
 /**
- * A React hook for components that care about whether or not
- * the nearest scrollable container is scrolling.
+ * `useScrolling` is a React hook for components that care about
+ * whether or not the nearest scrollable container is scrolling.
  *
- * @returns {[boolean, (node: HTMLElement | null) => void]}
+ * Returns an array containing a `boolean` value indicating whether the
+ * nearest scrollable container is scrolling, and a `RefObject`.
+ *
+ * The `RefObject` should be passed to an underlying DOM node.
+ * Note that the node does not have to be scrollable itself,
+ * as `useScrolling` will traverse the DOM to find a scrollable parent
+ * to observe.
  */
 export default function useScrolling(
   /**
-   * An optional ref object or callback ref.
+   * An optional ref to use. If provided, this ref object will be
+   * passed through as the returned value for `useScrolling`.
    * Useful when the component needs to handle ref forwarding.
    */
-  innerRef?: InnerRef<HTMLElement> | null,
-): [boolean, (node: HTMLElement | null) => void] {
+  ref: React.RefObject<HTMLElement> = createRef<HTMLElement>(),
+): [boolean, React.RefObject<HTMLElement>] {
   // Keep track of whether or not the nearest scrollable container is scrolling.
-  let [scrolling, setScrolling] = useState(false);
+  const [scrolling, setScrolling] = useState(false);
 
   // Keep a ref to the nearest scrollable container.
-  let [ref, refCallback] = useRefCallback(innerRef);
-  const scrollingElement = useNearestScrollNode(ref);
+  const scrollRef = useNearestScrollNodeRef(ref);
+
   // Keep a ref to a timeout id.
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // A callback to clear the scroll timeout.
-  const clearScrollTimeout = useCallback((): void => {
+  /**
+   * `clearScrollTimeout` will... uh... clear the scroll timeout.
+   */
+  const clearScrollTimeout = useCallback(function clearScrollTimeout() {
     if (scrollTimeout.current) {
       clearTimeout(scrollTimeout.current);
       scrollTimeout.current = null;
     }
   }, []);
 
-  // A callback to clear the scroll timeout and flip `scrolling` to false.
-  const stopScrolling = useCallback((): void => {
-    clearScrollTimeout();
-    setScrolling(false);
-  }, [clearScrollTimeout]);
+  /**
+   * `stopScrolling` will clear the scroll timeout and
+   * flip `scrolling` to `false`. This will be called when
+   * the scroll timeout expires.
+   */
+  const stopScrolling = useCallback(
+    function stopScrolling() {
+      clearScrollTimeout();
+      setScrolling(false);
+    },
+    [clearScrollTimeout],
+  );
 
-  // A callback to start the scroll timeout and flip `scrolling` to true.
-  const startScrolling = useCallback((): void => {
-    clearScrollTimeout();
-    setScrolling(true);
-    scrollTimeout.current = setTimeout(stopScrolling, SCROLL_TIMEOUT);
-  }, [clearScrollTimeout, stopScrolling]);
+  /**
+   * `startScrolling` will clear the scroll timeout,
+   * flip `scrolling` to `true`, and start a new scroll timeout.
+   */
+  const startScrolling = useCallback(
+    function startScrolling() {
+      clearScrollTimeout();
+      setScrolling(true);
+      scrollTimeout.current = setTimeout(stopScrolling, SCROLL_TIMEOUT);
+    },
+    [clearScrollTimeout, stopScrolling],
+  );
 
-  // Make sure we clear the timeout when we unmount.
-  useEffect(() => clearScrollTimeout(), [clearScrollTimeout]);
+  useEffect(
+    /**
+     * `cleanup` will clear the scroll timeout when we unmount.
+     */
+    function cleanup() {
+      clearScrollTimeout();
+    },
+    [clearScrollTimeout],
+  );
 
   // Subscribe to scroll events on the nearest scrolling element,
   // calling the `startScrolling` callback whenever a scroll event occurs.
-  useEffect(() => {
-    if (scrollingElement) {
-      scrollingElement.addEventListener(
-        SCROLL,
-        startScrolling,
-        LISTENER_OPTIONS,
-      );
-    }
-    return () => {
-      if (scrollingElement) {
-        scrollingElement.removeEventListener(
-          SCROLL,
-          startScrolling,
-          LISTENER_OPTIONS,
-        );
-      }
-    };
-  }, [scrollingElement, startScrolling]);
+  useScrollEffect(scrollRef, startScrolling, [startScrolling]);
 
-  return [scrolling, refCallback];
+  return [scrolling, ref];
 }

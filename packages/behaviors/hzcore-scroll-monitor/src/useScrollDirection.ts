@@ -1,19 +1,23 @@
-import {useState, useEffect, useRef} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {useState, useRef, createRef} from 'react';
 import {ScrollPosition, getScrollPosition} from './useScrollPosition';
-import {useNearestScrollNode} from './utils';
+import {useNearestScrollNodeRef, useScrollEffect} from './utils';
 
-const SCROLL = 'scroll';
-const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
-const INITIAL_SCROLL_DIRECTION: ScrollDirection = {
+const INITIAL_SCROLL_DIRECTION: ScrollDirectionState = {
   vertical: null,
   horizontal: null,
 };
 
+/**
+ * `ScrollDirection` is an enum of possible scroll direction states.
+ */
 export enum ScrollDirection {
+  /** Indicates that scrolling is moving in a downward direction. */
   DOWN = 'down',
+  /** Indicates that scrolling is moving in a upward direction. */
   UP = 'up',
+  /** Indicates that scrolling is moving in a leftward direction. */
   LEFT = 'left',
+  /** Indicates that scrolling is moving in a righward direction. */
   RIGHT = 'right',
 }
 export const DOWN = ScrollDirection.DOWN;
@@ -26,21 +30,34 @@ export type HorizontalScrollDirection =
   | ScrollDirection.LEFT
   | ScrollDirection.RIGHT;
 
+/**
+ * `ScrollDirectionState` is an object of `vertical` and `horizontal` values,
+ * where `vertical` is either `'up'` or `'down'`, and `horizontal` is either
+ * `'left'` or `'right'`.
+ */
 export interface ScrollDirectionState {
   /**
    * The direction the nearest scrollable container
    * most recently scrolled vertically,
-   * where 'direction' is either 'up' or 'down'.
+   * where 'direction' is either `'up'` or `'down'`.
    */
   vertical: VerticalScrollDirection | null;
   /**
    * The direction the nearest scrollable container
    * most recently scrolled horizontally,
-   * where 'direction' is either 'left' or 'right'.
+   * where 'direction' is either `'left'` or `'right'`.
    */
   horizontal: HorizontalScrollDirection | null;
 }
 
+/**
+ * `getScrollDirection` compares two `ScrollPosition` objects
+ * and returns a `ScrollDirectionState` object.
+ *
+ * `ScrollDirectionState.vertical` will be one of `ScrollDirection.UP`
+ * or `ScrollDirection.DOWN`, while `ScrollDirectionState.horizontal`
+ * will be one of `ScrollDirection.LEFT` or `ScrollDirection.RIGHT`.
+ */
 export function getScrollDirection(
   position: ScrollPosition,
   lastPosition: ScrollPosition | null,
@@ -67,42 +84,41 @@ export function getScrollDirection(
 }
 
 /**
- * A React hook for components that care about
+ * `useScrollDirection` is a React hook for components that care about
  * the nearest scrollable container's scroll direction.
  *
- * @returns {[ScrollDirection, (node: HTMLElement | null) => void]}
+ * Returns an array containing a `ScrollDirectionState` object
+ * with `horizontal` and `vertical` keys, and a `RefObject`.
+ *
+ * `ScrollDirectionState.vertical` will be one of `ScrollDirection.UP`
+ *  or `ScrollDirection.DOWN`, while `ScrollDirectionState.horizontal`
+ * will be one of `ScrollDirection.LEFT` or `ScrollDirection.RIGHT`.
+ *
+ * The `RefObject` should be passed to an underlying DOM node.
+ * Note that the node does not have to be scrollable itself,
+ * as `useScrollDirection` will traverse the DOM to find a scrollable parent
+ * to observe.
  */
 export default function useScrollDirection(
   /**
-   * An optional ref object or callback ref.
+   * An optional ref to use. If provided, this ref object will be
+   * passed through as the returned value for `useScrollDirection`.
    * Useful when the component needs to handle ref forwarding.
    */
-  innerRef?: InnerRef<HTMLElement> | null,
-): [ScrollDirection, (node: HTMLElement | null) => void] {
-  const [ref, refCallback] = useRefCallback(innerRef);
-  const scrollingElement = useNearestScrollNode(ref);
+  ref: React.RefObject<HTMLElement> = createRef<HTMLElement>(),
+): [ScrollDirectionState, React.RefObject<HTMLElement>] {
   const scrollPosition = useRef<ScrollPosition | null>(null);
-  const [scrollDirection, setScrollDirection] = useState(
-    INITIAL_SCROLL_DIRECTION,
-  );
-
-  useEffect(() => {
-    const handler = (event: Event): void => {
+  const [direction, setDirection] = useState(INITIAL_SCROLL_DIRECTION);
+  const scrollRef = useNearestScrollNodeRef(ref);
+  useScrollEffect(
+    scrollRef,
+    (event: Event): void => {
       const position = getScrollPosition(event);
       const direction = getScrollDirection(position, scrollPosition.current);
       scrollPosition.current = position;
-      setScrollDirection(direction);
-    };
-
-    if (scrollingElement) {
-      scrollingElement.addEventListener(SCROLL, handler, LISTENER_OPTIONS);
-    }
-    return () => {
-      if (scrollingElement) {
-        scrollingElement.removeEventListener(SCROLL, handler, LISTENER_OPTIONS);
-      }
-    };
-  }, [scrollPosition, scrollingElement]);
-
-  return [scrollDirection, refCallback];
+      setDirection(direction);
+    },
+    [],
+  );
+  return [direction, ref];
 }

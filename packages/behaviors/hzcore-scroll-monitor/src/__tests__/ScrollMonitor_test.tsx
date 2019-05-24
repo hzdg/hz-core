@@ -8,14 +8,20 @@ type Mutable<T> = {-readonly [K in keyof T]: T[K]};
 
 const SCROLL_SIZE = 100;
 
+const printScrollState = (scrollState: ScrollMonitorRenderProps): string => {
+  /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
+  const {scrollRef, ...printable} = scrollState;
+  return JSON.stringify(printable, null, 2);
+};
+
 const renderScrollState = (
   scrollState: ScrollMonitorRenderProps,
 ): JSX.Element => (
   <div
-    ref={scrollState.scrollRef}
+    ref={scrollState.scrollRef as React.RefObject<HTMLDivElement>}
     style={{width: SCROLL_SIZE, height: SCROLL_SIZE}}
   >
-    <pre data-testid="scrollState">{JSON.stringify(scrollState, null, 2)}</pre>
+    <pre data-testid="scrollState">{printScrollState(scrollState)}</pre>
   </div>
 );
 

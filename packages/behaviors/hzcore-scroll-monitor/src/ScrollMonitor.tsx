@@ -1,6 +1,12 @@
-import {useEffect, useState, useCallback, useMemo} from 'react';
+import {
+  useEffect,
+  useState,
+  useMemo,
+  useLayoutEffect,
+  useRef,
+  MutableRefObject,
+} from 'react';
 import PropTypes from 'prop-types';
-import {InnerRef} from '@hzcore/hook-ref-callback';
 import useScrolling from './useScrolling';
 import useScrollPosition, {ScrollPosition} from './useScrollPosition';
 import useScrollDirection, {ScrollDirectionState} from './useScrollDirection';
@@ -14,12 +20,12 @@ import useScrollIntersection, {
  */
 export interface ScrollMonitorRenderProps {
   /**
-   * A callback ref that should be passed to an underlying DOM node.
+   * A ref object that should be passed to an underlying DOM node.
    * Note that the node does not have to be scrollable itself,
    * as `ScrollMonitor` will traverse the DOM to find a scrollable parent
    * to observe.
    */
-  scrollRef: (instance: HTMLElement | null) => void;
+  scrollRef: React.RefObject<HTMLElement>;
   /**
    * Whether or not the nearest scrollable container is currently scrolling.
    *
@@ -60,7 +66,7 @@ export interface ScrollMonitorProps {
    * An optional ref object or callback ref.
    * Useful when the owner component needs to handle ref forwarding.
    */
-  innerRef?: InnerRef<HTMLElement> | null;
+  innerRef?: React.Ref<HTMLElement | null>;
   /**
    * Whether or not to monitor scroll direction.
    *
@@ -117,48 +123,36 @@ export interface ScrollMonitorProps {
  * the nearest scrollable container.
  */
 function ScrollMonitor(props: ScrollMonitorProps): JSX.Element {
-  const {innerRef} = props;
-  const [scrolling, scrollingRef] = useScrolling();
-  const [direction, scrollDirectionRef] = useScrollDirection();
-  const [intersects, scrollIntersectionRef] = useScrollIntersection(
-    props.intersects,
-  );
+  const scrollRef = useRef<HTMLElement>(null);
+  const [scrolling] = useScrolling(scrollRef);
+  const [direction] = useScrollDirection(scrollRef);
+  const [intersects] = useScrollIntersection(props.intersects || [], scrollRef);
 
   const [position, setPosition] = useState<ScrollPosition>({
     top: null,
     left: null,
   });
-  const scrollPositionRef = useScrollPosition(setPosition);
+  useScrollPosition(setPosition, scrollRef);
 
   const scrollingEnabled =
-    props.scrolling || props.onStart || props.onChange || props.onEnd;
-  const positionEnabled = props.position || props.onChange;
-  const directionEnabled = props.direction;
-  const intersectionEnabled = props.intersects;
+    props.scrolling || Boolean(props.onStart || props.onChange || props.onEnd);
+  const positionEnabled = props.position || Boolean(props.onChange);
+  const directionEnabled = Boolean(props.direction);
+  const intersectionEnabled = Boolean(props.intersects);
 
-  const scrollRef = useCallback(
-    (node: HTMLElement | null) => {
-      if (scrollingEnabled) scrollingRef(node);
-      if (positionEnabled) scrollPositionRef(node);
-      if (directionEnabled) scrollDirectionRef(node);
-      if (intersectionEnabled) scrollIntersectionRef(node);
+  useLayoutEffect(
+    /**
+     * `updateInnerRef` will sync the `scrollRef` render prop with the
+     * `innerRef` `ScrollMonitor` prop.
+     */
+    function updateInnerRef() {
+      const {innerRef} = props;
       if (typeof innerRef === 'function') {
-        innerRef(node);
+        innerRef(scrollRef.current);
       } else if (innerRef && 'current' in innerRef) {
-        innerRef.current = node;
+        (innerRef as MutableRefObject<unknown>).current = scrollRef.current;
       }
     },
-    [
-      innerRef,
-      scrollingRef,
-      scrollPositionRef,
-      scrollDirectionRef,
-      scrollIntersectionRef,
-      scrollingEnabled,
-      positionEnabled,
-      directionEnabled,
-      intersectionEnabled,
-    ],
   );
 
   // Create the new state.
