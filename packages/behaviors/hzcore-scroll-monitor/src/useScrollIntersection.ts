@@ -5,19 +5,19 @@ import {getScrollRect, ScrollRect, useNearestScrollNode} from './utils';
 const SCROLL = 'scroll';
 const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
 
-interface Bounds {
+export interface Bounds {
   top: number;
   right: number;
   bottom: number;
   left: number;
 }
 
-type TopBounds = Partial<Bounds> & Pick<Bounds, 'top'>;
-type RightBounds = Partial<Bounds> & Pick<Bounds, 'right'>;
-type BottomBounds = Partial<Bounds> & Pick<Bounds, 'bottom'>;
-type LeftBounds = Partial<Bounds> & Pick<Bounds, 'left'>;
+export type TopBounds = Partial<Bounds> & Pick<Bounds, 'top'>;
+export type RightBounds = Partial<Bounds> & Pick<Bounds, 'right'>;
+export type BottomBounds = Partial<Bounds> & Pick<Bounds, 'bottom'>;
+export type LeftBounds = Partial<Bounds> & Pick<Bounds, 'left'>;
 
-type BoundsRect = TopBounds | RightBounds | BottomBounds | LeftBounds;
+export type BoundsRect = TopBounds | RightBounds | BottomBounds | LeftBounds;
 
 /**
  * One or more areas to check for intersection with

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import {InnerRef} from '@hzcore/hook-ref-callback';
 import useScrolling from './useScrolling';
 import useScrollPosition, {ScrollPosition} from './useScrollPosition';
-import useScrollDirection, {ScrollDirection} from './useScrollDirection';
+import useScrollDirection, {ScrollDirectionState} from './useScrollDirection';
 import useScrollIntersection, {
   ScrollIntersectionConfig,
   Intersects,
@@ -38,7 +38,7 @@ export interface ScrollMonitorRenderProps {
    *
    * Only set if the `ScrollMonitor` `direction` prop is `true`.
    */
-  direction?: ScrollDirection;
+  direction?: ScrollDirectionState;
   /**
    * Whether or not the latest position of the nearest scrollable container
    * intersects with one or more defined areas.

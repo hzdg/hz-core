@@ -1,19 +1,33 @@
-import ScrollMonitor from './ScrollMonitor';
-import useScrolling from './useScrolling';
-import useScrollPosition from './useScrollPosition';
-import useScrollDirection, {UP, RIGHT, DOWN, LEFT} from './useScrollDirection';
-import useScrollIntersection from './useScrollIntersection';
+import * as ScrollMonitor from './ScrollMonitor';
+import * as scrolling from './useScrolling';
+import * as position from './useScrollPosition';
+import * as direction from './useScrollDirection';
+import * as intersection from './useScrollIntersection';
 
-export const ScrollDirection: {
-  UP: typeof UP;
-  RIGHT: typeof RIGHT;
-  DOWN: typeof DOWN;
-  LEFT: typeof LEFT;
-} = {UP, RIGHT, DOWN, LEFT};
-export {
-  useScrolling,
-  useScrollPosition,
-  useScrollDirection,
-  useScrollIntersection,
-};
-export default ScrollMonitor;
+export const useScrolling = scrolling.default;
+
+export type ScrollPosition = position.ScrollPosition;
+export const useScrollPosition = position.default;
+export const getScrollPosition = position.getScrollPosition;
+
+export type VerticalScrollDirection = direction.VerticalScrollDirection;
+export type HorizontalScrollDirection = direction.HorizontalScrollDirection;
+export type ScrollDirectionState = direction.ScrollDirectionState;
+export const ScrollDirection = direction.ScrollDirection;
+export const getScrollDirection = direction.getScrollDirection;
+export const useScrollDirection = direction.default;
+
+export type Bounds = intersection.Bounds;
+export type TopBounds = intersection.TopBounds;
+export type RightBounds = intersection.RightBounds;
+export type BottomBounds = intersection.BottomBounds;
+export type LeftBounds = intersection.LeftBounds;
+export type BoundsRect = intersection.BoundsRect;
+export type ScrollIntersectionConfig = intersection.ScrollIntersectionConfig;
+export type Intersects = intersection.Intersects;
+export const getIntersects = intersection.getIntersects;
+export const useScrollIntersection = intersection.default;
+
+export type ScrollMonitorRenderProps = ScrollMonitor.ScrollMonitorRenderProps;
+export type ScrollMonitorProps = ScrollMonitor.ScrollMonitorProps;
+export default ScrollMonitor.default;

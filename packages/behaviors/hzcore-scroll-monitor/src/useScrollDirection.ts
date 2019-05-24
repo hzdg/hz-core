@@ -10,16 +10,23 @@ const INITIAL_SCROLL_DIRECTION: ScrollDirection = {
   horizontal: null,
 };
 
-export const DOWN = 'down';
-export const UP = 'up';
-export const LEFT = 'left';
-export const RIGHT = 'right';
+export enum ScrollDirection {
+  DOWN = 'down',
+  UP = 'up',
+  LEFT = 'left',
+  RIGHT = 'right',
+}
+export const DOWN = ScrollDirection.DOWN;
+export const UP = ScrollDirection.UP;
+export const LEFT = ScrollDirection.LEFT;
+export const RIGHT = ScrollDirection.RIGHT;
 
-export type VerticalScrollDirection = typeof DOWN | typeof UP;
+export type VerticalScrollDirection = ScrollDirection.DOWN | ScrollDirection.UP;
+export type HorizontalScrollDirection =
+  | ScrollDirection.LEFT
+  | ScrollDirection.RIGHT;
 
-export type HorizontalScrollDirection = typeof LEFT | typeof RIGHT;
-
-export interface ScrollDirection {
+export interface ScrollDirectionState {
   /**
    * The direction the nearest scrollable container
    * most recently scrolled vertically,
@@ -37,7 +44,7 @@ export interface ScrollDirection {
 export function getScrollDirection(
   position: ScrollPosition,
   lastPosition: ScrollPosition | null,
-): ScrollDirection {
+): ScrollDirectionState {
   if (lastPosition) {
     const vertical =
       typeof position.top === 'number' &&
