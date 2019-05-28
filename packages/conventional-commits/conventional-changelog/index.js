@@ -24,6 +24,14 @@ function whatBump(commits) {
             features += 1;
             level = Math.min(level, 1);
             break;
+          case 2:
+            break;
+          default:
+            if (commit.notes.length > 0) {
+              breakings += commit.notes.length;
+              level = 0;
+            }
+            break;
         }
         break;
       }
