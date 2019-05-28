@@ -21,19 +21,22 @@
     "emoji": "🐛",
     "code": ":bug:",
     "description": "Fixing a bug.",
-    "name": "fix"
+    "name": "fix",
+    "level": 2
   },
   {
     "emoji": "🚑",
     "code": ":ambulance:",
     "description": "Critical hotfix.",
-    "name": "quickfix"
+    "name": "quickfix",
+    "level": 2
   },
   {
     "emoji": "✨",
     "code": ":sparkles:",
     "description": "Introducing new features.",
-    "name": "feature"
+    "name": "feature",
+    "level": 1
   },
   {
     "emoji": "📝",
@@ -63,7 +66,8 @@
     "emoji": "🔒",
     "code": ":lock:",
     "description": "Fixing security issues.",
-    "name": "security"
+    "name": "security",
+    "level": 2
   },
   {
     "emoji": "🔖",
@@ -148,6 +152,7 @@
     "emoji": "💥",
     "code": ":boom:",
     "description": "Introducing breaking changes.",
-    "name": "breaking"
+    "name": "breaking",
+    "level": 0
   }
 ]
