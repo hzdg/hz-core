@@ -8,6 +8,10 @@ route: /use-ref-callback
 
 A React [hook] for components that need to know when a [ref] changes.
 
+> **NOTE** If your ref will contain a DOM node,
+> you might not need this hook! React has [useLayoutEffect],
+> which is usually the right place for code that depends on a DOM ref.
+
 ## What's it for?
 
 React ships with a [useRef] hook that works perfectly fine for most
@@ -103,6 +107,7 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
 [hook]: https://reactjs.org/docs/hooks-overview.html
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
+[uselayouteffect]: https://reactjs.org/docs/hooks-reference.html#uselayouteffect
 [callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
