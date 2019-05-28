@@ -29,30 +29,32 @@ import {useScrollDirection} from '@hzcore/scroll-monitor';
 ### Signature
 
 ```ts
-function useScrollDirection(
-  innerRef?: InnerRef<HTMLElement> | null,
-): [ScrollDirection, (node: HTMLElement | null) => void] {
+function useScrollDirection(): [ScrollDirection, React.RefObject<HTMLElement>];
 ```
 
-### Arguments
+or, with a `providedRef`:
 
 ```ts
-innerRef?: InnerRef<HTMLElement> | null
+function useScrollDirection(
+  providedRef: React.RefObject<HTMLElement>,
+): ScrollDirection;
 ```
 
-An optional ref object or callback ref.
+### providedRef: `providedRef?: React.RefObject<HTMLElement>`
+
+An optional ref object to use.
 Useful when the component needs to handle ref forwarding.
 
-### Returns
+See [Usage with Shared Ref / Ref Forwarding] for more.
 
-```ts
-[ScrollDirection, (node: HTMLElement | null) => void] {
-```
+### returns `ScrollDirection | [ScrollDirection, React.RefObject<HTMLElement>]`
 
-An array containing a `ScrollDirection` object and a callback `ref`.
+If a `providedRef` is passed to `useScrollDirection`,
+returns a `ScrollDirection` value.
 
-The callback `ref` should be passed to an underlying DOM node.
-Note that the node does not have to be scrollable itself,
+If no `providedRef` is passed, returns an array containing a
+`ScrollDirection` object and a `ref` object. The `ref` should be passed
+to an underlying DOM node. Note that the node does not have to be scrollable itself,
 as `useScrollDirection` will traverse the DOM to find a scrollable parent
 to observe.
 
@@ -110,8 +112,9 @@ interface ScrollDirection {
 <Playground>
   {() => {
     const ScrollUpBar = () => {
-      const [{height}, sizeRef] = useSize();
-      const [{vertical}, ref] = useScrollDirection(sizeRef);
+      const ref = React.useRef();
+      const {vertical} = useScrollDirection(ref);
+      const [{height}, sizeRef] = useSize(ref);
       const transform = useSpring({
         config: config.stiff,
         transform: `translateY(${
@@ -133,7 +136,7 @@ interface ScrollDirection {
           }}
         >
           <animated.div
-            ref={ref}
+            ref={sizeRef}
             style={{
               position: 'absolute',
               top: 0,
@@ -155,24 +158,36 @@ interface ScrollDirection {
   }}
 </Playground>
 
-## Usage with Ref Forwarding
+## Usage with Shared Ref / Ref Forwarding
 
-Sometimes a component needs to [forward a ref] to its children.
-To support this case, `useScrollDirection` accepts an optional ref argument:
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useScrollDirection`
+accepts an optional `providedRef` argument:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
-  // We pass `forwardedRef` (which may be a ref object or a callack ref)
-  // to `useScrollDirection`. Note that the returned `ref` will _not_ be
-  // the same as `forwardedRef`, but they _will_ get the same value.
-  const [scrollDirection, ref] = useScrollDirection(forwardedRef);
-  // Note that we actually pass `ref` to the underlying component,
-  // not `forwardedRef`. We do this to make sure that
-  // `useScrollDirection` is notified when the ref value changes.
-  // This works because we passed `forwardedRef` to `useScrollDirection`,
-  // which will update the `forwardedRef` automatically.
-  return <div ref={ref}>{JSON.stringify(scrollDirection, null, 2)}</div>;
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // to `useScrollDirection`. Note that a `ref`
+  // will _not_ be returned with the `ScrollDirection` value.
+  const scrollDirection = useScrollDirection(forwardedRef);
+  return (
+    <div ref={forwardedRef}>{JSON.stringify(scrollDirection, null, 2)}</div>
+  );
 });
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const ref = React.useRef(null);
+  // We pass `ref` to `useScrollDirection`.
+  // Note that a `ref` will _not_ be returned
+  // with the `ScrollDirection` value.
+  const scrollDirection = useScrollDirection(ref);
+  return <div ref={ref}>{JSON.stringify(scrollDirection, null, 2)}</div>;
+};
 ```
 
 [hook]: https://reactjs.org/docs/hooks-overview.html
@@ -183,3 +198,4 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
 [scroll up bar]: http://usabilitypost.com/2014/05/24/the-scroll-up-bar/
 [react-spring]: https://www.react-spring.io/
+[usage with shared ref / ref forwarding]: #usage-with-shared-ref--ref-forwarding

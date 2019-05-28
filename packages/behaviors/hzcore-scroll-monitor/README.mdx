@@ -16,7 +16,7 @@ it accepts a child [render prop], and returns the result
 of calling that render prop with the latest state of
 the nearest scrollable container.
 
-> **For React>=16.8.0:**
+> **Deprecated**
 >
 > It is generally better to use the [hooks]
 > that provide the specific aspects of scrolling you would like to
@@ -47,7 +47,11 @@ import ScrollMonitor from '@hzcore/scroll-monitor';
   <ScrollMonitor scrolling direction position>
     {state => (
       <pre ref={state.scrollRef} style={{width: '100%', height: 250}}>
-        {JSON.stringify(state, null, 2)}
+        {JSON.stringify(
+          Object.assign({}, state, {scrollRef: undefined}),
+          null,
+          2,
+        )}
       </pre>
     )}
   </ScrollMonitor>

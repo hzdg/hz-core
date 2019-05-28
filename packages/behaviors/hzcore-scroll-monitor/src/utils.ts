@@ -65,14 +65,14 @@ export function getNearestScrollNode(
  *
  * Returns a `RefObject` pointing the nearest scrollable node, or `null`.
  */
-export function useNearestScrollNodeRef(
+export function useNearestScrollNodeRef<T extends Node>(
   /**
    * A ref to a DOM Element.
    * Note that the node does not have to be scrollable itself,
    * as `useNearestScrollNodeRef` will traverse the DOM to find
    * a scrollable parent.
    */
-  ref: React.RefObject<Element | null>,
+  ref: React.RefObject<T>,
 ): React.RefObject<HTMLElement | Document | null> {
   const {current} = ref;
   const scrollRef = useRef<HTMLElement | Document | null>(null);
@@ -110,7 +110,7 @@ export interface Subscribe {
  * Returns a `Subscribe` function that is called with an `EventListener`
  * and returns an `Unsubscribe` callback.
  */
-export function useSubscribableEvent(
+export function useSubscribableEvent<T extends EventTarget>(
   /**
    * A ref to a DOM `EventTarget`.
    * This is the target that can emit events of the type specified by `event`.
@@ -118,7 +118,7 @@ export function useSubscribableEvent(
    * If the ref value is `null` (i.e., not mounted),
    * then subscribers will not receive events.
    */
-  ref: React.RefObject<EventTarget>,
+  ref: React.RefObject<T>,
   /**
    * The event type to make subscribable.
    */
@@ -254,12 +254,24 @@ const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
  * A memoized version of the `listener` callback will be used
  * until one of the `inputs` has changed.
  */
-export function useScrollEffect(
-  scrollRef: React.RefObject<HTMLElement | Document>,
+export function useScrollEffect<T extends EventTarget>(
+  scrollRef: React.RefObject<T>,
   listener: EventListener,
   deps: unknown[],
 ): void {
   const handler = useCallback(listener, deps);
   const subscribe = useSubscribableEvent(scrollRef, SCROLL, LISTENER_OPTIONS);
   useEffect(() => subscribe(handler), [subscribe, handler]);
+}
+
+/**
+ * `useSyncRef` works like `React.useRef`, but will optionally update the
+ * current value of the returned ref with the current value of `providedRef`.
+ */
+export function useSyncRef<T>(
+  providedRef?: React.RefObject<T>,
+): React.RefObject<T> {
+  const ref = useRef<T | null>(null);
+  ref.current = providedRef ? providedRef.current : ref.current;
+  return ref;
 }

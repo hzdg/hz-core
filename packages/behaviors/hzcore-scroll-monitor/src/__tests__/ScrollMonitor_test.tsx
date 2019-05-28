@@ -8,14 +8,16 @@ type Mutable<T> = {-readonly [K in keyof T]: T[K]};
 
 const SCROLL_SIZE = 100;
 
-const printScrollState = (scrollState: ScrollMonitorRenderProps): string => {
+const printScrollState = (
+  scrollState: ScrollMonitorRenderProps<HTMLElement>,
+): string => {
   /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
   const {scrollRef, ...printable} = scrollState;
   return JSON.stringify(printable, null, 2);
 };
 
 const renderScrollState = (
-  scrollState: ScrollMonitorRenderProps,
+  scrollState: ScrollMonitorRenderProps<HTMLElement>,
 ): JSX.Element => (
   <div
     ref={scrollState.scrollRef as React.RefObject<HTMLDivElement>}
@@ -25,7 +27,9 @@ const renderScrollState = (
   </div>
 );
 
-const getScrollState = (container: HTMLElement): ScrollMonitorRenderProps =>
+const getScrollState = (
+  container: HTMLElement,
+): ScrollMonitorRenderProps<HTMLElement> =>
   JSON.parse(getByTestId(container, 'scrollState').innerHTML);
 
 function scrollTo(scrollLeft: number, scrollTop: number): void {
@@ -165,7 +169,7 @@ describe('<ScrollMonitor>', () => {
           {renderScrollState}
         </ScrollMonitor>,
       );
-      expect(getScrollState(container).intersects).toBeNull();
+      expect(getScrollState(container).intersects).toBe(false);
       scrollTo(0, 2);
       expect(getScrollState(container).intersects).toBe(true);
       scrollTo(0, 4);
@@ -179,7 +183,7 @@ describe('<ScrollMonitor>', () => {
         {renderScrollState}
       </ScrollMonitor>,
     );
-    expect(getScrollState(container).intersects).toBeNull();
+    expect(getScrollState(container).intersects).toMatchObject([false, false]);
     scrollTo(0, 20);
     expect(getScrollState(container).intersects).toMatchObject([true, true]);
     scrollTo(0, 10);

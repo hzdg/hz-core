@@ -18,14 +18,14 @@ import useScrollIntersection, {
 /**
  * Scroll state passed to the ScrollMonitor render prop (children function).
  */
-export interface ScrollMonitorRenderProps {
+export interface ScrollMonitorRenderProps<T extends HTMLElement> {
   /**
    * A ref object that should be passed to an underlying DOM node.
    * Note that the node does not have to be scrollable itself,
    * as `ScrollMonitor` will traverse the DOM to find a scrollable parent
    * to observe.
    */
-  scrollRef: React.RefObject<HTMLElement>;
+  scrollRef: React.RefObject<T>;
   /**
    * Whether or not the nearest scrollable container is currently scrolling.
    *
@@ -56,17 +56,17 @@ export interface ScrollMonitorRenderProps {
   intersects?: Intersects;
 }
 
-export interface ScrollMonitorProps {
+export interface ScrollMonitorProps<T extends HTMLElement> {
   /**
    * A function that takes scroll monitor state and returns a React element.
    * Also known as a 'render prop'.
    */
-  children: (state: ScrollMonitorRenderProps) => JSX.Element;
+  children: (state: ScrollMonitorRenderProps<T>) => JSX.Element;
   /**
    * An optional ref object or callback ref.
    * Useful when the owner component needs to handle ref forwarding.
    */
-  innerRef?: React.Ref<HTMLElement | null>;
+  innerRef?: React.Ref<T>;
   /**
    * Whether or not to monitor scroll direction.
    *
@@ -107,7 +107,7 @@ export interface ScrollMonitorProps {
    * A callback for when scroll position changes.
    * Receives the latest scroll state, in the same form as the render prop.
    */
-  onChange?: ((state: ScrollMonitorRenderProps) => void) | null;
+  onChange?: ((state: ScrollMonitorRenderProps<T>) => void) | null;
   /**
    * A callback for when scrolling stops.
    */
@@ -122,11 +122,13 @@ export interface ScrollMonitorProps {
  * of calling that render prop with the latest state of
  * the nearest scrollable container.
  */
-function ScrollMonitor(props: ScrollMonitorProps): JSX.Element {
-  const scrollRef = useRef<HTMLElement>(null);
-  const [scrolling] = useScrolling(scrollRef);
-  const [direction] = useScrollDirection(scrollRef);
-  const [intersects] = useScrollIntersection(props.intersects || [], scrollRef);
+function ScrollMonitor<T extends HTMLElement>(
+  props: ScrollMonitorProps<T>,
+): JSX.Element {
+  const scrollRef = useRef<T>(null);
+  const scrolling = useScrolling(scrollRef);
+  const direction = useScrollDirection(scrollRef);
+  const intersects = useScrollIntersection(props.intersects || [], scrollRef);
 
   const [position, setPosition] = useState<ScrollPosition>({
     top: null,
@@ -157,7 +159,7 @@ function ScrollMonitor(props: ScrollMonitorProps): JSX.Element {
 
   // Create the new state.
   const state = useMemo(() => {
-    const state: ScrollMonitorRenderProps = {scrollRef};
+    const state: ScrollMonitorRenderProps<T> = {scrollRef};
     if (scrollingEnabled) state.scrolling = scrolling;
     if (positionEnabled) state.position = position;
     if (directionEnabled) state.direction = direction;

@@ -27,34 +27,35 @@ import {useScrolling} from '@hzcore/scroll-monitor';
 ### Signature
 
 ```ts
-function useScrolling(
-  innerRef?: InnerRef<HTMLElement> | null,
-): [boolean, (node: HTMLElement | null) => void];
+function useScrolling(): [boolean, React.RefObject<HTMLElement>];
 ```
 
-### Arguments
+or, with a `providedRef`:
 
 ```ts
-innerRef?: InnerRef<HTMLElement> | null
+function useScrolling(providedRef: React.RefObject<HTMLElement>): boolean;
 ```
 
-An optional ref object or callback ref.
+### providedRef: `providedRef?: React.RefObject<HTMLElement>`
+
+An optional ref object to use.
 Useful when the component needs to handle ref forwarding.
 
-### Returns
+See [Usage with Shared Ref / Ref Forwarding] for more.
 
-```ts
-[scrolling, ref]: [boolean, (node: HTMLElement | null) => void]
-```
+### returns `boolean | [boolean, React.RefObject<HTMLElement>]`
 
-An array containing a `scrolling` boolean and a callback `ref`.
+If a `providedRef` is passed to `useScrolling`,
+returns a boolean value, that indicates whether or not
+the nearest scrollable container is scrolling.
 
-The callback `ref` should be passed to an underlying DOM node.
+If no `providedRef` is passed, returns an array containing a boolean
+and a `ref` object. The `ref` should be passed to an underlying DOM node.
 Note that the node does not have to be scrollable itself,
 as `useScrolling` will traverse the DOM to find a scrollable parent
 to observe.
 
-The `scrolling` boolean is `true` when the nearest
+The returned boolean is `true` when the nearest
 scrollable container is scrolling, and `false` when it is not.
 
 ## Example
@@ -85,24 +86,35 @@ scrollable container is scrolling, and `false` when it is not.
   }}
 </Playground>
 
-## Usage with Ref Forwarding
+## Usage with Shared Ref / Ref Forwarding
 
-Sometimes a component needs to [forward a ref] to its children.
-To support this case, `useScrolling` accepts an optional ref argument:
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useScrolling`
+accepts an optional `providedRef` argument:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
-  // We pass `forwardedRef` (which may be a ref object or a callack ref)
-  // to `useScrolling`. Note that the returned `ref` will _not_ be
-  // the same as `forwardedRef`, but they _will_ get the same value.
-  const [scrolling, ref] = useScrolling(forwardedRef);
-  // Note that we actually pass `ref` to the underlying component,
-  // not `forwardedRef`. We do this to make sure that
-  // `useScrolling` is notified when the ref value changes.
-  // This works because we passed `forwardedRef` to `useScrolling`,
-  // which will update the `forwardedRef` automatically.
-  return <div ref={ref}>{scrolling ? 'Scrolling' : 'Not Scroling'}</div>;
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // to `useScrolling`. Note that a `ref`
+  // will _not_ be returned with the `scrolling` value.
+  const scrolling = useScrolling(forwardedRef);
+  return (
+    <div ref={forwardedRef}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>
+  );
 });
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const ref = React.useRef(null);
+  // We pass `ref` to `useScrolling`.
+  // Note that a `ref` will _not_ be returned with the `scrolling` value.
+  const scrolling = useScrolling(ref);
+  return <div ref={ref}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>;
+};
 ```
 
 [hook]: https://reactjs.org/docs/hooks-overview.html
@@ -111,3 +123,4 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
 [callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[usage with shared ref / ref forwarding]: #usage-with-shared-ref--ref-forwarding

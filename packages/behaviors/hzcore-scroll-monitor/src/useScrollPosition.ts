@@ -1,5 +1,10 @@
-import {useEffect, useRef, createRef} from 'react';
-import {getScrollRect, useNearestScrollNodeRef, useScrollEffect} from './utils';
+import {useEffect, useRef} from 'react';
+import {
+  getScrollRect,
+  useNearestScrollNodeRef,
+  useScrollEffect,
+  useSyncRef,
+} from './utils';
 
 /**
  * `ScrollPosition` is an object of `top` and `left` values,
@@ -44,12 +49,23 @@ export function getScrollPosition(event: Event): ScrollPosition {
  * Expects a `handler` that will receive a `ScrollPosition` each time the
  * nearest scrollable element's scroll position changes.
  *
- * Returns a `RefObject` that should be passed to an underlying DOM node.
+ * If a `providedRef` is passed to `useScrollPosition`,
+ * returns `undefined`.
+ *
+ * If no `providedRef` is passed, returns a `ref` object.
+ * The `ref` should be passed to an underlying DOM node.
  * Note that the node does not have to be scrollable itself,
  * as `useScrollPosition` will traverse the DOM to find a scrollable parent
  * to observe.
  */
-export default function useScrollPosition(
+function useScrollPosition<T extends HTMLElement>(
+  handler: (position: ScrollPosition) => void,
+): React.RefObject<T>;
+function useScrollPosition<T extends HTMLElement>(
+  handler: (position: ScrollPosition) => void,
+  providedRef: React.RefObject<T>,
+): void;
+function useScrollPosition<T extends HTMLElement>(
   /**
    * `handler` will receive a `ScrollPosition` object each time
    * the nearest scrollable container's scroll position changes.
@@ -61,12 +77,13 @@ export default function useScrollPosition(
    */
   handler: (position: ScrollPosition) => void,
   /**
-   * An optional ref to use. If provided, this ref object will be
-   * passed through as the returned value for `useScrollPosition`.
+   * An optional ref to use.
+   * If provided, `useScrollPosition` will not return a ref.
    * Useful when the component needs to handle ref forwarding.
    */
-  ref: React.RefObject<HTMLElement> = createRef<HTMLElement>(),
-): React.RefObject<HTMLElement> {
+  providedRef?: React.RefObject<T>,
+): React.RefObject<T> | void {
+  const ref = useSyncRef(providedRef);
   const scrollRef = useNearestScrollNodeRef(ref);
   const changeHandler = useRef(handler);
 
@@ -91,5 +108,7 @@ export default function useScrollPosition(
     [],
   );
 
-  return ref;
+  if (!providedRef) return ref;
 }
+
+export default useScrollPosition;

@@ -1,9 +1,10 @@
-import {useState, useEffect, useRef, createRef} from 'react';
+import {useState, useEffect, useRef} from 'react';
 import {
   getScrollRect,
   ScrollRect,
   useNearestScrollNodeRef,
   useScrollEffect,
+  useSyncRef,
 } from './utils';
 
 export interface Bounds {
@@ -43,7 +44,7 @@ export type ScrollIntersectionConfig = BoundsRect | BoundsRect[];
  * where the index of each boolean corresponds to the index of the area in
  * the configuration array.
  */
-export type Intersects = boolean | boolean[] | null;
+export type Intersects = boolean | boolean[];
 
 function intersects(bounds: BoundsRect, rect: ScrollRect): boolean {
   const {
@@ -100,23 +101,32 @@ export function getIntersects(
  * that care about the interesction of the nearest scrollable container's
  * scroll position with one or more areas of the scrollable area.
  *
- * Returns an array containing an `Intersects` value,
- * consisting of one intersection boolean or an array of booleans,
- * and a `RefObject`.
+ * If a `providedRef` is passed to `useScrollIntersection`,
+ * returns the `Intersects` value, consisting of one intersection
+ * boolean or an array of booleans.
+ *
+ * If no `providedRef` is passed, returns an array containing an `Intersects`
+ * value and a `ref` object. The `ref` should be passed to an underlying
+ * DOM node. Note that the node does not have to be scrollable itself,
+ * as `useScrollIntersection` will traverse the DOM to find
+ * a scrollable parent to observe.
  *
  * `Intersects` describes whether or not any of the configured areas
  * currently intersect with the nearest scrollable container's scroll position.
- * If a single area has been configured, `Intersects` will be one boolean.
+ *
+ * If a single area has been configured, `Intersects` will be a boolean.
  * If an array of areas has been configured, this will be an array of booleans,
  * where the index of each boolean corresponds to the index of the area in
  * the configuration array.
- *
- * The `RefObject` should be passed to an underlying DOM node.
- * Note that the node does not have to be scrollable itself,
- * as `useScrollIntersection` will traverse the DOM to find a scrollable parent
- * to observe.
  */
-export default function useScrollIntersection(
+function useScrollIntersection<T extends HTMLElement>(
+  config: ScrollIntersectionConfig,
+  providedRef: React.RefObject<T>,
+): Intersects;
+function useScrollIntersection<T extends HTMLElement>(
+  config: ScrollIntersectionConfig,
+): [Intersects, React.RefObject<T>];
+function useScrollIntersection<T extends HTMLElement>(
   /**
    * A rect or array of rects to check for intersection.
    * A rect should have at least one of `{top, right, left, bottom}`
@@ -128,8 +138,8 @@ export default function useScrollIntersection(
    * passed through as the returned value for `useScrollIntersection`.
    * Useful when the component needs to handle ref forwarding.
    */
-  ref: React.RefObject<HTMLElement> = createRef<HTMLElement>(),
-): [Intersects, React.RefObject<HTMLElement>] {
+  providedRef?: React.RefObject<T>,
+): Intersects | [Intersects, React.RefObject<T>] {
   // Keep track of changes to intersection config.
   const intersectionConfig = useRef(config);
   useEffect(() => {
@@ -138,8 +148,15 @@ export default function useScrollIntersection(
 
   // Keep track of whether or not any configured areas
   // interesect the scroll position.
-  const [intersects, setIntersects] = useState<Intersects>(null);
+  const [intersects, setIntersects] = useState<Intersects>(() => {
+    return Array.isArray(intersectionConfig.current)
+      ? new Array(intersectionConfig.current.length).fill(false)
+      : false;
+  });
+
+  const ref = useSyncRef(providedRef);
   const scrollRef = useNearestScrollNodeRef(ref);
+
   useScrollEffect(
     scrollRef,
     (event: Event): void => {
@@ -148,5 +165,10 @@ export default function useScrollIntersection(
     [],
   );
 
-  return [intersects, ref];
+  // If a ref has been provided, just return the `Intersects` value.
+  // If a ref has not not been provided, return a ref along with
+  // the `Intersects` value.
+  return providedRef ? intersects : [intersects, ref];
 }
+
+export default useScrollIntersection;

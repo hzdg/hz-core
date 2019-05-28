@@ -28,6 +28,10 @@ export type Intersects = intersection.Intersects;
 export const getIntersects = intersection.getIntersects;
 export const useScrollIntersection = intersection.default;
 
-export type ScrollMonitorRenderProps = ScrollMonitor.ScrollMonitorRenderProps;
-export type ScrollMonitorProps = ScrollMonitor.ScrollMonitorProps;
+export type ScrollMonitorRenderProps<
+  T extends HTMLElement
+> = ScrollMonitor.ScrollMonitorRenderProps<T>;
+export type ScrollMonitorProps<
+  T extends HTMLElement
+> = ScrollMonitor.ScrollMonitorProps<T>;
 export default ScrollMonitor.default;

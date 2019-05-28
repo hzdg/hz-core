@@ -29,11 +29,17 @@ import {useScrollPosition} from '@hzcore/scroll-monitor';
 ```ts
 function useScrollPosition(
   handler: (position: ScrollPosition) => void,
-  innerRef?: InnerRef<HTMLElement> | null,
-): (node: HTMLElement | null) => void {
+): React.RefObject<HTMLElement>;
 ```
 
-### Arguments
+or, with a `providedRef`:
+
+```ts
+function useScrollPosition(
+  handler: (position: ScrollPosition) => void,
+  providedRef: React.RefObject<HTMLElement>,
+): void;
+```
 
 ### handler: `handler: (position: ScrollPosition) => void,`
 
@@ -57,14 +63,20 @@ interface ScrollPosition {
 }
 ```
 
-### innerRef `innerRef?: InnerRef<HTMLElement> | null`
+### providedRef: `providedRef?: React.RefObject<HTMLElement>`
 
-An optional ref object or callback ref.
+An optional ref object to use.
 Useful when the component needs to handle ref forwarding.
 
-### returns `(node: HTMLElement | null) => void`
+See [Usage with Shared Ref / Ref Forwarding] for more.
 
-A [callback ref] that should be passed to an underlying DOM node.
+### returns `React.RefObject<HTMLElement> | void`
+
+If a `providedRef` is passed to `useScrollPosition`,
+returns `void`.
+
+If no `providedRef` is passed, returns a `ref` object.
+The `ref` should be passed to an underlying DOM node.
 Note that the node does not have to be scrollable itself,
 as `useScrollPosition` will traverse the DOM to find a scrollable parent
 to observe.
@@ -96,24 +108,34 @@ to observe.
   }}
 </Playground>
 
-## Usage with Ref Forwarding
+## Usage with Shared Ref / Ref Forwarding
 
-Sometimes a component needs to [forward a ref] to its children.
-To support this case, `useScrollPosition` accepts an optional ref argument:
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useScrollPosition`
+accepts an optional `providedRef` argument:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
-  // We pass `forwardedRef` (which may be a ref object or a callack ref)
-  // to `useScrollPosition`. Note that the returned `ref` will _not_ be
-  // the same as `forwardedRef`, but they _will_ get the same value.
-  const ref = useScrollPosition(setPosition, forwardedRef);
-  // Note that we actually pass `ref` to the underlying component,
-  // not `forwardedRef`. We do this to make sure that
-  // `useScrollPosition` is notified when the ref value changes.
-  // This works because we passed `forwardedRef` to `useScrollPosition`,
-  // which will update the `forwardedRef` automatically.
-  return <div ref={ref}>{JSON.stringify(position, null, 2)}</div>;
+  const [position, setPosition] = React.useState(null);
+  // We pass `forwardedRef` (which _must_ be a ref object) to `useScrollPosition`.
+  // Note that a `ref` will _not_ be returned.
+  useScrollPosition(setPosition, forwardedRef);
+  return <div ref={forwardedRef}>{JSON.stringify(position, null, 2)}</div>;
 });
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const [position, setPosition] = React.useState(null);
+  const ref = React.useRef(null);
+  // We pass `ref` to `useScrollPosition`.
+  // Note that a `ref` will _not_ be returned.
+  useScrollPosition(setPosition, ref);
+  return <div ref={ref}>{JSON.stringify(position, null, 2)}</div>;
+};
 ```
 
 [hook]: https://reactjs.org/docs/hooks-overview.html
@@ -122,3 +144,4 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
 [callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[usage with shared ref / ref forwarding]: #usage-with-shared-ref--ref-forwarding

@@ -1,6 +1,6 @@
-import {useState, useRef, createRef} from 'react';
+import {useState, useRef} from 'react';
 import {ScrollPosition, getScrollPosition} from './useScrollPosition';
-import {useNearestScrollNodeRef, useScrollEffect} from './utils';
+import {useNearestScrollNodeRef, useScrollEffect, useSyncRef} from './utils';
 
 const INITIAL_SCROLL_DIRECTION: ScrollDirectionState = {
   vertical: null,
@@ -87,28 +87,37 @@ export function getScrollDirection(
  * `useScrollDirection` is a React hook for components that care about
  * the nearest scrollable container's scroll direction.
  *
- * Returns an array containing a `ScrollDirectionState` object
- * with `horizontal` and `vertical` keys, and a `RefObject`.
+ * If a `providedRef` is passed to `useScrollDirection`,
+ * returns a `ScrollDirection` value.
+ *
+ * If no `providedRef` is passed, returns an array containing a
+ * `ScrollDirection` object and a `ref` object. The `ref` should be passed
+ * to an underlying DOM node. Note that the node does not have to be scrollable itself,
+ * as `useScrollDirection` will traverse the DOM to find a scrollable parent
+ * to observe.
  *
  * `ScrollDirectionState.vertical` will be one of `ScrollDirection.UP`
  *  or `ScrollDirection.DOWN`, while `ScrollDirectionState.horizontal`
  * will be one of `ScrollDirection.LEFT` or `ScrollDirection.RIGHT`.
- *
- * The `RefObject` should be passed to an underlying DOM node.
- * Note that the node does not have to be scrollable itself,
- * as `useScrollDirection` will traverse the DOM to find a scrollable parent
- * to observe.
  */
-export default function useScrollDirection(
+function useScrollDirection<T extends HTMLElement>(): [
+  ScrollDirectionState,
+  React.RefObject<T>
+];
+function useScrollDirection<T extends HTMLElement>(
+  providedRef?: React.RefObject<T>,
+): ScrollDirectionState;
+function useScrollDirection<T extends HTMLElement>(
   /**
    * An optional ref to use. If provided, this ref object will be
    * passed through as the returned value for `useScrollDirection`.
    * Useful when the component needs to handle ref forwarding.
    */
-  ref: React.RefObject<HTMLElement> = createRef<HTMLElement>(),
-): [ScrollDirectionState, React.RefObject<HTMLElement>] {
+  providedRef?: React.RefObject<T>,
+): ScrollDirectionState | [ScrollDirectionState, React.RefObject<T>] {
   const scrollPosition = useRef<ScrollPosition | null>(null);
   const [direction, setDirection] = useState(INITIAL_SCROLL_DIRECTION);
+  const ref = useSyncRef(providedRef);
   const scrollRef = useNearestScrollNodeRef(ref);
   useScrollEffect(
     scrollRef,
@@ -120,5 +129,7 @@ export default function useScrollDirection(
     },
     [],
   );
-  return [direction, ref];
+  return providedRef ? direction : [direction, ref];
 }
+
+export default useScrollDirection;
