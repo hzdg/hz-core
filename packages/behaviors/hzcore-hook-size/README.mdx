@@ -26,29 +26,29 @@ import useSize from '@hzcore/hook-size';
 ### Signature
 
 ```ts
-function useSize(
-  innerRef?: InnerRef<HTMLElement> | null,
-): [Size, (node: HTMLElement | null) => void] {
+function useSize(): [Size, React.RefObject<HTMLElement>];
 ```
 
-### Arguments
+or, with a `providedRef`:
 
 ```ts
-innerRef?: InnerRef<HTMLElement> | null
+function useSize(providedRef: React.RefObject<HTMLElement>): Size;
 ```
 
-An optional ref object or callback ref.
+### providedRef: `providedRef?: React.RefObject<HTMLElement>`
+
+An optional ref object to use.
 Useful when the component needs to handle ref forwarding.
 
-### Returns
+See [Usage with Shared Ref / Ref Forwarding] for more.
 
-```ts
-[Size, (node: HTMLElement | null) => void] {
-```
+### returns `Size | [Size, (node: HTMLElement | null) => void]`
 
-An array containing a `Size` object and a callback `ref`.
+If a `providedRef` is passed to `useSize`, returns a `Size` value.
 
-The callback `ref` should be passed to the underlying DOM node to measure.
+If no `providedRef` is passed, returns an array containing a
+`Size` object and a `ref` object. The `ref` should be passed
+to an underlying DOM node.
 
 The `Size` object shape is:
 
@@ -122,29 +122,37 @@ interface Size {
   }}
 </Playground>
 
-## Usage with Ref Forwarding
+## Usage with Shared Ref / Ref Forwarding
 
-Sometimes a component needs to [forward a ref] to its children.
-To support this case, `useSize` accepts an optional ref argument:
+Sometimes a component needs to [forward a ref] to its children,
+or [use a ref][useref] with other hooks.
+To support these cases, `useSize` accepts an optional `providedRef` argument:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
-  // We pass `forwardedRef` (which may be a ref object or a callack ref)
-  // to `useSize`. Note that the returned `ref` will _not_ be
-  // the same as `forwardedRef`, but they _will_ get the same value.
-  const [size, ref] = useSize(forwardedRef);
-  // Note that we actually pass `ref` to the underlying component,
-  // not `forwardedRef`. We do this to make sure that
-  // `useSize` is notified when the ref value changes.
-  // This works because we passed `forwardedRef` to `useSize`,
-  // which will update the `forwardedRef` automatically.
-  return <div ref={ref}>{JSON.stringify(size, null, 2)}</div>;
+  // We pass `forwardedRef` (which _must_ be a ref object)
+  // to `useSize`. Note that a `ref` will _not_ be returned
+  // with the `size` value.
+  const size = useSize(forwardedRef);
+  return <div ref={forwardedRef}>{JSON.stringify(size, null, 2)}</div>;
 });
+```
+
+or, with `useRef`:
+
+```js
+const SomeRefUsingComponent = () => {
+  const ref = React.useRef(null);
+  // We pass `ref` to `useSize`.
+  // Note that a `ref` will _not_ be returned with the `size` value.
+  const size = useSize(ref);
+  return <div ref={ref}>{JSON.stringify(size, null, 2)}</div>;
+};
 ```
 
 [hook]: https://reactjs.org/docs/hooks-overview.html
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
-[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[usage with shared ref / ref forwarding]: #usage-with-shared-ref--ref-forwarding

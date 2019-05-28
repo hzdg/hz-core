@@ -1,15 +1,19 @@
-import {useEffect, useMemo, useState} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {useEffect, useMemo, useState, useRef, useLayoutEffect} from 'react';
 import {useWindowSize} from '@hzcore/windowsize-monitor';
 import ResizeObservable from '@hzcore/resize-observable';
 
 // We really would just like to use DOMRect as our type here, but due to
 // the new nature of the API and the polyfill behavior, The DOMRect interface
-// isn't always fully implemented. in particulart, the `toJSON()` method is
+// isn't always fully implemented. in particular, the `toJSON()` method is
 // often missing. Since we aren't using it directly anyway, we just omit it
 // from our expected type.
 type ElementSize = Readonly<Pick<DOMRect, Exclude<keyof DOMRect, 'toJSON'>>>;
 
+/**
+ * A DOMRect-like object, but with additional useful measurements.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/DOMRect
+ */
 export interface Size {
   /** The x coordinate of the DOMRect's origin. */
   readonly x: number;
@@ -63,23 +67,28 @@ const INITIAL_ELEMENT_SIZE: ElementSize = {
 };
 
 /**
- * A React hook for components that care about their size
+ * `useSize` is a React hook for components that care about their size.
  *
- * @returns {[Size, (node: HTMLElement | null) => void]}
+ * If a `providedRef` is passed to `useSize`, returns a `Size` value.
+ *
+ * If no `providedRef` is passed, returns an array containing a
+ * `Size` object and a `ref` object. The `ref` should be passed
+ * to an underlying DOM node.
  */
-export default function useSize(
+function useSize<T extends HTMLElement>(): [Size, React.RefObject<T>];
+function useSize<T extends HTMLElement>(providedRef: React.RefObject<T>): Size;
+function useSize<T extends HTMLElement>(
   /**
-   * An optional ref object or callback ref.
+   * An optional ref object.
+   * If provided, `useSize` will return only a `Size` value.
    * Useful when the component needs to handle ref forwarding.
    */
-  innerRef?: InnerRef<HTMLElement> | null,
-): [Size, (node: HTMLElement | null) => void] {
+  providedRef?: React.RefObject<T>,
+): Size | [Size, React.RefObject<T>] {
   const [elementSize, setElementSize] = useState<ElementSize>(
     INITIAL_ELEMENT_SIZE,
   );
   const viewSize = useWindowSize();
-  const [ref, refCallback] = useRefCallback(innerRef);
-  const element = ref.current;
   const size: Size = useMemo(
     () =>
       Object.freeze({
@@ -97,13 +106,53 @@ export default function useSize(
     [elementSize, viewSize],
   );
 
+  const ref = useRef<T | null>(null);
+  if (providedRef) {
+    ref.current = providedRef.current;
+  }
+
+  // Note: we use state instead of a ref to track this value
+  // because `useState` supports lazy instantiation (via a callback),
+  // whereas`useRef` would have us creating and throwing away a `new Map()`
+  // on every subsequent render.
+  const [subscriptions] = useState(
+    () => new Map<HTMLElement, ZenObservable.Subscription>(),
+  );
+
+  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  useLayoutEffect(
+    /**
+     * `subscribeIfNecessary` will run on layout to determine if we need to
+     * subscribe to resize events on an element. If we are already subscribed
+     * to the element, it will do nothing.
+     */
+    function subscribeIfNecessary() {
+      const element = ref.current;
+      if (element && !subscriptions.has(element)) {
+        subscriptions.set(
+          element,
+          ResizeObservable.create(element).subscribe(setElementSize),
+        );
+      }
+    },
+  );
+
   useEffect(() => {
-    if (element) {
-      const subscription = ResizeObservable.create(element).subscribe(
-        setElementSize,
-      );
-      return subscription.unsubscribe.bind(subscription);
+    /**
+     * `cleanup` will run on unmount to unsubscribe from any subscriptions.
+     */
+    function cleanup(): void {
+      if (subscriptions.size > 0) {
+        for (const [el, sub] of subscriptions.entries()) {
+          sub.unsubscribe();
+          subscriptions.delete(el);
+        }
+      }
     }
-  }, [element]);
-  return [size, refCallback];
+    return cleanup;
+  }, [subscriptions]);
+
+  return providedRef ? size : [size, ref];
 }
+
+export default useSize;

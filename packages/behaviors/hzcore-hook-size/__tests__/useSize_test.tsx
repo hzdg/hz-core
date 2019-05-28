@@ -4,7 +4,7 @@ import {render, getByTestId} from 'react-testing-library';
 import useSize, {Size} from '../src';
 
 const SizeUser = (): JSX.Element => {
-  const [size, ref] = useSize();
+  const [size, ref] = useSize<HTMLDivElement>();
   return (
     <div ref={ref}>
       <pre data-testid="sizeState">{JSON.stringify(size, null, 2)}</pre>
