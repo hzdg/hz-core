@@ -43,8 +43,8 @@ function useSize(handler: (size: Size) => void): React.RefObject<HTMLElement>;
 
 // Stateless with a handler and a provided ref
 function useSize(
-  handler: (size: Size) => void,
   providedRef: React.RefObject<HTMLElement>,
+  handler: (size: Size) => void,
 ): void;
 ```
 
@@ -170,12 +170,12 @@ The returned [ref object] should be passed to the DOM element to be measured.
 </Playground>
 
 To `useSize` statelessly with an existing [ref object], call `useSize`
-with a [handler] function and the [ref object]. It will return `undefined`:
+with the [ref object] and a [handler] function. It will return `undefined`:
 
 ```ts
 function useSize(
-  handler: (size: Size) => void,
   providedRef: React.RefObject<HTMLElement>,
+  handler: (size: Size) => void,
 ): void;
 ```
 
@@ -191,7 +191,7 @@ See [Shared Ref / Ref Forwarding] for more on `providedRef`.
     const SizeUser = () => {
       const [size, setSize] = React.useState(null);
       const ref = React.useRef(null);
-      useSize(setSize, ref);
+      useSize(ref, setSize);
       return (
         <div
           ref={ref}

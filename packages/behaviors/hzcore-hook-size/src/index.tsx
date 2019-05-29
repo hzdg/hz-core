@@ -97,15 +97,15 @@ function getSize(elementSize: ElementSize, viewSize: WindowSize): Size {
  */
 function useSize<T extends HTMLElement>(
   /**
-   * `handler` will receive a `Size` object each time
-   * the observed element's size changes.
-   */
-  handler: (size: Size) => void,
-  /**
    * An existing ref being passed to the DOM element to measure.
    * Useful for ref forwarding or sharing.
    */
   providedRef: React.RefObject<T>,
+  /**
+   * `handler` will receive a `Size` object each time
+   * the observed element's size changes.
+   */
+  handler: (size: Size) => void,
 ): void;
 /**
  * `useSize` is a React hook for components that care about their size.
@@ -142,17 +142,18 @@ function useSize<T extends HTMLElement>(
 function useSize<T extends HTMLElement>(): [Size, React.RefObject<T>];
 function useSize<T extends HTMLElement>(
   handlerOrProvidedRef?: ((size: Size) => void) | React.RefObject<T>,
-  providedRef?: React.RefObject<T>,
+  handler?: (size: Size) => void,
 ): Size | React.RefObject<T> | [Size, React.RefObject<T>] | void {
   const changeHandler = useRef<((size: Size) => void) | null>(null);
   const ref = useRef<T | null>(null);
+  let providedRef: React.RefObject<T> | null = null;
 
   if (typeof handlerOrProvidedRef === 'function') {
     changeHandler.current = handlerOrProvidedRef;
-  } else {
-    changeHandler.current = null;
-    if (!providedRef) {
-      providedRef = handlerOrProvidedRef;
+  } else if (typeof handlerOrProvidedRef === 'object') {
+    providedRef = handlerOrProvidedRef;
+    if (typeof handler === 'function') {
+      changeHandler.current = handler;
     }
   }
 

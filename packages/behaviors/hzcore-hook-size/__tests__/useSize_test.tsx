@@ -1,6 +1,6 @@
 /* eslint-env jest, browser */
 import React from 'react';
-import {render, fireEvent, act} from 'react-testing-library';
+import {render} from 'react-testing-library';
 import useSize from '../src';
 
 test('useSize gets the initial size', async () => {
@@ -44,7 +44,7 @@ test('useSize uses an existing ref and a handler', async () => {
   const handler = jest.fn();
   const SizeUser = (): JSX.Element => {
     const ref = React.useRef(null);
-    useSize<HTMLDivElement>(handler, ref);
+    useSize<HTMLDivElement>(ref, handler);
     return <div ref={ref} />;
   };
   render(<SizeUser />);
