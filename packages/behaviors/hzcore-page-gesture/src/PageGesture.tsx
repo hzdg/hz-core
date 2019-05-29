@@ -213,7 +213,6 @@ function PageGesture(props: PageGestureProps): JSX.Element {
         dispatch({type: LAST});
       },
       onNext() {
-        console.log('ON NEXT BXES');
         if (typeof onNext === 'function') onNext();
         dispatch({type: NEXT});
       },
