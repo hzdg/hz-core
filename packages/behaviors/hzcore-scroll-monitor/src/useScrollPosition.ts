@@ -86,10 +86,7 @@ function useScrollPosition<T extends HTMLElement>(
   const ref = useSyncRef(providedRef);
   const scrollRef = useNearestScrollNodeRef(ref);
   const changeHandler = useRef(handler);
-
-  useEffect(function updateHandler() {
-    changeHandler.current = handler;
-  });
+  changeHandler.current = handler;
 
   useScrollEffect(
     scrollRef,

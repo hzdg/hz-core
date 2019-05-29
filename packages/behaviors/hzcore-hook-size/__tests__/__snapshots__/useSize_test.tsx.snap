@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useSize gets the initial size 1`] = `
+<div
+  data-testid="size"
+>
+  {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 0,
+  "bottom": 0,
+  "left": 0,
+  "width": 0,
+  "height": 0,
+  "vw": 0,
+  "vh": 0
+}
+</div>
+`;
+
+exports[`useSize passes the initial size to a handler 1`] = `
+Array [
+  Array [
+    Object {
+      "bottom": 0,
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "vh": 0,
+      "vw": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0,
+    },
+  ],
+]
+`;
+
+exports[`useSize uses an existing ref 1`] = `
+<div
+  data-testid="size"
+>
+  {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 0,
+  "bottom": 0,
+  "left": 0,
+  "width": 0,
+  "height": 0,
+  "vw": 0,
+  "vh": 0
+}
+</div>
+`;
+
+exports[`useSize uses an existing ref and a handler 1`] = `
+Array [
+  Array [
+    Object {
+      "bottom": 0,
+      "height": 0,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "vh": 0,
+      "vw": 0,
+      "width": 0,
+      "x": 0,
+      "y": 0,
+    },
+  ],
+]
+`;

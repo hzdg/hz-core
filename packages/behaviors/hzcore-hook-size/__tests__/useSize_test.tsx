@@ -1,33 +1,52 @@
 /* eslint-env jest, browser */
 import React from 'react';
-import {render, getByTestId} from 'react-testing-library';
-import useSize, {Size} from '../src';
-
-const SizeUser = (): JSX.Element => {
-  const [size, ref] = useSize<HTMLDivElement>();
-  return (
-    <div ref={ref}>
-      <pre data-testid="sizeState">{JSON.stringify(size, null, 2)}</pre>
-    </div>
-  );
-};
-
-const getSize = (container: HTMLElement): Size =>
-  JSON.parse(getByTestId(container, 'sizeState').innerHTML);
+import {render, fireEvent, act} from 'react-testing-library';
+import useSize from '../src';
 
 test('useSize gets the initial size', async () => {
-  const {container} = render(<SizeUser />);
-  expect(container).toBeInTheDocument();
-  expect(getSize(container)).toMatchObject({
-    x: 0,
-    y: 0,
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-    width: 0,
-    height: 0,
-    vw: 0,
-    vh: 0,
-  });
+  const SizeUser = (): JSX.Element => {
+    const [size, ref] = useSize<HTMLDivElement>();
+    return (
+      <div ref={ref} data-testid="size">
+        {JSON.stringify(size, null, 2)}
+      </div>
+    );
+  };
+  const {getByTestId} = render(<SizeUser />);
+  expect(getByTestId('size')).toMatchSnapshot();
+});
+
+test('useSize passes the initial size to a handler', async () => {
+  const handler = jest.fn();
+  const SizeUser = (): JSX.Element => {
+    const ref = useSize<HTMLDivElement>(handler);
+    return <div ref={ref} />;
+  };
+  render(<SizeUser />);
+  expect(handler.mock.calls).toMatchSnapshot();
+});
+
+test('useSize uses an existing ref', async () => {
+  const SizeUser = (): JSX.Element => {
+    const ref = React.useRef(null);
+    const size = useSize<HTMLDivElement>(ref);
+    return (
+      <div ref={ref} data-testid="size">
+        {JSON.stringify(size, null, 2)}
+      </div>
+    );
+  };
+  const {getByTestId} = render(<SizeUser />);
+  expect(getByTestId('size')).toMatchSnapshot();
+});
+
+test('useSize uses an existing ref and a handler', async () => {
+  const handler = jest.fn();
+  const SizeUser = (): JSX.Element => {
+    const ref = React.useRef(null);
+    useSize<HTMLDivElement>(handler, ref);
+    return <div ref={ref} />;
+  };
+  render(<SizeUser />);
+  expect(handler.mock.calls).toMatchSnapshot();
 });

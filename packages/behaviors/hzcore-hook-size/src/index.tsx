@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState, useRef, useLayoutEffect} from 'react';
+import {useEffect, useState, useRef, useLayoutEffect, useCallback} from 'react';
 import {useWindowSize} from '@hzcore/windowsize-monitor';
 import ResizeObservable from '@hzcore/resize-observable';
 
@@ -8,6 +8,11 @@ import ResizeObservable from '@hzcore/resize-observable';
 // often missing. Since we aren't using it directly anyway, we just omit it
 // from our expected type.
 type ElementSize = Readonly<Pick<DOMRect, Exclude<keyof DOMRect, 'toJSON'>>>;
+
+interface WindowSize {
+  width: number;
+  height: number;
+}
 
 /**
  * A DOMRect-like object, but with additional useful measurements.
@@ -67,48 +72,88 @@ const INITIAL_ELEMENT_SIZE: ElementSize = {
 };
 
 /**
- * `useSize` is a React hook for components that care about their size.
- *
- * If a `providedRef` is passed to `useSize`, returns a `Size` value.
- *
- * If no `providedRef` is passed, returns an array containing a
- * `Size` object and a `ref` object. The `ref` should be passed
- * to an underlying DOM node.
+ * `getSize` calculates a new `Size` from a `DOMRect` and viewport size.
  */
-function useSize<T extends HTMLElement>(): [Size, React.RefObject<T>];
-function useSize<T extends HTMLElement>(providedRef: React.RefObject<T>): Size;
+function getSize(elementSize: ElementSize, viewSize: WindowSize): Size {
+  return Object.freeze({
+    x: elementSize.x,
+    y: elementSize.y,
+    top: elementSize.top,
+    right: elementSize.right,
+    bottom: elementSize.bottom,
+    left: elementSize.left,
+    width: elementSize.width,
+    height: elementSize.height,
+    vw: elementSize.width / viewSize.width,
+    vh: elementSize.height / viewSize.height,
+  });
+}
+
+/**
+ * `useSize` is a React hook for components that care about their size.
+ * It can be used statefully or not, and with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-size
+ */
 function useSize<T extends HTMLElement>(
   /**
-   * An optional ref object.
-   * If provided, `useSize` will return only a `Size` value.
-   * Useful when the component needs to handle ref forwarding.
+   * `handler` will receive a `Size` object each time
+   * the observed element's size changes.
    */
+  handler: (size: Size) => void,
+  /**
+   * An existing ref being passed to the DOM element to measure.
+   * Useful for ref forwarding or sharing.
+   */
+  providedRef: React.RefObject<T>,
+): void;
+/**
+ * `useSize` is a React hook for components that care about their size.
+ * It can be used statefully or not, and with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-size
+ */
+function useSize<T extends HTMLElement>(
+  /**
+   * `handler` will receive a `Size` object each time
+   * the observed element's size changes.
+   */
+  handler: (size: Size) => void,
+): React.RefObject<T>;
+/**
+ * `useSize` is a React hook for components that care about their size.
+ * It can be used statefully or not, and with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-size
+ */
+function useSize<T extends HTMLElement>(
+  /**
+   * An existing ref being passed to the DOM element to measure.
+   * Useful for ref forwarding or sharing.
+   */
+  providedRef: React.RefObject<T>,
+): Size;
+/**
+ * `useSize` is a React hook for components that care about their size.
+ * It can be used statefully or not, and with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-size
+ */
+function useSize<T extends HTMLElement>(): [Size, React.RefObject<T>];
+function useSize<T extends HTMLElement>(
+  handlerOrProvidedRef?: ((size: Size) => void) | React.RefObject<T>,
   providedRef?: React.RefObject<T>,
-): Size | [Size, React.RefObject<T>] {
-  const [elementSize, setElementSize] = useState<ElementSize>(
-    INITIAL_ELEMENT_SIZE,
-  );
-  const viewSize = useWindowSize();
-  const size: Size = useMemo(
-    () =>
-      Object.freeze({
-        x: elementSize.x,
-        y: elementSize.y,
-        top: elementSize.top,
-        right: elementSize.right,
-        bottom: elementSize.bottom,
-        left: elementSize.left,
-        width: elementSize.width,
-        height: elementSize.height,
-        vw: elementSize.width / viewSize.width,
-        vh: elementSize.height / viewSize.height,
-      }),
-    [elementSize, viewSize],
-  );
-
+): Size | React.RefObject<T> | [Size, React.RefObject<T>] | void {
+  const changeHandler = useRef<((size: Size) => void) | null>(null);
   const ref = useRef<T | null>(null);
-  if (providedRef) {
-    ref.current = providedRef.current;
+
+  if (typeof handlerOrProvidedRef === 'function') {
+    changeHandler.current = handlerOrProvidedRef;
+  } else {
+    changeHandler.current = null;
+    if (!providedRef) {
+      providedRef = handlerOrProvidedRef;
+    }
   }
 
   // Note: we use state instead of a ref to track this value
@@ -119,7 +164,38 @@ function useSize<T extends HTMLElement>(
     () => new Map<HTMLElement, ZenObservable.Subscription>(),
   );
 
-  /* eslint-disable-next-line react-hooks/exhaustive-deps */
+  const windowSizeState = useWindowSize();
+  const viewSize = useRef(windowSizeState);
+
+  const elementSize = useRef(INITIAL_ELEMENT_SIZE);
+
+  const [size, setSize] = useState(() =>
+    getSize(elementSize.current, viewSize.current),
+  );
+
+  const handleSizeChange = useCallback(
+    /**
+     * `handleSizeChange` will update the current change handler
+     * with a new `Size` whenever the observed element's size or
+     * the viewport size changes.
+     */
+    function handleSizeChange() {
+      const cb = changeHandler.current;
+      const size = getSize(elementSize.current, viewSize.current);
+      if (typeof cb === 'function') {
+        cb(size);
+      } else {
+        setSize(size);
+      }
+    },
+    [],
+  );
+
+  if (windowSizeState !== viewSize.current) {
+    viewSize.current = windowSizeState;
+    handleSizeChange();
+  }
+
   useLayoutEffect(
     /**
      * `subscribeIfNecessary` will run on layout to determine if we need to
@@ -127,32 +203,54 @@ function useSize<T extends HTMLElement>(
      * to the element, it will do nothing.
      */
     function subscribeIfNecessary() {
+      if (providedRef) {
+        ref.current = providedRef.current;
+      }
       const element = ref.current;
       if (element && !subscriptions.has(element)) {
         subscriptions.set(
           element,
-          ResizeObservable.create(element).subscribe(setElementSize),
+          ResizeObservable.create(element).subscribe(
+            function handleElementSizeChange(size: ElementSize) {
+              elementSize.current = size;
+              handleSizeChange();
+            },
+          ),
         );
+        // call the handler to initialize it
+        // with the new element measurements.
+        handleSizeChange();
       }
     },
   );
 
-  useEffect(() => {
+  useEffect(
     /**
-     * `cleanup` will run on unmount to unsubscribe from any subscriptions.
+     * `cleanup` returns a function that will run on unmount
+     * to unsubscribe from any subscriptions.
      */
-    function cleanup(): void {
-      if (subscriptions.size > 0) {
-        for (const [el, sub] of subscriptions.entries()) {
-          sub.unsubscribe();
-          subscriptions.delete(el);
+    function cleanup() {
+      return () => {
+        if (subscriptions.size > 0) {
+          for (const [el, sub] of subscriptions.entries()) {
+            sub.unsubscribe();
+            subscriptions.delete(el);
+          }
         }
-      }
-    }
-    return cleanup;
-  }, [subscriptions]);
+      };
+    },
+    [subscriptions],
+  );
 
-  return providedRef ? size : [size, ref];
+  if (!providedRef) {
+    if (changeHandler.current) {
+      return ref;
+    } else {
+      return [size, ref];
+    }
+  } else if (!changeHandler.current) {
+    return size;
+  }
 }
 
 export default useSize;
