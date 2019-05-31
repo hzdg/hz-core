@@ -1,4 +1,4 @@
-import React, {useMemo, useCallback, useReducer} from 'react';
+import React, {useMemo, useReducer, useRef, useLayoutEffect} from 'react';
 import PropTypes from 'prop-types';
 import {
   GestureState,
@@ -36,7 +36,7 @@ export interface PageGestureProps {
    * An optional ref object or callback ref.
    * Useful when the owner component needs to handle ref forwarding.
    */
-  innerRef?: React.Ref<HTMLElement | null>;
+  innerRef?: React.Ref<HTMLElement> | null;
   /**
    * Whether or not page gesture detection is enabled.
    */
@@ -196,7 +196,10 @@ function usePageGestureConfig(
  * an ongoing gesturing, or the last state of a completed gesture
  * and it's associated pagination action.
  */
-function PageGesture(props: PageGestureProps): JSX.Element {
+function PageGesture<T extends HTMLElement>(
+  props: PageGestureProps,
+): JSX.Element {
+  const gestureRef = useRef<T>(null);
   const [state, dispatch] = useReducer(pageGestureStateReducer, null);
   const {onStart, onMove, onEnd, onFirst, onLast, onNext, onPrevious} = props;
 
@@ -252,29 +255,36 @@ function PageGesture(props: PageGestureProps): JSX.Element {
   const touchConfig = useConfigFor('touch', props);
   const wheelConfig = useConfigFor('wheel', props);
 
-  const keyboardRef = useKeyboardGesture(gestureHandler, keyboardConfig);
-  const mouseRef = useMouseGesture(gestureHandler, mouseConfig);
-  const touchRef = useTouchGesture(gestureHandler, touchConfig);
-  const wheelRef = useWheelGesture(gestureHandler, wheelConfig);
+  const keyboardRef = useRef<T | null>(null);
+  const mouseRef = useRef<T | null>(null);
+  const touchRef = useRef<T | null>(null);
+  const wheelRef = useRef<T | null>(null);
 
-  const gestureRef = useCallback(
-    (node: HTMLElement | null): void => {
-      if (keyboardConfig) keyboardRef(node);
-      if (mouseConfig) mouseRef(node);
-      if (touchConfig) touchRef(node);
-      if (wheelConfig) wheelRef(node);
+  useLayoutEffect(
+    /**
+     * `updateRefs` will sync the `gestureRef` render prop with the
+     * `innerRef` `PageGesture` prop, and any of the configured
+     * gesture refs.
+     */
+    function updateRefs() {
+      const {innerRef} = props;
+      if (typeof innerRef === 'function') {
+        innerRef(gestureRef.current);
+      } else if (innerRef && 'current' in innerRef) {
+        (innerRef as React.MutableRefObject<unknown>).current =
+          gestureRef.current;
+      }
+      keyboardRef.current = keyboardConfig ? gestureRef.current : null;
+      mouseRef.current = mouseConfig ? gestureRef.current : null;
+      touchRef.current = touchConfig ? gestureRef.current : null;
+      wheelRef.current = wheelConfig ? gestureRef.current : null;
     },
-    [
-      keyboardConfig,
-      mouseConfig,
-      touchConfig,
-      wheelConfig,
-      keyboardRef,
-      mouseRef,
-      touchRef,
-      wheelRef,
-    ],
   );
+
+  useKeyboardGesture(keyboardRef, gestureHandler, keyboardConfig);
+  useMouseGesture(mouseRef, gestureHandler, mouseConfig);
+  useTouchGesture(touchRef, gestureHandler, touchConfig);
+  useWheelGesture(wheelRef, gestureHandler, wheelConfig);
 
   const {children: render} = props;
   return render({...state, gestureRef});

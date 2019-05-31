@@ -20,7 +20,7 @@ of calling that render prop with the latest state of
 an ongoing gesture, or the last state of a completed gesture
 and it's associated pagination action.
 
-> **For React>=16.8.0:**
+> **Deprecated**
 >
 > It is generally better to use the [usePageGesture] hook,
 > along side the [hooks] that provide the specific types of gesture input
@@ -60,7 +60,7 @@ A basic horizontal example that shows off all possible gesture inputs
         ref={state.gestureRef}
         style={{width: '100%', minHeight: 400}}
       >
-        {JSON.stringify(state, null, 2)}
+        {JSON.stringify(Object.assign({}, state, {gestureRef: null}), null, 2)}
       </pre>
     )}
   </PageGesture>
@@ -78,7 +78,7 @@ An vertical example that uses gesture inputs with custom configurations:
         ref={state.gestureRef}
         style={{width: '100%', minHeight: 400}}
       >
-        {JSON.stringify(state, null, 2)}
+        {JSON.stringify(Object.assign({}, state, {gestureRef: null}), null, 2)}
       </pre>
     )}
   </PageGesture>
@@ -98,10 +98,10 @@ Also known as a 'render prop'.
 ### innerRef
 
 ```ts
-innerRef?: InnerRef<HTMLElement> | null;
+innerRef?: React.Ref<HTMLElement> | null;
 ```
 
-An optional ref object or callback ref.
+An optional [ref object] or [callback ref].
 Useful when the owner component needs to handle ref forwarding.
 
 ### disabled
@@ -271,7 +271,7 @@ In usage as follows:
 gestureRef: (node: HTMLElement | null) => void;
 ```
 
-A callback ref that should be passed to an underlying DOM node.
+A [ref object] that should be passed to an underlying DOM node.
 
 ### action
 
@@ -329,6 +329,7 @@ const RefForwardingGestureCatcher = React.forwardRef((props, forwardedRef) => {
 [headless component]: https://medium.com/merrickchristensen/headless-user-interface-components-565b0c0f2e18
 [render prop]: https://cdb.reacttraining.com/use-a-render-prop-50de598f11ce
 [callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
+[ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
 [usepagegesture]: /use-page-gesture
 [usekeyboardgesture]: /use-keyboard-gesture
