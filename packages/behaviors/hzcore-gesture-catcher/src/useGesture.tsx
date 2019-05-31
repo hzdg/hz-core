@@ -18,6 +18,8 @@ import useKeyboardGesture, {
   KeyboardGestureState,
   KeyboardGestureEndState,
 } from './useKeyboardGesture';
+import {useRef} from 'react';
+import {useProvidedRef} from './utils';
 
 export type GestureState =
   | MouseGestureState
@@ -57,6 +59,8 @@ export interface GestureHandlers {
   onEnd?: (state: GestureEndState) => void;
 }
 
+export type GestureHandler = GestureChangeHandler | GestureHandlers;
+
 export type GestureConfig = MouseGestureConfig &
   WheelGestureConfig &
   TouchGestureConfig &
@@ -68,21 +72,62 @@ export type GestureConfig = MouseGestureConfig &
  * This hook is a 'merge' of the separate input-specific gesture hooks,
  * `useMouseGesture`, `useWheelGesture`, `useTouchGesture`, `useKeyboardGesture`.
  *
- * @returns A callback ref that should be passed to the DOM element
- *          for which gestures should be observed.
+ * @see https://hz-core.netlify.com/use-gesture
  */
-export default function useGesture(
-  gestureHandler: GestureChangeHandler | GestureHandlers,
-  gestureConfig?: GestureConfig | null,
-): (node: HTMLElement | null) => void {
-  const mouseRef = useMouseGesture(gestureHandler, gestureConfig);
-  const wheelRef = useWheelGesture(gestureHandler, gestureConfig);
-  const touchRef = useTouchGesture(gestureHandler, gestureConfig);
-  const keyboardRef = useKeyboardGesture(gestureHandler, gestureConfig);
-  return (node: HTMLElement | null) => {
-    mouseRef(node);
-    wheelRef(node);
-    touchRef(node);
-    keyboardRef(node);
-  };
+function useGesture<T extends HTMLElement>(
+  /**
+   * An existing ref being passed to the DOM element on which to detect
+   * gestures. Useful for ref forwarding or sharing.
+   */
+  providedRef: React.RefObject<T>,
+  /**
+   * A function to handle gesture updates,
+   * or a configuration of handlers, like
+   * `{onStart?, onMove?, onEnd?}`.
+   */
+  handler: GestureHandler,
+  /**
+   * An object describing how to configure gesture detection.
+   */
+  config?: GestureConfig,
+): void;
+function useGesture<T extends HTMLElement>(
+  /**
+   * A function to handle gesture updates,
+   * or a configuration of handlers, like
+   * `{onStart?, onMove?, onEnd?}`.
+   */
+  handler: GestureHandler,
+  /**
+   * An object describing how to configure gesture detection.
+   */
+  config?: GestureConfig,
+): React.RefObject<T>;
+function useGesture<T extends HTMLElement>(
+  handlerOrProvidedRef: React.RefObject<T> | GestureHandler,
+  handlerOrConfig?: GestureHandler | GestureConfig,
+  maybeConfig?: GestureConfig,
+): React.RefObject<T> | void {
+  const ref = useRef<T | null>(null);
+  let providedRef: React.RefObject<T> | null = null;
+  let gestureHandler: GestureHandler;
+  let gestureConfig: GestureConfig | undefined = undefined;
+
+  if ('current' in handlerOrProvidedRef) {
+    providedRef = handlerOrProvidedRef;
+    gestureHandler = handlerOrConfig as GestureHandler;
+    if (maybeConfig) gestureConfig = maybeConfig;
+  } else {
+    gestureHandler = (handlerOrProvidedRef as GestureHandler) || null;
+    if (handlerOrConfig) gestureConfig = handlerOrConfig as MouseGestureConfig;
+  }
+
+  useProvidedRef(ref, providedRef);
+  useMouseGesture(ref, gestureHandler, gestureConfig);
+  useWheelGesture(ref, gestureHandler, gestureConfig);
+  useTouchGesture(ref, gestureHandler, gestureConfig);
+  useKeyboardGesture(ref, gestureHandler, gestureConfig);
+  if (!providedRef) return ref;
 }
+
+export default useGesture;

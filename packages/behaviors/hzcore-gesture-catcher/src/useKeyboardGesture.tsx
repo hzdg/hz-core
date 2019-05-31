@@ -1,18 +1,11 @@
-import {useEffect, useRef, useCallback} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {useRef} from 'react';
 import {KeyboardGestureObservable} from '@hzcore/gesture-observable';
+import {useProvidedRef, useObservableGestureEffect} from './utils';
 
 export type KeyboardGestureObservableConfig = KeyboardGestureObservable.KeyboardGestureObservableConfig;
 export type KeyboardGestureState = KeyboardGestureObservable.KeyboardGestureState;
 export type KeyboardGestureEndState = KeyboardGestureObservable.KeyboardGestureEndState;
-
-export interface KeyboardGestureConfig extends KeyboardGestureObservableConfig {
-  /**
-   * An optional ref object or callback ref.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  ref?: InnerRef<HTMLElement> | null;
-}
+export type KeyboardGestureConfig = KeyboardGestureObservable.KeyboardGestureObservableConfig;
 
 /**
  * A callback for when keyboard gesture state changes.
@@ -40,64 +33,73 @@ export interface KeyboardGestureHandlers {
   onEnd?: (state: KeyboardGestureEndState) => void;
 }
 
+export type KeyboardGestureHandler =
+  | KeyboardGestureChangeHandler
+  | KeyboardGestureHandlers;
+
 /**
- * A React hook for components that want to handle keyboard gesture intent.
+ * `useKeyboardGesture` is a React hook for components that want to handle
+ * keyboard gesture intent. It can be used with an existing ref or not.
  *
- * @returns A callback ref that should be passed to the DOM element
- *          for which keyboard gestures should be observed.
+ * @see https://hz-core.netlify.com/use-keyboard-gesture
  */
-export default function useKeyboardGesture(
+function useKeyboardGesture<T extends HTMLElement>(
+  /**
+   * An existing ref being passed to the DOM element on which to detect
+   * keyboard gestures. Useful for ref forwarding or sharing.
+   */
+  providedRef: React.RefObject<T>,
   /**
    * A function to handle keyboard gesture updates,
    * or a configuration of handlers, like
    * `{onStart?, onMove?, onEnd?}`.
    */
-  handler: KeyboardGestureChangeHandler | KeyboardGestureHandlers,
+  handler: KeyboardGestureHandler,
   /**
    * An object describing how to configure keyboard gesture detection.
    */
-  config?: KeyboardGestureConfig | null,
-): (node: HTMLElement | null) => void {
-  const [ref, setRef] = useRefCallback((config && config.ref) || null);
-  const lastState = useRef<
-    KeyboardGestureState | KeyboardGestureEndState | null
-  >(null);
-  const element = ref.current;
-  const dispatch = useCallback(
-    (state: KeyboardGestureState | KeyboardGestureEndState | null) => {
-      if (state) {
-        if (typeof handler === 'function') {
-          handler(state);
-        } else {
-          if (state.gesturing) {
-            if (!lastState.current || !lastState.current.gesturing) {
-              if (handler && typeof handler.onStart === 'function') {
-                handler.onStart(state);
-              }
-            } else if (lastState.current && lastState.current.gesturing) {
-              if (handler && typeof handler.onMove === 'function') {
-                handler.onMove(state);
-              }
-            }
-          } else if (!lastState.current || lastState.current.gesturing) {
-            if (handler && typeof handler.onEnd === 'function') {
-              handler.onEnd(state);
-            }
-          }
-        }
-      }
-      lastState.current = state;
-    },
-    [handler],
-  );
-  useEffect(() => {
-    if (element) {
-      const subscription = KeyboardGestureObservable.create(
-        element,
-        config,
-      ).subscribe(dispatch);
-      return subscription.unsubscribe.bind(subscription);
-    }
-  }, [element, config, dispatch]);
-  return setRef;
+  config?: KeyboardGestureConfig,
+): void;
+/**
+ * `useKeyboardGesture` is a React hook for components that want to handle
+ * keyboard gesture intent. It can be used with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-keyboard-gesture
+ */
+function useKeyboardGesture<T extends HTMLElement>(
+  /**
+   * A function to handle keyboard gesture updates,
+   * or a configuration of handlers, like
+   * `{onStart?, onMove?, onEnd?}`.
+   */
+  handler: KeyboardGestureHandler,
+  /**
+   * An object describing how to configure keyboard gesture detection.
+   */
+  config?: KeyboardGestureConfig,
+): React.RefObject<T>;
+function useKeyboardGesture<T extends HTMLElement>(
+  handlerOrProvidedRef: React.RefObject<T> | KeyboardGestureHandler,
+  handlerOrConfig?: KeyboardGestureHandler | KeyboardGestureConfig,
+  maybeConfig?: KeyboardGestureConfig,
+): React.RefObject<T> | void {
+  const ref = useRef<T | null>(null);
+  const handler = useRef<KeyboardGestureHandler | null>(null);
+  const config = useRef<KeyboardGestureConfig | null>(null);
+  let providedRef: React.RefObject<T> | null = null;
+
+  if ('current' in handlerOrProvidedRef) {
+    providedRef = handlerOrProvidedRef;
+    handler.current = (handlerOrConfig as KeyboardGestureHandler) || null;
+    config.current = maybeConfig || null;
+  } else {
+    handler.current = (handlerOrProvidedRef as KeyboardGestureHandler) || null;
+    config.current = (handlerOrConfig as KeyboardGestureConfig) || null;
+  }
+
+  useProvidedRef(ref, providedRef);
+  useObservableGestureEffect(KeyboardGestureObservable, ref, handler, config);
+  if (!providedRef) return ref;
 }
+
+export default useKeyboardGesture;

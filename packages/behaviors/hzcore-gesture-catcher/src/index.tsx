@@ -5,8 +5,12 @@ import * as touch from './useTouchGesture';
 import * as wheel from './useWheelGesture';
 import * as gesture from './useGesture';
 
-export type GestureCatcherRenderProps = GestureCatcher.GestureCatcherRenderProps;
-export type GestureCatcherProps = GestureCatcher.GestureCatcherProps;
+export type GestureCatcherRenderProps<
+  T extends HTMLElement
+> = GestureCatcher.GestureCatcherRenderProps<T>;
+export type GestureCatcherProps<
+  T extends HTMLElement
+> = GestureCatcher.GestureCatcherProps<T>;
 
 export type KeyboardGestureConfig = keyboard.KeyboardGestureConfig;
 export type KeyboardGestureState = keyboard.KeyboardGestureState;

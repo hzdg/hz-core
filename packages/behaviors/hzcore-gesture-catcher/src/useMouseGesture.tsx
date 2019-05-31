@@ -1,18 +1,11 @@
-import {useEffect, useRef, useCallback} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {useRef} from 'react';
 import {MouseGestureObservable} from '@hzcore/gesture-observable';
+import {useProvidedRef, useObservableGestureEffect} from './utils';
 
 export type MouseGestureObservableConfig = MouseGestureObservable.MouseGestureObservableConfig;
 export type MouseGestureState = MouseGestureObservable.MouseGestureState;
 export type MouseGestureEndState = MouseGestureObservable.MouseGestureEndState;
-
-export interface MouseGestureConfig extends MouseGestureObservableConfig {
-  /**
-   * An optional ref object or callback ref.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  ref?: InnerRef<HTMLElement> | null;
-}
+export type MouseGestureConfig = MouseGestureObservable.MouseGestureObservableConfig;
 
 /**
  * A callback for when mouse gesture state changes.
@@ -40,64 +33,73 @@ export interface MouseGestureHandlers {
   onEnd?: (state: MouseGestureEndState) => void;
 }
 
+export type MouseGestureHandler =
+  | MouseGestureChangeHandler
+  | MouseGestureHandlers;
+
 /**
- * A React hook for components that want to handle mouse gesture intent.
+ * `useMouseGesture` is a React hook for components that want to handle
+ * mouse gesture intent. It can be used with an existing ref or not.
  *
- * @returns A callback ref that should be passed to the DOM element
- *          for which mouse gestures should be observed.
+ * @see https://hz-core.netlify.com/use-mouse-gesture
  */
-export default function useMouseGesture(
+function useMouseGesture<T extends HTMLElement>(
+  /**
+   * An existing ref being passed to the DOM element on which to detect
+   * mouse gestures. Useful for ref forwarding or sharing.
+   */
+  providedRef: React.RefObject<T>,
   /**
    * A function to handle mouse gesture updates,
    * or a configuration of handlers, like
    * `{onStart?, onMove?, onEnd?}`.
    */
-  handler: MouseGestureChangeHandler | MouseGestureHandlers,
+  handler: MouseGestureHandler,
   /**
    * An object describing how to configure mouse gesture detection.
    */
-  config?: MouseGestureConfig | null,
-): (node: HTMLElement | null) => void {
-  const [ref, setRef] = useRefCallback((config && config.ref) || null);
-  const lastState = useRef<MouseGestureState | MouseGestureEndState | null>(
-    null,
-  );
-  const element = ref.current;
-  const dispatch = useCallback(
-    (state: MouseGestureState | MouseGestureEndState | null) => {
-      if (state) {
-        if (typeof handler === 'function') {
-          handler(state);
-        } else {
-          if (state.gesturing) {
-            if (!lastState.current || !lastState.current.gesturing) {
-              if (handler && typeof handler.onStart === 'function') {
-                handler.onStart(state);
-              }
-            } else if (lastState.current && lastState.current.gesturing) {
-              if (handler && typeof handler.onMove === 'function') {
-                handler.onMove(state);
-              }
-            }
-          } else if (!lastState.current || lastState.current.gesturing) {
-            if (handler && typeof handler.onEnd === 'function') {
-              handler.onEnd(state);
-            }
-          }
-        }
-      }
-      lastState.current = state;
-    },
-    [handler],
-  );
-  useEffect(() => {
-    if (element) {
-      const subscription = MouseGestureObservable.create(
-        element,
-        config,
-      ).subscribe(dispatch);
-      return subscription.unsubscribe.bind(subscription);
-    }
-  }, [element, config, dispatch]);
-  return setRef;
+  config?: MouseGestureConfig,
+): void;
+/**
+ * `useMouseGesture` is a React hook for components that want to handle
+ * mouse gesture intent. It can be used with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-mouse-gesture
+ */
+function useMouseGesture<T extends HTMLElement>(
+  /**
+   * A function to handle mouse gesture updates,
+   * or a configuration of handlers, like
+   * `{onStart?, onMove?, onEnd?}`.
+   */
+  handler: MouseGestureHandler,
+  /**
+   * An object describing how to configure mouse gesture detection.
+   */
+  config?: MouseGestureConfig,
+): React.RefObject<T>;
+function useMouseGesture<T extends HTMLElement>(
+  handlerOrProvidedRef: React.RefObject<T> | MouseGestureHandler,
+  handlerOrConfig?: MouseGestureHandler | MouseGestureConfig,
+  maybeConfig?: MouseGestureConfig,
+): React.RefObject<T> | void {
+  const ref = useRef<T | null>(null);
+  const handler = useRef<MouseGestureHandler | null>(null);
+  const config = useRef<MouseGestureConfig | null>(null);
+  let providedRef: React.RefObject<T> | null = null;
+
+  if ('current' in handlerOrProvidedRef) {
+    providedRef = handlerOrProvidedRef;
+    handler.current = (handlerOrConfig as MouseGestureHandler) || null;
+    config.current = maybeConfig || null;
+  } else {
+    handler.current = (handlerOrProvidedRef as MouseGestureHandler) || null;
+    config.current = (handlerOrConfig as MouseGestureConfig) || null;
+  }
+
+  useProvidedRef(ref, providedRef);
+  useObservableGestureEffect(MouseGestureObservable, ref, handler, config);
+  if (!providedRef) return ref;
 }
+
+export default useMouseGesture;

@@ -1,18 +1,11 @@
-import {useEffect, useRef, useCallback} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {useRef} from 'react';
 import {TouchGestureObservable} from '@hzcore/gesture-observable';
+import {useProvidedRef, useObservableGestureEffect} from './utils';
 
 export type TouchGestureObservableConfig = TouchGestureObservable.TouchGestureObservableConfig;
 export type TouchGestureState = TouchGestureObservable.TouchGestureState;
 export type TouchGestureEndState = TouchGestureObservable.TouchGestureEndState;
-
-export interface TouchGestureConfig extends TouchGestureObservableConfig {
-  /**
-   * An optional ref object or callback ref.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  ref?: InnerRef<HTMLElement> | null;
-}
+export type TouchGestureConfig = TouchGestureObservable.TouchGestureObservableConfig;
 
 /**
  * A callback for when touch gesture state changes.
@@ -40,64 +33,73 @@ export interface TouchGestureHandlers {
   onEnd?: (state: TouchGestureEndState) => void;
 }
 
+export type TouchGestureHandler =
+  | TouchGestureChangeHandler
+  | TouchGestureHandlers;
+
 /**
- * A React hook for components that want to handle touch gesture intent.
+ * `useTouchGesture` is a React hook for components that want to handle
+ * touch gesture intent. It can be used with an existing ref or not.
  *
- * @returns A callback ref that should be passed to the DOM element
- *          for which touch gestures should be observed.
+ * @see https://hz-core.netlify.com/use-touch-gesture
  */
-export default function useTouchGesture(
+function useTouchGesture<T extends HTMLElement>(
+  /**
+   * An existing ref being passed to the DOM element on which to detect
+   * touch gestures. Useful for ref forwarding or sharing.
+   */
+  providedRef: React.RefObject<T>,
   /**
    * A function to handle touch gesture updates,
    * or a configuration of handlers, like
    * `{onStart?, onMove?, onEnd?}`.
    */
-  handler: TouchGestureChangeHandler | TouchGestureHandlers,
+  handler: TouchGestureHandler,
   /**
    * An object describing how to configure touch gesture detection.
    */
-  config?: TouchGestureConfig | null,
-): (node: HTMLElement | null) => void {
-  const [ref, setRef] = useRefCallback((config && config.ref) || null);
-  const lastState = useRef<TouchGestureState | TouchGestureEndState | null>(
-    null,
-  );
-  const element = ref.current;
-  const dispatch = useCallback(
-    (state: TouchGestureState | TouchGestureEndState | null) => {
-      if (state) {
-        if (typeof handler === 'function') {
-          handler(state);
-        } else {
-          if (state.gesturing) {
-            if (!lastState.current || !lastState.current.gesturing) {
-              if (handler && typeof handler.onStart === 'function') {
-                handler.onStart(state);
-              }
-            } else if (lastState.current && lastState.current.gesturing) {
-              if (handler && typeof handler.onMove === 'function') {
-                handler.onMove(state);
-              }
-            }
-          } else if (!lastState.current || lastState.current.gesturing) {
-            if (handler && typeof handler.onEnd === 'function') {
-              handler.onEnd(state);
-            }
-          }
-        }
-      }
-      lastState.current = state;
-    },
-    [handler],
-  );
-  useEffect(() => {
-    if (element) {
-      const subscription = TouchGestureObservable.create(
-        element,
-        config,
-      ).subscribe(dispatch);
-      return subscription.unsubscribe.bind(subscription);
-    }
-  }, [element, config, dispatch]);
-  return setRef;
+  config?: TouchGestureConfig,
+): void;
+/**
+ * `useTouchGesture` is a React hook for components that want to handle
+ * touch gesture intent. It can be used with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-touch-gesture
+ */
+function useTouchGesture<T extends HTMLElement>(
+  /**
+   * A function to handle touch gesture updates,
+   * or a configuration of handlers, like
+   * `{onStart?, onMove?, onEnd?}`.
+   */
+  handler: TouchGestureHandler,
+  /**
+   * An object describing how to configure touch gesture detection.
+   */
+  config?: TouchGestureConfig,
+): React.RefObject<T>;
+function useTouchGesture<T extends HTMLElement>(
+  handlerOrProvidedRef: React.RefObject<T> | TouchGestureHandler,
+  handlerOrConfig?: TouchGestureHandler | TouchGestureConfig,
+  maybeConfig?: TouchGestureConfig,
+): React.RefObject<T> | void {
+  const ref = useRef<T | null>(null);
+  const handler = useRef<TouchGestureHandler | null>(null);
+  const config = useRef<TouchGestureConfig | null>(null);
+  let providedRef: React.RefObject<T> | null = null;
+
+  if ('current' in handlerOrProvidedRef) {
+    providedRef = handlerOrProvidedRef;
+    handler.current = (handlerOrConfig as TouchGestureHandler) || null;
+    config.current = maybeConfig || null;
+  } else {
+    handler.current = (handlerOrProvidedRef as TouchGestureHandler) || null;
+    config.current = (handlerOrConfig as TouchGestureConfig) || null;
+  }
+
+  useProvidedRef(ref, providedRef);
+  useObservableGestureEffect(TouchGestureObservable, ref, handler, config);
+  if (!providedRef) return ref;
 }
+
+export default useTouchGesture;

@@ -1,4 +1,10 @@
-import React, {useState, useMemo, useCallback} from 'react';
+import React, {
+  useState,
+  useMemo,
+  useRef,
+  useLayoutEffect,
+  MutableRefObject,
+} from 'react';
 import PropTypes from 'prop-types';
 import useKeyboardGesture, {KeyboardGestureConfig} from './useKeyboardGesture';
 import useMouseGesture, {MouseGestureConfig} from './useMouseGesture';
@@ -6,17 +12,17 @@ import useTouchGesture, {TouchGestureConfig} from './useTouchGesture';
 import useWheelGesture, {WheelGestureConfig} from './useWheelGesture';
 import {GestureState, GestureEndState} from './useGesture';
 
-export interface GestureCatcherProps {
+export interface GestureCatcherProps<T extends HTMLElement> {
   /**
    * A function that takes gesture state and returns a React element.
    * Also known as a 'render prop'.
    */
-  children: (state: GestureCatcherRenderProps) => JSX.Element;
+  children: (state: GestureCatcherRenderProps<T>) => JSX.Element;
   /**
    * An optional ref object or callback ref.
    * Useful when the owner component needs to handle ref forwarding.
    */
-  innerRef?: React.Ref<HTMLElement | null>;
+  innerRef?: React.Ref<T>;
   /**
    * Whether or not gesture detection is enabled.
    */
@@ -77,23 +83,23 @@ export type GestureCatcherState = GestureState | GestureEndState;
 /**
  * Gesture state passed to the GestureCatcher render prop (children function).
  */
-export type GestureCatcherRenderProps =
+export type GestureCatcherRenderProps<T extends HTMLElement> =
   | (GestureCatcherState & {
       /**
-       * A callback ref that should be passed to an underlying DOM node.
+       * A ref object that should be passed to an underlying DOM node.
        */
-      gestureRef: (node: HTMLElement | null) => void;
+      gestureRef: React.RefObject<T>;
     })
   | {
       /**
-       * A callback ref that should be passed to an underlying DOM node.
+       * A ref object that should be passed to an underlying DOM node.
        */
-      gestureRef: (node: HTMLElement | null) => void;
+      gestureRef: React.RefObject<T>;
     };
 
-function shouldUseConfigFor(
+function shouldUseConfigFor<T extends HTMLElement>(
   input: 'keyboard' | 'mouse' | 'touch' | 'wheel',
-  props: GestureCatcherProps,
+  props: GestureCatcherProps<T>,
 ): boolean {
   const {keyboard, mouse, touch, wheel} = props;
   if (keyboard || mouse || touch || wheel) {
@@ -103,31 +109,35 @@ function shouldUseConfigFor(
   }
 }
 
-function useConfigFor(
+/**
+ * `useConfigFor` will extract and return a config
+ * for the specified input from the given props.
+ */
+function useConfigFor<T extends HTMLElement>(
   input: 'keyboard',
-  props: GestureCatcherProps,
-): KeyboardGestureConfig | null;
-function useConfigFor(
+  props: GestureCatcherProps<T>,
+): KeyboardGestureConfig | undefined;
+function useConfigFor<T extends HTMLElement>(
   input: 'mouse',
-  props: GestureCatcherProps,
-): MouseGestureConfig | null;
-function useConfigFor(
+  props: GestureCatcherProps<T>,
+): MouseGestureConfig | undefined;
+function useConfigFor<T extends HTMLElement>(
   input: 'touch',
-  props: GestureCatcherProps,
-): TouchGestureConfig | null;
-function useConfigFor(
+  props: GestureCatcherProps<T>,
+): TouchGestureConfig | undefined;
+function useConfigFor<T extends HTMLElement>(
   input: 'wheel',
-  props: GestureCatcherProps,
-): WheelGestureConfig | null;
-function useConfigFor(
+  props: GestureCatcherProps<T>,
+): WheelGestureConfig | undefined;
+function useConfigFor<T extends HTMLElement>(
   input: 'keyboard' | 'mouse' | 'touch' | 'wheel',
-  props: GestureCatcherProps,
+  props: GestureCatcherProps<T>,
 ):
   | KeyboardGestureConfig
   | MouseGestureConfig
   | TouchGestureConfig
   | WheelGestureConfig
-  | null {
+  | undefined {
   const shouldUse = shouldUseConfigFor(input, props);
   const config = props[input];
   const {disabled, preventDefault, passive} = props;
@@ -139,7 +149,7 @@ function useConfigFor(
         ...(typeof config === 'object' ? config : {}),
       };
     }
-    return null;
+    return undefined;
   }, [disabled, preventDefault, passive, config, shouldUse]);
 }
 
@@ -153,7 +163,10 @@ export {useConfigFor};
  * of calling that render prop with the latest state of
  * an ongoing or completed gesture.
  */
-function GestureCatcher(props: GestureCatcherProps): JSX.Element {
+function GestureCatcher<T extends HTMLElement>(
+  props: GestureCatcherProps<T>,
+): JSX.Element {
+  const gestureRef = useRef<T>(null);
   const [state, setState] = useState<GestureCatcherState | null>(null);
   const {onStart, onMove, onEnd} = props;
 
@@ -180,29 +193,35 @@ function GestureCatcher(props: GestureCatcherProps): JSX.Element {
   const touchConfig = useConfigFor('touch', props);
   const wheelConfig = useConfigFor('wheel', props);
 
-  const keyboardRef = useKeyboardGesture(gestureHandler, keyboardConfig);
-  const mouseRef = useMouseGesture(gestureHandler, mouseConfig);
-  const touchRef = useTouchGesture(gestureHandler, touchConfig);
-  const wheelRef = useWheelGesture(gestureHandler, wheelConfig);
+  const keyboardRef = useRef<T | null>(null);
+  const mouseRef = useRef<T | null>(null);
+  const touchRef = useRef<T | null>(null);
+  const wheelRef = useRef<T | null>(null);
 
-  const gestureRef = useCallback(
-    (node: HTMLElement | null): void => {
-      if (keyboardConfig) keyboardRef(node);
-      if (mouseConfig) mouseRef(node);
-      if (touchConfig) touchRef(node);
-      if (wheelConfig) wheelRef(node);
+  useLayoutEffect(
+    /**
+     * `updateRefs` will sync the `gestureRef` render prop with the
+     * `innerRef` `GestureCatcher` prop, and any of the configured
+     * gesture refs.
+     */
+    function updateRefs() {
+      const {innerRef} = props;
+      if (typeof innerRef === 'function') {
+        innerRef(gestureRef.current);
+      } else if (innerRef && 'current' in innerRef) {
+        (innerRef as MutableRefObject<unknown>).current = gestureRef.current;
+      }
+      keyboardRef.current = keyboardConfig ? gestureRef.current : null;
+      mouseRef.current = mouseConfig ? gestureRef.current : null;
+      touchRef.current = touchConfig ? gestureRef.current : null;
+      wheelRef.current = wheelConfig ? gestureRef.current : null;
     },
-    [
-      keyboardConfig,
-      mouseConfig,
-      touchConfig,
-      wheelConfig,
-      keyboardRef,
-      mouseRef,
-      touchRef,
-      wheelRef,
-    ],
   );
+
+  useKeyboardGesture(keyboardRef, gestureHandler, keyboardConfig);
+  useMouseGesture(mouseRef, gestureHandler, mouseConfig);
+  useTouchGesture(touchRef, gestureHandler, touchConfig);
+  useWheelGesture(wheelRef, gestureHandler, wheelConfig);
 
   const {children: render} = props;
   return render({...state, gestureRef});

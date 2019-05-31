@@ -1,18 +1,11 @@
-import {useEffect, useRef, useCallback} from 'react';
-import useRefCallback, {InnerRef} from '@hzcore/hook-ref-callback';
+import {useRef} from 'react';
 import {WheelGestureObservable} from '@hzcore/gesture-observable';
+import {useProvidedRef, useObservableGestureEffect} from './utils';
 
 export type WheelGestureObservableConfig = WheelGestureObservable.WheelGestureObservableConfig;
 export type WheelGestureState = WheelGestureObservable.WheelGestureState;
 export type WheelGestureEndState = WheelGestureObservable.WheelGestureEndState;
-
-export interface WheelGestureConfig extends WheelGestureObservableConfig {
-  /**
-   * An optional ref object or callback ref.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  ref?: InnerRef<HTMLElement> | null;
-}
+export type WheelGestureConfig = WheelGestureObservable.WheelGestureObservableConfig;
 
 /**
  * A callback for when wheel gesture state changes.
@@ -40,64 +33,73 @@ export interface WheelGestureHandlers {
   onEnd?: (state: WheelGestureEndState) => void;
 }
 
+export type WheelGestureHandler =
+  | WheelGestureChangeHandler
+  | WheelGestureHandlers;
+
 /**
- * A React hook for components that want to handle wheel gesture intent.
+ * `useWheelGesture` is a React hook for components that want to handle
+ * wheel gesture intent. It can be used with an existing ref or not.
  *
- * @returns A callback ref that should be passed to the DOM element
- *          for which wheel gestures should be observed.
+ * @see https://hz-core.netlify.com/use-wheel-gesture
  */
-export default function useWheelGesture(
+function useWheelGesture<T extends HTMLElement>(
+  /**
+   * An existing ref being passed to the DOM element on which to detect
+   * wheel gestures. Useful for ref forwarding or sharing.
+   */
+  providedRef: React.RefObject<T>,
   /**
    * A function to handle wheel gesture updates,
    * or a configuration of handlers, like
    * `{onStart?, onMove?, onEnd?}`.
    */
-  handler: WheelGestureChangeHandler | WheelGestureHandlers,
+  handler: WheelGestureHandler,
   /**
    * An object describing how to configure wheel gesture detection.
    */
-  config?: WheelGestureConfig | null,
-): (node: HTMLElement | null) => void {
-  const [ref, setRef] = useRefCallback((config && config.ref) || null);
-  const lastState = useRef<WheelGestureState | WheelGestureEndState | null>(
-    null,
-  );
-  const element = ref.current;
-  const dispatch = useCallback(
-    (state: WheelGestureState | WheelGestureEndState | null) => {
-      if (state) {
-        if (typeof handler === 'function') {
-          handler(state);
-        } else {
-          if (state.gesturing) {
-            if (!lastState.current || !lastState.current.gesturing) {
-              if (handler && typeof handler.onStart === 'function') {
-                handler.onStart(state);
-              }
-            } else if (lastState.current && lastState.current.gesturing) {
-              if (handler && typeof handler.onMove === 'function') {
-                handler.onMove(state);
-              }
-            }
-          } else if (!lastState.current || lastState.current.gesturing) {
-            if (handler && typeof handler.onEnd === 'function') {
-              handler.onEnd(state);
-            }
-          }
-        }
-      }
-      lastState.current = state;
-    },
-    [handler],
-  );
-  useEffect(() => {
-    if (element) {
-      const subscription = WheelGestureObservable.create(
-        element,
-        config,
-      ).subscribe(dispatch);
-      return subscription.unsubscribe.bind(subscription);
-    }
-  }, [element, config, dispatch]);
-  return setRef;
+  config?: WheelGestureConfig,
+): void;
+/**
+ * `useWheelGesture` is a React hook for components that want to handle
+ * wheel gesture intent. It can be used with an existing ref or not.
+ *
+ * @see https://hz-core.netlify.com/use-wheel-gesture
+ */
+function useWheelGesture<T extends HTMLElement>(
+  /**
+   * A function to handle wheel gesture updates,
+   * or a configuration of handlers, like
+   * `{onStart?, onMove?, onEnd?}`.
+   */
+  handler: WheelGestureHandler,
+  /**
+   * An object describing how to configure wheel gesture detection.
+   */
+  config?: WheelGestureConfig,
+): React.RefObject<T>;
+function useWheelGesture<T extends HTMLElement>(
+  handlerOrProvidedRef: React.RefObject<T> | WheelGestureHandler,
+  handlerOrConfig?: WheelGestureHandler | WheelGestureConfig,
+  maybeConfig?: WheelGestureConfig,
+): React.RefObject<T> | void {
+  const ref = useRef<T | null>(null);
+  const handler = useRef<WheelGestureHandler | null>(null);
+  const config = useRef<WheelGestureConfig | null>(null);
+  let providedRef: React.RefObject<T> | null = null;
+
+  if ('current' in handlerOrProvidedRef) {
+    providedRef = handlerOrProvidedRef;
+    handler.current = (handlerOrConfig as WheelGestureHandler) || null;
+    config.current = maybeConfig || null;
+  } else {
+    handler.current = (handlerOrProvidedRef as WheelGestureHandler) || null;
+    config.current = (handlerOrConfig as WheelGestureConfig) || null;
+  }
+
+  useProvidedRef(ref, providedRef);
+  useObservableGestureEffect(WheelGestureObservable, ref, handler, config);
+  if (!providedRef) return ref;
 }
+
+export default useWheelGesture;
