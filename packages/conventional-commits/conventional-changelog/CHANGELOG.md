@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/hzdg/hz-core/compare/@hzcore/conventional-changelog@1.0.1...@hzcore/conventional-changelog@1.1.0) (2019-05-31)
+
+
+### @hzcore/conventional-changelog
+
+* support breaking change notes ([b8a274e](https://github.com/hzdg/hz-core/commit/b8a274e))
+
+
 ## 1.0.1 (2018-08-29)
 
 

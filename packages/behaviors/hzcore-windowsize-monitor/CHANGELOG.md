@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.8...@hzcore/windowsize-monitor@1.0.0) (2019-05-31)
+
+
+### @hzcore/hook-size
+
+* add stateful and stateless APIs ([97eaf36](https://github.com/hzdg/hz-core/commit/97eaf36))
+
+
 ## [0.1.8](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.7...@hzcore/windowsize-monitor@0.1.8) (2019-05-20)
 
 

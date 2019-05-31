@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@1.0.6...@hzcore/hook-size@2.0.0) (2019-05-31)
+
+
+### @hzcore/hook-size
+
+* add stateful and stateless APIs ([97eaf36](https://github.com/hzdg/hz-core/commit/97eaf36))
+* replace ref callbacks with objects ([7bd1004](https://github.com/hzdg/hz-core/commit/7bd1004))
+* swap providedRef and handler args ([62b95b2](https://github.com/hzdg/hz-core/commit/62b95b2))
+
+
 ## [1.0.6](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@1.0.5...@hzcore/hook-size@1.0.6) (2019-05-20)
 
 **Note:** Version bump only for package @hzcore/hook-size

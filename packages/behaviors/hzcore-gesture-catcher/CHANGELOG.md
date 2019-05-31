@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@1.0.0...@hzcore/gesture-catcher@2.0.0) (2019-05-31)
+
+
+### @hzcore/gesture-catcher
+
+* replace ref callbacks with objects ([89b758e](https://github.com/hzdg/hz-core/commit/89b758e))
+
+
 ## [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@0.1.6...@hzcore/gesture-catcher@1.0.0) (2019-05-20)
 
 

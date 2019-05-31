@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/conventional-changelog",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "The hzcore conventional changelog preset",
   "license": "MIT",
   "publishConfig": {
@@ -11,6 +11,6 @@
   "private": true,
   "main": "index.js",
   "dependencies": {
-    "@hzcore/gitmoji": "^1.0.1"
+    "@hzcore/gitmoji": "^1.0.2"
   }
 }

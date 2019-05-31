@@ -3,6 +3,23 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@1.0.5...@hzcore/scroll-monitor@2.0.0) (2019-05-31)
+
+
+### @hzcore/scroll-monitor
+
+* fix react{-dom} dep range ([d2bbe04](https://github.com/hzdg/hz-core/commit/d2bbe04))
+* fix type reexports ([1ba7836](https://github.com/hzdg/hz-core/commit/1ba7836))
+* make useScrollPosition stateless ([3a94fce](https://github.com/hzdg/hz-core/commit/3a94fce))
+* replace ref callbacks with objects ([01d16c2](https://github.com/hzdg/hz-core/commit/01d16c2))
+* simplify provided ref APIs ([672c706](https://github.com/hzdg/hz-core/commit/672c706))
+* update ref object-related mentions ([f1c941a](https://github.com/hzdg/hz-core/commit/f1c941a))
+
+### @hzcore/hook-size
+
+* add stateful and stateless APIs ([97eaf36](https://github.com/hzdg/hz-core/commit/97eaf36))
+
+
 ## [1.0.5](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@1.0.4...@hzcore/scroll-monitor@1.0.5) (2019-05-20)
 
 **Note:** Version bump only for package @hzcore/scroll-monitor

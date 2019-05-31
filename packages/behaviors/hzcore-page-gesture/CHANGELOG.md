@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@1.0.0...@hzcore/page-gesture@2.0.0) (2019-05-31)
+
+
+### @hzcore/page-gesture
+
+* remove unused dep ([a5e2ac6](https://github.com/hzdg/hz-core/commit/a5e2ac6))
+* replace ref callbacks with objects ([5462176](https://github.com/hzdg/hz-core/commit/5462176))
+
+
 ## [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@0.1.6...@hzcore/page-gesture@1.0.0) (2019-05-20)
 
 
