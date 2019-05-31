@@ -16,7 +16,7 @@
     "create-package": "./node_modules/.bin/create-package",
     "develop": "yarn build-packages && ./node_modules/.bin/docz dev",
     "lint": "./node_modules/.bin/eslint --ext .js,.jsx,.ts,.tsx ./packages",
-    "preversion": "yarn test && yarn build",
+    "preversion": "yarn test && yarn build -f",
     "start": "yarn develop",
     "typecheck": "./node_modules/.bin/tsc --noEmit",
     "test": "yarn build && ./node_modules/.bin/jest",
