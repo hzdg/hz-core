@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@1.0.0...@hzcore/windowsize-monitor@1.0.1) (2019-06-03)
+
+
+### @hzcore/windowsize-monitor
+
+* removing console.log ([58cc356](https://github.com/hzdg/hz-core/commit/58cc356))
+
+
 # [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@0.1.8...@hzcore/windowsize-monitor@1.0.0) (2019-05-31)
 
 
