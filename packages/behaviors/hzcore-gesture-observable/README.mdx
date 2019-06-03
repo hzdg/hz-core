@@ -26,7 +26,7 @@ Create an observable by passing the element
 you wish to observe and gesture configuration to `GestureObservable.create`:
 
 ```js
-const element = document.getElementById('some-element-that-might-change-size');
+const element = document.getElementById('some-element-that-receives-gestures');
 const observable = ResizeObservable.create(element, {
   keyboard: boolean;
   mouse: boolean;
