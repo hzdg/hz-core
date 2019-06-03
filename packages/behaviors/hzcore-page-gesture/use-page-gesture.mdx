@@ -219,8 +219,6 @@ The outline of the intention algorithm is:
   - A gesture in the `UP` direction is assigned a `NEXT` action.
   - An `ArrowDown` keypress is assigned a `PREVIOUS` action.
   - An `ArrowUp` keypress is assigned a `NEXT` action.
-  - A `Home` keypress is assign a `FIRST` action
-  - An `End` keypress is assign a `LAST` action
   - A `Space` keypress is assigned a `NEXT` action
   - A `PageDown` keypress is assigned a `NEXT` action
   - A `PageUp` keypress is assigned a `PREVIOUS` action
@@ -414,7 +412,7 @@ A vertical example using [gesture] detection and [react-spring] transitions.
   {() => {
     const PAGE_SIZE = 500; // Size of a page in px
     const TOTAL_PAGES = 10; // Total number of pages
-    const PAGE_CONFIFG = {orientation: VERTICAL};
+    const PAGE_CONFIG = {orientation: VERTICAL};
     const GESTURE_CONFIG = {preventDefault: true, threshold: 0};
     /**
      * A Page component.
@@ -474,7 +472,7 @@ A vertical example using [gesture] detection and [react-spring] transitions.
         },
         [page, setTransform, forceUpdate],
       );
-      const updatePagination = usePageGesture(pageHandler, PAGE_CONFIFG);
+      const updatePagination = usePageGesture(pageHandler, PAGE_CONFIG);
       const gestureHandler = React.useCallback(
         gesture => {
           setTransform({
