@@ -41,7 +41,6 @@ export const useWindowSize = (
   });
 
   const handle = throttle(() => {
-    console.log('>>>>', window.innerWidth);
     setSize({
       width: window.innerWidth,
       height: window.innerHeight,
