@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@2.0.0...@hzcore/scroll-monitor@3.0.0) (2019-06-03)
+
+
+### @hzcore/scroll-monitor
+
+* put ref first to match other hzcore hooks ([c51c7c0](https://github.com/hzdg/hz-core/commit/c51c7c0))
+
+
 # [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@1.0.5...@hzcore/scroll-monitor@2.0.0) (2019-05-31)
 
 
