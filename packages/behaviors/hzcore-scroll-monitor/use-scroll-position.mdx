@@ -20,11 +20,16 @@ yarn add @hzcore/scroll-monitor
 
 ## Usage
 
-```
+```js
 import {useScrollPosition} from '@hzcore/scroll-monitor';
 ```
 
-### Signature
+`useScrollPosition` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useScrollPosition` has 2 different signatures:
+
+Without an existing [ref object]:
 
 ```ts
 function useScrollPosition(
@@ -32,21 +37,35 @@ function useScrollPosition(
 ): React.RefObject<HTMLElement>;
 ```
 
-or, with a `providedRef`:
+The returned [ref object] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
 
 ```ts
 function useScrollPosition(
-  handler: (position: ScrollPosition) => void,
   providedRef: React.RefObject<HTMLElement>,
+  handler: (position: ScrollPosition) => void,
 ): void;
 ```
 
-### handler: `handler: (position: ScrollPosition) => void,`
+Note that `useScrollPosition` will _not_ return a [ref object] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
+
+## Handler
+
+`handler: (position: ScrollPosition) => void,`
 
 A function to handle scroll position updates.
-Receives the latest `ScrollPosition`.
+Receives the latest [ScrollPosition].
 
-The `ScrollPosition` object shape is:
+## State
+
+`state: ScrollPosition`
+
+An object describing the scroll position for the nearest scrollable container.
+This is provided to the [handler].
+
+### ScrollPosition
 
 ```ts
 interface ScrollPosition {
@@ -63,31 +82,14 @@ interface ScrollPosition {
 }
 ```
 
-### providedRef: `providedRef?: React.RefObject<HTMLElement>`
-
-An optional ref object to use.
-Useful when the component needs to handle ref forwarding.
-
-See [Usage with Shared Ref / Ref Forwarding] for more.
-
-### returns `React.RefObject<HTMLElement> | void`
-
-If a `providedRef` is passed to `useScrollPosition`,
-returns `void`.
-
-If no `providedRef` is passed, returns a `ref` object.
-The `ref` should be passed to an underlying DOM node.
-Note that the node does not have to be scrollable itself,
-as `useScrollPosition` will traverse the DOM to find a scrollable parent
-to observe.
-
 ## Example
 
 <Playground>
   {() => {
     const ScrollPositionUser = () => {
       const [position, setPosition] = React.useState(null);
-      const ref = useScrollPosition(setPosition);
+      const ref = React.useRef(null);
+      useScrollPosition(ref, setPosition);
       return (
         <div
           ref={ref}
@@ -108,19 +110,19 @@ to observe.
   }}
 </Playground>
 
-## Usage with Shared Ref / Ref Forwarding
+## Shared Ref / Ref Forwarding
 
 Sometimes a component needs to [forward a ref] to its children,
 or [use a ref][useref] with other hooks.
 To support these cases, `useScrollPosition`
-accepts an optional `providedRef` argument:
+accepts an optional `providedRef` [ref object]:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   const [position, setPosition] = React.useState(null);
   // We pass `forwardedRef` (which _must_ be a ref object) to `useScrollPosition`.
   // Note that a `ref` will _not_ be returned.
-  useScrollPosition(setPosition, forwardedRef);
+  useScrollPosition(forwardedRef, setPosition);
   return <div ref={forwardedRef}>{JSON.stringify(position, null, 2)}</div>;
 });
 ```
@@ -133,7 +135,7 @@ const SomeRefUsingComponent = () => {
   const ref = React.useRef(null);
   // We pass `ref` to `useScrollPosition`.
   // Note that a `ref` will _not_ be returned.
-  useScrollPosition(setPosition, ref);
+  useScrollPosition(ref, setPosition);
   return <div ref={ref}>{JSON.stringify(position, null, 2)}</div>;
 };
 ```
@@ -141,7 +143,11 @@ const SomeRefUsingComponent = () => {
 [hook]: https://reactjs.org/docs/hooks-overview.html
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
-[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
-[usage with shared ref / ref forwarding]: #usage-with-shared-ref--ref-forwarding
+[installation]: #installation
+[usage]: #usage
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding

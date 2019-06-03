@@ -20,30 +20,33 @@ yarn add @hzcore/scroll-monitor
 
 ## Usage
 
-```
+```js
 import {useScrolling} from '@hzcore/scroll-monitor';
 ```
 
-### Signature
+`useScrolling` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useScrolling` has 2 different signatures:
+
+Without an existing [ref object]:
 
 ```ts
 function useScrolling(): [boolean, React.RefObject<HTMLElement>];
 ```
 
-or, with a `providedRef`:
+The returned [ref object] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
 
 ```ts
 function useScrolling(providedRef: React.RefObject<HTMLElement>): boolean;
 ```
 
-### providedRef: `providedRef?: React.RefObject<HTMLElement>`
+Note that `useScrolling` will _not_ return a [ref object] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
 
-An optional ref object to use.
-Useful when the component needs to handle ref forwarding.
-
-See [Usage with Shared Ref / Ref Forwarding] for more.
-
-### returns `boolean | [boolean, React.RefObject<HTMLElement>]`
+## State
 
 If a `providedRef` is passed to `useScrolling`,
 returns a boolean value, that indicates whether or not
@@ -86,12 +89,12 @@ scrollable container is scrolling, and `false` when it is not.
   }}
 </Playground>
 
-## Usage with Shared Ref / Ref Forwarding
+## Shared Ref / Ref Forwarding
 
 Sometimes a component needs to [forward a ref] to its children,
 or [use a ref][useref] with other hooks.
 To support these cases, `useScrolling`
-accepts an optional `providedRef` argument:
+accepts an optional `providedRef` [ref object]:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
@@ -120,7 +123,11 @@ const SomeRefUsingComponent = () => {
 [hook]: https://reactjs.org/docs/hooks-overview.html
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
-[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
-[usage with shared ref / ref forwarding]: #usage-with-shared-ref--ref-forwarding
+[installation]: #installation
+[usage]: #usage
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding

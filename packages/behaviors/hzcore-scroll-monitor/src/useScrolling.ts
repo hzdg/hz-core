@@ -22,14 +22,14 @@ const SCROLL_TIMEOUT = 60;
  */
 function useScrolling<T extends HTMLElement>(): [boolean, React.RefObject<T>];
 function useScrolling<T extends HTMLElement>(
+  /**
+   * A ref to use.
+   * If provided, `useScrolling` will not return a ref.
+   * Useful when the component needs to handle ref forwarding.
+   */
   providedRef: React.RefObject<T>,
 ): boolean;
 function useScrolling<T extends HTMLElement>(
-  /**
-   * An optional ref to use. If provided, this ref object will be
-   * passed through as the returned value for `useScrolling`.
-   * Useful when the component needs to handle ref forwarding.
-   */
   providedRef?: React.RefObject<T>,
 ): boolean | [boolean, React.RefObject<T>] {
   // Keep track of whether or not the nearest scrollable container is scrolling.

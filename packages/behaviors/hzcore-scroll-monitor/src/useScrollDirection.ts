@@ -105,14 +105,14 @@ function useScrollDirection<T extends HTMLElement>(): [
   React.RefObject<T>
 ];
 function useScrollDirection<T extends HTMLElement>(
-  providedRef?: React.RefObject<T>,
-): ScrollDirectionState;
-function useScrollDirection<T extends HTMLElement>(
   /**
-   * An optional ref to use. If provided, this ref object will be
-   * passed through as the returned value for `useScrollDirection`.
+   * A ref to use.
+   * If provided, `useScrollDirection` will not return a ref.
    * Useful when the component needs to handle ref forwarding.
    */
+  providedRef: React.RefObject<T>,
+): ScrollDirectionState;
+function useScrollDirection<T extends HTMLElement>(
   providedRef?: React.RefObject<T>,
 ): ScrollDirectionState | [ScrollDirectionState, React.RefObject<T>] {
   const scrollPosition = useRef<ScrollPosition | null>(null);

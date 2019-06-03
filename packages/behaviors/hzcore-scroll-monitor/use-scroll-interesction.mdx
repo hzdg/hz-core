@@ -21,11 +21,16 @@ yarn add @hzcore/scroll-monitor
 
 ## Usage
 
-```
+```js
 import {useScrollIntersection} from '@hzcore/scroll-monitor';
 ```
 
-### Signature
+`useScrollIntersection` supports using an existing [ref object].
+(See [shared ref / ref forwarding] for more).
+
+This means `useScrollIntersection` has 2 different signatures:
+
+Without an existing [ref object]:
 
 ```ts
 function useScrollIntersection(
@@ -33,16 +38,23 @@ function useScrollIntersection(
 ): [Intersects, React.RefObject<HTMLElement>];
 ```
 
-or, with a `providedRef`:
+The returned [ref object] should be passed to an underlying DOM node.
+
+With an existing [ref object]:
 
 ```ts
 function useScrollIntersection(
-  config: ScrollIntersectionConfig,
   providedRef: React.RefObject<HTMLElement>,
+  config: ScrollIntersectionConfig,
 ): Intersects;
 ```
 
-### config `config: BoundsRect | BoundsRect[]`
+Note that `useScrollIntersection` will _not_ return a [ref object] in this case.
+The provided [ref object] is expected to be passed to an underlying DOM node.
+
+## Config
+
+`config: BoundsRect | BoundsRect[]`
 
 One or more areas to check for intersection with
 the nearest scrollable container's scroll position.
@@ -55,14 +67,7 @@ or partially, i.e.,
 
 `{right: 50, bottom: 50}`
 
-### providedRef: `providedRef?: React.RefObject<HTMLElement>`
-
-An optional ref object to use.
-Useful when the component needs to handle ref forwarding.
-
-See [Usage with Shared Ref / Ref Forwarding] for more.
-
-### returns `Intersects | [Intersects, React.RefObject<HTMLElement>]`
+## State
 
 If a `providedRef` is passed to `useScrollIntersection`,
 returns the `Intersects` value, consisting of one intersection
@@ -81,6 +86,12 @@ If a single area has been configured, `Intersects` will be a boolean.
 If an array of areas has been configured, this will be an array of booleans,
 where the index of each boolean corresponds to the index of the area in
 the configuration array.
+
+### Intersects
+
+```ts
+type Intersects = boolean | boolean[];
+```
 
 ## Example
 
@@ -120,19 +131,19 @@ the configuration array.
   }}
 </Playground>
 
-## Usage with Shared Ref / Ref Forwarding
+## Shared Ref / Ref Forwarding
 
 Sometimes a component needs to [forward a ref] to its children,
 or [use a ref][useref] with other hooks.
 To support these cases, `useScrollIntersection`
-accepts an optional `providedRef` argument:
+accepts an optional `providedRef` [ref object]:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // We pass `forwardedRef` (which _must_ be a ref object)
   // to `useScrollIntersection`. Note that a `ref`
   // will _not_ be returned with the `intersects` value.
-  const intersects = useScrollIntersection({top: 250}, forwardedRef);
+  const intersects = useScrollIntersection(forwardedRef, {top: 250});
   return <div ref={forwardedRef}>{JSON.stringify(intersects, null, 2)}</div>;
 });
 ```
@@ -144,7 +155,7 @@ const SomeRefUsingComponent = () => {
   const ref = React.useRef(null);
   // We pass `ref` to `useScrollIntersection`.
   // Note that a `ref` will _not_ be returned with the `intersects` value.
-  const intersects = useScrollIntersection({top: 250}, ref);
+  const intersects = useScrollIntersection(ref, {top: 250});
   return <div ref={ref}>{JSON.stringify(intersects, null, 2)}</div>;
 };
 ```
@@ -152,7 +163,12 @@ const SomeRefUsingComponent = () => {
 [hook]: https://reactjs.org/docs/hooks-overview.html
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
-[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
-[usage with shared ref / ref forwarding]: #usage-with-shared-ref--ref-forwarding
+[installation]: #installation
+[usage]: #usage
+[config]: #config
+[handler]: #handler
+[state]: #state
+[example]: #example
+[shared ref / ref forwarding]: #shared-ref--ref-forwarding

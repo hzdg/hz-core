@@ -128,13 +128,13 @@ function ScrollMonitor<T extends HTMLElement>(
   const scrollRef = useRef<T>(null);
   const scrolling = useScrolling(scrollRef);
   const direction = useScrollDirection(scrollRef);
-  const intersects = useScrollIntersection(props.intersects || [], scrollRef);
+  const intersects = useScrollIntersection(scrollRef, props.intersects || []);
 
   const [position, setPosition] = useState<ScrollPosition>({
     top: null,
     left: null,
   });
-  useScrollPosition(setPosition, scrollRef);
+  useScrollPosition(scrollRef, setPosition);
 
   const scrollingEnabled =
     props.scrolling || Boolean(props.onStart || props.onChange || props.onEnd);

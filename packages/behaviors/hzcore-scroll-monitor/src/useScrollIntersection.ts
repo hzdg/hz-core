@@ -120,12 +120,19 @@ export function getIntersects(
  * the configuration array.
  */
 function useScrollIntersection<T extends HTMLElement>(
-  config: ScrollIntersectionConfig,
+  /**
+   * A ref to use.
+   * If provided, `useScrollIntersection` will not return a ref.
+   * Useful when the component needs to handle ref forwarding.
+   */
   providedRef: React.RefObject<T>,
-): Intersects;
-function useScrollIntersection<T extends HTMLElement>(
+  /**
+   * A rect or array of rects to check for intersection.
+   * A rect should have at least one of `{top, right, left, bottom}`
+   * set to a number.
+   */
   config: ScrollIntersectionConfig,
-): [Intersects, React.RefObject<T>];
+): Intersects;
 function useScrollIntersection<T extends HTMLElement>(
   /**
    * A rect or array of rects to check for intersection.
@@ -133,13 +140,17 @@ function useScrollIntersection<T extends HTMLElement>(
    * set to a number.
    */
   config: ScrollIntersectionConfig,
-  /**
-   * An optional ref to use. If provided, this ref object will be
-   * passed through as the returned value for `useScrollIntersection`.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  providedRef?: React.RefObject<T>,
+): [Intersects, React.RefObject<T>];
+function useScrollIntersection<T extends HTMLElement>(
+  providedRefOrConfig: React.RefObject<T> | ScrollIntersectionConfig,
+  config?: ScrollIntersectionConfig,
 ): Intersects | [Intersects, React.RefObject<T>] {
+  let providedRef: React.RefObject<T> | undefined = undefined;
+  if (`current` in providedRefOrConfig) {
+    providedRef = providedRefOrConfig;
+  } else {
+    config = providedRefOrConfig;
+  }
   // Keep track of changes to intersection config.
   const intersectionConfig = useRef(config);
   useEffect(() => {

@@ -59,11 +59,22 @@ export function getScrollPosition(event: Event): ScrollPosition {
  * to observe.
  */
 function useScrollPosition<T extends HTMLElement>(
-  handler: (position: ScrollPosition) => void,
-): React.RefObject<T>;
-function useScrollPosition<T extends HTMLElement>(
-  handler: (position: ScrollPosition) => void,
+  /**
+   * A ref to use.
+   * If provided, `useScrollPosition` will not return a ref.
+   * Useful when the component needs to handle ref forwarding.
+   */
   providedRef: React.RefObject<T>,
+  /**
+   * `handler` will receive a `ScrollPosition` object each time
+   * the nearest scrollable container's scroll position changes.
+   *
+   * `ScrollPosition` will be an object of `top` and `left` values,
+   * where `top` is the number of pixels the nearest scrollable container
+   * is scrolled vertically, and `left` is the number of pixels the
+   * nearest scrollable container is scrolled horizontally.
+   */
+  handler: (position: ScrollPosition) => void,
 ): void;
 function useScrollPosition<T extends HTMLElement>(
   /**
@@ -76,13 +87,19 @@ function useScrollPosition<T extends HTMLElement>(
    * nearest scrollable container is scrolled horizontally.
    */
   handler: (position: ScrollPosition) => void,
-  /**
-   * An optional ref to use.
-   * If provided, `useScrollPosition` will not return a ref.
-   * Useful when the component needs to handle ref forwarding.
-   */
-  providedRef?: React.RefObject<T>,
+): React.RefObject<T>;
+function useScrollPosition<T extends HTMLElement>(
+  providedRefOrHandler:
+    | React.RefObject<T>
+    | ((position: ScrollPosition) => void),
+  handler?: (position: ScrollPosition) => void,
 ): React.RefObject<T> | void {
+  let providedRef: React.RefObject<T> | undefined = undefined;
+  if ('current' in providedRefOrHandler) {
+    providedRef = providedRefOrHandler;
+  } else {
+    handler = providedRefOrHandler;
+  }
   const ref = useSyncRef(providedRef);
   const scrollRef = useNearestScrollNodeRef(ref);
   const changeHandler = useRef(handler);
