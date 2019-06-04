@@ -1,0 +1,9 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useIntersection uses a handler 1`] = `
+Object {
+  "current": <div
+    data-testid="intersects"
+  />,
+}
+`;
