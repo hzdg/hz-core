@@ -13,6 +13,11 @@ A React [hook] for components that care about
 the intersection of the nearest scrollable container's scroll position
 with one or more areas of the scrollable area.
 
+> **Note:**
+> If your use case is for knowing when an element intersects with the viewport
+> or a scrollable area, or any other use case that could be covered
+> by [IntersectionObserver], you should try [useIntersection] instead.
+
 ## Installation
 
 ```shell
@@ -165,6 +170,8 @@ const SomeRefUsingComponent = () => {
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[intersectionobserver]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
+[useintersection]: /use-intersection
 [installation]: #installation
 [usage]: #usage
 [config]: #config
