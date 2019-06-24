@@ -84,8 +84,8 @@ function getSize(elementSize: ElementSize, viewSize: WindowSize): Size {
     left: elementSize.left,
     width: elementSize.width,
     height: elementSize.height,
-    vw: elementSize.width / viewSize.width,
-    vh: elementSize.height / viewSize.height,
+    vw: Math.round((elementSize.width / viewSize.width) * 100) / 100,
+    vh: Math.round((elementSize.height / viewSize.height) * 100) / 100,
   });
 }
 
