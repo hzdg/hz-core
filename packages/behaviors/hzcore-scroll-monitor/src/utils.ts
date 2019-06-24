@@ -60,6 +60,18 @@ export function getNearestScrollNode(
 }
 
 /**
+ * `useForceUpdate` will return a function that, when called
+ * will force the component to rerender.
+ */
+export function useForceUpdate(): () => void {
+  const [, flipUpdateBit] = useState(false);
+  const forceUpdate = useCallback(function forceUpdate() {
+    flipUpdateBit(v => !v);
+  }, []);
+  return forceUpdate;
+}
+
+/**
  * `useNearestScrollNodeRef` is a React hook for finding
  * the nearest scrollable ancestor of a DOM node.
  *
@@ -75,23 +87,13 @@ export function useNearestScrollNodeRef<T extends Node>(
   ref: React.RefObject<T>,
 ): React.RefObject<HTMLElement | Document | null> {
   const {current} = ref;
+  const forceUpdate = useForceUpdate();
   const scrollRef = useRef<HTMLElement | Document | null>(null);
   useLayoutEffect(() => {
     scrollRef.current = getNearestScrollNode(current);
-  }, [current]);
+    forceUpdate();
+  }, [current, forceUpdate]);
   return scrollRef;
-}
-
-/**
- * `useForceUpdate` will return a function that, when called
- * will force the component to rerender.
- */
-export function useForceUpdate(): () => void {
-  const [, flipUpdateBit] = useState(false);
-  const forceUpdate = useCallback(function forceUpdate() {
-    flipUpdateBit(v => !v);
-  }, []);
-  return forceUpdate;
 }
 
 export interface Unsubscribe {

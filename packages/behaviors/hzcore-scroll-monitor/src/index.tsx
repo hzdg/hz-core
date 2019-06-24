@@ -3,6 +3,7 @@ import * as scrolling from './useScrolling';
 import * as position from './useScrollPosition';
 import * as direction from './useScrollDirection';
 import * as intersection from './useScrollIntersection';
+import * as utils from './utils';
 
 export const useScrolling = scrolling.default;
 
@@ -27,6 +28,8 @@ export type ScrollIntersectionConfig = intersection.ScrollIntersectionConfig;
 export type Intersects = intersection.Intersects;
 export const getIntersects = intersection.getIntersects;
 export const useScrollIntersection = intersection.default;
+
+export const useNearestScrollNodeRef = utils.useNearestScrollNodeRef;
 
 export type ScrollMonitorRenderProps<
   T extends HTMLElement
