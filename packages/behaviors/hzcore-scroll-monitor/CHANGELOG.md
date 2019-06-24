@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.1.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@3.0.0...@hzcore/scroll-monitor@3.1.0) (2019-06-24)
+
+
+### @hzcore/scroll-monitor
+
+* add useNearestScrollableRef hook ([5d96cb6](https://github.com/hzdg/hz-core/commit/5d96cb6))
+* add note about useIntersection ([39662c6](https://github.com/hzdg/hz-core/commit/39662c6))
+
+
 # [3.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@2.0.0...@hzcore/scroll-monitor@3.0.0) (2019-06-03)
 
 
