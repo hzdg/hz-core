@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.2](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@2.0.1...@hzcore/hook-size@2.0.2) (2019-06-24)
+
+
+### @hzcore/hook-size
+
+* fix vw/vh precision to nearest 100th ([a73d8d9](https://github.com/hzdg/hz-core/commit/a73d8d9))
+
+
 ## [2.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@2.0.0...@hzcore/hook-size@2.0.1) (2019-06-03)
 
 **Note:** Version bump only for package @hzcore/hook-size
