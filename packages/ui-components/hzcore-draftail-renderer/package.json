@@ -1,0 +1,19 @@
+{
+  "name": "@hzcore/draftail-renderer",
+  "version": "0.0.1",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.tsx",
+  "license": "MIT",
+  "private": true,
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "types",
+    "!**/__test*"
+  ]
+}

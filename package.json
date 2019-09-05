@@ -36,7 +36,8 @@
     "packages/behaviors/*",
     "packages/conventional-commits/*",
     "packages/simple-actions/*",
-    "packages/utilities/*"
+    "packages/utilities/*",
+    "packages/ui-components/*"
   ],
   "config": {
     "commitizen": {
