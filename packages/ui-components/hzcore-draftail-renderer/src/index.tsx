@@ -1,18 +1,16 @@
-import React, {CSSProperties} from 'react';
+import React from 'react';
 
 import DraftailProvider, {Components} from './context';
-import createElement from './createElement';
-import {
+import createElementBasedOnBlockType, {
+  BOLD,
+  ITALIC,
   UNSTYLED,
-  ORDERED_LIST_ITEM,
-  UNORDERED_LIST_ITEM,
   LINK,
   BlockType,
-} from './blockTypes';
-
-const BOLD = 'BOLD';
-const ITALIC = 'ITALIC';
-const MUTABLE = 'MUTABLE';
+  isOrderedListItem,
+  isUnorderedListItem,
+  isListItem,
+} from './createElementBasedOnBlockType';
 
 interface InlineStyleRange {
   length: number;
@@ -26,6 +24,16 @@ interface EntityRange {
   offset: number;
 }
 
+interface EntityMap {
+  [key: string]: {
+    data: {
+      url: string;
+    };
+    mutability: 'MUTABLE' | 'IMMUTABLE';
+    type: typeof LINK;
+  };
+}
+
 export interface Block {
   depth: number;
   entityRanges: EntityRange[];
@@ -36,15 +44,7 @@ export interface Block {
   isLink?: boolean;
 }
 
-interface EntityMap {
-  [key: string]: {
-    data: {
-      url: string;
-    };
-    mutability: typeof MUTABLE;
-    type: typeof LINK;
-  };
-}
+export type BlockWithEntityMap = Block & EntityMap;
 
 export interface RichTextNode {
   blocks: Block[];
@@ -56,79 +56,17 @@ export interface DraftailRendererProps {
   components?: Components;
 }
 
-type Merged = Block & EntityMap;
-
-function setStyleBasedOnStyleRanges(block: Block): CSSProperties | {} {
-  const {inlineStyleRanges} = block;
-  if (inlineStyleRanges.length < 1) return {};
-  const defaultStyles = {};
-  inlineStyleRanges.forEach(({style}) => {
-    switch (style) {
-      case ITALIC:
-        return Object.assign(defaultStyles, {fontStyle: 'italic'});
-      case BOLD:
-        return Object.assign(defaultStyles, {fontWeight: 'bold'});
-      default:
-        return defaultStyles;
-    }
-  });
-  return defaultStyles;
-}
-
-function getComponentBasedOnBlockType(
-  block: Block | Merged,
-  i: number,
-): JSX.Element | null {
-  switch (block.type as BlockType) {
-    case LINK:
-      return createElement('a', {
-        key: i,
-        href: block.data.url,
-        style: setStyleBasedOnStyleRanges(block),
-        children: block.text,
-      });
-    case UNSTYLED:
-      return createElement('p', {
-        key: i,
-        style: setStyleBasedOnStyleRanges(block),
-        children: block.text,
-      });
-    case ORDERED_LIST_ITEM:
-    case UNORDERED_LIST_ITEM:
-      return createElement('li', {
-        key: i,
-        style: setStyleBasedOnStyleRanges(block),
-        children: block.isLink
-          ? createElement('a', {
-              href: block.data.url,
-              style: setStyleBasedOnStyleRanges(block),
-              children: block.text,
-            })
-          : block.text,
-      });
-    default:
-      return null;
-  }
-}
-
-function isOrderedListItem(block: Block): boolean {
-  return Boolean(block.type === ORDERED_LIST_ITEM);
-}
-
-function isUnorderedListItem(block: Block): boolean {
-  return Boolean(block.type === UNORDERED_LIST_ITEM);
-}
-
-function isListItem(block: Block): boolean {
-  if (!block) return false;
-  return isOrderedListItem(block) || isUnorderedListItem(block);
-}
-
-function groupBlocksByType(blocksWithEntities: Block[]): Block[] | null {
+function groupBlocksByType(
+  blocksWithEntities: (Block | BlockWithEntityMap)[],
+): (Block | BlockWithEntityMap)[] | null {
   if (!blocksWithEntities || blocksWithEntities.length === 0) return null;
   let pointer = 1;
   return blocksWithEntities.reduce(
-    (blocks: Block[], currBlock: Block, currIndex) => {
+    (
+      blocks: (Block | BlockWithEntityMap)[],
+      currBlock: Block | BlockWithEntityMap,
+      currIndex,
+    ) => {
       const nextBlock = blocksWithEntities[currIndex + 1];
       if (
         isListItem(currBlock) ||
@@ -138,7 +76,7 @@ function groupBlocksByType(blocksWithEntities: Block[]): Block[] | null {
           blocks[currIndex - pointer].push(currBlock);
           pointer++;
         } else {
-          let list: Block[] = [];
+          let list: (Block | BlockWithEntityMap)[] = [];
           list.push(currBlock);
           blocks.push(list);
         }
@@ -152,7 +90,7 @@ function groupBlocksByType(blocksWithEntities: Block[]): Block[] | null {
 }
 
 function renderBlocksWithEntities(
-  blocks: Block[],
+  blocks: (Block | BlockWithEntityMap)[],
 ): JSX.Element | (JSX.Element | null)[] | null {
   const groupedBlocks = groupBlocksByType(blocks);
   if (!groupedBlocks || groupedBlocks.length === 0) return null;
@@ -163,7 +101,7 @@ function renderBlocksWithEntities(
           return (
             <ol key={i}>
               {block.map((listItem, i) =>
-                getComponentBasedOnBlockType(listItem, i),
+                createElementBasedOnBlockType(listItem, i),
               )}
             </ol>
           );
@@ -171,7 +109,7 @@ function renderBlocksWithEntities(
           return (
             <ul key={i}>
               {block.map((listItem, i) =>
-                getComponentBasedOnBlockType(listItem, i),
+                createElementBasedOnBlockType(listItem, i),
               )}
             </ul>
           );
@@ -184,7 +122,7 @@ function renderBlocksWithEntities(
           return null;
         }
       } else {
-        return getComponentBasedOnBlockType(block, i);
+        return createElementBasedOnBlockType(block, i);
       }
     })
     .filter(Boolean);
@@ -196,7 +134,7 @@ export default function DraftailRenderer({
 }: DraftailRendererProps): JSX.Element | null {
   const {blocks = [], entityMap = {}} = body as RichTextNode;
 
-  const blocksWithEntities: Block[] = blocks
+  const blocksWithEntities: (Block | BlockWithEntityMap)[] = blocks
     .map(block => {
       /**
        * if the block has an entityMap assosiated with it by `key`
