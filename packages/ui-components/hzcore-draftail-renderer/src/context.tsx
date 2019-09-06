@@ -1,7 +1,5 @@
 import React, {useContext} from 'react';
 
-const isFunction = (obj: {}): boolean => typeof obj === 'function';
-
 export type ComponentType =
   | 'p'
   | 'h1'
@@ -38,13 +36,17 @@ export type DraftailProviderProps = React.PropsWithChildren<{
 
 export const DraftailContext = React.createContext({});
 
-export const useDraftailComponents = (components: Components): Components => {
+export const useDraftailComponents = (
+  components: Components | ((contextComponents: Components) => Components),
+): Components => {
   const contextComponents = useContext(DraftailContext);
   let allComponents = contextComponents;
   if (components) {
-    allComponents = isFunction(components)
-      ? components(contextComponents)
-      : {...contextComponents, ...components};
+    if (typeof components === 'function') {
+      allComponents = components(contextComponents);
+    } else {
+      allComponents = {...contextComponents, ...components};
+    }
   }
   return allComponents;
 };

@@ -2,21 +2,17 @@ import React, {CSSProperties} from 'react';
 
 import DraftailProvider, {Components} from './context';
 import createElement from './createElement';
-
-const UNSTYLED = 'unstyled';
-const ORDERED_LIST_ITEM = 'ordered-list-item';
-const UNORDERED_LIST_ITEM = 'unordered-list-item';
-const LINK = 'LINK';
+import {
+  UNSTYLED,
+  ORDERED_LIST_ITEM,
+  UNORDERED_LIST_ITEM,
+  LINK,
+  BlockType,
+} from './blockTypes';
 
 const BOLD = 'BOLD';
 const ITALIC = 'ITALIC';
 const MUTABLE = 'MUTABLE';
-
-type BlockType =
-  | typeof UNSTYLED
-  | typeof ORDERED_LIST_ITEM
-  | typeof UNORDERED_LIST_ITEM
-  | typeof LINK;
 
 interface InlineStyleRange {
   length: number;
@@ -57,7 +53,6 @@ export interface RichTextNode {
 
 export interface DraftailRendererProps {
   body: RichTextNode | {};
-  headline?: string;
   components?: Components;
 }
 
@@ -129,7 +124,7 @@ function isListItem(block: Block): boolean {
   return isOrderedListItem(block) || isUnorderedListItem(block);
 }
 
-function sortBlocksBasedOnType(blocksWithEntities: Block[]): Block[] | null {
+function groupBlocksByType(blocksWithEntities: Block[]): Block[] | null {
   if (!blocksWithEntities || blocksWithEntities.length === 0) return null;
   let pointer = 1;
   return blocksWithEntities.reduce(
@@ -159,9 +154,9 @@ function sortBlocksBasedOnType(blocksWithEntities: Block[]): Block[] | null {
 function renderBlocksWithEntities(
   blocks: Block[],
 ): JSX.Element | (JSX.Element | null)[] | null {
-  const sortedBlocks = sortBlocksBasedOnType(blocks);
-  if (!sortedBlocks || sortedBlocks.length === 0) return null;
-  return sortedBlocks
+  const groupedBlocks = groupBlocksByType(blocks);
+  if (!groupedBlocks || groupedBlocks.length === 0) return null;
+  return groupedBlocks
     .map((block, i) => {
       if (Array.isArray(block)) {
         if (isOrderedListItem(block[0])) {
@@ -197,7 +192,6 @@ function renderBlocksWithEntities(
 
 export default function DraftailRenderer({
   components = {},
-  headline,
   body = {},
 }: DraftailRendererProps): JSX.Element | null {
   const {blocks = [], entityMap = {}} = body as RichTextNode;
@@ -227,12 +221,12 @@ export default function DraftailRenderer({
                * saying that it also should be a link. Solves an issue when a link
                * is a part of un/ordered list.
                */
+              blockWithEntity = Object.assign({}, block, entityMap[key], {
+                type: block.type,
+                isLink: true,
+              });
+              return blockWithEntity;
             }
-            blockWithEntity = Object.assign({}, block, entityMap[key], {
-              type: block.type,
-              isLink: true,
-            });
-            return blockWithEntity;
           }
         }
       }
@@ -248,7 +242,6 @@ export default function DraftailRenderer({
 
   return (
     <DraftailProvider components={components}>
-      {headline && createElement('h1', {children: headline})}
       {renderBlocksWithEntities(blocksWithEntities)}
     </DraftailProvider>
   );
