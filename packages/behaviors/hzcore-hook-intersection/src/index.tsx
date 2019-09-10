@@ -181,8 +181,6 @@ function useIntersection<T extends HTMLElement>(
   const {root = undefined, rootMargin = undefined, threshold = undefined} =
     config || {};
 
-  const element = ref.current;
-
   useLayoutEffect(
     /**
      * `subscribeIfNecessary` will run on layout to determine if we need to
@@ -190,20 +188,23 @@ function useIntersection<T extends HTMLElement>(
      * subscribed to the element, it will do nothing.
      */
     function subscribeIfNecessary() {
-      if (element && !subscriptions.has(element)) {
+      const currentElement = ref.current;
+      if (currentElement && !subscriptions.has(currentElement)) {
         const observer = new IntersectionObserver(entries => {
           for (const entry of entries) {
-            if (entry.target === element) {
+            if (entry.target === currentElement) {
               return handleIntersectionChange(entry);
             }
           }
         }, config);
-        observer.observe(element);
-        subscriptions.set(element, {
+        observer.observe(currentElement);
+        subscriptions.set(currentElement, {
           closed: false,
           unsubscribe() {
             this.closed = true;
-            observer.unobserve(element);
+            if (currentElement) {
+              observer.unobserve(currentElement);
+            }
           },
         });
       }
@@ -220,7 +221,7 @@ function useIntersection<T extends HTMLElement>(
         }
       };
     },
-    // Note: We don't include `config` in our depenency list because
+    // Note: We don't include `config` in our dependency list because
     // the object might not be referentially stable across renders.
     // We don't care if it isn't; we only care if its deconstructed values
     // (`root`, `rootMargin`, `threshold`) are.
@@ -228,7 +229,12 @@ function useIntersection<T extends HTMLElement>(
     [
       subscriptions,
       handleIntersectionChange,
-      element,
+      // Note: We include `ref.current` here (against the advice of the linter)
+      // because we want this effect to be re-run when the ref value changes.
+      // We know that a render is not caused by changes to `ref.current`,
+      // but we want to make sure this effect is rerun when that value happens
+      // to be different during a render caused by some other update.
+      ref.current,
       root,
       rootMargin,
       // Note: We spread `threshold` value(s) as dependencies because
