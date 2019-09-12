@@ -1,6 +1,6 @@
 import ResizeObserver from 'resize-observer-polyfill';
 import Observable from 'zen-observable';
-import invariant from 'invariant';
+import {ensureDOMInstance} from '@hzcore/dom-utils';
 
 type Observer = ZenObservable.SubscriptionObserver<DOMRect>;
 const resizeObservers = new Map<Element, Set<Observer>>();
@@ -20,10 +20,7 @@ function createResizeObserver(): void {
 }
 
 export function create(element: Element): Observable<DOMRect> {
-  invariant(
-    element instanceof Element,
-    `An Element is required, but received ${element}`,
-  );
+  ensureDOMInstance(element, Element);
   return new Observable((observer: Observer) => {
     if (!resizeObserver) createResizeObserver();
     let observers = resizeObservers.get(element);
