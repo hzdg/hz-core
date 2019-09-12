@@ -1,5 +1,5 @@
 import Observable from 'zen-observable';
-import invariant from 'invariant';
+import {ensureDOMInstance} from '@hzcore/dom-utils';
 import merge from 'callbag-merge';
 import asObservable from './asObservable';
 import * as WheelGestureObservable from './WheelGestureObservable';
@@ -169,10 +169,7 @@ export function create(
   /** Configuration for the GestureObservable. */
   config?: GestureObservableConfig | null,
 ): Observable<GestureState> {
-  invariant(
-    element instanceof Element,
-    `An Element is required, but received ${element}`,
-  );
+  ensureDOMInstance(element, Element);
   config = parseConfig(config);
 
   const sources = [];

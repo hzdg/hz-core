@@ -1,5 +1,5 @@
 import Observable from 'zen-observable';
-import invariant from 'invariant';
+import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
@@ -236,10 +236,7 @@ export function createSource(
   /** Configuration for the keyboard gesture source. */
   config?: Partial<KeyboardGestureObservableConfig> | null,
 ): Source<KeyboardGestureState | KeyboardGestureEndState> {
-  invariant(
-    element instanceof Element,
-    `An Element is required, but received ${element}`,
-  );
+  ensureDOMInstance(element, Element);
   const {preventDefault} = parseConfig(config);
 
   let gesturingKey: KeyboardGestureEvent | null = null;

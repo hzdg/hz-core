@@ -1,5 +1,5 @@
 import Observable from 'zen-observable';
-import invariant from 'invariant';
+import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Lethargy} from 'lethargy';
 import {Source} from 'callbag';
 import share from 'callbag-share';
@@ -314,11 +314,7 @@ export function createSource(
   /** Configuration for the wheel gesture source. */
   config?: Partial<WheelGestureObservableConfig> | null,
 ): Source<WheelGestureState | WheelGestureEndState> {
-  invariant(
-    element instanceof Element,
-    `An Element is required, but received ${element}`,
-  );
-
+  ensureDOMInstance(element, Element);
   let {threshold = GESTURE_THRESHOLD, preventDefault, passive} = parseConfig(
     config,
   );
