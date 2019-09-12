@@ -17,6 +17,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
+    "@hzcore/dom-utils": "^1.0.1",
     "callbag": "^1.2.0",
     "callbag-filter": "^1.1.0",
     "callbag-from-event": "^1.2.1",
@@ -27,7 +28,6 @@
     "callbag-share": "^1.2.0",
     "callbag-subject": "^1.0.2",
     "callbag-subscribe": "^1.5.1",
-    "invariant": "^2.2.4",
     "lethargy": "^1.0.4",
     "zen-observable": "^0.8.14"
   }
