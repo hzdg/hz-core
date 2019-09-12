@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.0.0...@hzcore/gesture-observable@1.0.1) (2019-09-12)
+
+
+### @hzcore/gesture-observable
+
+* add @hzcore/dom-utils dep ([0558fea](https://github.com/hzdg/hz-core/commit/0558fea))
+* fix usage within iframes ([8d510d3](https://github.com/hzdg/hz-core/commit/8d510d3))
+* fix typo ([138bb7d](https://github.com/hzdg/hz-core/commit/138bb7d))
+
+
 ## 1.0.0 (2019-05-20)
 
 

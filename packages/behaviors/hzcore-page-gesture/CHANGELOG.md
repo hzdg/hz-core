@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@2.0.0...@hzcore/page-gesture@2.0.1) (2019-09-12)
+
+
+### @hzcore/page-gesture
+
+* fix typo ([7d724f8](https://github.com/hzdg/hz-core/commit/7d724f8))
+
+
 # [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@1.0.0...@hzcore/page-gesture@2.0.0) (2019-05-31)
 
 
