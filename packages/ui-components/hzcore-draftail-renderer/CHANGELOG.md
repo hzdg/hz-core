@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.1.0...@hzcore/draftail-renderer@1.1.1) (2019-09-23)
+
+
+### @hzcore/draftail-renderer
+
+* removing "private" field ([4bb2e3d](https://github.com/hzdg/hz-core/commit/4bb2e3d))
+
+
 # 1.1.0 (2019-09-23)
 
 
