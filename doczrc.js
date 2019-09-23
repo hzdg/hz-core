@@ -16,6 +16,7 @@ module.exports = {
     'Hooks',
     'Styled Components',
     'Utilities',
+    'UI Components',
   ],
   htmlContext: {
     favicon: 'public/favicon.ico',
