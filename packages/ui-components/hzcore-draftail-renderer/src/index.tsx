@@ -171,13 +171,9 @@ function renderListRecursive(
     return createElementBasedOnBlockType(block);
   } else {
     return isOrderedListItem(block[0]) ? (
-      <ol key={block[0].key}>
-        {block.map(innerBlock => renderListRecursive(innerBlock))}
-      </ol>
+      <ol key={block[0].key}>{block.map(renderListRecursive)}</ol>
     ) : isUnorderedListItem(block[0]) ? (
-      <ul key={block[0].key}>
-        {block.map(innerBlock => renderListRecursive(innerBlock))}
-      </ul>
+      <ul key={block[0].key}>{block.map(renderListRecursive)}</ul>
     ) : null;
   }
 }
