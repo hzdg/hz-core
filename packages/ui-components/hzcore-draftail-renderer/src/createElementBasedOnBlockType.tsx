@@ -59,26 +59,25 @@ export function isListItem(block: Block | BlockWithEntityMap): boolean {
 
 export default function createElementBasedOnBlockType(
   block: Block | BlockWithEntityMap,
-  i: number,
 ): JSX.Element | null {
   switch (block.type as BlockType) {
     case LINK:
       return createElement('a', {
-        key: i,
+        key: block.key,
         href: block.data.url,
         style: setStyleBasedOnStyleRanges(block),
         children: block.text,
       });
     case UNSTYLED:
       return createElement('p', {
-        key: i,
+        key: block.key,
         style: setStyleBasedOnStyleRanges(block),
         children: block.text,
       });
     case ORDERED_LIST_ITEM:
     case UNORDERED_LIST_ITEM:
       return createElement('li', {
-        key: i,
+        key: block.key,
         style: setStyleBasedOnStyleRanges(block),
         children: block.isLink
           ? createElement('a', {
