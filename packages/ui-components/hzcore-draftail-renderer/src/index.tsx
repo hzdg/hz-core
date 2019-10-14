@@ -72,6 +72,9 @@ function groupBlocksByType(
         isListItem(currBlock) ||
         (nextBlock && isListItem(currBlock) && isListItem(nextBlock))
       ) {
+        /**
+         * check if the block's depth is not 0
+         */
         if (blocks.length > 0 && Array.isArray(blocks[currIndex - pointer])) {
           blocks[currIndex - pointer].push(currBlock);
           pointer++;
@@ -89,40 +92,114 @@ function groupBlocksByType(
   );
 }
 
+function sortNestedLists(blocks: Block[]): Block[] {
+  let list: unknown[] | Block[] = [];
+
+  blocks.forEach(block => {
+    if (list.length === 0) {
+      list.push(block);
+    } else {
+      /**
+       * grabbing value of the last item in the list.
+       */
+      let last = list[list.length - 1]
+        ? list[list.length - 1]
+        : list[list.length];
+      /**
+       * we've moved from the first index.
+       */
+      if (Array.isArray(last)) {
+        let lastInLast = last[last.length - 1]
+          ? last[last.length - 1]
+          : last[last.length];
+
+        /**
+         * if the first item in nested array has the same depth as the current block - add the block to that array.
+         */
+        if (block.depth === last[0].depth) {
+          last.push(block);
+        } else {
+          /**
+           * if not - create a new array and add the block to that array and append it to the position next to the last item, depending on the depth
+           */
+          let nestedArray: unknown[] | Block[] = [];
+          nestedArray.push(block);
+
+          if (Array.isArray(lastInLast)) {
+            if (block.depth === lastInLast[0].depth) {
+              lastInLast.push(nestedArray);
+            } else {
+              if (Array.isArray(lastInLast[lastInLast.length - 1])) {
+                if (lastInLast[lastInLast.length - 1].depth === block.depth) {
+                  lastInLast[lastInLast.length - 1].push(block);
+                } else {
+                  lastInLast[lastInLast.length - 1].push(nestedArray);
+                }
+              } else {
+                lastInLast.push(nestedArray);
+              }
+            }
+          } else {
+            last.push(nestedArray);
+          }
+        }
+        /**
+         * if the last item is array, we are one level deeper.
+         */
+      } else {
+        /**
+         * last item in the list is NOT array but a regular block.
+         */
+        if ((last as Block) && (last as Block).depth !== block.depth) {
+          let nestedArray: unknown[] | Block[] = [];
+          nestedArray.push(block);
+          list.push(nestedArray);
+        } else {
+          list.push(block);
+        }
+      }
+    }
+  });
+
+  return list as Block[];
+}
+
+function renderListRecursive(
+  block: (Block | BlockWithEntityMap)[] | (Block | BlockWithEntityMap),
+): JSX.Element | null {
+  if (!Array.isArray(block)) {
+    return createElementBasedOnBlockType(block);
+  } else {
+    return isOrderedListItem(block[0]) ? (
+      <ol key={block[0].key}>
+        {block.map(innerBlock => renderListRecursive(innerBlock))}
+      </ol>
+    ) : isUnorderedListItem(block[0]) ? (
+      <ul key={block[0].key}>
+        {block.map(innerBlock => renderListRecursive(innerBlock))}
+      </ul>
+    ) : null;
+  }
+}
+
+function renderList(
+  block: BlockWithEntityMap,
+): JSX.Element | (JSX.Element | null)[] | null {
+  const sortedNestedLists = sortNestedLists(block);
+  return renderListRecursive(sortedNestedLists);
+}
+
 function renderBlocksWithEntities(
   blocks: (Block | BlockWithEntityMap)[],
 ): JSX.Element | (JSX.Element | null)[] | null {
   const groupedBlocks = groupBlocksByType(blocks);
   if (!groupedBlocks || groupedBlocks.length === 0) return null;
   return groupedBlocks
-    .map((block, i) => {
+    .map(block => {
       if (Array.isArray(block)) {
-        if (isOrderedListItem(block[0])) {
-          return (
-            <ol key={i}>
-              {block.map((listItem, i) =>
-                createElementBasedOnBlockType(listItem, i),
-              )}
-            </ol>
-          );
-        } else if (isUnorderedListItem(block[0])) {
-          return (
-            <ul key={i}>
-              {block.map((listItem, i) =>
-                createElementBasedOnBlockType(listItem, i),
-              )}
-            </ul>
-          );
-        } else {
-          /**
-           * for now, known types that will be generated as arrays are
-           * ordered and unordered list items, but it might change in the future
-           * as we add more types from the draftail.
-           */
-          return null;
-        }
+        return renderList(block);
       } else {
-        return createElementBasedOnBlockType(block, i);
+        return createElementBasedOnBlockType(block);
       }
     })
     .filter(Boolean);
