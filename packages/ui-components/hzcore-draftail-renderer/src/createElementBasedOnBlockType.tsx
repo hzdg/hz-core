@@ -60,27 +60,29 @@ export function isListItem(block: Block | BlockWithEntityMap): boolean {
 export default function createElementBasedOnBlockType(
   block: Block | BlockWithEntityMap,
 ): JSX.Element | null {
+  if (!block || !block.type || typeof block.type !== 'string') return null;
   switch (block.type as BlockType) {
     case LINK:
       return createElement('a', {
-        key: block.key,
+        key: `${block.key}_${block.text}_${block.data.url}`,
         href: block.data.url,
         style: setStyleBasedOnStyleRanges(block),
         children: block.text,
       });
     case UNSTYLED:
       return createElement('p', {
-        key: block.key,
+        key: `${block.key}_${block.text}`,
         style: setStyleBasedOnStyleRanges(block),
         children: block.text,
       });
     case ORDERED_LIST_ITEM:
     case UNORDERED_LIST_ITEM:
       return createElement('li', {
-        key: block.key,
+        key: `${block.key}_${block.text}`,
         style: setStyleBasedOnStyleRanges(block),
         children: block.isLink
           ? createElement('a', {
+              key: `${block.key}_${block.text}_${block.data.url}`,
               href: block.data.url,
               style: setStyleBasedOnStyleRanges(block),
               children: block.text,
