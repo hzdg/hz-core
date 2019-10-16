@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.1.1...@hzcore/draftail-renderer@1.2.0) (2019-10-16)
+
+
+### @hzcore/draftail-renderer
+
+* adding nested lists support ([e50bb1a](https://github.com/hzdg/hz-core/commit/e50bb1a))
+* making draftail parse deeply nested lists ([33fbe1a](https://github.com/hzdg/hz-core/commit/33fbe1a))
+
+* more complex list structure to test ([94fbd6f](https://github.com/hzdg/hz-core/commit/94fbd6f))
+* keys more unique in createElementBasedOnBlockType ([6a64a5e](https://github.com/hzdg/hz-core/commit/6a64a5e))
+* block.key for react element key instead of map index ([70ddf96](https://github.com/hzdg/hz-core/commit/70ddf96))
+
+
 ## [1.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.1.0...@hzcore/draftail-renderer@1.1.1) (2019-09-23)
 
 
