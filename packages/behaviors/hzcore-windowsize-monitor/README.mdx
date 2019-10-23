@@ -5,43 +5,32 @@ route: /windowsize-monitor
 ---
 
 import {Playground} from 'docz';
-import WindowsizeMonitor, {useWindowSize} from './src/index.tsx';
+import WindowsizeMonitor from './src/index.tsx';
 
 # WindowsizeMonitor
 
-The component is used to determine the size(width & height) of the window. Some
-use cases may include transforming the desktop nav to mobile navigation, or
-to create a conditional rendering of components in the section depending on the
-viewport size. It subsribes to a resize event and caches the events for optimization
-purposes when using this hook/render prop in multiple components on the page.
+The component is used to determine the size (width & height) of the [window].
+Some use cases may include transforming the desktop nav to mobile navigation,
+or to create a conditional rendering of components in the section depending on
+the viewport size. It subscribes to a resize event and caches the events for
+optimization purposes when using this hook/render prop in multiple components
+on the page.
 
-#### To use with a hook(requires react v. 16.8+)
+> To use with a hook (requires react v. 16.8+) see [useWindowSize]
 
-1. Install the component package
-2. Import it in your module as `import {useWindowSize} from '@hzcore/windowsize-monitor'
-3. Use it!
+## Installation
 
-<Playground>
-  {() => {
-    const Size = () => {
-      const {width, height} = useWindowSize();
-      return (
-        <pre style={{width: '100%', height: '100%'}}>
-          current width is {JSON.stringify(width, null, 2)}
-          <br />
-          current height is {JSON.stringify(height, null, 2)}
-        </pre>
-      );
-    };
-    return <Size />;
-  }}
-</Playground>
+```shell
+yarn add @hzcore/windowsize-monitor
+```
 
-#### To use with a render prop
+## Usage
 
-1. Install the component package
-2. Import it in your module. Use default import as `import WindowsizeMonitor from '@hzcore/windowsize-monitor'`
-3. Use it as a wrapper around component where you need to use window's width&height
+```js
+import WindowsizeMonitor from '@hzcore/windowsize-monitor';
+```
+
+## Example
 
 <Playground>
   <WindowsizeMonitor>
@@ -54,3 +43,9 @@ purposes when using this hook/render prop in multiple components on the page.
     )}
   </WindowsizeMonitor>
 </Playground>
+
+[window]: https://developer.mozilla.org/en-US/docs/Web/API/Window
+[usewindowsize]: /use-window-size
+[installation]: #installation
+[usage]: #usage
+[example]: #example

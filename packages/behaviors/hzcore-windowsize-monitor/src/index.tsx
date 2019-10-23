@@ -1,16 +1,5 @@
-import React, {
-  PureComponent,
-  useState,
-  useRef,
-  useEffect,
-  useCallback,
-  useMemo,
-} from 'react';
+import {useState, useRef, useEffect, useMemo} from 'react';
 import {throttle} from './utils';
-
-import {Props, State} from './types';
-
-export * from './types';
 
 export interface WindowSize {
   width: number;
@@ -152,45 +141,9 @@ function useWindowSize(
 
 export {useWindowSize};
 
-class WindowsizeMonitor extends PureComponent<Props, State> {
-  state = {
-    width: 0,
-    height: 0,
-  };
-
-  componentDidMount(): void {
-    // we need this for static site generators to not complain about
-    // undefined window
-    if (typeof window !== undefined) {
-      this.updateDimensions();
-      this.subscription = subscribeToWindowSizeChange(this.updateDimensions);
-    }
-  }
-
-  componentWillUnmount(): void {
-    if (this.subscription) {
-      this.subscription();
-      this.subscription = null;
-    }
-  }
-
-  getDimensions(): State {
-    const width = window.innerWidth;
-    const height = window.innerHeight;
-    return {width, height};
-  }
-
-  subscription: null | (() => void) = null;
-
-  updateDimensions = () => {
-    this.setState(this.getDimensions());
-  };
-
-  render(): JSX.Element {
-    return this.props.children({
-      ...this.state,
-    });
-  }
+export default function WindowSizeMonitor(
+  props: WindowSizeMonitorProps,
+): JSX.Element {
+  const size = useWindowSize();
+  return props.children(size);
 }
-
-export default WindowsizeMonitor;
