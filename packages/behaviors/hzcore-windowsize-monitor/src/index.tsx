@@ -130,9 +130,10 @@ function useWindowSize(
       : handleSizeChange;
   }, [options]);
 
-  useEffect(() => subscribeToWindowSizeChange(handleSizeChange), [
-    handleSizeChange,
-  ]);
+  useEffect(() => {
+    subscribeToWindowSizeChange(handleSizeChange);
+    handleSizeChange();
+  }, [handleSizeChange]);
 
   if (!changeHandler.current) {
     return size;
