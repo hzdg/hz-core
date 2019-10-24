@@ -1,6 +1,7 @@
 import {useEffect, useState, useRef, useCallback} from 'react';
 import {useWindowSize, WindowSize} from '@hzcore/windowsize-monitor';
 import ResizeObservable from '@hzcore/resize-observable';
+import memoizeOne from 'memoize-one';
 
 // We really would just like to use DOMRect as our type here, but due to
 // the new nature of the API and the polyfill behavior, The DOMRect interface
@@ -71,22 +72,58 @@ const INITIAL_VIEW_SIZE: WindowSize = {
   height: 0,
 };
 
+function shallowEqual(
+  a: Record<string, unknown>,
+  b: Record<string, unknown>,
+): boolean {
+  if (a === b) return true;
+  for (let k in a) {
+    if (a[k] !== b[k]) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /**
  * `getSize` calculates a new `Size` from a `DOMRect` and viewport size.
  */
-function getSize(elementSize: ElementSize, viewSize: WindowSize): Size {
-  return Object.freeze({
-    x: elementSize.x,
-    y: elementSize.y,
-    top: elementSize.top,
-    right: elementSize.right,
-    bottom: elementSize.bottom,
-    left: elementSize.left,
-    width: elementSize.width,
-    height: elementSize.height,
-    vw: Math.round((elementSize.width / viewSize.width) * 100) / 100,
-    vh: Math.round((elementSize.height / viewSize.height) * 100) / 100,
-  });
+const getSize = memoizeOne(
+  function getSize(elementSize: ElementSize, viewSize: WindowSize): Size {
+    return Object.freeze({
+      x: elementSize.x,
+      y: elementSize.y,
+      top: elementSize.top,
+      right: elementSize.right,
+      bottom: elementSize.bottom,
+      left: elementSize.left,
+      width: elementSize.width,
+      height: elementSize.height,
+      vw: Math.round((elementSize.width / viewSize.width) * 100) / 100,
+      vh: Math.round((elementSize.height / viewSize.height) * 100) / 100,
+    });
+  },
+  function areInputsEqual(
+    [newElementSize, newViewSize],
+    [lastElementSize, lastViewSize],
+  ) {
+    return (
+      shallowEqual(newElementSize, lastElementSize) &&
+      shallowEqual(newViewSize, lastViewSize)
+    );
+  },
+);
+
+/**
+ * `useForceUpdate` will return a function that, when called
+ * will force the component to rerender.
+ */
+function useForceUpdate(): () => void {
+  const [, flipUpdateBit] = useState(false);
+  const forceUpdate = useCallback(function forceUpdate() {
+    flipUpdateBit(v => !v);
+  }, []);
+  return forceUpdate;
 }
 
 /**
@@ -159,13 +196,18 @@ function useSize<T extends HTMLElement>(
 
   const viewSize = useRef(INITIAL_VIEW_SIZE);
   const elementSize = useRef(INITIAL_ELEMENT_SIZE);
+  // Note: we use `setState` here to take advantage of the
+  // init function so that we only calculate the initial size once.
+  const [initialSize] = useState(() =>
+    getSize(elementSize.current, viewSize.current),
+  );
+  const size = useRef(initialSize);
+
   const subscribed = useRef<T | null>(null);
 
   const shouldResubscribe = !ref.current || ref.current !== subscribed.current;
 
-  const [size, setSize] = useState(() =>
-    getSize(elementSize.current, viewSize.current),
-  );
+  const forceUpdate = useForceUpdate();
 
   const handleSizeChange = useCallback(
     /**
@@ -175,15 +217,22 @@ function useSize<T extends HTMLElement>(
      */
     function handleSizeChange() {
       if (!subscribed.current) return;
-      const cb = changeHandler.current;
-      const size = getSize(elementSize.current, viewSize.current);
-      if (typeof cb === 'function') {
-        cb(size);
-      } else {
-        setSize(size);
+      const nextSize = getSize(elementSize.current, viewSize.current);
+      if (size.current !== nextSize) {
+        size.current = nextSize;
+        const cb = changeHandler.current;
+        if (typeof cb === 'function') {
+          // If we have a callback, then we're in 'stateless' mode,
+          // so just call it with the new size.
+          cb(size.current);
+        } else {
+          // Otherwise, we're in 'stateful' mode, so we should rerender,
+          // as the size has changed.
+          forceUpdate();
+        }
       }
     },
-    [],
+    [forceUpdate],
   );
 
   const handleWindowSizeChange = useCallback(
@@ -207,8 +256,8 @@ function useSize<T extends HTMLElement>(
      * with a new `Size` whenever it changes, and also
      * call `handleSizeChange` to update the container size.
      */
-    function handleElementSizeChange(size: ElementSize) {
-      elementSize.current = size;
+    function handleElementSizeChange(newSize: ElementSize) {
+      elementSize.current = newSize;
       handleSizeChange();
     },
     [handleSizeChange],
