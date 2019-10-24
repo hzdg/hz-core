@@ -1,5 +1,5 @@
-import {useEffect, useState, useRef, useLayoutEffect, useCallback} from 'react';
-import {useWindowSize} from '@hzcore/windowsize-monitor';
+import {useEffect, useState, useRef, useCallback} from 'react';
+import {useWindowSize, WindowSize} from '@hzcore/windowsize-monitor';
 import ResizeObservable from '@hzcore/resize-observable';
 
 // We really would just like to use DOMRect as our type here, but due to
@@ -8,11 +8,6 @@ import ResizeObservable from '@hzcore/resize-observable';
 // often missing. Since we aren't using it directly anyway, we just omit it
 // from our expected type.
 type ElementSize = Readonly<Pick<DOMRect, Exclude<keyof DOMRect, 'toJSON'>>>;
-
-interface WindowSize {
-  width: number;
-  height: number;
-}
 
 /**
  * A DOMRect-like object, but with additional useful measurements.
@@ -67,6 +62,11 @@ const INITIAL_ELEMENT_SIZE: ElementSize = {
   right: 0,
   bottom: 0,
   left: 0,
+  width: 0,
+  height: 0,
+};
+
+const INITIAL_VIEW_SIZE: WindowSize = {
   width: 0,
   height: 0,
 };
@@ -157,18 +157,11 @@ function useSize<T extends HTMLElement>(
     }
   }
 
-  // Note: we use state instead of a ref to track this value
-  // because `useState` supports lazy instantiation (via a callback),
-  // whereas`useRef` would have us creating and throwing away a `new Map()`
-  // on every subsequent render.
-  const [subscriptions] = useState(
-    () => new Map<HTMLElement, ZenObservable.Subscription>(),
-  );
-
-  const windowSizeState = useWindowSize();
-  const viewSize = useRef(windowSizeState);
-
+  const viewSize = useRef(INITIAL_VIEW_SIZE);
   const elementSize = useRef(INITIAL_ELEMENT_SIZE);
+  const subscribed = useRef<T | null>(null);
+
+  const shouldResubscribe = !ref.current || ref.current !== subscribed.current;
 
   const [size, setSize] = useState(() =>
     getSize(elementSize.current, viewSize.current),
@@ -181,6 +174,7 @@ function useSize<T extends HTMLElement>(
      * the viewport size changes.
      */
     function handleSizeChange() {
+      if (!subscribed.current) return;
       const cb = changeHandler.current;
       const size = getSize(elementSize.current, viewSize.current);
       if (typeof cb === 'function') {
@@ -192,55 +186,55 @@ function useSize<T extends HTMLElement>(
     [],
   );
 
-  if (windowSizeState !== viewSize.current) {
-    viewSize.current = windowSizeState;
-    handleSizeChange();
-  }
-
-  useLayoutEffect(
+  const handleWindowSizeChange = useCallback(
     /**
-     * `subscribeIfNecessary` will run on layout to determine if we need to
-     * subscribe to resize events on an element. If we are already subscribed
-     * to the element, it will do nothing.
+     * `handleWindowSizeChange` will update the current view size
+     * with a new `WindowSize` whenever it changes, and also
+     * call `handleSizeChange` to update the container size.
      */
-    function subscribeIfNecessary() {
-      if (providedRef) {
-        ref.current = providedRef.current;
-      }
-      const element = ref.current;
-      if (element && !subscriptions.has(element)) {
-        subscriptions.set(
-          element,
-          ResizeObservable.create(element).subscribe(
-            function handleElementSizeChange(size: ElementSize) {
-              elementSize.current = size;
-              handleSizeChange();
-            },
-          ),
-        );
-        // call the handler to initialize it
-        // with the new element measurements.
-        handleSizeChange();
-      }
+    function handleWindowSizeChange(windowSize) {
+      viewSize.current = windowSize;
+      handleSizeChange();
     },
+    [handleSizeChange],
+  );
+
+  useWindowSize(handleWindowSizeChange);
+
+  const handleElementSizeChange = useCallback(
+    /**
+     * `handleElementSizeChange` will update the current element size
+     * with a new `Size` whenever it changes, and also
+     * call `handleSizeChange` to update the container size.
+     */
+    function handleElementSizeChange(size: ElementSize) {
+      elementSize.current = size;
+      handleSizeChange();
+    },
+    [handleSizeChange],
   );
 
   useEffect(
     /**
-     * `cleanup` returns a function that will run on unmount
-     * to unsubscribe from any subscriptions.
+     * `subscribeIfNecessary` will run to determine if we need to
+     * subscribe to resize events on an element. If we are already subscribed
+     * to the element, it will do nothing.
      */
-    function cleanup() {
-      return () => {
-        if (subscriptions.size > 0) {
-          for (const [el, sub] of subscriptions.entries()) {
-            sub.unsubscribe();
-            subscriptions.delete(el);
-          }
-        }
-      };
+    function subscribeIfNecessary() {
+      const element = ref.current;
+      if (element) {
+        subscribed.current = element;
+        const subscription = ResizeObservable.create(element).subscribe(
+          handleElementSizeChange,
+        );
+
+        return function unsubscribe() {
+          subscribed.current = null;
+          subscription.unsubscribe();
+        };
+      }
     },
-    [subscriptions],
+    [ref, shouldResubscribe, handleElementSizeChange],
   );
 
   if (!providedRef) {
