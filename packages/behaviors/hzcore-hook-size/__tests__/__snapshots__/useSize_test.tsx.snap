@@ -8,13 +8,13 @@ exports[`useSize gets the initial size 1`] = `
   "x": 0,
   "y": 0,
   "top": 0,
-  "right": 0,
-  "bottom": 0,
+  "right": 120,
+  "bottom": 120,
   "left": 0,
-  "width": 0,
-  "height": 0,
-  "vw": 0,
-  "vh": 0
+  "width": 120,
+  "height": 120,
+  "vw": 0.12,
+  "vh": 0.16
 }
 </div>
 `;
@@ -23,14 +23,14 @@ exports[`useSize passes the initial size to a handler 1`] = `
 Array [
   Array [
     Object {
-      "bottom": 0,
-      "height": 0,
+      "bottom": 120,
+      "height": 120,
       "left": 0,
-      "right": 0,
+      "right": 120,
       "top": 0,
-      "vh": 0,
-      "vw": 0,
-      "width": 0,
+      "vh": 0.16,
+      "vw": 0.12,
+      "width": 120,
       "x": 0,
       "y": 0,
     },
@@ -46,13 +46,13 @@ exports[`useSize uses an existing ref 1`] = `
   "x": 0,
   "y": 0,
   "top": 0,
-  "right": 0,
-  "bottom": 0,
+  "right": 120,
+  "bottom": 120,
   "left": 0,
-  "width": 0,
-  "height": 0,
-  "vw": 0,
-  "vh": 0
+  "width": 120,
+  "height": 120,
+  "vw": 0.12,
+  "vh": 0.16
 }
 </div>
 `;
@@ -61,14 +61,14 @@ exports[`useSize uses an existing ref and a handler 1`] = `
 Array [
   Array [
     Object {
-      "bottom": 0,
-      "height": 0,
+      "bottom": 120,
+      "height": 120,
       "left": 0,
-      "right": 0,
+      "right": 120,
       "top": 0,
-      "vh": 0,
-      "vw": 0,
-      "width": 0,
+      "vh": 0.16,
+      "vw": 0.12,
+      "width": 120,
       "x": 0,
       "y": 0,
     },

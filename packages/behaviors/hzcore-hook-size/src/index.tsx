@@ -1,6 +1,7 @@
 import {useEffect, useState, useRef, useCallback} from 'react';
 import {useWindowSize, WindowSize} from '@hzcore/windowsize-monitor';
 import ResizeObservable from '@hzcore/resize-observable';
+import useRefCallback from '@hzcore/hook-ref-callback';
 import memoizeOne from 'memoize-one';
 
 // We really would just like to use DOMRect as our type here, but due to
@@ -99,8 +100,8 @@ const getSize = memoizeOne(
       left: elementSize.left,
       width: elementSize.width,
       height: elementSize.height,
-      vw: Math.round((elementSize.width / viewSize.width) * 100) / 100,
-      vh: Math.round((elementSize.height / viewSize.height) * 100) / 100,
+      vw: Math.round((elementSize.width / viewSize.width) * 100) / 100 || 0,
+      vh: Math.round((elementSize.height / viewSize.height) * 100) / 100 || 0,
     });
   },
   function areInputsEqual(
@@ -144,25 +145,6 @@ function useSize<T extends HTMLElement>(
    */
   handler: (size: Size) => void,
 ): void;
-/**
- * `useSize` is a React hook for components that care about their size.
- * It can be used statefully or not, and with an existing ref or not.
- *
- * @see https://hz-core.netlify.com/use-size
- */
-function useSize<T extends HTMLElement>(
-  /**
-   * `handler` will receive a `Size` object each time
-   * the observed element's size changes.
-   */
-  handler: (size: Size) => void,
-): React.RefObject<T>;
-/**
- * `useSize` is a React hook for components that care about their size.
- * It can be used statefully or not, and with an existing ref or not.
- *
- * @see https://hz-core.netlify.com/use-size
- */
 function useSize<T extends HTMLElement>(
   /**
    * An existing ref being passed to the DOM element to measure.
@@ -170,20 +152,20 @@ function useSize<T extends HTMLElement>(
    */
   providedRef: React.RefObject<T>,
 ): Size;
-/**
- * `useSize` is a React hook for components that care about their size.
- * It can be used statefully or not, and with an existing ref or not.
- *
- * @see https://hz-core.netlify.com/use-size
- */
-function useSize<T extends HTMLElement>(): [Size, React.RefObject<T>];
 function useSize<T extends HTMLElement>(
-  handlerOrProvidedRef?: ((size: Size) => void) | React.RefObject<T>,
+  /**
+   * `handler` will receive a `Size` object each time
+   * the observed element's size changes.
+   */
+  handler: (size: Size) => void,
+): React.Ref<T>;
+function useSize<T extends HTMLElement>(): [Size, React.Ref<T>];
+function useSize<T extends HTMLElement>(
+  handlerOrProvidedRef?: React.RefObject<T> | ((size: Size) => void),
   handler?: (size: Size) => void,
-): Size | React.RefObject<T> | [Size, React.RefObject<T>] | void {
+): Size | React.Ref<T> | [Size, React.Ref<T>] | void {
   const changeHandler = useRef<((size: Size) => void) | null>(null);
-  const ref = useRef<T | null>(null);
-  let providedRef: React.RefObject<T> | null = null;
+  let providedRef: React.Ref<T> | null = null;
 
   if (typeof handlerOrProvidedRef === 'function') {
     changeHandler.current = handlerOrProvidedRef;
@@ -193,6 +175,9 @@ function useSize<T extends HTMLElement>(
       changeHandler.current = handler;
     }
   }
+
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
 
   const viewSize = useRef(INITIAL_VIEW_SIZE);
   const elementSize = useRef(INITIAL_ELEMENT_SIZE);
@@ -204,8 +189,6 @@ function useSize<T extends HTMLElement>(
   const size = useRef(initialSize);
 
   const subscribed = useRef<T | null>(null);
-
-  const shouldResubscribe = !ref.current || ref.current !== subscribed.current;
 
   const forceUpdate = useForceUpdate();
 
@@ -263,6 +246,8 @@ function useSize<T extends HTMLElement>(
     [handleSizeChange],
   );
 
+  const isSubscribed = ref.current === subscribed.current;
+
   useEffect(
     /**
      * `subscribeIfNecessary` will run to determine if we need to
@@ -283,17 +268,17 @@ function useSize<T extends HTMLElement>(
         };
       }
     },
-    [ref, shouldResubscribe, handleElementSizeChange],
+    [isSubscribed, ref, handleElementSizeChange],
   );
 
   if (!providedRef) {
     if (changeHandler.current) {
-      return ref;
+      return setRef;
     } else {
-      return [size, ref];
+      return [size.current, setRef];
     }
   } else if (!changeHandler.current) {
-    return size;
+    return size.current;
   }
 }
 
