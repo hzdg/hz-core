@@ -233,7 +233,7 @@ async function versionPkgs() {
   let pkgsToPublish = await collectChangedPkgs();
   await ensureCleanWorkingDirs(pkgsToPublish);
   // Get the current branch. This is to override lerna's configuration,
-  // which normally only alows versioning/publishing from the default branch.
+  // which normally only allows versioning/publishing from the default branch.
   const gitBranch = await getBranch();
   await run('lerna', [
     'version',
