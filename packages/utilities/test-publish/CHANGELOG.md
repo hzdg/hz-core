@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.5](https://github.com/hzdg/hz-core/compare/test-publish@1.0.4...test-publish@1.0.5) (2019-10-26)
+
+
+### test-publish
+
+* fix nested dep resolution ([888ea20](https://github.com/hzdg/hz-core/commit/888ea20))
+* fix typo ([c07555f](https://github.com/hzdg/hz-core/commit/c07555f))
+
+
 ## [1.0.4](https://github.com/hzdg/hz-core/compare/test-publish@1.0.3...test-publish@1.0.4) (2019-05-20)
 
 

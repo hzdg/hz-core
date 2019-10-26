@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@1.0.1...@hzcore/windowsize-monitor@2.0.0) (2019-10-26)
+
+
+### @hzcore/windowsize-monitor
+
+* initialize window subscription with size ([6df832b](https://github.com/hzdg/hz-core/commit/6df832b))
+* add stateless hook API ([1c98799](https://github.com/hzdg/hz-core/commit/1c98799))
+* useWindowSize in WindowSizeMonitor ([4c1eb41](https://github.com/hzdg/hz-core/commit/4c1eb41))
+
+
 ## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@1.0.0...@hzcore/windowsize-monitor@1.0.1) (2019-06-03)
 
 

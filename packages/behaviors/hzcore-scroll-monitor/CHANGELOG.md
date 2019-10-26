@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@3.1.0...@hzcore/scroll-monitor@3.1.1) (2019-10-26)
+
+
+### @hzcore/scroll-monitor
+
+* call on* callbacks synchronously ([5f59d8a](https://github.com/hzdg/hz-core/commit/5f59d8a))
+* fix scroll timeout cleanup on unmount ([1cffe4e](https://github.com/hzdg/hz-core/commit/1cffe4e))
+
+
 # [3.1.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@3.0.0...@hzcore/scroll-monitor@3.1.0) (2019-06-24)
 
 

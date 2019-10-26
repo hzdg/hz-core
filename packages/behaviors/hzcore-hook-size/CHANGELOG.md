@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [3.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@2.0.3...@hzcore/hook-size@3.0.0) (2019-10-26)
+
+
+### @hzcore/hook-size
+
+* fix duplicate size change updates ([4f8e4c0](https://github.com/hzdg/hz-core/commit/4f8e4c0))
+* fix resize jitter ([04db442](https://github.com/hzdg/hz-core/commit/04db442))
+* return callback ref ([b986fc7](https://github.com/hzdg/hz-core/commit/b986fc7))
+
+
 ## [2.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@2.0.2...@hzcore/hook-size@2.0.3) (2019-09-12)
 
 **Note:** Version bump only for package @hzcore/hook-size
