@@ -21,7 +21,8 @@
     "typecheck": "./node_modules/.bin/tsc --noEmit",
     "test": "yarn build && ./node_modules/.bin/jest",
     "test-debug": "yarn build && node --inspect-brk ./node_modules/.bin/jest",
-    "test-publish": "yarn build && ./node_modules/.bin/test-publish"
+    "test-publish": "yarn build && ./node_modules/.bin/test-publish",
+    "test-publish-debug": "yarn build && node --inspect-brk ./node_modules/.bin/test-publish"
   },
   "husky": {
     "hooks": {
