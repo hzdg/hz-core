@@ -1,5 +1,4 @@
 import {
-  useEffect,
   useState,
   useMemo,
   useLayoutEffect,
@@ -179,7 +178,7 @@ function ScrollMonitor<T extends HTMLElement>(
 
   // Call the `onStart` hook if the scroll container is scrolling.
   const {onStart} = props;
-  useEffect(() => {
+  useMemo(() => {
     if (typeof onStart === 'function' && scrolling) {
       onStart();
     }
@@ -187,7 +186,7 @@ function ScrollMonitor<T extends HTMLElement>(
 
   // Call the `onChange` hook if the scroll container is scrolling.
   const {onChange} = props;
-  useEffect(() => {
+  useMemo(() => {
     if (typeof onChange === 'function' && scrolling) {
       onChange(state);
     }
@@ -198,7 +197,7 @@ function ScrollMonitor<T extends HTMLElement>(
   // Keep track whether or not the scroll container
   // was scrolling during the previous `onEnd` effect.
   const [wasScrolling, setWasScrolling] = useState(false);
-  useEffect(() => {
+  useMemo(() => {
     // Call the `onEnd` hook if scrolling just stopped.
     if (typeof onEnd === 'function' && wasScrolling && !scrolling) {
       onEnd();
