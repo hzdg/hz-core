@@ -78,15 +78,14 @@ function useScrolling<T extends HTMLElement>(
     [clearScrollTimeout, stopScrolling],
   );
 
-  useEffect(
+  useEffect(() => {
     /**
      * `cleanup` will clear the scroll timeout when we unmount.
      */
-    function cleanup() {
+    return function cleanup() {
       clearScrollTimeout();
-    },
-    [clearScrollTimeout],
-  );
+    };
+  }, [clearScrollTimeout]);
 
   // Subscribe to scroll events on the nearest scrolling element,
   // calling the `startScrolling` callback whenever a scroll event occurs.
