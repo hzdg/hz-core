@@ -184,7 +184,7 @@ async function collectUnpublishedDeps(pkgs, publicPkgs) {
       }
     }
   }
-  const unpublishedNestedDeps = collectUnpublishedDeps(
+  const unpublishedNestedDeps = await collectUnpublishedDeps(
     unpublishedDeps,
     publicPkgs,
   );
