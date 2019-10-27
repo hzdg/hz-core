@@ -64,11 +64,13 @@ aliases:
     name: Install Node dependencies
     command: |
       yarn install --cache-folder ~/.cache/yarn --frozen-lockfile
+      lerna bootstrap -- --cache-folder ~/.cache/yarn --frozen-lockfile
 
   build_static_files: &build_static_files
     name: Build Static files
     command: |
-      yarn build-docz
+      yarn build-packages
+      docz build
 
   deploy_docz: &deploy_docz
     command: |
