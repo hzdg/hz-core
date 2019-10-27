@@ -8,6 +8,9 @@ import merge from 'callbag-merge';
 import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import asObservable from './asObservable';
+import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
+
+export {HORIZONTAL, VERTICAL};
 
 export const MOUSE_DOWN = 'mousedown';
 export const MOUSE_MOVE = 'mousemove';
@@ -34,6 +37,19 @@ export interface MouseGestureObservableConfig {
    * If `true`, then `preventDefault` will have no effect.
    */
   passive: boolean;
+  /**
+   * How 'far' a series of mouse events must cumulatively move
+   * in a consistent direction before a mouse gesture is detected,
+   * or `false`, if _any_ mouse event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of mouse events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then mouse events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: Orientation;
 }
 
 /**
@@ -109,6 +125,7 @@ const DEFAULT_INITIAL_STATE: MouseGestureBaseState = {
 const DEFAULT_CONFIG: MouseGestureObservableConfig = {
   passive: false,
   preventDefault: false,
+  threshold: false,
 };
 
 function parseConfig(
@@ -161,6 +178,49 @@ function reduceGestureState(
   throw new Error(`Could not handle event ${event}`);
 }
 
+function shouldGesture(
+  fromEvent: MouseGestureEvent,
+  toEvent: MouseGestureEvent,
+  threshold?: number | false,
+  orientation?: Orientation,
+): boolean {
+  if (!threshold) return true;
+  if (orientation) {
+    switch (orientation) {
+      case VERTICAL: {
+        let yDelta = fromEvent.clientY - toEvent.clientY;
+        return Math.abs(yDelta) > threshold;
+      }
+      case HORIZONTAL: {
+        let xDelta = fromEvent.clientX - toEvent.clientX;
+        return Math.abs(xDelta) > threshold;
+      }
+    }
+  }
+  let yDelta = fromEvent.clientY - toEvent.clientY;
+  let xDelta = fromEvent.clientX - toEvent.clientX;
+  return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > threshold;
+}
+
+function shouldCancel(
+  fromEvent: MouseGestureEvent,
+  toEvent: MouseGestureEvent,
+  threshold?: number | false,
+  orientation?: Orientation,
+): boolean {
+  if (threshold && orientation) {
+    switch (orientation) {
+      case VERTICAL: {
+        return shouldGesture(fromEvent, toEvent, threshold, HORIZONTAL);
+      }
+      case HORIZONTAL: {
+        return shouldGesture(fromEvent, toEvent, threshold, VERTICAL);
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * A mouse gesture callbag source.
  */
@@ -172,9 +232,11 @@ export function createSource(
 ): Source<MouseGestureState | MouseGestureEndState> {
   ensureDOMInstance(element, Element);
 
-  const {preventDefault, passive} = parseConfig(config);
+  const {preventDefault, passive, orientation, threshold} = parseConfig(config);
 
   let gesturing = false;
+  let firstEvent: MouseGestureEvent | null = null;
+  let canceled = false;
 
   const shouldPreventDefault = (event: MouseGestureEvent): boolean => {
     return (
@@ -189,19 +251,34 @@ export function createSource(
   const filterEvents = (event: MouseGestureEvent): boolean => {
     switch (event.type) {
       case MOUSE_DOWN: {
-        if (gesturing) return false;
+        if (firstEvent) return false;
+        firstEvent = event;
+        if (threshold) return false;
         gesturing = true;
         return true;
       }
       case MOUSE_MOVE: {
-        if (!gesturing) return false;
-        if (shouldPreventDefault(event)) event.preventDefault();
+        if (!firstEvent) return false;
+        if (!gesturing) {
+          if (!threshold || canceled) return false;
+          gesturing = shouldGesture(firstEvent, event, threshold, orientation);
+          if (!gesturing) {
+            canceled = shouldCancel(firstEvent, event, threshold, orientation);
+            return false;
+          }
+        }
+        if (shouldPreventDefault(event)) {
+          event.preventDefault();
+        }
         return true;
       }
       case MOUSE_UP: {
-        if (!gesturing) return false;
+        if (!firstEvent) return false;
+        let wasGesturing = gesturing;
+        firstEvent = null;
+        canceled = false;
         gesturing = false;
-        return true;
+        return wasGesturing;
       }
     }
     return false;

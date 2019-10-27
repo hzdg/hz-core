@@ -2,6 +2,7 @@ import Observable from 'zen-observable';
 import {ensureDOMInstance} from '@hzcore/dom-utils';
 import merge from 'callbag-merge';
 import asObservable from './asObservable';
+import * as Orientation from './Orientation';
 import * as WheelGestureObservable from './WheelGestureObservable';
 import * as MouseGestureObservable from './MouseGestureObservable';
 import * as TouchGestureObservable from './TouchGestureObservable';
@@ -14,6 +15,7 @@ export {
   KeyboardGestureObservable,
 };
 
+export {HORIZONTAL, VERTICAL} from './Orientation';
 export {WHEEL, GESTURE_END} from './WheelGestureObservable';
 export {MOUSE_DOWN, MOUSE_MOVE, MOUSE_UP} from './MouseGestureObservable';
 export {TOUCH_START, TOUCH_MOVE, TOUCH_END} from './TouchGestureObservable';
@@ -30,6 +32,8 @@ export {
   ARROW_RIGHT,
   ARROW_DOWN,
 } from './KeyboardGestureObservable';
+
+export type Orientation = Orientation.Orientation;
 
 export type WheelGestureType = WheelGestureObservable.WheelGestureType;
 export type WheelGestureEvent = WheelGestureObservable.WheelGestureEvent;

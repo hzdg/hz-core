@@ -11,6 +11,9 @@ import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import createSubject from 'callbag-subject';
 import asObservable from './asObservable';
+import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
+
+export {HORIZONTAL, VERTICAL};
 
 export const WHEEL = 'wheel';
 export const GESTURE_END = 'gestureend';
@@ -30,11 +33,18 @@ export interface WheelGestureObservableConfig {
    */
   passive: boolean;
   /**
-   * How 'far' a series of wheel events must cumulative move
+   * How 'far' a series of wheel events must cumulatively move
    * in a consistent direction before a wheel gesture is detected,
    * or `false`, if _any_ wheel event should be considered part of a gesture.
    */
   threshold?: number | false;
+  /**
+   * The orientation in which a series of wheel events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then wheel events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: Orientation;
 }
 
 // TODO: Find the smallest timeout that won't ever get tricked by inertia.
@@ -245,6 +255,7 @@ const DEFAULT_INITIAL_STATE: WheelGestureBaseState = {
 const DEFAULT_CONFIG: WheelGestureObservableConfig = {
   passive: false,
   preventDefault: false,
+  threshold: GESTURE_THRESHOLD,
 };
 
 function parseConfig(
@@ -305,6 +316,45 @@ function reduceGestureState(
   throw new Error(`Could not handle event ${event}`);
 }
 
+function shouldGesture(
+  accX: number,
+  accY: number,
+  threshold?: number | false,
+  orientation?: Orientation,
+): boolean {
+  if (!threshold) return true;
+  if (orientation) {
+    switch (orientation) {
+      case VERTICAL: {
+        return Math.abs(accY) > threshold;
+      }
+      case HORIZONTAL: {
+        return Math.abs(accX) > threshold;
+      }
+    }
+  }
+  return Math.max(Math.abs(accX), Math.abs(accY)) > threshold;
+}
+
+function shouldCancel(
+  accX: number,
+  accY: number,
+  threshold?: number | false,
+  orientation?: Orientation,
+): boolean {
+  if (threshold && orientation) {
+    switch (orientation) {
+      case VERTICAL: {
+        return shouldGesture(accX, accY, threshold, HORIZONTAL);
+      }
+      case HORIZONTAL: {
+        return shouldGesture(accX, accY, threshold, VERTICAL);
+      }
+    }
+  }
+  return false;
+}
+
 /**
  * A wheel gesture callbag source.
  */
@@ -315,9 +365,7 @@ export function createSource(
   config?: Partial<WheelGestureObservableConfig> | null,
 ): Source<WheelGestureState | WheelGestureEndState> {
   ensureDOMInstance(element, Element);
-  let {threshold = GESTURE_THRESHOLD, preventDefault, passive} = parseConfig(
-    config,
-  );
+  let {threshold, preventDefault, passive, orientation} = parseConfig(config);
   if (!threshold) {
     threshold = 0;
   }
@@ -333,6 +381,7 @@ export function createSource(
     | typeof RIGHT = false;
   let endTimeout: NodeJS.Timeout | null = null;
   let gesturing = false;
+  let canceled = false;
   let accX = 0;
   let accY = 0;
 
@@ -348,6 +397,7 @@ export function createSource(
     accY = 0;
     intent = false;
     gesturing = false;
+    canceled = false;
     endEvents(1, {type: GESTURE_END});
   };
 
@@ -363,18 +413,19 @@ export function createSource(
   };
 
   const filterEvents = (event: WheelGestureEvent): boolean => {
+    if (canceled) return false;
     // Assume we're gesturing if this wheel event seems intentional
     // (as opposed to inertial).
-    gesturing = Boolean(lethargy.check(event.originalEvent));
-    if (!gesturing && intent) {
+    let maybeGesturing = Boolean(lethargy.check(event.originalEvent));
+    if (!maybeGesturing && intent) {
       // If we aren't gesturing, but we have an assigned gesture intent,
       // Check if the intent has changed.
       // If it has, assume we're still gesturing.
-      gesturing =
+      maybeGesturing =
         intent !== direction(accX + event.deltaX, accY + event.deltaY);
     }
-    if (gesturing) {
-      // We're gesturing, so assign an intent for the gesture,
+    if (maybeGesturing) {
+      // We might be gesturing, so assign an intent for the gesture,
       // based on the cumulative change of the gesture.
       accX += event.deltaX;
       accY += event.deltaY;
@@ -383,10 +434,19 @@ export function createSource(
       if (endTimeout) clearTimeout(endTimeout);
       endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
     }
+
+    if (!gesturing) {
+      gesturing = shouldGesture(accX, accY, threshold, orientation);
+      if (!gesturing) {
+        canceled = shouldCancel(accX, accY, threshold, orientation);
+        if (canceled) return false;
+      }
+    }
+
     if (shouldPreventDefault(event.originalEvent)) {
       event.originalEvent.preventDefault();
     }
-    return gesturing || Boolean(intent);
+    return gesturing && maybeGesturing;
   };
 
   return share(
