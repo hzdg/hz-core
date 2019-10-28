@@ -230,7 +230,7 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   const [gesture, setGesture] = React.useState(null);
   // We pass `forwardedRef` (which _must_ be a ref object)
   // via the `ref` option to `useKeyboardGesture`.
-  // Note that a calblack ref will _not_ be returned.
+  // Note that a callback ref will _not_ be returned.
   // Note also that `useKeyboardGesture` won't be notified if the ref's
   // current value has changed, so it is up to this component
   // (or a parent component) to rerender whenever that happens.
