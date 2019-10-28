@@ -368,7 +368,7 @@ It could be used with ref forwarding like:
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // We pass `forwardedRef` (which _must_ be a ref object)
   // via the `ref` option to `useIntersection`.
-  // Note that a calblack ref will _not_ be returned.
+  // Note that a callback ref will _not_ be returned.
   // Note also that `useIntersection` won't be notified if the ref's
   // current value has changed, so it is up to this component
   // (or a parent component) to rerender whenever that happens.
