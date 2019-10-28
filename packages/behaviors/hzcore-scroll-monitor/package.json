@@ -22,6 +22,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
+    "@hzcore/hook-ref-callback": "^1.0.4",
     "invariant": "^2.2.4"
   }
 }

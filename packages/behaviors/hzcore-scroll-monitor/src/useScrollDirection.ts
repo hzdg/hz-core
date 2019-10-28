@@ -1,6 +1,7 @@
 import {useState, useRef} from 'react';
+import useRefCallback from '@hzcore/hook-ref-callback';
 import {ScrollPosition, getScrollPosition} from './useScrollPosition';
-import {useNearestScrollNodeRef, useScrollEffect, useSyncRef} from './utils';
+import {useNearestScrollNodeRef, useScrollEffect} from './utils';
 
 const INITIAL_SCROLL_DIRECTION: ScrollDirectionState = {
   vertical: null,
@@ -91,7 +92,7 @@ export function getScrollDirection(
  * returns a `ScrollDirection` value.
  *
  * If no `providedRef` is passed, returns an array containing a
- * `ScrollDirection` object and a `ref` object. The `ref` should be passed
+ * `ScrollDirection` object and a callback `ref`. The `ref` should be passed
  * to an underlying DOM node. Note that the node does not have to be scrollable itself,
  * as `useScrollDirection` will traverse the DOM to find a scrollable parent
  * to observe.
@@ -102,7 +103,7 @@ export function getScrollDirection(
  */
 function useScrollDirection<T extends HTMLElement>(): [
   ScrollDirectionState,
-  React.RefObject<T>
+  (node: T | null) => void
 ];
 function useScrollDirection<T extends HTMLElement>(
   /**
@@ -114,14 +115,20 @@ function useScrollDirection<T extends HTMLElement>(
 ): ScrollDirectionState;
 function useScrollDirection<T extends HTMLElement>(
   providedRef?: React.RefObject<T>,
-): ScrollDirectionState | [ScrollDirectionState, React.RefObject<T>] {
+): ScrollDirectionState | [ScrollDirectionState, (node: T | null) => void] {
   const scrollPosition = useRef<ScrollPosition | null>(null);
   const [direction, setDirection] = useState(INITIAL_SCROLL_DIRECTION);
-  const ref = useSyncRef(providedRef);
+
+  // Keep a ref to the nearest scrollable container.
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
   const scrollRef = useNearestScrollNodeRef(ref);
+
+  // Subscribe to scroll events on the nearest scrolling element,
+  // calling the handler whenever a scroll event occurs.
   useScrollEffect(
     scrollRef,
-    (event: Event): void => {
+    function handleScrollChange(event: Event) {
       const position = getScrollPosition(event);
       const direction = getScrollDirection(position, scrollPosition.current);
       scrollPosition.current = position;
@@ -129,7 +136,11 @@ function useScrollDirection<T extends HTMLElement>(
     },
     [],
   );
-  return providedRef ? direction : [direction, ref];
+
+  // If a ref has been provided, just return the `direction` value.
+  // If a ref has not not been provided, return a callback ref
+  // along with the `direction` value.
+  return providedRef ? direction : [direction, setRef];
 }
 
 export default useScrollDirection;

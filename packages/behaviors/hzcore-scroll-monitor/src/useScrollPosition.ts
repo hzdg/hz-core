@@ -1,10 +1,6 @@
-import {useEffect, useRef} from 'react';
-import {
-  getScrollRect,
-  useNearestScrollNodeRef,
-  useScrollEffect,
-  useSyncRef,
-} from './utils';
+import {useRef} from 'react';
+import useRefCallback from '@hzcore/hook-ref-callback';
+import {getScrollRect, useNearestScrollNodeRef, useScrollEffect} from './utils';
 
 /**
  * `ScrollPosition` is an object of `top` and `left` values,
@@ -52,7 +48,7 @@ export function getScrollPosition(event: Event): ScrollPosition {
  * If a `providedRef` is passed to `useScrollPosition`,
  * returns `undefined`.
  *
- * If no `providedRef` is passed, returns a `ref` object.
+ * If no `providedRef` is passed, returns a callback `ref`.
  * The `ref` should be passed to an underlying DOM node.
  * Note that the node does not have to be scrollable itself,
  * as `useScrollPosition` will traverse the DOM to find a scrollable parent
@@ -87,24 +83,29 @@ function useScrollPosition<T extends HTMLElement>(
    * nearest scrollable container is scrolled horizontally.
    */
   handler: (position: ScrollPosition) => void,
-): React.RefObject<T>;
+): (node: T | null) => void;
 function useScrollPosition<T extends HTMLElement>(
   providedRefOrHandler:
     | React.RefObject<T>
     | ((position: ScrollPosition) => void),
   handler?: (position: ScrollPosition) => void,
-): React.RefObject<T> | void {
+): ((node: T | null) => void) | void {
   let providedRef: React.RefObject<T> | undefined = undefined;
   if ('current' in providedRefOrHandler) {
     providedRef = providedRefOrHandler;
   } else {
     handler = providedRefOrHandler;
   }
-  const ref = useSyncRef(providedRef);
+  // Keep a ref to the nearest scrollable container.
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
   const scrollRef = useNearestScrollNodeRef(ref);
+
   const changeHandler = useRef(handler);
   changeHandler.current = handler;
 
+  // Subscribe to scroll events on the nearest scrolling element,
+  // calling the handler whenever a scroll event occurs.
   useScrollEffect(
     scrollRef,
     /**
@@ -122,7 +123,9 @@ function useScrollPosition<T extends HTMLElement>(
     [],
   );
 
-  if (!providedRef) return ref;
+  // If a ref has been provided, return nothing.
+  // If a ref has not not been provided, return a callback ref.
+  if (!providedRef) return setRef;
 }
 
 export default useScrollPosition;

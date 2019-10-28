@@ -265,15 +265,3 @@ export function useScrollEffect<T extends EventTarget>(
   const subscribe = useSubscribableEvent(scrollRef, SCROLL, LISTENER_OPTIONS);
   useEffect(() => subscribe(handler), [subscribe, handler]);
 }
-
-/**
- * `useSyncRef` works like `React.useRef`, but will optionally update the
- * current value of the returned ref with the current value of `providedRef`.
- */
-export function useSyncRef<T>(
-  providedRef?: React.RefObject<T>,
-): React.RefObject<T> {
-  const ref = useRef<T | null>(null);
-  ref.current = providedRef ? providedRef.current : ref.current;
-  return ref;
-}

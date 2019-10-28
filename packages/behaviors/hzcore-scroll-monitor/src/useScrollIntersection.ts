@@ -1,10 +1,10 @@
 import {useState, useEffect, useRef} from 'react';
+import useRefCallback from '@hzcore/hook-ref-callback';
 import {
   getScrollRect,
   ScrollRect,
   useNearestScrollNodeRef,
   useScrollEffect,
-  useSyncRef,
 } from './utils';
 
 export interface Bounds {
@@ -106,7 +106,7 @@ export function getIntersects(
  * boolean or an array of booleans.
  *
  * If no `providedRef` is passed, returns an array containing an `Intersects`
- * value and a `ref` object. The `ref` should be passed to an underlying
+ * value and a callback `ref`. The `ref` should be passed to an underlying
  * DOM node. Note that the node does not have to be scrollable itself,
  * as `useScrollIntersection` will traverse the DOM to find
  * a scrollable parent to observe.
@@ -140,11 +140,11 @@ function useScrollIntersection<T extends HTMLElement>(
    * set to a number.
    */
   config: ScrollIntersectionConfig,
-): [Intersects, React.RefObject<T>];
+): [Intersects, (node: T | null) => void];
 function useScrollIntersection<T extends HTMLElement>(
   providedRefOrConfig: React.RefObject<T> | ScrollIntersectionConfig,
   config?: ScrollIntersectionConfig,
-): Intersects | [Intersects, React.RefObject<T>] {
+): Intersects | [Intersects, (node: T | null) => void] {
   let providedRef: React.RefObject<T> | undefined = undefined;
   if (`current` in providedRefOrConfig) {
     providedRef = providedRefOrConfig;
@@ -165,21 +165,25 @@ function useScrollIntersection<T extends HTMLElement>(
       : false;
   });
 
-  const ref = useSyncRef(providedRef);
+  // Keep a ref to the nearest scrollable container.
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
   const scrollRef = useNearestScrollNodeRef(ref);
 
+  // Subscribe to scroll events on the nearest scrolling element,
+  // calling the handler whenever a scroll event occurs.
   useScrollEffect(
     scrollRef,
-    (event: Event): void => {
+    function handleScrolChange(event: Event) {
       setIntersects(getIntersects(event, intersectionConfig.current));
     },
     [],
   );
 
   // If a ref has been provided, just return the `Intersects` value.
-  // If a ref has not not been provided, return a ref along with
+  // If a ref has not not been provided, return a callback ref along with
   // the `Intersects` value.
-  return providedRef ? intersects : [intersects, ref];
+  return providedRef ? intersects : [intersects, setRef];
 }
 
 export default useScrollIntersection;

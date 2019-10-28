@@ -1,5 +1,6 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
-import {useNearestScrollNodeRef, useScrollEffect, useSyncRef} from './utils';
+import useRefCallback from '@hzcore/hook-ref-callback';
+import {useNearestScrollNodeRef, useScrollEffect} from './utils';
 
 const SCROLL_TIMEOUT = 60;
 
@@ -12,7 +13,7 @@ const SCROLL_TIMEOUT = 60;
  * the nearest scrollable container is scrolling.
  *
  * If no `providedRef` is passed, returns an array containing a boolean
- * and a `ref` object. The `ref` should be passed to an underlying DOM node.
+ * and a callback `ref`. The `ref` should be passed to an underlying DOM node.
  * Note that the node does not have to be scrollable itself,
  * as `useScrolling` will traverse the DOM to find a scrollable parent
  * to observe.
@@ -20,7 +21,10 @@ const SCROLL_TIMEOUT = 60;
  * The returned boolean is `true` when the nearest
  * scrollable container is scrolling, and `false` when it is not.
  */
-function useScrolling<T extends HTMLElement>(): [boolean, React.RefObject<T>];
+function useScrolling<T extends HTMLElement>(): [
+  boolean,
+  (node: T | null) => void
+];
 function useScrolling<T extends HTMLElement>(
   /**
    * A ref to use.
@@ -31,12 +35,13 @@ function useScrolling<T extends HTMLElement>(
 ): boolean;
 function useScrolling<T extends HTMLElement>(
   providedRef?: React.RefObject<T>,
-): boolean | [boolean, React.RefObject<T>] {
+): boolean | [boolean, (node: T | null) => void] {
   // Keep track of whether or not the nearest scrollable container is scrolling.
   const [scrolling, setScrolling] = useState(false);
 
   // Keep a ref to the nearest scrollable container.
-  const ref = useSyncRef(providedRef);
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
   const scrollRef = useNearestScrollNodeRef(ref);
 
   // Keep a ref to a timeout id.
@@ -92,9 +97,9 @@ function useScrolling<T extends HTMLElement>(
   useScrollEffect(scrollRef, startScrolling, [startScrolling]);
 
   // If a ref has been provided, just return the `scrolling` value.
-  // If a ref has not not been provided, return a ref along with
-  // the `scrolling` value.
-  return providedRef ? scrolling : [scrolling, ref];
+  // If a ref has not not been provided, return a callback ref
+  // along with the `scrolling` value.
+  return providedRef ? scrolling : [scrolling, setRef];
 }
 
 export default useScrolling;

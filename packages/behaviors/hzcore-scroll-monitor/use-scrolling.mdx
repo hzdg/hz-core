@@ -6,6 +6,7 @@ route: /use-scrolling
 
 import {Playground, Props} from 'docz';
 import useScrolling from './src/useScrolling';
+import useRefCallback from '@hzcore/hook-ref-callback';
 
 # useScrolling
 
@@ -32,10 +33,10 @@ This means `useScrolling` has 2 different signatures:
 Without an existing [ref object]:
 
 ```ts
-function useScrolling(): [boolean, React.RefObject<HTMLElement>];
+function useScrolling(): [boolean, (node: HTMLElement | null) => void];
 ```
 
-The returned [ref object] should be passed to an underlying DOM node.
+The returned [callback ref] should be passed to an underlying DOM node.
 
 With an existing [ref object]:
 
@@ -43,8 +44,12 @@ With an existing [ref object]:
 function useScrolling(providedRef: React.RefObject<HTMLElement>): boolean;
 ```
 
-Note that `useScrolling` will _not_ return a [ref object] in this case.
+Note that `useScrolling` will _not_ return a [callback ref] in this case.
 The provided [ref object] is expected to be passed to an underlying DOM node.
+
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
 
 ## State
 
@@ -53,7 +58,7 @@ returns a boolean value, that indicates whether or not
 the nearest scrollable container is scrolling.
 
 If no `providedRef` is passed, returns an array containing a boolean
-and a `ref` object. The `ref` should be passed to an underlying DOM node.
+and a callback `ref`. The `ref` should be passed to an underlying DOM node.
 Note that the node does not have to be scrollable itself,
 as `useScrolling` will traverse the DOM to find a scrollable parent
 to observe.
@@ -91,6 +96,12 @@ scrollable container is scrolling, and `false` when it is not.
 
 ## Shared Ref / Ref Forwarding
 
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useScrolling` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+
 Sometimes a component needs to [forward a ref] to its children,
 or [use a ref][useref] with other hooks.
 To support these cases, `useScrolling`
@@ -99,12 +110,15 @@ accepts an optional `providedRef` [ref object]:
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // We pass `forwardedRef` (which _must_ be a ref object)
-  // to `useScrolling`. Note that a `ref`
-  // will _not_ be returned with the `scrolling` value.
+  // via the `ref` option to `useScrolling`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrolling` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
   const scrolling = useScrolling(forwardedRef);
-  return (
-    <div ref={forwardedRef}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>
-  );
+  const [, setRef] = useRefCallback(forwardedRef);
+  return <div ref={setRef}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>;
 });
 ```
 
@@ -112,11 +126,17 @@ or, with `useRef`:
 
 ```js
 const SomeRefUsingComponent = () => {
+  // Create our own ref to use.
   const ref = React.useRef(null);
-  // We pass `ref` to `useScrolling`.
-  // Note that a `ref` will _not_ be returned with the `scrolling` value.
+  // We pass our own ref via the `ref` option to `useScrolling`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useScrolling` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
   const scrolling = useScrolling(ref);
-  return <div ref={ref}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>;
+  const [, setRef] = useRefCallback(ref);
+  return <div ref={setRef}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>;
 };
 ```
 
@@ -124,7 +144,9 @@ const SomeRefUsingComponent = () => {
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[userefcallback]: /use-ref-callback
 [installation]: #installation
 [usage]: #usage
 [handler]: #handler
