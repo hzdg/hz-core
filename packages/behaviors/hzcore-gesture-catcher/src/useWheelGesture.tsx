@@ -1,6 +1,7 @@
 import {useRef} from 'react';
 import {WheelGestureObservable} from '@hzcore/gesture-observable';
-import {useProvidedRef, useObservableGestureEffect} from './utils';
+import useRefCallback from '@hzcore/hook-ref-callback';
+import {useObservableGestureEffect} from './utils';
 
 export type WheelGestureObservableConfig = WheelGestureObservable.WheelGestureObservableConfig;
 export type WheelGestureState = WheelGestureObservable.WheelGestureState;
@@ -77,13 +78,12 @@ function useWheelGesture<T extends HTMLElement>(
    * An object describing how to configure wheel gesture detection.
    */
   config?: WheelGestureConfig,
-): React.RefObject<T>;
+): (node: T | null) => void;
 function useWheelGesture<T extends HTMLElement>(
   handlerOrProvidedRef: React.RefObject<T> | WheelGestureHandler,
   handlerOrConfig?: WheelGestureHandler | WheelGestureConfig,
   maybeConfig?: WheelGestureConfig,
-): React.RefObject<T> | void {
-  const ref = useRef<T | null>(null);
+): ((node: T | null) => void) | void {
   const handler = useRef<WheelGestureHandler | null>(null);
   const config = useRef<WheelGestureConfig | null>(null);
   let providedRef: React.RefObject<T> | null = null;
@@ -97,9 +97,10 @@ function useWheelGesture<T extends HTMLElement>(
     config.current = (handlerOrConfig as WheelGestureConfig) || null;
   }
 
-  useProvidedRef(ref, providedRef);
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
   useObservableGestureEffect(WheelGestureObservable, ref, handler, config);
-  if (!providedRef) return ref;
+  if (!providedRef) return setRef;
 }
 
 export default useWheelGesture;

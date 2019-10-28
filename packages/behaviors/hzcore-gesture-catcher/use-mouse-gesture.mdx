@@ -6,6 +6,7 @@ route: /use-mouse-gesture
 
 import {Playground, Props} from 'docz';
 import useMouseGesture from './src/useMouseGesture';
+import useRefCallback from '@hzcore/hook-ref-callback';
 
 # useMouseGesture
 
@@ -34,10 +35,10 @@ Without an existing [ref object]:
 function useMouseGesture(
   handler: MouseGestureChangeHandler | MouseGestureHandlers,
   config?: MouseGestureConfig | null,
-): React.RefObject<HTMLElement>;
+): (node: HTMLElement | null) => void;
 ```
 
-The returned [ref object] should be passed to an underlying DOM node.
+The returned [callback ref] should be passed to an underlying DOM node.
 
 With an existing [ref object]:
 
@@ -49,7 +50,7 @@ function useMouseGesture(
 ): void;
 ```
 
-Note that `useMouseGesture` will _not_ return a [ref object] in this case.
+Note that `useMouseGesture` will _not_ return a [callback ref] in this case.
 The provided [ref object] is expected to be passed to an underlying DOM node.
 
 ## Config
@@ -211,18 +212,32 @@ interface MouseGestureEndState extends MouseGestureState {
 
 ## Shared Ref / Ref Forwarding
 
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useMouseGesture` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+> See the existing ref examples above for more.
+
 Sometimes a component needs to [forward a ref] to its children,
 or [use a ref][useref] with other hooks.
-To support these cases, `useMouseGesture` accepts an optional
-`providedRef` [ref object].
+To support these cases, `useMouseGesture` accepts an optional [ref object].
+
+It could be used with ref forwarding like:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   const [gesture, setGesture] = React.useState(null);
   // We pass `forwardedRef` (which _must_ be a ref object)
-  // to `useMouseGesture`. Note that a`ref` will _not_ be returned.
+  // via the `ref` option to `useMouseGesture`.
+  // Note that a calblack ref will _not_ be returned.
+  // Note also that `useMouseGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
   useMouseGesture(forwardedRef, setGesture);
-  return <div ref={forwardedRef}>{JSON.stringify(gesture, null, 2)}</div>;
+  const [, setRef] = useRefCallback(forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
 });
 ```
 
@@ -231,11 +246,17 @@ or, with `useRef`:
 ```js
 const SomeRefUsingComponent = () => {
   const [gesture, setGesture] = React.useState(null);
+  // Create our own ref to use.
   const ref = React.useRef(null);
-  // We pass `ref` to `useMouseGesture`.
-  // Note that a `ref` will _not_ be returned.
+  // We pass our own ref via the `ref` option to `useMouseGesture`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useMouseGesture` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
   useMouseGesture(ref, setGesture);
-  return <div ref={ref}>{JSON.stringify(size, null, 2)}</div>;
+  const [, setRef] = useRefCallback(ref);
+  return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
 };
 ```
 
@@ -243,7 +264,9 @@ const SomeRefUsingComponent = () => {
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
+[userefcallback]: /use-ref-callback
 [installation]: #installation
 [usage]: #usage
 [config]: #config

@@ -21,6 +21,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@hzcore/gesture-observable": "^1.0.1",
+    "@hzcore/hook-ref-callback": "^1.0.4",
     "prop-types": "15.x.x"
   }
 }

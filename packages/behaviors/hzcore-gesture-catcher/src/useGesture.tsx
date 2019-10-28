@@ -1,3 +1,4 @@
+import useRefCallback from '@hzcore/hook-ref-callback';
 import useMouseGesture, {
   MouseGestureConfig,
   MouseGestureState,
@@ -18,8 +19,6 @@ import useKeyboardGesture, {
   KeyboardGestureState,
   KeyboardGestureEndState,
 } from './useKeyboardGesture';
-import {useRef} from 'react';
-import {useProvidedRef} from './utils';
 
 export type GestureState =
   | MouseGestureState
@@ -102,13 +101,12 @@ function useGesture<T extends HTMLElement>(
    * An object describing how to configure gesture detection.
    */
   config?: GestureConfig,
-): React.RefObject<T>;
+): (node: T | null) => void;
 function useGesture<T extends HTMLElement>(
   handlerOrProvidedRef: React.RefObject<T> | GestureHandler,
   handlerOrConfig?: GestureHandler | GestureConfig,
   maybeConfig?: GestureConfig,
-): React.RefObject<T> | void {
-  const ref = useRef<T | null>(null);
+): ((node: T | null) => void) | void {
   let providedRef: React.RefObject<T> | null = null;
   let gestureHandler: GestureHandler;
   let gestureConfig: GestureConfig | undefined = undefined;
@@ -122,12 +120,13 @@ function useGesture<T extends HTMLElement>(
     if (handlerOrConfig) gestureConfig = handlerOrConfig as MouseGestureConfig;
   }
 
-  useProvidedRef(ref, providedRef);
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
   useMouseGesture(ref, gestureHandler, gestureConfig);
   useWheelGesture(ref, gestureHandler, gestureConfig);
   useTouchGesture(ref, gestureHandler, gestureConfig);
   useKeyboardGesture(ref, gestureHandler, gestureConfig);
-  if (!providedRef) return ref;
+  if (!providedRef) return setRef;
 }
 
 export default useGesture;

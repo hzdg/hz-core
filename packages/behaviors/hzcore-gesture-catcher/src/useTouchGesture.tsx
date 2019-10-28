@@ -1,6 +1,7 @@
 import {useRef} from 'react';
 import {TouchGestureObservable} from '@hzcore/gesture-observable';
-import {useProvidedRef, useObservableGestureEffect} from './utils';
+import useRefCallback from '@hzcore/hook-ref-callback';
+import {useObservableGestureEffect} from './utils';
 
 export type TouchGestureObservableConfig = TouchGestureObservable.TouchGestureObservableConfig;
 export type TouchGestureState = TouchGestureObservable.TouchGestureState;
@@ -77,13 +78,12 @@ function useTouchGesture<T extends HTMLElement>(
    * An object describing how to configure touch gesture detection.
    */
   config?: TouchGestureConfig,
-): React.RefObject<T>;
+): (node: T | null) => void;
 function useTouchGesture<T extends HTMLElement>(
   handlerOrProvidedRef: React.RefObject<T> | TouchGestureHandler,
   handlerOrConfig?: TouchGestureHandler | TouchGestureConfig,
   maybeConfig?: TouchGestureConfig,
-): React.RefObject<T> | void {
-  const ref = useRef<T | null>(null);
+): ((node: T | null) => void) | void {
   const handler = useRef<TouchGestureHandler | null>(null);
   const config = useRef<TouchGestureConfig | null>(null);
   let providedRef: React.RefObject<T> | null = null;
@@ -97,9 +97,10 @@ function useTouchGesture<T extends HTMLElement>(
     config.current = (handlerOrConfig as TouchGestureConfig) || null;
   }
 
-  useProvidedRef(ref, providedRef);
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
   useObservableGestureEffect(TouchGestureObservable, ref, handler, config);
-  if (!providedRef) return ref;
+  if (!providedRef) return setRef;
 }
 
 export default useTouchGesture;

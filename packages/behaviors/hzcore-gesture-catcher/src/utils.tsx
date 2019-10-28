@@ -1,4 +1,4 @@
-import {useRef, useLayoutEffect, useEffect, useState} from 'react';
+import {useRef, useCallback, useEffect} from 'react';
 import Observable from 'zen-observable';
 
 interface GestureState {
@@ -50,7 +50,7 @@ function dispatchGestureStateChange<S extends GestureState>(
 /**
  * `useObservableGestureEffect` will manage a subscription to the given
  * gesture `Observable` on the `ref` DOM element with the given `config`,
- * calling the current `handler` wheneer a gesture state change is observed.
+ * calling the current `handler` whenever a gesture state change is observed.
  */
 export function useObservableGestureEffect<
   E extends HTMLElement,
@@ -77,86 +77,50 @@ export function useObservableGestureEffect<
   config: React.RefObject<C>,
 ): void {
   const lastState = useRef<S | null>(null);
+  const subscribed = useRef<E | null>(null);
 
-  // Note: we use state instead of a ref to track this value
-  // because `useState` supports lazy instantiation (via a callback),
-  // whereas`useRef` would have us creating and throwing away a `new Map()`
-  // on every subsequent render.
-  const [subscriptions] = useState(
-    () => new Map<HTMLElement, ZenObservable.Subscription>(),
+  const handleGestureStateChange = useCallback(
+    /**
+     * `handleGestureStateChange` will call the correct
+     * change handler with a new `GestureState` whenever
+     * a gesture change is observed.
+     */
+    function handleGestureState(state) {
+      if (handler.current) {
+        dispatchGestureStateChange<S>(
+          handler.current,
+          state,
+          lastState.current,
+        );
+      }
+      lastState.current = state;
+    },
+    [handler],
   );
 
-  useLayoutEffect(
+  const isSubscribed = ref.current === subscribed.current;
+
+  useEffect(
     /**
-     * `subscribeIfNecessary` will run on layout to determine if we need to
+     * `subscribeIfNecessary` will run to determine if we need to
      * subscribe to events on an element. If we are already subscribed
      * to the element, it will do nothing.
      */
     function subscribeIfNecessary() {
       const element = ref.current;
-      if (element && !subscriptions.has(element)) {
-        subscriptions.set(
+      if (element) {
+        subscribed.current = element;
+        const subscription = Observable.create(
           element,
-          Observable.create(element, config.current).subscribe(
-            function handleGestureState(state) {
-              if (handler.current) {
-                dispatchGestureStateChange<S>(
-                  handler.current,
-                  state,
-                  lastState.current,
-                );
-              }
-              lastState.current = state;
-            },
-          ),
-        );
+          config.current,
+        ).subscribe(handleGestureStateChange);
+
+        return function unsubscribe() {
+          subscribed.current = null;
+          subscription.unsubscribe();
+        };
       }
     },
-  );
-
-  useEffect(
-    /**
-     * `cleanup` returns a function that will run on unmount
-     * to unsubscribe from any subscriptions.
-     */
-    function cleanup() {
-      return () => {
-        if (subscriptions.size > 0) {
-          for (const [el, sub] of subscriptions.entries()) {
-            sub.unsubscribe();
-            subscriptions.delete(el);
-          }
-        }
-      };
-    },
-    [subscriptions],
-  );
-}
-
-/**
- * `useProvidedRef` will set `ref.current` to `providedRef.current`
- * on layout, if `providedRef` is a ref object.
- */
-export function useProvidedRef<T extends HTMLElement>(
-  /**
-   * The ref to sync with a provided ref. If `providedRef` is a ref object,
-   * `useProvidedRef` will set `ref.current` to `providedRef.current` on layout.
-   */
-  ref: React.MutableRefObject<T | null>,
-  /**
-   * The provided ref. If not a ref object, `useProvidedRef` will do nothing.
-   */
-  providedRef?: React.RefObject<T> | null,
-): void {
-  useLayoutEffect(
-    /**
-     * `syncWithProvidedRef` will keep the internal ref in sync
-     * with the provided ref, if it exists.
-     */
-    function syncWithProvidedRef() {
-      if (providedRef) {
-        ref.current = providedRef.current;
-      }
-    },
+    [isSubscribed, Observable, config, ref, handleGestureStateChange],
   );
 }
