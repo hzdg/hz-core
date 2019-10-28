@@ -143,24 +143,20 @@ const DEFAULT_CONFIG: GestureObservableConfig = {
 };
 
 export function parseConfig(
-  config?: GestureObservableConfig | null,
+  config?: Partial<GestureObservableConfig> | null,
 ): GestureObservableConfig {
   if (!config) {
     return {...DEFAULT_CONFIG};
   } else {
-    const {keyboard, mouse, touch, wheel} = config;
+    const {keyboard, mouse, touch, wheel, ...unionConfig} = config;
+    let parsedConfig = {...DEFAULT_CONFIG, ...unionConfig};
     if (keyboard || mouse || touch || wheel) {
-      return {
-        ...DEFAULT_CONFIG,
-        keyboard: false,
-        mouse: false,
-        touch: false,
-        wheel: false,
-        ...config,
-      };
-    } else {
-      return {...DEFAULT_CONFIG, ...config};
+      parsedConfig.keyboard = Boolean(keyboard);
+      parsedConfig.mouse = Boolean(mouse);
+      parsedConfig.touch = Boolean(touch);
+      parsedConfig.wheel = Boolean(wheel);
     }
+    return parsedConfig;
   }
 }
 
@@ -171,7 +167,7 @@ export function create(
   /** The DOM element to observe for gestures. */
   element: Element,
   /** Configuration for the GestureObservable. */
-  config?: GestureObservableConfig | null,
+  config?: Partial<GestureObservableConfig> | null,
 ): Observable<GestureState> {
   ensureDOMInstance(element, Element);
   config = parseConfig(config);

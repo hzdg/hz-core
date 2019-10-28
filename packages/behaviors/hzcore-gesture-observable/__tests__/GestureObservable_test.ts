@@ -155,7 +155,7 @@ test('GestureObservable observes touch gestures', async () => {
 test('GestureObservable observes wheel gestures', async () => {
   jest.useFakeTimers();
   const history = new GestureHistory();
-  const gesture = GestureObservable.create(node, {wheel: true});
+  const gesture = GestureObservable.create(node, {wheel: true, threshold: 0});
   subscription = gesture.subscribe(history);
   await new WheelSequence(node)
     .wheel()
@@ -289,7 +289,7 @@ test('GestureObservable observes keyboard gestures', async () => {
 test('GestureObservable observes all inputs by default', async () => {
   jest.useFakeTimers();
   const history = new GestureHistory();
-  const gesture = GestureObservable.create(node);
+  const gesture = GestureObservable.create(node, {threshold: 0});
   subscription = gesture.subscribe(history);
   await new MouseSequence(node)
     .down()
@@ -312,6 +312,7 @@ test.each([['mouse', 3], ['touch', 3], ['wheel', 2], ['keyboard', 2]])(
     const history = new GestureHistory();
     const gesture = GestureObservable.create(node, ({
       [inputType]: true,
+      threshold: 0,
     } as unknown) as GestureObservableConfig);
     subscription = gesture.subscribe(history);
     await new MouseSequence(node)
