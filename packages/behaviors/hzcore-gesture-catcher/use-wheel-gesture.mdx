@@ -71,6 +71,19 @@ interface WheelGestureConfig {
    * If `true`, then `preventDefault` will have no effect.
    */
   passive: boolean;
+  /**
+   * How 'far' a series of wheel events must cumulatively move
+   * in a consistent direction before a wheel gesture is detected,
+   * or `false`, if _any_ wheel event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of wheel events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then wheel events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: Orientation;
 }
 ```
 

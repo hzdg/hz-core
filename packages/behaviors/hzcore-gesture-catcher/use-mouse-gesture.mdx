@@ -71,6 +71,19 @@ interface MouseGestureConfig {
    * If `true`, then `preventDefault` will have no effect.
    */
   passive: boolean;
+  /**
+   * How 'far' a series of mouse events must cumulatively move
+   * in a consistent direction before a mouse gesture is detected,
+   * or `false`, if _any_ mouse event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of mouse events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then mouse events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: Orientation;
 }
 ```
 

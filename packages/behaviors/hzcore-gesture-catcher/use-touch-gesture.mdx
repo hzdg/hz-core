@@ -71,6 +71,19 @@ interface TouchGestureConfig {
    * If `true`, then `preventDefault` will have no effect.
    */
   passive: boolean;
+  /**
+   * How 'far' a series of touch events must cumulatively move
+   * in a consistent direction before a touch gesture is detected,
+   * or `false`, if _any_ touch event should be considered part of a gesture.
+   */
+  threshold?: number | false;
+  /**
+   * The orientation in which a series of touch events
+   * can move in order to be considered part of a gesture.
+   * If not provided, then touch events in _any_ orientation
+   * can be considered part of a gesture.
+   */
+  orientation?: Orientation;
 }
 ```
 
