@@ -1,5 +1,37 @@
-import {useState, useLayoutEffect, useEffect, useRef, useCallback} from 'react';
+import {useState, useMemo, useEffect, useRef, useCallback} from 'react';
+import useRefCallback from '@hzcore/hook-ref-callback';
 import 'intersection-observer'; // polyfill
+
+function useIntersectionThreshold(
+  threshold: number | number[] | undefined,
+): number | number[] | undefined {
+  return useMemo(
+    () => threshold,
+    // Note: We spread `threshold` value(s) as dependencies because
+    // `threshold` might be an array that is not referentially stable
+    // across renders, but we don't care if it isn't;
+    // we only care if its deconstructed values are.
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
+    Array.isArray(threshold) ? threshold : [threshold],
+  );
+}
+
+function useIntersectionObserverInit(
+  config: IntersectionObserverInit = {},
+): IntersectionObserverInit | undefined {
+  const {root = undefined, rootMargin = undefined} = config;
+  const threshold = useIntersectionThreshold(config.threshold);
+  return useMemo(() => {
+    let init: IntersectionObserverInit;
+    if (root || rootMargin || threshold) {
+      init = {};
+      if (root) init.root = root;
+      if (rootMargin) init.rootMargin = rootMargin;
+      if (threshold) init.threshold = threshold;
+      return init;
+    }
+  }, [root, rootMargin, threshold]);
+}
 
 export interface IntersectionHandler {
   /**
@@ -86,7 +118,7 @@ function useIntersection<T extends HTMLElement>(
    * @see https://hz-core.netlify.com/use-intersection#config
    */
   config?: IntersectionObserverInit,
-): React.RefObject<T>;
+): (node: T | null) => void;
 /**
  * `useIntersection` is a React hook for components that care about
  * their interesction with an ancestor element or with the viewport.
@@ -101,7 +133,7 @@ function useIntersection<T extends HTMLElement>(
    * @see https://hz-core.netlify.com/use-intersection#config
    */
   config?: IntersectionObserverInit,
-): [boolean, React.RefObject<T>];
+): [boolean, (node: T | null) => void];
 function useIntersection<T extends HTMLElement>(
   providedRefOrHandlerOrConfig?:
     | React.RefObject<T>
@@ -109,9 +141,12 @@ function useIntersection<T extends HTMLElement>(
     | IntersectionObserverInit,
   handlerOrConfig?: IntersectionHandler | IntersectionObserverInit,
   maybeConfig?: IntersectionObserverInit,
-): [boolean, React.RefObject<T>] | React.RefObject<T> | boolean | void {
+):
+  | [boolean, (node: T | null) => void]
+  | ((node: T | null) => void)
+  | boolean
+  | void {
   const changeHandler = useRef<IntersectionHandler | null>(null);
-  const ref = useRef<T | null>(null);
   let providedRef: React.RefObject<T> | null = null;
   let config: IntersectionObserverInit | undefined = undefined;
 
@@ -139,25 +174,10 @@ function useIntersection<T extends HTMLElement>(
     }
   }
 
-  useLayoutEffect(
-    /**
-     * `syncWithProvidedRefIfNecessary` will update
-     * the current ref with the provided ref value, if it exists.
-     */
-    function syncWithProvidedRefIfNecessary() {
-      if (providedRef) {
-        ref.current = providedRef.current;
-      }
-    },
-  );
+  const [ref, setRef] = useRefCallback<T>();
+  if (providedRef) setRef(providedRef.current);
 
-  // Note: we use state instead of a ref to track this value
-  // because `useState` supports lazy instantiation (via a callback),
-  // whereas`useRef` would have us creating and throwing away a `new Map()`
-  // on every subsequent render.
-  const [subscriptions] = useState(
-    () => new Map<HTMLElement, ZenObservable.Subscription>(),
-  );
+  const subscribed = useRef<T | null>(null);
 
   const [intersects, setIntersects] = useState(false);
 
@@ -168,6 +188,7 @@ function useIntersection<T extends HTMLElement>(
      * intersection with the ancestor element or viewport changes.
      */
     function handleIntersectionChange(entry: IntersectionObserverEntry) {
+      if (!subscribed.current) return;
       const cb = changeHandler.current;
       if (typeof cb === 'function') {
         cb(entry);
@@ -178,97 +199,45 @@ function useIntersection<T extends HTMLElement>(
     [],
   );
 
-  const {root = undefined, rootMargin = undefined, threshold = undefined} =
-    config || {};
+  const intersectionObserverInit = useIntersectionObserverInit(config);
 
-  useLayoutEffect(
+  const isSubscribed = ref.current === subscribed.current;
+
+  useEffect(
     /**
-     * `subscribeIfNecessary` will run on layout to determine if we need to
+     * `subscribeIfNecessary` will run to determine if we need to
      * subscribe to intersection events on an element. If we are already
      * subscribed to the element, it will do nothing.
      */
     function subscribeIfNecessary() {
       const currentElement = ref.current;
-      if (currentElement && !subscriptions.has(currentElement)) {
+      if (currentElement) {
         const observer = new IntersectionObserver(entries => {
           for (const entry of entries) {
             if (entry.target === currentElement) {
               return handleIntersectionChange(entry);
             }
           }
-        }, config);
+        }, intersectionObserverInit);
         observer.observe(currentElement);
-        subscriptions.set(currentElement, {
-          closed: false,
-          unsubscribe() {
-            this.closed = true;
-            if (currentElement) {
-              observer.unobserve(currentElement);
-            }
-          },
-        });
-      }
-      /**
-       * `resetSubscriptionsIfNecessary` returns a function that will run
-       * whenever the options for the intersection observer change.
-       */
-      return function resetSubscriptionsIfNecessary() {
-        if (subscriptions.size > 0) {
-          for (const [el, sub] of subscriptions.entries()) {
-            sub.unsubscribe();
-            subscriptions.delete(el);
-          }
-        }
-      };
-    },
-    // Note: We don't include `config` in our dependency list because
-    // the object might not be referentially stable across renders.
-    // We don't care if it isn't; we only care if its deconstructed values
-    // (`root`, `rootMargin`, `threshold`) are.
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-    [
-      subscriptions,
-      handleIntersectionChange,
-      // Note: We include `ref.current` here (against the advice of the linter)
-      // because we want this effect to be re-run when the ref value changes.
-      // We know that a render is not caused by changes to `ref.current`,
-      // but we want to make sure this effect is rerun when that value happens
-      // to be different during a render caused by some other update.
-      ref.current,
-      root,
-      rootMargin,
-      // Note: We spread `threshold` value(s) as dependencies because
-      // `threshold` might be an array that is not referentially stable
-      // across renders, and, like with `config`, we don't care if it isn't;
-      // we only care if its deconstructed values are.
-      /* eslint-disable-next-line react-hooks/exhaustive-deps */
-      ...(Array.isArray(threshold) ? threshold : [threshold]),
-    ],
-  );
+        subscribed.current = currentElement;
 
-  useEffect(
-    /**
-     * `cleanup` returns a function that will run on unmount
-     * to unsubscribe from any subscriptions.
-     */
-    function cleanup() {
-      return () => {
-        if (subscriptions.size > 0) {
-          for (const [el, sub] of subscriptions.entries()) {
-            sub.unsubscribe();
-            subscriptions.delete(el);
+        return function unsubscribe() {
+          subscribed.current = null;
+          if (currentElement) {
+            observer.unobserve(currentElement);
           }
-        }
-      };
+        };
+      }
     },
-    [subscriptions],
+    [isSubscribed, ref, handleIntersectionChange, intersectionObserverInit],
   );
 
   if (!providedRef) {
     if (changeHandler.current) {
-      return ref;
+      return setRef;
     } else {
-      return [intersects, ref];
+      return [intersects, setRef];
     }
   } else if (!changeHandler.current) {
     return intersects;

@@ -6,6 +6,7 @@ route: /use-intersection
 
 import {Playground} from 'docz';
 import useIntersection from './src';
+import useRefCallback from '@hzcore/hook-ref-callback';
 
 # useIntersection
 
@@ -34,24 +35,24 @@ Additionally, `useIntersection` supports using an existing [ref object].
 This means `useIntersection` has 4 different signatures:
 
 ```ts
-// Stateful
+// Stateful — returns an intersects state and a callback ref to attach to a DOM node.
 function useIntersection(
   config?: IntersectionObserverInit,
-): [boolean, React.RefObject<HTMLElement>];
+): [boolean, (node: HTMLElement | null) => void];
 
-// Stateful with a provided ref
+// Stateful with a provided ref object — returns an intersects state.
 function useIntersection(
   providedRef: React.RefObject<HTMLElement>,
   config?: IntersectionObserverInit,
 ): boolean;
 
-// Stateless with a handler
+// Stateless with a handler - returns a callback ref to attach to a DOM node.
 function useIntersection(
   handler: (entry: IntersectionObserverEntry) => void,
   config?: IntersectionObserverInit,
-): React.RefObject<HTMLElement>;
+): (node: HTMLElement | null) => void;
 
-// Stateless with a handler and a provided ref
+// Stateless with a handler and a provided ref object - returns nothing!
 function useIntersection(
   providedRef: React.RefObject<HTMLElement>,
   handler: (entry: IntersectionObserverEntry) => void,
@@ -65,19 +66,19 @@ Sometimes a component wants to simply update whenever it starts or stops
 intersecting an ancestor element or viewport.
 In these cases, `useIntersection` provides a **stateful** API.
 
+### Stateful Example
+
 To `useIntersection` statefully, call `useIntersection` without any arguments
 or with an optional [config] object.
-It will return an array containing a `boolean` [state] and a [ref object]:
+It will return an array containing a `boolean` [state] and a [callback ref]:
 
 ```ts
 function useIntersection(
   config?: IntersectionObserverInit,
-): [boolean, React.RefObject<HTMLElement>];
+): [boolean, (node: HTMLElement | null) => void];
 ```
 
-The returned [ref object] should be passed to the DOM element to be observed.
-
-### Stateful Example
+The returned [callback ref] should be passed to the DOM element to be observed.
 
 <Playground>
   {() => {
@@ -123,6 +124,8 @@ The returned [ref object] should be passed to the DOM element to be observed.
   }}
 </Playground>
 
+### Stateful Example with an Existing Ref
+
 To `useIntersection` statefully with an existing [ref object], pass it
 to `useIntersection`. It will return _just_ a `boolean` [state] (_not_ an array):
 
@@ -136,9 +139,9 @@ function useIntersection(
 The existing `providedRef` [ref object] should be passed to the DOM element
 to be observed.
 
-See [Shared Ref / Ref Forwarding] for more on `providedRef`.
-
-### Stateful Example with an Existing Ref
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
 
 <Playground>
   {() => {
@@ -166,14 +169,17 @@ See [Shared Ref / Ref Forwarding] for more on `providedRef`.
     );
     const IntersectionStateUser = () => {
       const [root, setRoot] = React.useState(null);
-      const ref = React.useRef(null);
+      // Since we aren't using a callback ref from `useIntersection`,
+      // we use `useRefCallback()` to rerender whenever
+      // the ref's current value changes.
+      const [ref, setRef] = useRefCallback();
       const intersects = useIntersection(ref, {root, threshold: 0.75});
       return (
         <div
           ref={setRoot}
           style={{overflow: 'scroll', width: '100%', height: 250}}
         >
-          <IntersectionIndicator ref={ref} intersects={intersects}>
+          <IntersectionIndicator ref={setRef} intersects={intersects}>
             threshold: 0.75
             <br />
             intersecting: {intersects.toString()}
@@ -191,6 +197,8 @@ Sometimes (often for performance reasons), a component wants to derive state
 from intersection changes, or debounce or otherwise throttle updates caused
 by changes. In these cases, `useIntersection` provides a **stateless** API.
 
+### Stateless Example
+
 To `useIntersection` statelessly, call `useIntersection` with a [handler]
 function and an optional [config] object. It will return a [ref object]:
 
@@ -198,12 +206,10 @@ function and an optional [config] object. It will return a [ref object]:
 function useIntersection(
   handler: (entry: IntersectionObserverEntry) => void,
   config?: IntersectionObserverInit,
-): React.RefObject<HTMLElement>;
+): (node: HTMLElement | null) => void;
 ```
 
-The returned [ref object] should be passed to the DOM element to be observed.
-
-### Stateless Example
+The returned [callback ref] should be passed to the DOM element to be observed.
 
 <Playground>
   {() => {
@@ -260,6 +266,8 @@ The returned [ref object] should be passed to the DOM element to be observed.
   }}
 </Playground>
 
+### Stateless Example With an Existing Ref
+
 To `useIntersection` statelessly with an existing [ref object],
 call `useIntersection` with the [ref object] and a [handler] function
 and an optional [config] object. It will return `undefined`:
@@ -275,9 +283,9 @@ function useIntersection(
 The existing `providedRef` [ref object] should be passed to the DOM element
 to be observed.
 
-See [Shared Ref / Ref Forwarding] for more on `providedRef`.
-
-### Stateless Example With an Existing Ref
+> **Note:** Using an existing ref object has some possible gotchas.
+>
+> See [Shared Ref / Ref Forwarding] for more.
 
 <Playground>
   {() => {
@@ -305,11 +313,16 @@ See [Shared Ref / Ref Forwarding] for more on `providedRef`.
     );
     const IntersectionStateUser = () => {
       const [root, setRoot] = React.useState(null);
+      // We use a state setter as our callback for demo purposes.
+      // This is just to rerender whenever `useIntersection` calls it.
       const [state, setState] = React.useState({
         isIntersecting: false,
         intersectionRatio: 0,
       });
-      const ref = React.useRef(null);
+      // Since we aren't using a callback ref from `useIntersection`,
+      // we use `useRefCallback()` to rerender whenever
+      // the ref's current value changes.
+      const [ref, setRef] = useRefCallback();
       const returned = useIntersection(
         ref,
         ({isIntersecting, intersectionRatio}) => {
@@ -322,7 +335,7 @@ See [Shared Ref / Ref Forwarding] for more on `providedRef`.
           ref={setRoot}
           style={{overflow: 'scroll', width: '100%', height: 250}}
         >
-          <IntersectionIndicator ref={ref} intersects={state.isIntersecting}>
+          <IntersectionIndicator ref={setRef} intersects={state.isIntersecting}>
             threshold: [0.5, 0.6, 0.7, 0.8, 0.9, 1]
             <br />
             isIntersecting: {state.isIntersecting.toString()}
@@ -338,18 +351,31 @@ See [Shared Ref / Ref Forwarding] for more on `providedRef`.
 
 ## Shared Ref / Ref Forwarding
 
+> **Note:** Using an existing ref object has a possible gotcha:
+> `useIntersection` cannot know when the current value has changed!
+> This means the component is responsible for rerendering
+> whenever the the ref's value has been changed.
+> One easy way to achieve this is with [useRefCallback].
+> See the existing ref examples above for more.
+
 Sometimes a component needs to [forward a ref] to its children,
-or [use a ref][useref] with other hooks. To support these cases,
-`useIntersection` accepts an optional `providedRef` [ref object].
+or [use a ref][useref] with other hooks.
+To support these cases, `useIntersection` accepts an optional [ref object].
 
 It could be used with ref forwarding like:
 
 ```js
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // We pass `forwardedRef` (which _must_ be a ref object)
-  // to `useIntersection`. Note that a `ref` will _not_ be returned.
+  // via the `ref` option to `useIntersection`.
+  // Note that a calblack ref will _not_ be returned.
+  // Note also that `useIntersection` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // (or a parent component) to rerender whenever that happens.
+  // In this example, we `useRefCallback` to solve this.
   const intersects = useIntersection(forwardedRef);
-  return <div ref={forwardedRef}>{JSON.stringify(intersects, null, 2)}</div>;
+  const [, setRef] = useRefCallback(forwardedRef);
+  return <div ref={setRef}>{JSON.stringify(intersects, null, 2)}</div>;
 });
 ```
 
@@ -357,11 +383,17 @@ or, with `useRef`:
 
 ```js
 const SomeRefUsingComponent = () => {
+  // Create our own ref to use.
   const ref = React.useRef(null);
-  // We pass `ref` to `useIntersection`.
-  // Note that a `ref` will _not_ be returned.
+  // We pass our own ref via the `ref` option to `useIntersection`.
+  // Note that a callback ref will _not_ be returned.
+  // Note also that `useIntersection` won't be notified if the ref's
+  // current value has changed, so it is up to this component
+  // to rerender whenever that happens. In this example,
+  // we `useRefCallback` to solve this.
   const intersects = useIntersection(ref);
-  return <div ref={ref}>{JSON.stringify(intersects, null, 2)}</div>;
+  const [, setRef] = useRefCallback(ref);
+  return <div ref={setRef}>{JSON.stringify(intersects, null, 2)}</div>;
 };
 ```
 
@@ -461,11 +493,13 @@ interface IntersectionObserverEntry {
 [ref]: https://reactjs.org/docs/refs-and-the-dom.html
 [useref]: https://reactjs.org/docs/hooks-reference.html#useref
 [ref object]: https://reactjs.org/docs/refs-and-the-dom.html#accessing-refs
+[callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
 [intersectionobserver]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API
 [intersectionobserverentry]: https://developer.mozilla.org/en-US/docs/Web/API/IntersectionObserverEntry
 [the root element and root margin]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API#The_root_element_and_root_margin
 [thresholds]: https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API#Thresholds
+[userefcallback]: /use-ref-callback
 [stateful]: #stateful
 [stateless]: #stateless
 [config]: #config
