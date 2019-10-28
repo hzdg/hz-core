@@ -34,13 +34,15 @@ This means `useSize` has 4 different signatures:
 
 ```ts
 // Stateful — returns a size state and a callback ref to attach to a DOM node.
-function useSize(): [Size, React.Ref<HTMLElement>];
+function useSize(): [Size, (node: HTMLElement | null) => void];
 
 // Stateful with a provided ref object — returns a size state.
 function useSize(providedRef: React.RefObject<HTMLElement>): Size;
 
 // Stateless with a handler - returns a callback ref to attach to a DOM node.
-function useSize(handler: (size: Size) => void): React.Ref<HTMLElement>;
+function useSize(
+  handler: (size: Size) => void,
+): (node: HTMLElement | null) => void;
 
 // Stateless with a handler and a provided ref object - returns nothing!
 function useSize(
@@ -60,7 +62,7 @@ To `useSize` statefully, call `useSize` without any arguments.
 It will return an array containing a [Size] state and a [callback ref]:
 
 ```ts
-function useSize(): [Size, React.Ref<HTMLElement>];
+function useSize(): [Size, (node: HTMLElement | null) => void];
 ```
 
 The returned [callback ref] should be attached to the DOM element to be measured.
@@ -145,7 +147,9 @@ To `useSize` statelessly, call `useSize` with a [handler] function.
 It will return _just_ a [callback ref] (_not_ an array):
 
 ```ts
-function useSize(handler: (size: Size) => void): React.RefObject<HTMLElement>;
+function useSize(
+  handler: (size: Size) => void,
+): (node: HTMLElement | null) => void;
 ```
 
 The returned [callback ref] should be attached to the DOM element to be measured.

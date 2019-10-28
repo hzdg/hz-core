@@ -158,14 +158,14 @@ function useSize<T extends HTMLElement>(
    * the observed element's size changes.
    */
   handler: (size: Size) => void,
-): React.Ref<T>;
-function useSize<T extends HTMLElement>(): [Size, React.Ref<T>];
+): (node: T | null) => void;
+function useSize<T extends HTMLElement>(): [Size, (node: T | null) => void];
 function useSize<T extends HTMLElement>(
   handlerOrProvidedRef?: React.RefObject<T> | ((size: Size) => void),
   handler?: (size: Size) => void,
-): Size | React.Ref<T> | [Size, React.Ref<T>] | void {
+): Size | ((node: T | null) => void) | [Size, (node: T | null) => void] | void {
   const changeHandler = useRef<((size: Size) => void) | null>(null);
-  let providedRef: React.Ref<T> | null = null;
+  let providedRef: React.RefObject<T> | null = null;
 
   if (typeof handlerOrProvidedRef === 'function') {
     changeHandler.current = handlerOrProvidedRef;
