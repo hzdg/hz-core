@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@3.0.0...@hzcore/hook-size@3.0.1) (2019-10-28)
+
+
+### @hzcore/hook-size
+
+* fix callback ref types ([50a7a48](https://github.com/hzdg/hz-core/commit/50a7a48))
+* fix typo ([d4571b1](https://github.com/hzdg/hz-core/commit/d4571b1))
+
+
 # [3.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@2.0.3...@hzcore/hook-size@3.0.0) (2019-10-26)
 
 

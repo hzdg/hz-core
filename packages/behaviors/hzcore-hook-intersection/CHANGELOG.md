@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-intersection@1.0.1...@hzcore/hook-intersection@2.0.0) (2019-10-28)
+
+
+### @hzcore/hook-intersection
+
+* return callback ref ([23e93cd](https://github.com/hzdg/hz-core/commit/23e93cd))
+* fix typo ([363dddd](https://github.com/hzdg/hz-core/commit/363dddd))
+
+
 ## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-intersection@1.0.0...@hzcore/hook-intersection@1.0.1) (2019-09-10)
 
 

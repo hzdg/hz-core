@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@3.1.1...@hzcore/scroll-monitor@4.0.0) (2019-10-28)
+
+
+### @hzcore/scroll-monitor
+
+* return callback refs from hooks ([05b134f](https://github.com/hzdg/hz-core/commit/05b134f))
+
+
 ## [3.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@3.1.0...@hzcore/scroll-monitor@3.1.1) (2019-10-26)
 
 

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.0.1...@hzcore/gesture-observable@1.1.0) (2019-10-28)
+
+
+### @hzcore/gesture-observable
+
+* add orientation ([774cc62](https://github.com/hzdg/hz-core/commit/774cc62))
+* fix option parsing; fix tests ([50bfec2](https://github.com/hzdg/hz-core/commit/50bfec2))
+
+* typo ([0b6e75f](https://github.com/hzdg/hz-core/commit/0b6e75f))
+
+
 ## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.0.0...@hzcore/gesture-observable@1.0.1) (2019-09-12)
 
 

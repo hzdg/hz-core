@@ -1,7 +1,7 @@
 {
   "name": "@hzcore/hook-intersection",
   "description": "A React hook for components that care about interesction with an ancestor element or viewport.",
-  "version": "1.0.1",
+  "version": "2.0.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
