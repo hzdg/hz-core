@@ -172,7 +172,7 @@ to be observed.
       // Since we aren't using a callback ref from `useIntersection`,
       // we use `useRefCallback()` to rerender whenever
       // the ref's current value changes.
-      const [ref, setRef] = useRefCallback();
+      const [ref, setRef] = useRefCallback(null);
       const intersects = useIntersection(ref, {root, threshold: 0.75});
       return (
         <div
@@ -322,7 +322,7 @@ to be observed.
       // Since we aren't using a callback ref from `useIntersection`,
       // we use `useRefCallback()` to rerender whenever
       // the ref's current value changes.
-      const [ref, setRef] = useRefCallback();
+      const [ref, setRef] = useRefCallback(null);
       const returned = useIntersection(
         ref,
         ({isIntersecting, intersectionRatio}) => {
@@ -374,7 +374,7 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // (or a parent component) to rerender whenever that happens.
   // In this example, we `useRefCallback` to solve this.
   const intersects = useIntersection(forwardedRef);
-  const [, setRef] = useRefCallback(forwardedRef);
+  const [, setRef] = useRefCallback(null, forwardedRef);
   return <div ref={setRef}>{JSON.stringify(intersects, null, 2)}</div>;
 });
 ```
@@ -392,7 +392,7 @@ const SomeRefUsingComponent = () => {
   // to rerender whenever that happens. In this example,
   // we `useRefCallback` to solve this.
   const intersects = useIntersection(ref);
-  const [, setRef] = useRefCallback(ref);
+  const [, setRef] = useRefCallback(null, ref);
   return <div ref={setRef}>{JSON.stringify(intersects, null, 2)}</div>;
 };
 ```

@@ -174,7 +174,7 @@ function useIntersection<T extends HTMLElement>(
     }
   }
 
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
 
   const subscribed = useRef<T | null>(null);
