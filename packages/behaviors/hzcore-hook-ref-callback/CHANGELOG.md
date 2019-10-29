@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-ref-callback@1.0.4...@hzcore/hook-ref-callback@2.0.0) (2019-10-29)
+
+
+### @hzcore/hook-ref-callback
+
+* add initialValue argument ([174f6aa](https://github.com/hzdg/hz-core/commit/174f6aa))
+* add note discouraging use for DOM refs ([30c13b9](https://github.com/hzdg/hz-core/commit/30c13b9))
+
+
 ## [1.0.4](https://github.com/hzdg/hz-core/compare/@hzcore/hook-ref-callback@1.0.3...@hzcore/hook-ref-callback@1.0.4) (2019-05-20)
 
 
