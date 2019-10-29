@@ -12,16 +12,21 @@ export type InnerRef<T> =
  * the ref object is updated with the value passed to the callback, and the
  * component is rerendered.
  */
-export default function useRefCallback<T>(
+function useRefCallback<T>(
+  /**
+   * An optional initial value for the ref.
+   * Used like `React.useRef(initialValue)`.
+   */
+  initialValue?: T | null,
   /**
    * An optional ref object or callback ref.
    * Useful when the component needs to handle ref forwarding.
    */
   innerRef?: InnerRef<T> | null,
-): [React.RefObject<T | null>, (node: T | null) => void] {
+): [React.RefObject<T>, (node: T | null) => void] {
   const [, f] = useState(false);
   const forceUpdate = useCallback(() => f(v => !v), []);
-  const ref = useRef<T | null>(null);
+  const ref = useRef(initialValue);
   const callback = useCallback(
     (node: T | null) => {
       if (typeof innerRef === 'function') {
@@ -36,5 +41,7 @@ export default function useRefCallback<T>(
     },
     [innerRef, forceUpdate],
   );
-  return [ref, callback];
+  return [ref as React.RefObject<T>, callback];
 }
+
+export default useRefCallback;

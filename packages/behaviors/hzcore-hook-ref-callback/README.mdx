@@ -59,7 +59,8 @@ import useRefCallback from '@hzcore/hook-ref-callback';
 
 const SomeComponent = () => {
   // Returns a tuple of a ref object and a ref callback.
-  const [ref, setRef] = useRefCallback();
+  // An optional initial value is allowed and works just like `React.useRef`.
+  const [ref, setRef] = useRefCallback(null);
   useEffect(
     () => {
       if (ref.current) {
@@ -94,7 +95,7 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // to `useRefCallback`. Note that the returned `ref` will _not_ be
   // the same as `forwardedRef`, but they _will_ get the same value
   // from calls to `setRef`.
-  const [ref, setRef] = useRefCallback(forwardedRef);
+  const [ref, setRef] = useRefCallback(null, forwardedRef);
   useEffect(() => {
     if (ref.current) {
       // do something with the current ref.
