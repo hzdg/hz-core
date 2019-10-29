@@ -120,7 +120,7 @@ function useScrollDirection<T extends HTMLElement>(
   const [direction, setDirection] = useState(INITIAL_SCROLL_DIRECTION);
 
   // Keep a ref to the nearest scrollable container.
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
   const scrollRef = useNearestScrollNodeRef(ref);
 

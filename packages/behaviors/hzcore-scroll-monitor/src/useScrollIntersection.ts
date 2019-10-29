@@ -166,7 +166,7 @@ function useScrollIntersection<T extends HTMLElement>(
   });
 
   // Keep a ref to the nearest scrollable container.
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
   const scrollRef = useNearestScrollNodeRef(ref);
 

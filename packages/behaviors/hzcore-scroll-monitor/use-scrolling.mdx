@@ -117,7 +117,7 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // (or a parent component) to rerender whenever that happens.
   // In this example, we `useRefCallback` to solve this.
   const scrolling = useScrolling(forwardedRef);
-  const [, setRef] = useRefCallback(forwardedRef);
+  const [, setRef] = useRefCallback(null, forwardedRef);
   return <div ref={setRef}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>;
 });
 ```
@@ -135,7 +135,7 @@ const SomeRefUsingComponent = () => {
   // to rerender whenever that happens. In this example,
   // we `useRefCallback` to solve this.
   const scrolling = useScrolling(ref);
-  const [, setRef] = useRefCallback(ref);
+  const [, setRef] = useRefCallback(null, ref);
   return <div ref={setRef}>{scrolling ? 'Scrolling' : 'Not Scrolling'}</div>;
 };
 ```

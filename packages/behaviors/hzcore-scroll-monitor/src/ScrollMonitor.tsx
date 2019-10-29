@@ -1,10 +1,4 @@
-import {
-  useState,
-  useMemo,
-  useLayoutEffect,
-  useRef,
-  MutableRefObject,
-} from 'react';
+import {useState, useMemo} from 'react';
 import PropTypes from 'prop-types';
 import useRefCallback from '@hzcore/hook-ref-callback';
 import useScrolling from './useScrolling';
@@ -126,7 +120,7 @@ function ScrollMonitor<T extends HTMLElement>(
   props: ScrollMonitorProps<T>,
 ): JSX.Element {
   const {innerRef} = props;
-  const [scrollRef, setScrollRef] = useRefCallback(innerRef);
+  const [scrollRef, setScrollRef] = useRefCallback(null, innerRef);
   const scrolling = useScrolling(scrollRef);
   const direction = useScrollDirection(scrollRef);
   const intersects = useScrollIntersection(scrollRef, props.intersects || []);
