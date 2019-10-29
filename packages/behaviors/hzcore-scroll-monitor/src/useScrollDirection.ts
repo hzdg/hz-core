@@ -63,25 +63,26 @@ export function getScrollDirection(
   position: ScrollPosition,
   lastPosition: ScrollPosition | null,
 ): ScrollDirectionState {
-  if (lastPosition) {
-    const vertical =
-      typeof position.top === 'number' &&
-      typeof lastPosition.top === 'number' &&
-      lastPosition.top < position.top
-        ? DOWN
-        : UP;
-    const horizontal =
-      typeof position.left === 'number' &&
-      typeof lastPosition.left === 'number' &&
-      lastPosition.left < position.left
-        ? RIGHT
-        : LEFT;
-    return {vertical, horizontal};
-  } else {
-    const vertical = typeof position.top === 'number' ? DOWN : UP;
-    const horizontal = typeof position.left === 'number' ? RIGHT : LEFT;
-    return {vertical, horizontal};
+  let vertical: ScrollDirection.DOWN | ScrollDirection.UP | null = null;
+  let horizontal: ScrollDirection.LEFT | ScrollDirection.RIGHT | null = null;
+
+  if (typeof position.top === 'number') {
+    vertical = position.top > 0 ? DOWN : null;
+    if (lastPosition && typeof lastPosition.top === 'number') {
+      if (lastPosition.top === position.top) vertical = null;
+      else if (lastPosition.top > position.top) vertical = UP;
+    }
   }
+
+  if (typeof position.left === 'number') {
+    horizontal = position.left > 0 ? RIGHT : null;
+    if (lastPosition && typeof lastPosition.left === 'number') {
+      if (lastPosition.left === position.left) horizontal = null;
+      else if (lastPosition.left > position.left) horizontal = LEFT;
+    }
+  }
+
+  return {vertical, horizontal};
 }
 
 /**
@@ -129,10 +130,19 @@ function useScrollDirection<T extends HTMLElement>(
   useScrollEffect(
     scrollRef,
     function handleScrollChange(event: Event) {
-      const position = getScrollPosition(event);
-      const direction = getScrollDirection(position, scrollPosition.current);
-      scrollPosition.current = position;
-      setDirection(direction);
+      const nextPosition = getScrollPosition(event);
+      const next = getScrollDirection(nextPosition, scrollPosition.current);
+      scrollPosition.current = nextPosition;
+      setDirection(prev => {
+        let state = prev;
+        if (next.horizontal !== null && next.horizontal !== state.horizontal) {
+          state = {...state, horizontal: next.horizontal};
+        }
+        if (next.vertical !== null && next.vertical !== state.vertical) {
+          state = {...state, vertical: next.vertical};
+        }
+        return state;
+      });
     },
     [],
   );
