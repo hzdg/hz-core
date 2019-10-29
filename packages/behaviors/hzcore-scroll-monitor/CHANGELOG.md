@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.2](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@4.0.1...@hzcore/scroll-monitor@4.0.2) (2019-10-29)
+
+
+### @hzcore/scroll-monitor
+
+* memoize direction state ([7b676a9](https://github.com/hzdg/hz-core/commit/7b676a9))
+
+
 ## [4.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@4.0.0...@hzcore/scroll-monitor@4.0.1) (2019-10-29)
 
 
