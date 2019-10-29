@@ -113,7 +113,7 @@ The existing [ref object] should be attached to the DOM element to be measured.
       // Since we aren't using a callback ref from `useSize`,
       // we use `useRefCallback()` to rerender whenever
       // the ref's current value changes.
-      const [ref, setRef] = useRefCallback();
+      const [ref, setRef] = useRefCallback(null);
       const size = useSize(ref);
       return (
         <div
@@ -208,7 +208,7 @@ The existing [ref object] should be attached to the DOM element to be measured.
       // Since we aren't using a callback ref from `useSize`,
       // we use `useRefCallback()` to rerender whenever
       // the ref's current value changes.
-      const [ref, setRef] = useRefCallback();
+      const [ref, setRef] = useRefCallback(null);
       useSize(ref, setSize);
       return (
         <div
@@ -255,7 +255,7 @@ const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   // (or a parent component) to rerender whenever that happens.
   // In this example, we `useRefCallback` to solve this.
   const size = useSize(forwardedRef);
-  const [, setRef] = useRefCallback(forwardedRef);
+  const [, setRef] = useRefCallback(null, forwardedRef);
   return <div ref={setRef}>{JSON.stringify(size, null, 2)}</div>;
 });
 ```
@@ -273,7 +273,7 @@ const SomeRefUsingComponent = () => {
   // to rerender whenever that happens. In this example,
   // we `useRefCallback` to solve this.
   const size = useSize(ref);
-  const [, setRef] = useRefCallback(ref);
+  const [, setRef] = useRefCallback(null, ref);
   return <div ref={setRef}>{JSON.stringify(size, null, 2)}</div>;
 };
 ```

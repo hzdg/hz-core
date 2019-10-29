@@ -176,7 +176,7 @@ function useSize<T extends HTMLElement>(
     }
   }
 
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
 
   const viewSize = useRef(INITIAL_VIEW_SIZE);
