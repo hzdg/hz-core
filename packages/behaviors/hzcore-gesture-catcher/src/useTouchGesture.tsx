@@ -97,7 +97,7 @@ function useTouchGesture<T extends HTMLElement>(
     config.current = (handlerOrConfig as TouchGestureConfig) || null;
   }
 
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
   useObservableGestureEffect(TouchGestureObservable, ref, handler, config);
   if (!providedRef) return setRef;

@@ -120,7 +120,7 @@ function useGesture<T extends HTMLElement>(
     if (handlerOrConfig) gestureConfig = handlerOrConfig as MouseGestureConfig;
   }
 
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
   useMouseGesture(ref, gestureHandler, gestureConfig);
   useWheelGesture(ref, gestureHandler, gestureConfig);

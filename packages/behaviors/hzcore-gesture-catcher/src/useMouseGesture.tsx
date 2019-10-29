@@ -97,7 +97,7 @@ function useMouseGesture<T extends HTMLElement>(
     config.current = (handlerOrConfig as MouseGestureConfig) || null;
   }
 
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
   useObservableGestureEffect(MouseGestureObservable, ref, handler, config);
   if (!providedRef) return setRef;

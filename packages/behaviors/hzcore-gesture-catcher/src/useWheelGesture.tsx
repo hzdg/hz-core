@@ -97,7 +97,7 @@ function useWheelGesture<T extends HTMLElement>(
     config.current = (handlerOrConfig as WheelGestureConfig) || null;
   }
 
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
   useObservableGestureEffect(WheelGestureObservable, ref, handler, config);
   if (!providedRef) return setRef;

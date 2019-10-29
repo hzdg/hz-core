@@ -97,7 +97,7 @@ function useKeyboardGesture<T extends HTMLElement>(
     config.current = (handlerOrConfig as KeyboardGestureConfig) || null;
   }
 
-  const [ref, setRef] = useRefCallback<T>();
+  const [ref, setRef] = useRefCallback<T>(null);
   if (providedRef) setRef(providedRef.current);
   useObservableGestureEffect(KeyboardGestureObservable, ref, handler, config);
   if (!providedRef) return setRef;

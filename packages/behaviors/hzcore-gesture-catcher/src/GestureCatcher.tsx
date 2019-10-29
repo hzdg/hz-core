@@ -192,7 +192,7 @@ function GestureCatcher<T extends HTMLElement>(
   const setTouchRef = useTouchGesture(gestureHandler, touchConfig);
   const setWheelRef = useWheelGesture(gestureHandler, wheelConfig);
 
-  const [gestureRef, setGestureRef] = useRefCallback<T>(innerRef);
+  const [gestureRef, setGestureRef] = useRefCallback<T>(null, innerRef);
 
   if (keyboardConfig) setKeyboardRef(gestureRef.current);
   if (mouseConfig) setMouseRef(gestureRef.current);
