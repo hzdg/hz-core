@@ -393,12 +393,13 @@ export function createSource(
       clearTimeout(endTimeout);
       endTimeout = null;
     }
+    const wasGesturing = gesturing;
     accX = 0;
     accY = 0;
     intent = false;
     gesturing = false;
     canceled = false;
-    endEvents(1, {type: GESTURE_END});
+    if (wasGesturing) endEvents(1, {type: GESTURE_END});
   };
 
   const shouldPreventDefault = (event: UnnormalizedWheelEvent): boolean => {
@@ -430,6 +431,7 @@ export function createSource(
       accX += event.deltaX;
       accY += event.deltaY;
       intent = direction(accX, accY);
+
       // Debounce the gesture end event.
       if (endTimeout) clearTimeout(endTimeout);
       endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
