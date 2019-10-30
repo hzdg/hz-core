@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.1.0...@hzcore/gesture-observable@1.1.1) (2019-10-30)
+
+
+### @hzcore/gesture-observable
+
+* init gestures from first move events ([896a96c](https://github.com/hzdg/hz-core/commit/896a96c))
+* prevent clicks on gesture end ([f7a8b9c](https://github.com/hzdg/hz-core/commit/f7a8b9c))
+* use webkit touch hack with threshold ([d985640](https://github.com/hzdg/hz-core/commit/d985640))
+
+
 # [1.1.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.0.1...@hzcore/gesture-observable@1.1.0) (2019-10-28)
 
 
