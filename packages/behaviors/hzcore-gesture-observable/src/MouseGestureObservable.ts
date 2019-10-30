@@ -224,6 +224,32 @@ function shouldCancel(
   return false;
 }
 
+const CLICK = 'click';
+
+class ClickHack {
+  clickTimeout: NodeJS.Timeout | null = null;
+  clickHandler = (event: Event) => {
+    event.preventDefault();
+    if (typeof window === 'undefined') return;
+    window.removeEventListener(CLICK, this.clickHandler, true);
+  };
+
+  preventNextClick(): void {
+    if (typeof window === 'undefined') return;
+    window.addEventListener(CLICK, this.clickHandler, true);
+    this.clickTimeout = setTimeout(this.destroy.bind(this), 0);
+  }
+
+  destroy(): void {
+    if (this.clickTimeout) {
+      clearTimeout(this.clickTimeout);
+      this.clickTimeout = null;
+    }
+    if (typeof window === 'undefined') return;
+    window.removeEventListener(CLICK, this.clickHandler, true);
+  }
+}
+
 /**
  * A mouse gesture callbag source.
  */
@@ -240,6 +266,7 @@ export function createSource(
   let gesturing = false;
   let firstEvent: MouseGestureEvent | null = null;
   let canceled = false;
+  const clickHack = preventDefault ? new ClickHack() : null;
 
   const shouldPreventDefault = (event: MouseGestureEvent): boolean => {
     return (
@@ -262,6 +289,9 @@ export function createSource(
       }
       case MOUSE_MOVE: {
         if (!firstEvent) return false;
+        if (shouldPreventDefault(event)) {
+          event.preventDefault();
+        }
         if (!gesturing) {
           if (!threshold || canceled) return false;
           gesturing = shouldGesture(firstEvent, event, threshold, orientation);
@@ -270,13 +300,11 @@ export function createSource(
             return false;
           }
         }
-        if (shouldPreventDefault(event)) {
-          event.preventDefault();
-        }
         return true;
       }
       case MOUSE_UP: {
         if (!firstEvent) return false;
+        if (gesturing && clickHack) clickHack.preventNextClick();
         let wasGesturing = gesturing;
         firstEvent = null;
         canceled = false;
