@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.1.1...@hzcore/gesture-observable@1.1.2) (2019-10-30)
+
+
+### @hzcore/gesture-observable
+
+* prevent GESTURE_END when not gesturing ([a5481fc](https://github.com/hzdg/hz-core/commit/a5481fc))
+
+
 ## [1.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.1.0...@hzcore/gesture-observable@1.1.1) (2019-10-30)
 
 
