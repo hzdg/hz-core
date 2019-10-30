@@ -141,33 +141,36 @@ function reduceGestureState(
 ): TouchGestureBaseState | TouchGestureState | TouchGestureEndState {
   switch (event.type) {
     case TOUCH_START:
-      return {
-        ...state,
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY,
-        xInitial: event.touches[0].clientX,
-        yInitial: event.touches[0].clientY,
-        xPrev: event.touches[0].clientX,
-        yPrev: event.touches[0].clientY,
-        xDelta: 0,
-        yDelta: 0,
-        gesturing: true,
-        type: event.type,
-      };
     case TOUCH_MOVE:
-      return {
-        ...state,
-        x: event.touches[0].clientX,
-        y: event.touches[0].clientY,
-        xPrev: state.x,
-        yPrev: state.y,
-        xDelta: event.touches[0].clientX - state.xInitial,
-        yDelta: event.touches[0].clientY - state.yInitial,
-        xVelocity: event.touches[0].clientX - state.x,
-        yVelocity: event.touches[0].clientY - state.y,
-        gesturing: true,
-        type: event.type,
-      };
+      if (state.gesturing) {
+        return {
+          ...state,
+          x: event.touches[0].clientX,
+          y: event.touches[0].clientY,
+          xPrev: state.x,
+          yPrev: state.y,
+          xDelta: event.touches[0].clientX - state.xInitial,
+          yDelta: event.touches[0].clientY - state.yInitial,
+          xVelocity: event.touches[0].clientX - state.x,
+          yVelocity: event.touches[0].clientY - state.y,
+          gesturing: true,
+          type: event.type,
+        };
+      } else {
+        return {
+          ...state,
+          x: event.touches[0].clientX,
+          y: event.touches[0].clientY,
+          xInitial: event.touches[0].clientX,
+          yInitial: event.touches[0].clientY,
+          xPrev: event.touches[0].clientX,
+          yPrev: event.touches[0].clientY,
+          xDelta: 0,
+          yDelta: 0,
+          gesturing: true,
+          type: event.type,
+        };
+      }
     case TOUCH_END:
       return {
         ...state,

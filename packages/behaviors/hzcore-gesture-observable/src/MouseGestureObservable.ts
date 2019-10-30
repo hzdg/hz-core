@@ -141,33 +141,36 @@ function reduceGestureState(
 ): MouseGestureBaseState | MouseGestureState | MouseGestureEndState {
   switch (event.type) {
     case MOUSE_DOWN:
-      return {
-        ...state,
-        x: event.clientX,
-        y: event.clientY,
-        xInitial: event.clientX,
-        yInitial: event.clientY,
-        xPrev: event.clientX,
-        yPrev: event.clientY,
-        xDelta: 0,
-        yDelta: 0,
-        gesturing: true,
-        type: event.type,
-      };
     case MOUSE_MOVE:
-      return {
-        ...state,
-        x: event.clientX,
-        y: event.clientY,
-        xPrev: state.x,
-        yPrev: state.y,
-        xDelta: event.clientX - state.xInitial,
-        yDelta: event.clientY - state.yInitial,
-        xVelocity: event.clientX - state.x,
-        yVelocity: event.clientY - state.y,
-        gesturing: true,
-        type: event.type,
-      };
+      if (state.gesturing) {
+        return {
+          ...state,
+          x: event.clientX,
+          y: event.clientY,
+          xPrev: state.x,
+          yPrev: state.y,
+          xDelta: event.clientX - state.xInitial,
+          yDelta: event.clientY - state.yInitial,
+          xVelocity: event.clientX - state.x,
+          yVelocity: event.clientY - state.y,
+          gesturing: true,
+          type: event.type,
+        };
+      } else {
+        return {
+          ...state,
+          x: event.clientX,
+          y: event.clientY,
+          xInitial: event.clientX,
+          yInitial: event.clientY,
+          xPrev: event.clientX,
+          yPrev: event.clientY,
+          xDelta: 0,
+          yDelta: 0,
+          gesturing: true,
+          type: event.type,
+        };
+      }
     case MOUSE_UP:
       return {
         ...state,
