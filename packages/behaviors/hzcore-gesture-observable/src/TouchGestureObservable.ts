@@ -307,8 +307,8 @@ export function createSource(
       case TOUCH_START: {
         if (firstEvent) return false;
         firstEvent = event;
-        if (threshold) return false;
         if (webkitHack) webkitHack.preventTouchMove();
+        if (threshold) return false;
         gesturing = true;
         return true;
       }
