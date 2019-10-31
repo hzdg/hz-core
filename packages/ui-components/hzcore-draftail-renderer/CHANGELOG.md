@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.3.0](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.2.0...@hzcore/draftail-renderer@1.3.0) (2019-10-31)
+
+
+### @hzcore/draftail-renderer
+
+* adding utility to parse inlined links ([fbf0cca](https://github.com/hzdg/hz-core/commit/fbf0cca))
+
+* adding example with inlined links ([8e00777](https://github.com/hzdg/hz-core/commit/8e00777))
+* cleaning up main component ([229e147](https://github.com/hzdg/hz-core/commit/229e147))
+
+
 # [1.2.0](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.1.1...@hzcore/draftail-renderer@1.2.0) (2019-10-16)
 
 
