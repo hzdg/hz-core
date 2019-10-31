@@ -1,171 +1,23 @@
 import React from 'react';
 
-import DraftailProvider, {Components} from './context';
+import DraftailProvider from './context';
 import createElementBasedOnBlockType, {
-  BOLD,
-  ITALIC,
   UNSTYLED,
-  LINK,
-  BlockType,
+} from './createElementBasedOnBlockType';
+import parseInlinedLinks from './parseInlinedLinks';
+import createElement from './createElement';
+import sortNestedLists from './sortNestedLists';
+import groupBlocksByType, {
   isOrderedListItem,
   isUnorderedListItem,
-  isListItem,
-} from './createElementBasedOnBlockType';
-
-interface InlineStyleRange {
-  length: number;
-  offset: number;
-  style: typeof BOLD | typeof ITALIC;
-}
-
-interface EntityRange {
-  key: number;
-  length: number;
-  offset: number;
-}
-
-interface EntityMap {
-  [key: string]: {
-    data: {
-      url: string;
-    };
-    mutability: 'MUTABLE' | 'IMMUTABLE';
-    type: typeof LINK;
-  };
-}
-
-export interface Block {
-  depth: number;
-  entityRanges: EntityRange[];
-  inlineStyleRanges: InlineStyleRange[];
-  key: string;
-  text: string;
-  type: BlockType;
-  isLink?: boolean;
-}
-
-export type BlockWithEntityMap = Block & EntityMap;
-
-export interface RichTextNode {
-  blocks: Block[];
-  entityMap: EntityMap;
-}
-
-export interface DraftailRendererProps {
-  body: RichTextNode | {};
-  components?: Components;
-}
-
-class Stack {
-  count: number = 0;
-  storage: {
-    [key: number]: Block | BlockWithEntityMap | (Block | BlockWithEntityMap)[];
-  } = {};
-  /**
-   * Append a value to the end of the stack.
-   */
-  push(
-    value: Block | BlockWithEntityMap | (Block | BlockWithEntityMap)[],
-  ): void {
-    this.storage[this.count] = value;
-    this.count++;
-  }
-  /**
-   * Removes and returns the value at the end of the stack.
-   */
-  pop(): unknown {
-    if (this.count === 0) {
-      return undefined;
-    }
-    this.count--;
-    const result = this.storage[this.count];
-    delete this.storage[this.count];
-    return result;
-  }
-
-  /**
-   *  Returns the current site of the stack.
-   */
-  size(): number {
-    return this.count;
-  }
-  /**
-   * Returns the value at the end of the stack
-   */
-  peek(): unknown {
-    return this.storage[this.count - 1];
-  }
-}
-
-function groupBlocksByType(
-  blocksWithEntities: (Block | BlockWithEntityMap)[],
-): (Block | BlockWithEntityMap)[] | null {
-  if (!blocksWithEntities || blocksWithEntities.length === 0) return null;
-  let pointer = 1;
-  return blocksWithEntities.reduce(
-    (
-      blocks: (Block | BlockWithEntityMap)[],
-      currBlock: Block | BlockWithEntityMap,
-      currIndex,
-    ) => {
-      const nextBlock = blocksWithEntities[currIndex + 1];
-      if (
-        isListItem(currBlock) ||
-        (nextBlock && isListItem(currBlock) && isListItem(nextBlock))
-      ) {
-        /**
-         * check if the block's depth is not 0
-         */
-        if (blocks.length > 0 && Array.isArray(blocks[currIndex - pointer])) {
-          blocks[currIndex - pointer].push(currBlock);
-          pointer++;
-        } else {
-          let list: (Block | BlockWithEntityMap)[] = [];
-          list.push(currBlock);
-          blocks.push(list);
-        }
-      } else {
-        blocks.push(currBlock);
-      }
-      return blocks;
-    },
-    [],
-  );
-}
-
-function sortNestedLists(
-  blocks: (Block | BlockWithEntityMap)[],
-): (Block | BlockWithEntityMap)[] | null {
-  const stack = new Stack();
-  let currentDepth = 0;
-  if (!blocks || blocks.length === 0) return null;
-  blocks.forEach(block => {
-    if (block.depth === currentDepth) {
-      stack.push(block);
-    } else if (block.depth < currentDepth) {
-      currentDepth--;
-      let stackPeek = stack.pop();
-      if (stackPeek && Array.isArray(stackPeek)) {
-        let currentPeek = stack.peek();
-        if (Array.isArray(currentPeek)) {
-          currentPeek.push(stackPeek);
-          currentPeek.push(block);
-        } else {
-          stack.push(stackPeek);
-          stack.push(block);
-        }
-      }
-    } else if (block.depth > currentDepth) {
-      currentDepth++;
-      stack.push([block]);
-    } else {
-      // noop ? we should never get here.
-    }
-  });
-
-  // TODO: type this somehow
-  return Object.values(stack.storage);
-}
+} from './groupBlocksByType';
+import {
+  Block,
+  BlockWithEntityMap,
+  DraftailRendererProps,
+  RichTextNode,
+  EntityMap,
+} from './types';
 
 function renderLists(
   block: (Block | BlockWithEntityMap)[] | (Block | BlockWithEntityMap),
@@ -190,6 +42,13 @@ function renderList(block: (Block | BlockWithEntityMap)[]): JSX.Element | null {
   }
 }
 
+function renderInlinedLinks(block: BlockWithEntityMap): JSX.Element | null {
+  return createElement('p', {
+    key: `${block.key}`,
+    children: parseInlinedLinks(block),
+  });
+}
+
 function mapEntityToBlock(
   blocks: Block[],
   entityMap: EntityMap,
@@ -203,28 +62,35 @@ function mapEntityToBlock(
          * merging those 2 objects together.
          */
         if (block.entityRanges && block.entityRanges.length > 0 && entityMap) {
+          // console.log(entityMap, block);
           for (const key of Object.keys(entityMap as EntityMap)) {
-            if (Number(block.entityRanges[0].key) === Number(key)) {
-              let blockWithEntity;
-              /**
-               * if the block(typeof UNSTYLED) doesn't have any styles applied to it,
-               * we can merge it with its entityMap. the type will become LINK.
-               */
-              if (block.type === UNSTYLED) {
-                blockWithEntity = Object.assign({}, block, entityMap[key]);
-                return blockWithEntity;
-              } else {
+            for (const value of Object.values(block.entityRanges)) {
+              if (Number(value.key) === Number(key)) {
+                let blockWithEntity;
+
                 /**
-                 * if there is a specific(not unstyled) type applied to a block,
-                 * we need to preserve that type and add a flag to an object
-                 * saying that it also should be a link. Solves an issue when a link
-                 * is a part of un/ordered list.
+                 * if the block(typeof UNSTYLED) doesn't have any styles applied to it,
+                 * we can merge it with its entityMap. the type will become LINK.
                  */
-                blockWithEntity = Object.assign({}, block, entityMap[key], {
-                  type: block.type,
-                  isLink: true,
-                });
-                return blockWithEntity;
+                if (block.type === UNSTYLED) {
+                  blockWithEntity = Object.assign({}, block, {
+                    entityMap,
+                    type: block.type,
+                  });
+                  return blockWithEntity;
+                } else {
+                  /**
+                   * if there is a specific(not unstyled) type applied to a block,
+                   * we need to preserve that type and add a flag to an object
+                   * saying that it also should be a link. Solves an issue when a link
+                   * is a part of un/ordered list.
+                   */
+                  blockWithEntity = Object.assign({}, block, entityMap[key], {
+                    type: block.type,
+                    isLink: true,
+                  });
+                  return blockWithEntity;
+                }
               }
             }
           }
@@ -250,6 +116,8 @@ function renderBlocksWithEntities(
     .map(block => {
       if (Array.isArray(block)) {
         return renderList(block as (Block | BlockWithEntityMap)[]);
+      } else if (block.entityRanges && block.entityRanges.length > 0) {
+        return renderInlinedLinks(block as BlockWithEntityMap);
       } else {
         return createElementBasedOnBlockType(block);
       }
@@ -268,7 +136,6 @@ export default function DraftailRenderer({
   ) {
     return null;
   }
-
   const {blocks = [], entityMap = {}} = body as RichTextNode;
   const blocksWithEntities = mapEntityToBlock(blocks, entityMap);
 

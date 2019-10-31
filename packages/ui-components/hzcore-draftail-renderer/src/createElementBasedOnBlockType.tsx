@@ -1,7 +1,7 @@
 import {CSSProperties} from 'react';
 
 import createElement from './createElement';
-import {Block, BlockWithEntityMap} from './';
+import {Block, BlockWithEntityMap, BlockType, EntityMap} from './types';
 
 /**
  * currently supported block types.
@@ -16,12 +16,6 @@ export const LINK = 'LINK';
  */
 export const BOLD = 'BOLD';
 export const ITALIC = 'ITALIC';
-
-export type BlockType =
-  | typeof UNSTYLED
-  | typeof ORDERED_LIST_ITEM
-  | typeof UNORDERED_LIST_ITEM
-  | typeof LINK;
 
 function setStyleBasedOnStyleRanges(
   block: Block | BlockWithEntityMap,
@@ -42,23 +36,8 @@ function setStyleBasedOnStyleRanges(
   return defaultStyles;
 }
 
-export function isOrderedListItem(block: Block | BlockWithEntityMap): boolean {
-  return Boolean(block.type === ORDERED_LIST_ITEM);
-}
-
-export function isUnorderedListItem(
-  block: Block | BlockWithEntityMap,
-): boolean {
-  return Boolean(block.type === UNORDERED_LIST_ITEM);
-}
-
-export function isListItem(block: Block | BlockWithEntityMap): boolean {
-  if (!block) return false;
-  return isOrderedListItem(block) || isUnorderedListItem(block);
-}
-
 export default function createElementBasedOnBlockType(
-  block: Block | BlockWithEntityMap,
+  block: Block | Block & {entityMap: EntityMap},
 ): JSX.Element | null {
   if (!block || !block.type || typeof block.type !== 'string') return null;
   switch (block.type as BlockType) {
