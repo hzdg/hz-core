@@ -29,10 +29,111 @@ yarn add @hzcore/draftail-renderer
 import DraftailRenderer from '@hzcore/draftail-renderer';
 ```
 
+#### Example with inlined links
+
+<Playground>
+  {() => {
+    return (
+      <DraftailRenderer
+        body={{
+          blocks: [
+            {
+              key: 'b0ei9',
+              text:
+                'Some text that has inline links inside of it. A link  can also be a bold link  or an italic link . It can pretty much be anything you want. Even a bold and italic together.',
+              type: 'unstyled',
+              depth: 0,
+              inlineStyleRanges: [
+                {
+                  offset: 68,
+                  length: 10,
+                  style: 'BOLD',
+                },
+                {
+                  offset: 147,
+                  length: 25,
+                  style: 'BOLD',
+                },
+                {
+                  offset: 85,
+                  length: 11,
+                  style: 'ITALIC',
+                },
+                {
+                  offset: 147,
+                  length: 25,
+                  style: 'ITALIC',
+                },
+              ],
+              entityRanges: [
+                {
+                  offset: 48,
+                  length: 4,
+                  key: 0,
+                },
+                {
+                  offset: 68,
+                  length: 9,
+                  key: 1,
+                },
+                {
+                  offset: 85,
+                  length: 11,
+                  key: 2,
+                },
+                {
+                  offset: 147,
+                  length: 24,
+                  key: 3,
+                },
+              ],
+              data: {},
+            },
+          ],
+          entityMap: {
+            '0': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.facebook.com',
+              },
+            },
+            '1': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.linkedin.com',
+              },
+            },
+            '2': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.instagram.com',
+              },
+            },
+            '3': {
+              type: 'LINK',
+              mutability: 'MUTABLE',
+              data: {
+                url: 'www.twitter.com',
+              },
+            },
+          },
+        }}
+      />
+    );
+  }}
+</Playground>
+
+#### Example with nested ordered and unordered lists.
+
 <Playground>
   {() => {
     const Heading = ({children}) => <h1 style={{color: 'red'}}>{children}</h1>;
-    const CustomParagraph = ({children}) => <p style={{color: 'blue'}}>{children}</p>;
+    const CustomParagraph = ({children}) => (
+      <p style={{color: 'blue'}}>{children}</p>
+    );
     return (
       <DraftailRenderer
         headline={`test`}
@@ -322,9 +423,7 @@ import DraftailRenderer from '@hzcore/draftail-renderer';
         components={{h1: Heading}}
       />
     );
-
-}}
-
+  }}
 </Playground>
 
 [component]: https://reactjs.org/docs/components-and-props.html
