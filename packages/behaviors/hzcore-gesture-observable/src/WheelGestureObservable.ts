@@ -472,7 +472,7 @@ export function createSource(
     if (shouldPreventDefault(event.originalEvent)) {
       event.originalEvent.preventDefault();
     }
-    return gesturing && maybeGesturing;
+    return gesturing;
   };
 
   return share(
