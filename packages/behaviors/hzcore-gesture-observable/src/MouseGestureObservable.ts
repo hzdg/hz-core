@@ -85,6 +85,14 @@ interface MouseGestureBaseState {
   gesturing: boolean;
   /** The type of event last associated with a gesture. */
   type: MouseGestureType | null;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
 }
 
 /**
@@ -120,6 +128,10 @@ const DEFAULT_INITIAL_STATE: MouseGestureBaseState = {
   yVelocity: 0,
   gesturing: false,
   type: null,
+  time: Infinity,
+  timeInitial: Infinity,
+  duration: 0,
+  elapsed: 0,
 };
 
 const DEFAULT_CONFIG: MouseGestureObservableConfig = {
@@ -139,12 +151,16 @@ function reduceGestureState(
   state: MouseGestureBaseState,
   event: MouseGestureEvent,
 ): MouseGestureBaseState | MouseGestureState | MouseGestureEndState {
+  const {timeStamp: time} = event;
   switch (event.type) {
     case MOUSE_DOWN:
     case MOUSE_MOVE:
       if (state.gesturing) {
         return {
           ...state,
+          time,
+          duration: time - state.time,
+          elapsed: time - state.timeInitial,
           x: event.clientX,
           y: event.clientY,
           xPrev: state.x,
@@ -159,6 +175,8 @@ function reduceGestureState(
       } else {
         return {
           ...state,
+          time,
+          timeInitial: time,
           x: event.clientX,
           y: event.clientY,
           xInitial: event.clientX,
@@ -174,6 +192,9 @@ function reduceGestureState(
     case MOUSE_UP:
       return {
         ...state,
+        time,
+        duration: time - state.time,
+        elapsed: time - state.timeInitial,
         gesturing: false,
         type: event.type,
       };

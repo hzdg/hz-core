@@ -123,6 +123,7 @@ export interface WheelGestureEvent extends WheelEvent {
  */
 export interface GestureEndEvent {
   type: typeof GESTURE_END;
+  timeStamp: number;
 }
 
 // Based on https://github.com/facebookarchive/fixed-data-table/blob/3a9bf338b22406169e7261f85ddeda22ddce3b6f/src/vendor_upstream/dom/normalizeWheel.js
@@ -213,6 +214,14 @@ interface WheelGestureBaseState {
   gesturing: boolean;
   /** The type of event last associated with a gesture. */
   type: WheelGestureType | null;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
 }
 
 /**
@@ -250,6 +259,10 @@ const DEFAULT_INITIAL_STATE: WheelGestureBaseState = {
   yVelocity: 0,
   gesturing: false,
   type: null,
+  time: Infinity,
+  timeInitial: Infinity,
+  duration: 0,
+  elapsed: 0,
 };
 
 const DEFAULT_CONFIG: WheelGestureObservableConfig = {
@@ -269,11 +282,16 @@ function reduceGestureState(
   state: WheelGestureBaseState,
   event: WheelGestureEvent | GestureEndEvent,
 ): WheelGestureBaseState | WheelGestureState | WheelGestureEndState {
+  const {timeStamp: time} =
+    'originalEvent' in event ? event.originalEvent : event;
   switch (event.type) {
     case WHEEL:
       if (state.gesturing) {
         return {
           ...state,
+          time,
+          duration: time - state.time,
+          elapsed: time - state.timeInitial,
           x: event.clientX || event.originalEvent.clientX || state.x,
           y: event.clientY || event.originalEvent.clientY || state.y,
           xPrev: state.x,
@@ -290,6 +308,8 @@ function reduceGestureState(
       } else {
         return {
           ...state,
+          time,
+          timeInitial: time,
           x: event.clientX || event.originalEvent.clientX || 0,
           y: event.clientY || event.originalEvent.clientY || 0,
           xInitial: event.clientX || event.originalEvent.clientX || 0,
@@ -306,12 +326,16 @@ function reduceGestureState(
           type: event.type,
         };
       }
-    case GESTURE_END:
+    case GESTURE_END: {
       return {
         ...state,
+        time,
+        duration: time - state.time,
+        elapsed: time - state.timeInitial,
         gesturing: false,
         type: event.type,
       };
+    }
   }
   throw new Error(`Could not handle event ${event}`);
 }
@@ -399,7 +423,7 @@ export function createSource(
     intent = false;
     gesturing = false;
     canceled = false;
-    if (wasGesturing) endEvents(1, {type: GESTURE_END});
+    if (wasGesturing) endEvents(1, new WheelEvent(GESTURE_END));
   };
 
   const shouldPreventDefault = (event: UnnormalizedWheelEvent): boolean => {

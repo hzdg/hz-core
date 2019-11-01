@@ -147,6 +147,14 @@ interface KeyboardGestureBaseState {
   gesturing: boolean;
   /** The type of event last associated with a gesture. */
   type: KeyboardGestureType | null;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
 }
 
 /**
@@ -184,6 +192,10 @@ const DEFAULT_INITIAL_STATE: KeyboardGestureBaseState = {
   key: null,
   repeat: null,
   type: null,
+  time: Infinity,
+  timeInitial: Infinity,
+  duration: 0,
+  elapsed: 0,
 };
 
 const DEFAULT_CONFIG: KeyboardGestureObservableConfig = {
@@ -202,22 +214,41 @@ function reduceGestureState(
   state: KeyboardGestureBaseState,
   event: KeyboardGestureEvent,
 ): KeyboardGestureBaseState | KeyboardGestureState | KeyboardGestureEndState {
+  const {timeStamp: time} = event;
   switch (event.type) {
     case KEY_DOWN:
-      return {
-        ...state,
-        gesturing: true,
-        xDelta: 0,
-        yDelta: 0,
-        xVelocity: 0,
-        yVelocity: 0,
-        type: event.type,
-        key: getKeyCode(event),
-        repeat: event.repeat,
-      };
+      if (state.gesturing) {
+        return {
+          ...state,
+          time,
+          duration: time - state.time,
+          elapsed: time - state.timeInitial,
+          gesturing: true,
+          type: event.type,
+          key: getKeyCode(event),
+          repeat: event.repeat,
+        };
+      } else {
+        return {
+          ...state,
+          time,
+          timeInitial: time,
+          gesturing: true,
+          xDelta: 0,
+          yDelta: 0,
+          xVelocity: 0,
+          yVelocity: 0,
+          type: event.type,
+          key: getKeyCode(event),
+          repeat: event.repeat,
+        };
+      }
     case KEY_UP:
       return {
         ...state,
+        time,
+        duration: time - state.time,
+        elapsed: time - state.timeInitial,
         gesturing: false,
         type: event.type,
         key: getKeyCode(event),

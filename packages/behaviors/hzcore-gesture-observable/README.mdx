@@ -230,6 +230,14 @@ interface TouchGestureState {
   yVelocity: number;
   /** Indicates a gesture is ongoing. */
   gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
   /** The type of event last associated with a gesture. */
   type: 'touchstart' | 'touchmove';
 }
@@ -325,6 +333,14 @@ interface MouseGestureState {
   yVelocity: number;
   /** Indicates a gesture is ongoing. */
   gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
   /** The type of event associated with the gesture. */
   type: 'mousedown' | 'mousemove';
 }
@@ -437,6 +453,14 @@ interface WheelGestureState {
   yVelocity: number;
   /** Indicates a gesture is ongoing. */
   gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
   /** The type of event associated with the gesture. */
   type: 'wheel';
 }
@@ -533,6 +557,14 @@ interface KeyboardGestureState {
     | null;
   /** Indicates a gesture is ongoing. */
   gesturing: true;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
   /** The type of event associated with the gesture. */
   type: 'keydown';
 }

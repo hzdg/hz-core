@@ -85,6 +85,14 @@ interface TouchGestureBaseState {
   gesturing: boolean;
   /** The type of event last associated with a gesture. */
   type: TouchGestureType | null;
+  /** The timestamp of the event last associated with a gesture. */
+  time: number;
+  /** The initial timestamp for the gesture. */
+  timeInitial: number;
+  /** How long the latest update to the gesture state took. */
+  duration: number;
+  /** How long the gesture has been active. */
+  elapsed: number;
 }
 
 /**
@@ -120,6 +128,10 @@ const DEFAULT_INITIAL_STATE: TouchGestureBaseState = {
   yVelocity: 0,
   gesturing: false,
   type: null,
+  time: Infinity,
+  timeInitial: Infinity,
+  duration: 0,
+  elapsed: 0,
 };
 
 const DEFAULT_CONFIG: TouchGestureObservableConfig = {
@@ -139,12 +151,16 @@ function reduceGestureState(
   state: TouchGestureBaseState,
   event: TouchGestureEvent,
 ): TouchGestureBaseState | TouchGestureState | TouchGestureEndState {
+  const {timeStamp: time} = event;
   switch (event.type) {
     case TOUCH_START:
     case TOUCH_MOVE:
       if (state.gesturing) {
         return {
           ...state,
+          time,
+          duration: time - state.time,
+          elapsed: time - state.timeInitial,
           x: event.touches[0].clientX,
           y: event.touches[0].clientY,
           xPrev: state.x,
@@ -159,6 +175,8 @@ function reduceGestureState(
       } else {
         return {
           ...state,
+          time,
+          timeInitial: time,
           x: event.touches[0].clientX,
           y: event.touches[0].clientY,
           xInitial: event.touches[0].clientX,
@@ -174,6 +192,9 @@ function reduceGestureState(
     case TOUCH_END:
       return {
         ...state,
+        time,
+        duration: time - state.time,
+        elapsed: time - state.timeInitial,
         gesturing: false,
         type: event.type,
       };
