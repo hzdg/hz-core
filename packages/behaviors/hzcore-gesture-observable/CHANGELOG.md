@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.1.2...@hzcore/gesture-observable@1.2.0) (2019-11-01)
+
+
+### @hzcore/gesture-observable
+
+* add gesture timestamps ([c1803a2](https://github.com/hzdg/hz-core/commit/c1803a2))
+* fix dropped wheel events ([be033b4](https://github.com/hzdg/hz-core/commit/be033b4))
+
+
 ## [1.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.1.1...@hzcore/gesture-observable@1.1.2) (2019-10-30)
 
 
