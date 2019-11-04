@@ -10,7 +10,8 @@ import {Playground} from 'docz';
 
 An [Observable] wrapper for [ResizeObserver]
 
-Uses the [zen-observable] implementation of Observable.
+Uses the [zen-observable] implementation of Observable
+and the [@juggle/resize-observer] polyfill for ResizeObserver.
 
 ## Installation
 
@@ -32,12 +33,12 @@ const element = document.getElementById('some-element-that-might-change-size');
 const observable = ResizeObservable.create(element);
 ```
 
-Then subscribe to it to receive an updated [DOMRect]
+Then subscribe to it to receive an updated [ResizeObservableSize]
 whenever the element's size changes:
 
 ```js
-const subscription = observable.subscribe(rect => {
-  // do something with the rect!
+const subscription = observable.subscribe(size => {
+  // do something with the size!
 });
 ```
 
@@ -48,7 +49,30 @@ Then, whenever you are done watching the element, simply unsubscribe:
 subscription.unsubscribe();
 ```
 
+## ResizeObservableSize
+
+Whenever the size of the observed element changes,
+subscribers will receive an extended [DOMRect] that
+includes [contentBoxSize] and [borderBoxSize]:
+
+```ts
+interface ResizeObservableSize extends DOMRectReadOnly {
+  readonly contentBoxSize: {
+    readonly inlineSize;
+    readonly blockSize;
+  };
+  readonly borderBoxSize: {
+    readonly inlineSize;
+    readonly blockSize;
+  };
+}
+```
+
 [resizeobserver]: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserver
 [zen-observable]: https://github.com/zenparsing/zen-observable
+[@juggle/resize-observer]: https://github.com/juggle/resize-observer
 [observable]: https://github.com/tc39/proposal-observable
 [domrect]: https://developer.mozilla.org/en-US/docs/Web/API/DOMRect
+[borderboxsize]: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry/borderBoxSize
+[contentboxsize]: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry/contentBoxSize
+[resizeobservablesize]: #resizeobservablesize

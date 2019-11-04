@@ -26,6 +26,9 @@ module.exports = {
   // An array of RegExp patterns that are matched against all source file paths before re-running tests in watch mode.
   watchPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/\\..*'],
 
+  // An array of regexp pattern strings that are matched against all source file paths before transformation.
+  transformIgnorePatterns: ['node_modules/(?!(@juggle)/)'],
+
   watchPlugins: [
     'jest-watch-yarn-workspaces',
     'jest-watch-typeahead/filename',

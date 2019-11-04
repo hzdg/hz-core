@@ -1266,6 +1266,11 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
+"@juggle/resize-observer@^2.4.0":
+  version "2.4.0"
+  resolved "http://npmregistry.hzdg.com/@juggle%2fresize-observer/-/resize-observer-2.4.0.tgz#8693fc08e49625eabd146751870e95d7a1eb556f"
+  integrity sha512-iBxD3plYdW4+yryivUWtfHy+B2wwQsdET6eviABx9QJKjokf0lBOZH853I31sbccskPsagtulW0ik1SWDek4RQ==
+
 "@lerna/add@3.13.3":
   version "3.13.3"
   resolved "http://npmregistry.hzdg.com/@lerna%2fadd/-/add-3.13.3.tgz#f4c1674839780e458f0426d4f7b6d0a77b9a2ae9"
@@ -13218,11 +13223,6 @@ requires-port@^1.0.0:
   version "1.0.0"
   resolved "http://npmregistry.hzdg.com/requires-port/-/requires-port-1.0.0.tgz#925d2601d39ac485e091cf0da5c6e694dc3dcaff"
   integrity sha1-kl0mAdOaxIXgkc8NpcbmlNw9yv8=
-
-resize-observer-polyfill@^1.5.1:
-  version "1.5.1"
-  resolved "http://npmregistry.hzdg.com/resize-observer-polyfill/-/resize-observer-polyfill-1.5.1.tgz#0e9020dd3d21024458d4ebd27e23e40269810464"
-  integrity sha512-LwZrotdHOo12nQuZlHEmtuXdqGoOD0OhaxopaNFxWzInpEgaLWoVuAMbTzixuosCx2nEG58ngzW3vxdWoxIgdg==
 
 resolve-cwd@^2.0.0:
   version "2.0.0"

@@ -1,25 +1,57 @@
-import ResizeObserver from 'resize-observer-polyfill';
+// NOTE: We _always_ use a ponyfill because the spec is still in flux,
+// and if the spec (and thus, a native implementation) ends up straying
+// far from where it was at the time this lib was last published, it
+// may cause user code to fail in unexpected ways.
+// Once the spec is stablized, we should switch to using the native
+// version when available.
+import ResizeObserver from '@juggle/resize-observer';
+import {ResizeObserverSize} from '@juggle/resize-observer/lib/ResizeObserverSize';
+import {ResizeObserverEntry} from '@juggle/resize-observer/lib/ResizeObserverEntry';
 import Observable from 'zen-observable';
 import {ensureDOMInstance} from '@hzcore/dom-utils';
 
-type Observer = ZenObservable.SubscriptionObserver<DOMRect>;
-const resizeObservers = new Map<Element, Set<Observer>>();
+export interface ResizeObservableSize extends DOMRectReadOnly {
+  readonly contentBoxSize: ResizeObserverSize;
+  readonly borderBoxSize: ResizeObserverSize;
+}
 
+type Observer = ZenObservable.SubscriptionObserver<ResizeObservableSize>;
+
+const resizeObservers = new Map<Element, Set<Observer>>();
 let resizeObserver: ResizeObserver;
+
+function createPayload(entry: ResizeObserverEntry): ResizeObservableSize {
+  const {contentBoxSize, borderBoxSize, contentRect} = entry;
+  const payload = Object.assign({contentBoxSize, borderBoxSize}, contentRect);
+  const frozenPayload = Object.freeze(
+    Object.assign(
+      {
+        toJSON() {
+          return JSON.parse(
+            JSON.stringify(this === frozenPayload ? payload : this),
+          );
+        },
+      },
+      payload,
+    ),
+  );
+  return frozenPayload;
+}
 
 function createResizeObserver(): void {
   resizeObserver = new ResizeObserver(entries => {
     for (const entry of entries) {
-      const {target: element, contentRect: payload} = entry;
+      const {target: element} = entry;
       const observers = resizeObservers.get(element);
       if (observers) {
-        observers.forEach(observer => observer.next(payload as DOMRect));
+        const payload = createPayload(entry);
+        observers.forEach(observer => observer.next(payload));
       }
     }
   });
 }
 
-export function create(element: Element): Observable<DOMRect> {
+export function create(element: Element): Observable<ResizeObservableSize> {
   ensureDOMInstance(element, Element);
   return new Observable((observer: Observer) => {
     if (!resizeObserver) createResizeObserver();

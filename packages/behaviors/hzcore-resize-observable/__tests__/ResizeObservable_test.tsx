@@ -1,9 +1,9 @@
 /* eslint-env jest, browser */
 import ResizeObservable from '../src';
 import Observable from 'zen-observable';
-import ResizeObserver from 'resize-observer-polyfill';
+import ResizeObserver from '@juggle/resize-observer';
 
-jest.mock('resize-observer-polyfill');
+jest.mock('@juggle/resize-observer');
 
 const ResizeObserverMock = ResizeObserver as jest.Mock<ResizeObserver>;
 
