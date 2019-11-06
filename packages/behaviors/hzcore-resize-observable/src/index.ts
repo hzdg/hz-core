@@ -18,6 +18,7 @@ export interface ResizeObservableSize extends DOMRectReadOnly {
 type Observer = ZenObservable.SubscriptionObserver<ResizeObservableSize>;
 
 const resizeObservers = new Map<Element, Set<Observer>>();
+const latestSize = new Map<Element, ResizeObservableSize>();
 let resizeObserver: ResizeObserver;
 
 function createPayload(entry: ResizeObserverEntry): ResizeObservableSize {
@@ -45,6 +46,7 @@ function createResizeObserver(): void {
       const observers = resizeObservers.get(element);
       if (observers) {
         const payload = createPayload(entry);
+        latestSize.set(element, payload);
         observers.forEach(observer => observer.next(payload));
       }
     }
@@ -58,6 +60,8 @@ export function create(element: Element): Observable<ResizeObservableSize> {
     let observers = resizeObservers.get(element);
     if (observers) {
       observers.add(observer);
+      const size = latestSize.get(element);
+      if (size) observer.next(size);
     } else {
       observers = new Set<Observer>([observer]);
       resizeObservers.set(element, observers);
@@ -67,6 +71,7 @@ export function create(element: Element): Observable<ResizeObservableSize> {
       if (observers) {
         observers.delete(observer);
         if (observers.size === 0) {
+          latestSize.delete(element);
           resizeObservers.delete(element);
           resizeObserver.unobserve(element);
         }
