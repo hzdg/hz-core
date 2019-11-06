@@ -190,6 +190,43 @@ function useForceUpdate(): () => void {
   return forceUpdate;
 }
 
+function useSubscription(
+  ref: React.RefObject<HTMLElement | null>,
+  handler: (size: ResizeObservableSize) => void,
+): boolean {
+  const subscribed = useRef(false);
+  const [subscriptions] = useState(
+    () => new Map<Element, ZenObservable.Subscription>(),
+  );
+
+  const cleanupSubscriptions = useCallback(() => {
+    subscriptions.forEach(subscription => {
+      subscription.unsubscribe();
+    });
+    subscriptions.clear();
+    subscribed.current = false;
+  }, [subscriptions]);
+
+  // Cleanup all subscriptions whenever the handler changes, and on unmount.
+  useEffect(() => cleanupSubscriptions, [cleanupSubscriptions, handler]);
+
+  useEffect(() => {
+    const element = ref.current;
+    if (!element || !subscriptions.has(element)) {
+      cleanupSubscriptions();
+      if (element) {
+        subscriptions.set(
+          element,
+          ResizeObservable.create(element).subscribe(handler),
+        );
+        subscribed.current = true;
+      }
+    }
+  });
+
+  return subscribed.current;
+}
+
 /**
  * `useSize` is a React hook for components that care about their size.
  * It can be used statefully or not, and with an existing ref or not.
@@ -251,7 +288,7 @@ function useSize<T extends HTMLElement>(
   );
   const size = useRef(initialSize);
 
-  const subscribed = useRef<T | null>(null);
+  const subscribed = useRef<boolean>(false);
 
   const forceUpdate = useForceUpdate();
 
@@ -309,30 +346,7 @@ function useSize<T extends HTMLElement>(
     [handleSizeChange],
   );
 
-  const isSubscribed = ref.current === subscribed.current;
-
-  useEffect(
-    /**
-     * `subscribeIfNecessary` will run to determine if we need to
-     * subscribe to resize events on an element. If we are already subscribed
-     * to the element, it will do nothing.
-     */
-    function subscribeIfNecessary() {
-      const element = ref.current;
-      if (element) {
-        subscribed.current = element;
-        const subscription = ResizeObservable.create(element).subscribe(
-          handleElementSizeChange,
-        );
-
-        return function unsubscribe() {
-          subscribed.current = null;
-          subscription.unsubscribe();
-        };
-      }
-    },
-    [isSubscribed, ref, handleElementSizeChange],
-  );
+  subscribed.current = useSubscription(ref, handleElementSizeChange);
 
   if (!providedRef) {
     if (changeHandler.current) {

@@ -15,7 +15,7 @@ function runAllTimers(): void {
   });
 }
 
-test('useSize gets the initial size', async () => {
+test('useSize gets the initial size', () => {
   const SizeUser = (): JSX.Element => {
     const [size, ref] = useSize<HTMLDivElement>();
     return (
@@ -29,7 +29,7 @@ test('useSize gets the initial size', async () => {
   expect(getByTestId('size')).toMatchSnapshot();
 });
 
-test('useSize passes the initial size to a handler', async () => {
+test('useSize passes the initial size to a handler', () => {
   const handler = jest.fn();
   const SizeUser = (): JSX.Element => {
     const ref = useSize<HTMLDivElement>(handler);
@@ -40,7 +40,7 @@ test('useSize passes the initial size to a handler', async () => {
   expect(handler.mock.calls).toMatchSnapshot();
 });
 
-test('useSize uses an existing ref', async () => {
+test('useSize uses an existing ref', () => {
   const SizeUser = (): JSX.Element => {
     const [node, setNode] = React.useState<HTMLDivElement | null>(null);
     const ref = React.useRef(node);
@@ -61,7 +61,7 @@ test('useSize uses an existing ref', async () => {
   expect(getByTestId('size')).toMatchSnapshot();
 });
 
-test('useSize uses an existing ref and a handler', async () => {
+test('useSize uses an existing ref and a handler', () => {
   const handler = jest.fn();
   const SizeUser = (): JSX.Element => {
     const [node, setNode] = React.useState<HTMLDivElement | null>(null);
@@ -75,4 +75,26 @@ test('useSize uses an existing ref and a handler', async () => {
   render(<SizeUser />);
   runAllTimers();
   expect(handler.mock.calls).toMatchSnapshot();
+});
+
+test('useSize resubscribes to changed refs', () => {
+  const SizeUser = ({index}: {index: number}): JSX.Element => {
+    const [size, ref] = useSize<HTMLDivElement>();
+    return (
+      <div data-testid="size">
+        <div ref={index ? null : ref} style={{width: 1, height: 1}}>
+          {index ? 'see below' : JSON.stringify(size, null, 2)}
+        </div>
+        <div ref={index ? ref : null} style={{width: 2, height: 2}}>
+          {index ? JSON.stringify(size, null, 2) : 'see above'}
+        </div>
+      </div>
+    );
+  };
+  const {getByTestId, rerender} = render(<SizeUser index={0} />);
+  runAllTimers();
+  expect(getByTestId('size')).toMatchSnapshot();
+  rerender(<SizeUser index={1} />);
+  runAllTimers();
+  expect(getByTestId('size')).toMatchSnapshot();
 });

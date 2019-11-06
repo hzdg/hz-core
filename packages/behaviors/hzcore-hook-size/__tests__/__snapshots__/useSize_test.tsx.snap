@@ -55,6 +55,78 @@ Array [
 ]
 `;
 
+exports[`useSize resubscribes to changed refs 1`] = `
+<div
+  data-testid="size"
+>
+  <div
+    style="width: 1px; height: 1px;"
+  >
+    {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 1,
+  "bottom": 1,
+  "left": 0,
+  "width": 1,
+  "height": 1,
+  "vw": 0,
+  "vh": 0,
+  "borderBoxSize": {
+    "inlineSize": 1,
+    "blockSize": 1
+  },
+  "contentBoxSize": {
+    "inlineSize": 1,
+    "blockSize": 1
+  }
+}
+  </div>
+  <div
+    style="width: 2px; height: 2px;"
+  >
+    see above
+  </div>
+</div>
+`;
+
+exports[`useSize resubscribes to changed refs 2`] = `
+<div
+  data-testid="size"
+>
+  <div
+    style="width: 1px; height: 1px;"
+  >
+    see below
+  </div>
+  <div
+    style="width: 2px; height: 2px;"
+  >
+    {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 2,
+  "bottom": 2,
+  "left": 0,
+  "width": 2,
+  "height": 2,
+  "vw": 0,
+  "vh": 0,
+  "borderBoxSize": {
+    "inlineSize": 2,
+    "blockSize": 2
+  },
+  "contentBoxSize": {
+    "inlineSize": 2,
+    "blockSize": 2
+  }
+}
+  </div>
+</div>
+`;
+
 exports[`useSize uses an existing ref 1`] = `
 <div
   data-testid="size"
