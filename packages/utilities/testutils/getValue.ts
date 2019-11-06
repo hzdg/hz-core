@@ -4,7 +4,11 @@ function getValue<T, K extends keyof T, V>(
   key: K,
   defaultValue: V,
 ): Exclude<T[K], undefined> | V;
-function getValue<T, K extends keyof T, V>(obj: T, key: K, defaultValue?: V) {
+function getValue<T, K extends keyof T, V>(
+  obj: T,
+  key: K,
+  defaultValue?: V,
+): T[K] | V | undefined {
   const value = obj[key];
   return value === undefined ? defaultValue : value;
 }
