@@ -13,8 +13,8 @@ const path = require('path');
 
 // Testing utils for react stuff.
 const React = require('react');
-const {render, fireEvent} = require('react-testing-library');
-const userEvent = require('user-event');
+const {render, fireEvent} = require('@testing-library/react');
+const userEvent = require('@testing-library/user-event');
 
 describe('${name}', () => {
   test('has been installed @${version}', async () => {

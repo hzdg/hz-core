@@ -1,7 +1,7 @@
 /** @jsdom-global Object */
 /* eslint-env jest, browser */
 import React from 'react';
-import {render} from 'react-testing-library';
+import {render} from '@testing-library/react';
 import useSize from '../src';
 
 // We have to mock these aspects of HTMLElement because

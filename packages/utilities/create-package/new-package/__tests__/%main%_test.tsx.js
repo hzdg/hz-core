@@ -25,7 +25,7 @@ test('${main} is implemented', () => {
 const TEST_REACT_COMPONENT = ({isDefault, main}) => `
 /* eslint-env jest, browser */
 import React from 'react';
-import {render} from 'react-testing-library';
+import {render} from '@testing-library/react';
 import ${isDefault ? main : `{${main}}`} from '../src';
 
 test('${main} is implemented', () => {
@@ -44,7 +44,7 @@ test('${main} is implemented', () => {
 const TEST_REACT_HOOK = ({isDefault, main}) => `
 /* eslint-env jest, browser */
 import React from 'react';
-import {render} from 'react-testing-library';
+import {render} from '@testing-library/react';
 import ${isDefault ? main : `{${main}}`} from '../src';
 
 test('${main} is implemented', () => {

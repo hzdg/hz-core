@@ -1,6 +1,6 @@
 /* eslint-env jest, browser */
 import React from 'react';
-import {render, getByTestId} from 'react-testing-library';
+import {render, getByTestId} from '@testing-library/react';
 import useRefCallback from '../src';
 
 describe('useRefCallback', () => {

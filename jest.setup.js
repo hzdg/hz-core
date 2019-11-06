@@ -1,6 +1,5 @@
-// See https://github.com/kentcdodds/react-testing-library#global-config
-import 'jest-dom/extend-expect';
-import 'react-testing-library/cleanup-after-each';
+// See https://github.com/testing-library/jest-dom#usage
+import '@testing-library/jest-dom/extend-expect';
 
 // Globally mock rAF so that it can be advanced using jest's fake timers.
 // See https://github.com/facebook/jest/issues/5147

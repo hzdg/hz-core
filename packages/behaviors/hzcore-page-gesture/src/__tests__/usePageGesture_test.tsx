@@ -1,6 +1,6 @@
 /* eslint-env jest, browser */
 import React from 'react';
-import {render} from 'react-testing-library';
+import {render} from '@testing-library/react';
 import usePageGesture, {
   FromInputState,
   CANCELED,

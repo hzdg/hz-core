@@ -1,6 +1,6 @@
 /* eslint-env jest */
 import React, {useState} from 'react';
-import {render, fireEvent, getByTestId, act} from 'react-testing-library';
+import {render, fireEvent, getByTestId, act} from '@testing-library/react';
 import ScrollMonitor, {ScrollMonitorRenderProps} from '../ScrollMonitor';
 import {DOWN, RIGHT, UP, LEFT} from '../useScrollDirection';
 

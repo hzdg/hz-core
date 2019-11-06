@@ -1,5 +1,5 @@
 import React from 'react';
-import {render, fireEvent} from 'react-testing-library';
+import {render, fireEvent} from '@testing-library/react';
 import useScrollDirection from '../useScrollDirection';
 
 type Mutable<T> = {-readonly [K in keyof T]: T[K]};
