@@ -15,7 +15,15 @@ exports[`useSize gets the initial size 1`] = `
   "width": 120,
   "height": 120,
   "vw": 0.12,
-  "vh": 0.16
+  "vh": 0.16,
+  "borderBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  },
+  "contentBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  }
 }
 </div>
 `;
@@ -24,7 +32,15 @@ exports[`useSize passes the initial size to a handler 1`] = `
 Array [
   Array [
     Object {
+      "borderBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
       "bottom": 120,
+      "contentBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
       "height": 120,
       "left": 0,
       "right": 120,
@@ -54,7 +70,15 @@ exports[`useSize uses an existing ref 1`] = `
   "width": 120,
   "height": 120,
   "vw": 0.12,
-  "vh": 0.16
+  "vh": 0.16,
+  "borderBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  },
+  "contentBoxSize": {
+    "inlineSize": 120,
+    "blockSize": 120
+  }
 }
 </div>
 `;
@@ -63,7 +87,15 @@ exports[`useSize uses an existing ref and a handler 1`] = `
 Array [
   Array [
     Object {
+      "borderBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
       "bottom": 120,
+      "contentBoxSize": Object {
+        "blockSize": 120,
+        "inlineSize": 120,
+      },
       "height": 120,
       "left": 0,
       "right": 120,

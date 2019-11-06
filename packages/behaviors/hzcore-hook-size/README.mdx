@@ -292,48 +292,89 @@ no handler is necessary.
 The `Size` object is a [DOMRect]-like object with additional
 `vw` and `vh` measurements, where `vw` is the [DOMRect] width as a
 percentage of the viewport width, and `vh` is the [DOMRect] height
-as a percentage of the viewport height.
+as a percentage of the viewport height. It also includes `borderBoxSize`
+and `contentBoxSize` information from [ResizeObserverEntry].
 
 ```ts
 interface Size {
   /** The x coordinate of the DOMRect's origin. */
-  x: number;
+  readonly x: number;
   /** The y coordinate of the DOMRect's origin. */
-  y: number;
+  readonly y: number;
   /** The width of the DOMRect. */
-  width: number;
+  readonly width: number;
   /** The height of the DOMRect. */
-  height: number;
+  readonly height: number;
   /**
    * The top coordinate value of the DOMRect
    * (has the same value as y, or y + height if height is negative.)
    */
-  top: number;
+  readonly top: number;
   /**
    * The right coordinate value of the DOMRect
    * (has the same value as x + width, or x if width is negative.)
    */
-  right: number;
+  readonly right: number;
   /**
    * The bottom coordinate value of the DOMRect
    * (has the same value as y + height, or y if height is negative.)
    */
-  bottom: number;
+  readonly bottom: number;
   /**
    * The left coordinate value of the DOMRect
    * (has the same value as x, or x + width if width is negative.)
    */
-  left: number;
+  readonly left: number;
   /**
    * The DOMRect width as a percentage of the viewport width
    * (where 0 is 0% and 1 is 100%.)
    */
-  vw: number;
+  readonly vw: number;
   /**
    * The DOMRect height as a percentage of the viewport height
    * (where 0 is 0% and 1 is 100%.)
    */
-  vh: number;
+  readonly vh: number;
+  /**
+   * An object containing the new border box size of the observed element.
+   * The border box size accounts for border and padding on the element.
+   */
+  readonly borderBoxSize: {
+    /**
+     * The length of the observed element's border box
+     * in the block dimension. For boxes with a horizontal writing-mode,
+     * this is the vertical dimension, or height; if the writing-mode
+     * is vertical, this is the horizontal dimension, or width.
+     */
+    readonly blockSize: number;
+    /**
+     * The length of the observed element's border box
+     * in the inline dimension. For boxes with a horizontal writing-mode,
+     * this is the horizontal dimension, or width; if the writing-mode
+     * is vertical, this is the vertical dimension, or height.
+     */
+    readonly inlineSize: number;
+  };
+  /**
+   * An object containing the new content box size of the observed element.
+   * The content box size does not account for border or padding on the element.
+   */
+  readonly contentBoxSize: {
+    /**
+     * The length of the observed element's content box
+     * in the block dimension. For boxes with a horizontal writing-mode,
+     * this is the vertical dimension, or height; if the writing-mode
+     * is vertical, this is the horizontal dimension, or width.
+     */
+    readonly blockSize: number;
+    /**
+     * The length of the observed element's content box
+     * in the inline dimension. For boxes with a horizontal writing-mode,
+     * this is the horizontal dimension, or width; if the writing-mode
+     * is vertical, this is the vertical dimension, or height.
+     */
+    readonly inlineSize: number;
+  };
 }
 ```
 
@@ -344,6 +385,7 @@ interface Size {
 [callback ref]: https://reactjs.org/docs/refs-and-the-dom.html#callback-refs
 [forward a ref]: https://reactjs.org/docs/forwarding-refs.html
 [domrect]: https://developer.mozilla.org/en-US/docs/Web/API/DOMRect
+[resizeobserverentry]: https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry
 [userefcallback]: /use-ref-callback
 [shared ref / ref forwarding]: #shared-ref--ref-forwarding
 [stateful]: #stateful

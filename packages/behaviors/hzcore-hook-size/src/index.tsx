@@ -1,6 +1,8 @@
 import {useEffect, useState, useRef, useCallback} from 'react';
 import {useWindowSize, WindowSize} from '@hzcore/windowsize-monitor';
-import ResizeObservable from '@hzcore/resize-observable';
+import ResizeObservable, {
+  ResizeObservableSize,
+} from '@hzcore/resize-observable';
 import useRefCallback from '@hzcore/hook-ref-callback';
 import memoizeOne from 'memoize-one';
 
@@ -9,12 +11,15 @@ import memoizeOne from 'memoize-one';
 // isn't always fully implemented. in particular, the `toJSON()` method is
 // often missing. Since we aren't using it directly anyway, we just omit it
 // from our expected type.
-type ElementSize = Readonly<Pick<DOMRect, Exclude<keyof DOMRect, 'toJSON'>>>;
+type ElementSize = Readonly<
+  Pick<ResizeObservableSize, Exclude<keyof ResizeObservableSize, 'toJSON'>>
+>;
 
 /**
  * A DOMRect-like object, but with additional useful measurements.
  *
  * @see https://developer.mozilla.org/en-US/docs/Web/API/DOMRect
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry
  */
 export interface Size {
   /** The x coordinate of the DOMRect's origin. */
@@ -55,6 +60,46 @@ export interface Size {
    * (where 0 is 0% and 1 is 100%.)
    */
   readonly vh: number;
+  /**
+   * An object containing the new border box size of the observed element.
+   * The border box size accounts for border and padding on the element.
+   */
+  readonly borderBoxSize: {
+    /**
+     * The length of the observed element's border box
+     * in the block dimension. For boxes with a horizontal writing-mode,
+     * this is the vertical dimension, or height; if the writing-mode
+     * is vertical, this is the horizontal dimension, or width.
+     */
+    readonly blockSize: number;
+    /**
+     * The length of the observed element's border box
+     * in the inline dimension. For boxes with a horizontal writing-mode,
+     * this is the horizontal dimension, or width; if the writing-mode
+     * is vertical, this is the vertical dimension, or height.
+     */
+    readonly inlineSize: number;
+  };
+  /**
+   * An object containing the new content box size of the observed element.
+   * The content box size does not account for border or padding on the element.
+   */
+  readonly contentBoxSize: {
+    /**
+     * The length of the observed element's content box
+     * in the block dimension. For boxes with a horizontal writing-mode,
+     * this is the vertical dimension, or height; if the writing-mode
+     * is vertical, this is the horizontal dimension, or width.
+     */
+    readonly blockSize: number;
+    /**
+     * The length of the observed element's content box
+     * in the inline dimension. For boxes with a horizontal writing-mode,
+     * this is the horizontal dimension, or width; if the writing-mode
+     * is vertical, this is the vertical dimension, or height.
+     */
+    readonly inlineSize: number;
+  };
 }
 
 const INITIAL_ELEMENT_SIZE: ElementSize = {
@@ -66,6 +111,14 @@ const INITIAL_ELEMENT_SIZE: ElementSize = {
   left: 0,
   width: 0,
   height: 0,
+  borderBoxSize: {
+    blockSize: 0,
+    inlineSize: 0,
+  },
+  contentBoxSize: {
+    blockSize: 0,
+    inlineSize: 0,
+  },
 };
 
 const INITIAL_VIEW_SIZE: WindowSize = {
@@ -102,6 +155,8 @@ const getSize = memoizeOne(
       height: elementSize.height,
       vw: Math.round((elementSize.width / viewSize.width) * 100) / 100 || 0,
       vh: Math.round((elementSize.height / viewSize.height) * 100) / 100 || 0,
+      borderBoxSize: elementSize.borderBoxSize,
+      contentBoxSize: elementSize.contentBoxSize,
     });
   },
   function areInputsEqual(
@@ -110,6 +165,14 @@ const getSize = memoizeOne(
   ) {
     return (
       shallowEqual(newElementSize, lastElementSize) &&
+      shallowEqual(
+        newElementSize.borderBoxSize,
+        lastElementSize.borderBoxSize,
+      ) &&
+      shallowEqual(
+        newElementSize.contentBoxSize,
+        lastElementSize.contentBoxSize,
+      ) &&
       shallowEqual(newViewSize, lastViewSize)
     );
   },
@@ -239,7 +302,7 @@ function useSize<T extends HTMLElement>(
      * with a new `Size` whenever it changes, and also
      * call `handleSizeChange` to update the container size.
      */
-    function handleElementSizeChange(newSize: ElementSize) {
+    function handleElementSizeChange(newSize: ResizeObservableSize) {
       elementSize.current = newSize;
       handleSizeChange();
     },
