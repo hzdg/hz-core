@@ -3,7 +3,7 @@
 import React from 'react';
 import {render, act} from '@testing-library/react';
 import {WheelSequence} from 'testutils/EventSequence';
-import useWheelGesture from '../useWheelGesture';
+import useWheelGesture, {WheelGestureConfig} from '../useWheelGesture';
 
 const GestureStateMatcher = {
   duration: expect.any(Number),
@@ -180,4 +180,45 @@ test('useWheelGesture handles changes to handler and ref', async () => {
   runAllTimers();
   expect(handler1.mock.calls).toHaveLength(0);
   expect(handler2.mock.calls).toHaveLength(0);
+});
+
+test('useWheelGesture resubscribes on config changes', async () => {
+  const handler = jest.fn();
+  const WheelGestureUser = ({
+    config,
+  }: {
+    config?: WheelGestureConfig;
+  }): JSX.Element => {
+    const ref = useWheelGesture<HTMLDivElement>(handler, config);
+    return <div ref={ref} data-testid="gesture-target" />;
+  };
+  const {getByTestId, rerender} = render(
+    <WheelGestureUser config={{threshold: 20}} />,
+  );
+  const target = getByTestId('gesture-target');
+  await new WheelSequence(target).wheel().wheel({deltaX: 11});
+  runAllTimers();
+  expect(handler.mock.calls).toHaveLength(0);
+
+  handler.mockReset();
+
+  rerender(<WheelGestureUser config={{threshold: 10}} />);
+  await new WheelSequence(target).wheel().wheel({deltaX: 11});
+  runAllTimers();
+  expect(handler.mock.calls).toHaveLength(2);
+  handler.mock.calls.forEach(([state]) => {
+    expect(state).toMatchSnapshot(GestureStateMatcher, 'threshold 10');
+  });
+
+  handler.mockReset();
+
+  rerender(<WheelGestureUser />);
+  await new WheelSequence(target)
+    .wheel({deltaX: DEFAULT_THRESHOLD + 1})
+    .wheel({deltaX: 1});
+  runAllTimers();
+  expect(handler.mock.calls).toHaveLength(3);
+  handler.mock.calls.forEach(([state]) => {
+    expect(state).toMatchSnapshot(GestureStateMatcher, 'no config');
+  });
 });

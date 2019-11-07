@@ -92,6 +92,121 @@ Object {
 }
 `;
 
+exports[`useWheelGesture resubscribes on config changes: no config 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -41,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 1,
+  "xVelocity": -41,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: no config 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -42,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 2,
+  "xVelocity": -1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: no config 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "gestureend",
+  "x": 0,
+  "xDelta": -42,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 2,
+  "xVelocity": -1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: threshold 10 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "wheel",
+  "x": 0,
+  "xDelta": -11,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 1,
+  "xVelocity": -11,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useWheelGesture resubscribes on config changes: threshold 10 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "gestureend",
+  "x": 0,
+  "xDelta": -11,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xSpin": 1,
+  "xVelocity": -11,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "ySpin": 0,
+  "yVelocity": 0,
+}
+`;
+
 exports[`useWheelGesture uses an existing ref 1`] = `
 Object {
   "duration": Any<Number>,

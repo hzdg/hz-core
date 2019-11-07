@@ -1,4 +1,3 @@
-import {useRef} from 'react';
 import {MouseGestureObservable} from '@hzcore/gesture-observable';
 import useRefCallback from '@hzcore/hook-ref-callback';
 import {useObservableGestureEffect} from './utils';
@@ -84,17 +83,17 @@ function useMouseGesture<T extends HTMLElement>(
   handlerOrConfig?: MouseGestureHandler | MouseGestureConfig,
   maybeConfig?: MouseGestureConfig,
 ): ((node: T | null) => void) | void {
-  const handler = useRef<MouseGestureHandler | null>(null);
-  const config = useRef<MouseGestureConfig | null>(null);
+  let handler: MouseGestureHandler;
+  let config: MouseGestureConfig | undefined;
   let providedRef: React.RefObject<T> | null = null;
 
   if ('current' in handlerOrProvidedRef) {
     providedRef = handlerOrProvidedRef;
-    handler.current = (handlerOrConfig as MouseGestureHandler) || null;
-    config.current = maybeConfig || null;
+    handler = handlerOrConfig as MouseGestureChangeHandler;
+    config = maybeConfig;
   } else {
-    handler.current = (handlerOrProvidedRef as MouseGestureHandler) || null;
-    config.current = (handlerOrConfig as MouseGestureConfig) || null;
+    handler = handlerOrProvidedRef as MouseGestureChangeHandler;
+    config = handlerOrConfig as MouseGestureConfig;
   }
 
   const [ref, setRef] = useRefCallback<T>(null);

@@ -109,15 +109,15 @@ function useGesture<T extends HTMLElement>(
 ): ((node: T | null) => void) | void {
   let providedRef: React.RefObject<T> | null = null;
   let gestureHandler: GestureHandler;
-  let gestureConfig: GestureConfig | undefined = undefined;
+  let gestureConfig: GestureConfig | undefined;
 
   if ('current' in handlerOrProvidedRef) {
     providedRef = handlerOrProvidedRef;
     gestureHandler = handlerOrConfig as GestureHandler;
-    if (maybeConfig) gestureConfig = maybeConfig;
+    gestureConfig = maybeConfig;
   } else {
-    gestureHandler = (handlerOrProvidedRef as GestureHandler) || null;
-    if (handlerOrConfig) gestureConfig = handlerOrConfig as MouseGestureConfig;
+    gestureHandler = handlerOrProvidedRef as GestureHandler;
+    gestureConfig = handlerOrConfig as MouseGestureConfig;
   }
 
   const [ref, setRef] = useRefCallback<T>(null);

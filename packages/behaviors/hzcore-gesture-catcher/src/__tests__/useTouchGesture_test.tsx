@@ -3,7 +3,7 @@
 import React from 'react';
 import {render} from '@testing-library/react';
 import {TouchSequence} from 'testutils/EventSequence';
-import useTouchGesture from '../useTouchGesture';
+import useTouchGesture, {TouchGestureConfig} from '../useTouchGesture';
 
 const GestureStateMatcher = {
   duration: expect.any(Number),
@@ -161,4 +161,49 @@ test('useTouchGesture handles changes to handler and ref', async () => {
   await new TouchSequence(target2).start().end();
   expect(handler1.mock.calls).toHaveLength(0);
   expect(handler2.mock.calls).toHaveLength(0);
+});
+
+test('useTouchGesture resubscribes on config changes', async () => {
+  const handler = jest.fn();
+  const TouchGestureUser = ({
+    config,
+  }: {
+    config?: TouchGestureConfig;
+  }): JSX.Element => {
+    const ref = useTouchGesture<HTMLDivElement>(handler, config);
+    return <div ref={ref} data-testid="gesture-target" />;
+  };
+  const {getByTestId, rerender} = render(
+    <TouchGestureUser config={{threshold: 20}} />,
+  );
+  const target = getByTestId('gesture-target');
+  await new TouchSequence(target)
+    .start()
+    .move({x: 11})
+    .end();
+  expect(handler.mock.calls).toHaveLength(0);
+
+  handler.mockReset();
+
+  rerender(<TouchGestureUser config={{threshold: 10}} />);
+  await new TouchSequence(target)
+    .start()
+    .move({x: 11})
+    .end();
+  expect(handler.mock.calls).toHaveLength(2);
+  handler.mock.calls.forEach(([state]) => {
+    expect(state).toMatchSnapshot(GestureStateMatcher, 'threshold 10');
+  });
+
+  handler.mockReset();
+
+  rerender(<TouchGestureUser />);
+  await new TouchSequence(target)
+    .start()
+    .move({x: 1})
+    .end();
+  expect(handler.mock.calls).toHaveLength(3);
+  handler.mock.calls.forEach(([state]) => {
+    expect(state).toMatchSnapshot(GestureStateMatcher, 'no config');
+  });
 });

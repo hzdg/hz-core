@@ -1,4 +1,4 @@
-import {useRef, useCallback, useEffect} from 'react';
+import {useRef, useCallback, useEffect, useState} from 'react';
 import Observable from 'zen-observable';
 
 interface GestureState {
@@ -68,16 +68,27 @@ export function useObservableGestureEffect<
    */
   ref: React.RefObject<E>,
   /**
-   * A ref to the current handler or handlers of gesture state changes.
+   * A handler or handlers for gesture state changes.
    */
-  handler: React.RefObject<H>,
+  handler: H,
   /**
-   * A ref to the current configuration for the gesture observable.
+   * The configuration for the gesture observable.
    */
-  config: React.RefObject<C>,
+  config?: C,
 ): void {
   const lastState = useRef<S | null>(null);
-  const subscribed = useRef<E | null>(null);
+  const subscribed = useRef(false);
+  const [subscriptions] = useState(
+    () => new Map<Element, ZenObservable.Subscription>(),
+  );
+
+  const cleanupSubscriptions = useCallback(() => {
+    subscriptions.forEach(subscription => {
+      subscription.unsubscribe();
+    });
+    subscriptions.clear();
+    subscribed.current = false;
+  }, [subscriptions]);
 
   const handleGestureStateChange = useCallback(
     /**
@@ -86,19 +97,21 @@ export function useObservableGestureEffect<
      * a gesture change is observed.
      */
     function handleGestureState(state) {
-      if (handler.current) {
-        dispatchGestureStateChange<S>(
-          handler.current,
-          state,
-          lastState.current,
-        );
+      if (subscribed.current && handler) {
+        dispatchGestureStateChange<S>(handler, state, lastState.current);
       }
       lastState.current = state;
     },
     [handler],
   );
 
-  const isSubscribed = ref.current === subscribed.current;
+  // Cleanup all subscriptions whenever
+  // the handler or config changes, and on unmount.
+  useEffect(() => cleanupSubscriptions, [
+    cleanupSubscriptions,
+    handleGestureStateChange,
+    config,
+  ]);
 
   useEffect(
     /**
@@ -108,19 +121,18 @@ export function useObservableGestureEffect<
      */
     function subscribeIfNecessary() {
       const element = ref.current;
-      if (element) {
-        subscribed.current = element;
-        const subscription = Observable.create(
-          element,
-          config.current,
-        ).subscribe(handleGestureStateChange);
-
-        return function unsubscribe() {
-          subscribed.current = null;
-          subscription.unsubscribe();
-        };
+      if (!element || !subscriptions.has(element)) {
+        cleanupSubscriptions();
+        if (element) {
+          subscriptions.set(
+            element,
+            Observable.create(element, config).subscribe(
+              handleGestureStateChange,
+            ),
+          );
+          subscribed.current = true;
+        }
       }
     },
-    [isSubscribed, Observable, config, ref, handleGestureStateChange],
   );
 }

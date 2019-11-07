@@ -3,7 +3,7 @@
 import React from 'react';
 import {render} from '@testing-library/react';
 import {MouseSequence} from 'testutils/EventSequence';
-import useMouseGesture from '../useMouseGesture';
+import useMouseGesture, {MouseGestureConfig} from '../useMouseGesture';
 
 const GestureStateMatcher = {
   duration: expect.any(Number),
@@ -161,4 +161,49 @@ test('useMouseGesture handles changes to handler and ref', async () => {
   await new MouseSequence(target2).down().up();
   expect(handler1.mock.calls).toHaveLength(0);
   expect(handler2.mock.calls).toHaveLength(0);
+});
+
+test('useMouseGesture resubscribes on config changes', async () => {
+  const handler = jest.fn();
+  const MouseGestureUser = ({
+    config,
+  }: {
+    config?: MouseGestureConfig;
+  }): JSX.Element => {
+    const ref = useMouseGesture<HTMLDivElement>(handler, config);
+    return <div ref={ref} data-testid="gesture-target" />;
+  };
+  const {getByTestId, rerender} = render(
+    <MouseGestureUser config={{threshold: 20}} />,
+  );
+  const target = getByTestId('gesture-target');
+  await new MouseSequence(target)
+    .down()
+    .move({x: 11})
+    .up();
+  expect(handler.mock.calls).toHaveLength(0);
+
+  handler.mockReset();
+
+  rerender(<MouseGestureUser config={{threshold: 10}} />);
+  await new MouseSequence(target)
+    .down()
+    .move({x: 11})
+    .up();
+  expect(handler.mock.calls).toHaveLength(2);
+  handler.mock.calls.forEach(([state]) => {
+    expect(state).toMatchSnapshot(GestureStateMatcher, 'threshold 10');
+  });
+
+  handler.mockReset();
+
+  rerender(<MouseGestureUser />);
+  await new MouseSequence(target)
+    .down()
+    .move({x: 1})
+    .up();
+  expect(handler.mock.calls).toHaveLength(3);
+  handler.mock.calls.forEach(([state]) => {
+    expect(state).toMatchSnapshot(GestureStateMatcher, 'no config');
+  });
 });

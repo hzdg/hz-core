@@ -84,6 +84,111 @@ Object {
 }
 `;
 
+exports[`useTouchGesture resubscribes on config changes: no config 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "touchstart",
+  "x": 0,
+  "xDelta": 0,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useTouchGesture resubscribes on config changes: no config 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "touchmove",
+  "x": 1,
+  "xDelta": 1,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useTouchGesture resubscribes on config changes: no config 3`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "touchend",
+  "x": 1,
+  "xDelta": 1,
+  "xInitial": 0,
+  "xPrev": 0,
+  "xVelocity": 1,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useTouchGesture resubscribes on config changes: threshold 10 1`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": true,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "touchmove",
+  "x": 11,
+  "xDelta": 0,
+  "xInitial": 11,
+  "xPrev": 11,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
+exports[`useTouchGesture resubscribes on config changes: threshold 10 2`] = `
+Object {
+  "duration": Any<Number>,
+  "elapsed": Any<Number>,
+  "gesturing": false,
+  "time": Any<Number>,
+  "timeInitial": Any<Number>,
+  "type": "touchend",
+  "x": 11,
+  "xDelta": 0,
+  "xInitial": 11,
+  "xPrev": 11,
+  "xVelocity": 0,
+  "y": 0,
+  "yDelta": 0,
+  "yInitial": 0,
+  "yPrev": 0,
+  "yVelocity": 0,
+}
+`;
+
 exports[`useTouchGesture uses an existing ref 1`] = `
 Object {
   "duration": Any<Number>,

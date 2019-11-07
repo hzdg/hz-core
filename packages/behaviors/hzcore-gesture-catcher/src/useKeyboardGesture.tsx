@@ -1,4 +1,3 @@
-import {useRef} from 'react';
 import {KeyboardGestureObservable} from '@hzcore/gesture-observable';
 import useRefCallback from '@hzcore/hook-ref-callback';
 import {useObservableGestureEffect} from './utils';
@@ -84,17 +83,17 @@ function useKeyboardGesture<T extends HTMLElement>(
   handlerOrConfig?: KeyboardGestureHandler | KeyboardGestureConfig,
   maybeConfig?: KeyboardGestureConfig,
 ): ((node: T | null) => void) | void {
-  const handler = useRef<KeyboardGestureHandler | null>(null);
-  const config = useRef<KeyboardGestureConfig | null>(null);
+  let handler: KeyboardGestureHandler;
+  let config: KeyboardGestureConfig | undefined;
   let providedRef: React.RefObject<T> | null = null;
 
   if ('current' in handlerOrProvidedRef) {
     providedRef = handlerOrProvidedRef;
-    handler.current = (handlerOrConfig as KeyboardGestureHandler) || null;
-    config.current = maybeConfig || null;
+    handler = handlerOrConfig as KeyboardGestureHandler;
+    config = maybeConfig;
   } else {
-    handler.current = (handlerOrProvidedRef as KeyboardGestureHandler) || null;
-    config.current = (handlerOrConfig as KeyboardGestureConfig) || null;
+    handler = handlerOrProvidedRef as KeyboardGestureHandler;
+    config = handlerOrConfig as KeyboardGestureConfig;
   }
 
   const [ref, setRef] = useRefCallback<T>(null);

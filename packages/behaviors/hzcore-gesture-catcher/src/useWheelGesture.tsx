@@ -1,4 +1,3 @@
-import {useRef} from 'react';
 import {WheelGestureObservable} from '@hzcore/gesture-observable';
 import useRefCallback from '@hzcore/hook-ref-callback';
 import {useObservableGestureEffect} from './utils';
@@ -84,17 +83,17 @@ function useWheelGesture<T extends HTMLElement>(
   handlerOrConfig?: WheelGestureHandler | WheelGestureConfig,
   maybeConfig?: WheelGestureConfig,
 ): ((node: T | null) => void) | void {
-  const handler = useRef<WheelGestureHandler | null>(null);
-  const config = useRef<WheelGestureConfig | null>(null);
+  let handler: WheelGestureHandler;
+  let config: WheelGestureConfig | undefined;
   let providedRef: React.RefObject<T> | null = null;
 
   if ('current' in handlerOrProvidedRef) {
     providedRef = handlerOrProvidedRef;
-    handler.current = (handlerOrConfig as WheelGestureHandler) || null;
-    config.current = maybeConfig || null;
+    handler = handlerOrConfig as WheelGestureHandler;
+    config = maybeConfig;
   } else {
-    handler.current = (handlerOrProvidedRef as WheelGestureHandler) || null;
-    config.current = (handlerOrConfig as WheelGestureConfig) || null;
+    handler = handlerOrProvidedRef as WheelGestureHandler;
+    config = handlerOrConfig as WheelGestureConfig;
   }
 
   const [ref, setRef] = useRefCallback<T>(null);
