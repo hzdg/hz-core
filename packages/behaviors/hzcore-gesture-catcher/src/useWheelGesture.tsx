@@ -5,7 +5,9 @@ import {useObservableGestureEffect} from './utils';
 export type WheelGestureObservableConfig = WheelGestureObservable.WheelGestureObservableConfig;
 export type WheelGestureState = WheelGestureObservable.WheelGestureState;
 export type WheelGestureEndState = WheelGestureObservable.WheelGestureEndState;
-export type WheelGestureConfig = WheelGestureObservable.WheelGestureObservableConfig;
+export type WheelGestureConfig = Partial<
+  WheelGestureObservable.WheelGestureObservableConfig
+>;
 
 /**
  * A callback for when wheel gesture state changes.
