@@ -20,7 +20,7 @@ const renderScrollState = (
   scrollState: ScrollMonitorRenderProps<HTMLElement>,
 ): JSX.Element => (
   <div
-    ref={scrollState.scrollRef as React.RefObject<HTMLDivElement>}
+    ref={scrollState.scrollRef}
     style={{width: SCROLL_SIZE, height: SCROLL_SIZE}}
   >
     <pre data-testid="scrollState">{printScrollState(scrollState)}</pre>
@@ -38,6 +38,12 @@ function scrollTo(scrollLeft: number, scrollTop: number): void {
     target: {scrollLeft, scrollTop},
   });
 }
+
+const runAllTimers = (): void => {
+  act(() => {
+    jest.runAllTimers();
+  });
+};
 
 beforeAll(() => {
   // Monkeypatch `body.scrollWidth` and `body.scrollHeight`
@@ -86,7 +92,7 @@ describe('<ScrollMonitor>', () => {
       expect(getScrollState(container)).toMatchObject({scrolling: false});
       scrollTo(0, 0);
       expect(getScrollState(container)).toMatchObject({scrolling: true});
-      jest.runAllTimers();
+      runAllTimers();
       expect(getScrollState(container)).toMatchObject({scrolling: false});
     });
   });
@@ -225,7 +231,7 @@ describe('<ScrollMonitor>', () => {
       expect(onStart1).toHaveBeenCalledTimes(1);
 
       // Run the timeout that resets scrolling to false.
-      jest.runAllTimers();
+      runAllTimers();
       expect(getScrollState(container).scrolling).toBe(false);
 
       // Should still only have been called once!
@@ -249,7 +255,7 @@ describe('<ScrollMonitor>', () => {
       expect(onStart2).toHaveBeenCalledTimes(1);
 
       // Run the timeout that resets scrolling to false.
-      jest.runAllTimers();
+      runAllTimers();
       expect(getScrollState(container).scrolling).toBe(false);
 
       // Change the callback identity again,
@@ -321,7 +327,7 @@ describe('<ScrollMonitor>', () => {
         }),
       );
       // Run the timeout that resets scrolling to false.
-      jest.runAllTimers();
+      runAllTimers();
       // Don't expect onChange2 to have been called again,
       // since position didn't change.
       expect(onChange1).toHaveBeenCalledTimes(2);
@@ -359,7 +365,7 @@ describe('<ScrollMonitor>', () => {
       // Should not have been called as scrolling has started (or ended) yet.
       expect(onEnd1).not.toHaveBeenCalled();
       // Run the timeout that resets scrolling to false.
-      jest.runAllTimers();
+      runAllTimers();
       // Should have been called once!
       expect(onEnd1).toHaveBeenCalledTimes(1);
       // Start scrolling again.
@@ -367,7 +373,7 @@ describe('<ScrollMonitor>', () => {
       // Should not have been called a second time yet.
       expect(onEnd1).toHaveBeenCalledTimes(1);
       // Run the timeout that resets scrolling to false.
-      jest.runAllTimers();
+      runAllTimers();
       // Should have been called a second time.
       expect(onEnd1).toHaveBeenCalledTimes(2);
       // Start scrolling again.
@@ -384,7 +390,7 @@ describe('<ScrollMonitor>', () => {
       // We don't expect onEnd2 to have been called yet.
       expect(onEnd2).not.toHaveBeenCalled();
       // Run the timeout that resets scrolling to false.
-      jest.runAllTimers();
+      runAllTimers();
       // We don't expect onEnd1 to be called again.
       expect(onEnd1).toHaveBeenCalledTimes(2);
       // We expect onEnd2 to be called because scrolling ended.
