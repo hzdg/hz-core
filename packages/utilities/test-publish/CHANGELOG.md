@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.6](https://github.com/hzdg/hz-core/compare/test-publish@1.0.5...test-publish@1.0.6) (2019-11-08)
+
+
+### test-publish
+
+* include known es5 node modules in jest transform ([95e3d02](https://github.com/hzdg/hz-core/commit/95e3d02))
+
+* upgrade jest, jsdom & co ([03c1ee4](https://github.com/hzdg/hz-core/commit/03c1ee4))
+
+
 ## [1.0.5](https://github.com/hzdg/hz-core/compare/test-publish@1.0.4...test-publish@1.0.5) (2019-10-26)
 
 

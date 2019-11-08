@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [3.0.5](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@3.0.4...@hzcore/gesture-catcher@3.0.5) (2019-11-08)
+
+
+### @hzcore/gesture-catcher
+
+* add basic tests for individual hooks ([12d2a66](https://github.com/hzdg/hz-core/commit/12d2a66))
+* fix resubscribe on config change ([a786ade](https://github.com/hzdg/hz-core/commit/a786ade))
+* fix config types ([f3885e5](https://github.com/hzdg/hz-core/commit/f3885e5))
+
+
 ## [3.0.4](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@3.0.3...@hzcore/gesture-catcher@3.0.4) (2019-11-01)
 
 **Note:** Version bump only for package @hzcore/gesture-catcher

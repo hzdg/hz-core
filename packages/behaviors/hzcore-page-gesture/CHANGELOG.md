@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.7](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@2.0.6...@hzcore/page-gesture@2.0.7) (2019-11-08)
+
+
+* upgrade jest, jsdom & co ([03c1ee4](https://github.com/hzdg/hz-core/commit/03c1ee4))
+
+
 ## [2.0.6](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@2.0.5...@hzcore/page-gesture@2.0.6) (2019-11-01)
 
 **Note:** Version bump only for package @hzcore/page-gesture

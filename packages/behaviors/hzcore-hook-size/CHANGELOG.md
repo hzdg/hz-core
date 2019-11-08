@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@3.0.2...@hzcore/hook-size@4.0.0) (2019-11-08)
+
+
+### @hzcore/hook-size
+
+* fix tests ([c2ae5f8](https://github.com/hzdg/hz-core/commit/c2ae5f8))
+* fix resubscribe on ref change ([14d6a5c](https://github.com/hzdg/hz-core/commit/14d6a5c))
+* add contentBoxSize, borderBoxSize ([1d38a9b](https://github.com/hzdg/hz-core/commit/1d38a9b))
+
+* upgrade jest, jsdom & co ([03c1ee4](https://github.com/hzdg/hz-core/commit/03c1ee4))
+
+
 ## [3.0.2](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@3.0.1...@hzcore/hook-size@3.0.2) (2019-10-29)
 
 

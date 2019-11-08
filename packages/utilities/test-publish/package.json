@@ -1,7 +1,7 @@
 {
   "name": "test-publish",
   "description": "Smoke test @hzcore- packages before publish",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "bin": "bin/test-publish.js",
   "license": "UNLICENSED",
   "private": true,
