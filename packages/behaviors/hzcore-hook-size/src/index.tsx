@@ -194,37 +194,37 @@ function useSubscription(
   ref: React.RefObject<HTMLElement | null>,
   handler: (size: ResizeObservableSize) => void,
 ): boolean {
-  const subscribed = useRef(false);
-  const [subscriptions] = useState(
-    () => new Map<Element, ZenObservable.Subscription>(),
-  );
+  const subscribed = useRef<HTMLElement | null>(null);
+  const subscription = useRef<ZenObservable.Subscription | null>(null);
+  const subscriber = useRef<typeof handler | null>(null);
 
-  const cleanupSubscriptions = useCallback(() => {
-    subscriptions.forEach(subscription => {
-      subscription.unsubscribe();
-    });
-    subscriptions.clear();
-    subscribed.current = false;
-  }, [subscriptions]);
-
-  // Cleanup all subscriptions whenever the handler changes, and on unmount.
-  useEffect(() => cleanupSubscriptions, [cleanupSubscriptions, handler]);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element || !subscriptions.has(element)) {
-      cleanupSubscriptions();
-      if (element) {
-        subscriptions.set(
-          element,
-          ResizeObservable.create(element).subscribe(handler),
-        );
-        subscribed.current = true;
-      }
+  const subscribeIfNecessary = useCallback(() => {
+    if (ref.current && handler) {
+      subscribed.current = ref.current;
+      subscriber.current = handler;
+      subscription.current = ResizeObservable.create(ref.current).subscribe(
+        handler,
+      );
     }
-  });
+  }, [ref, handler]);
 
-  return subscribed.current;
+  const cleanup = useCallback(() => {
+    if (subscription.current) subscription.current.unsubscribe();
+    subscribed.current = null;
+    subscription.current = null;
+    subscriber.current = null;
+  }, []);
+
+  // Resubscribe when ref or handler changes.
+  if (subscribed.current !== ref.current || subscriber.current !== handler) {
+    cleanup();
+    subscribeIfNecessary();
+  }
+
+  // Cleanup subscription on unmount.
+  useEffect(() => cleanup, [cleanup]);
+
+  return Boolean(subscribed.current);
 }
 
 /**
