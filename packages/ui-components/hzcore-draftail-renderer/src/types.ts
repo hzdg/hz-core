@@ -1,3 +1,4 @@
+import React from 'react';
 import {Components} from './context';
 import {
   UNSTYLED,
@@ -7,6 +8,8 @@ import {
   BOLD,
   ITALIC,
 } from './createElementBasedOnBlockType';
+
+import {Map} from 'immutable';
 
 export type BlockType =
   | typeof UNSTYLED
@@ -56,4 +59,53 @@ export interface RichTextNode {
 export interface DraftailRendererProps {
   body: RichTextNode | {};
   components?: Components;
+}
+
+export interface DraftBlockRenderConfig {
+  /**
+   * Element tag to target
+   */
+  element?: string;
+
+  /**
+   * Component to wrap around targetted element
+   */
+  wrapper?: JSX.Element;
+
+  /**
+   * Other elements to target with the wrapper component
+   */
+  aliasedElements?: Array<string>;
+}
+
+export interface DraftailRenderProps {
+
+  /**
+   * Draftjs object
+   */
+  body: RichTextNode | {};
+
+  /**
+   * An Immutable Map containing custom component blocks
+   * See: https://draftjs.org/docs/advanced-topics-custom-block-render-map/
+   */
+  componentBlockMap?: Map<string, DraftBlockRenderConfig>;
+
+  /**
+   * Component for link components with entity types 'LINK'
+   */
+  linkComponent: JSX.Element;
+
+  /**
+   *  Support for custom rich text
+   *  See https://draftjs.org/docs/advanced-topics-decorators
+   */
+  customDecoratorStrategies: {
+    strategy: (
+      contentBlock: RichTextNode,
+      callback: any,
+      contentState: RichTextNode,
+    ) => void;
+    component: JSX.Element;
+  }[];
 }

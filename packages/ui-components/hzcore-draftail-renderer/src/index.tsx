@@ -15,9 +15,17 @@ import {
   Block,
   BlockWithEntityMap,
   DraftailRendererProps,
+  DraftailRenderProps,
   RichTextNode,
   EntityMap,
 } from './types';
+import {
+  CompositeDecorator,
+  DefaultDraftBlockRenderMap,
+  Editor,
+  EditorState,
+  convertFromRaw,
+} from 'draft-js';
 
 function renderLists(
   block: (Block | BlockWithEntityMap)[] | (Block | BlockWithEntityMap),
@@ -143,5 +151,60 @@ export default function DraftailRenderer({
     <DraftailProvider components={components}>
       {renderBlocksWithEntities(blocksWithEntities)}
     </DraftailProvider>
+  );
+}
+
+
+/**
+ * Scans through content to identity link entities
+ *
+ * See https://draftjs.org/docs/advanced-topics-decorators/#compositedecorator
+ *
+ * @param contentBlock
+ * @param callback
+ * @param contentState
+ *
+ */
+function findLinkEntities(contentBlock, callback, contentState) {
+  contentBlock.findEntityRanges(character => {
+    const entityKey = character.getEntity();
+    return (
+      entityKey !== null &&
+      contentState.getEntity(entityKey).getType() === 'LINK'
+    );
+  }, callback);
+}
+
+/**
+ * DraftailRender (not to be confused with DraftailRenderer) leverages
+ * DraftJs's existing features to render components from the returned
+ * content state from the backend.
+ *
+ */
+export function DraftailRender({
+  body = {},
+  componentBlockMap = null,
+  linkComponent = null,
+  customDecoratorStrategies = []
+} : DraftailRenderProps) : JSX.Element {
+  const contentState = convertFromRaw(body);
+  const editorState = EditorState.createWithContent(contentState);
+  const extendedBlockRenderMap = componentBlockMap ? DefaultDraftBlockRenderMap.merge(
+    componentBlockMap,
+  ) : DefaultDraftBlockRenderMap;
+  const linkStrategy = linkComponent
+    ? {
+      strategy: findLinkEntities,
+      component: linkComponent,
+    } : {};
+  const decorator = new CompositeDecorator([
+    {...customDecoratorStrategies, ...linkStrategy},
+  ]);
+  return (
+    <Editor
+      editorState={EditorState.set(editorState, {decorator})}
+      blockRenderMap={extendedBlockRenderMap}
+      readOnly={true}
+    />
   );
 }
