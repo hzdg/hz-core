@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.4.0](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.3.0...@hzcore/draftail-renderer@1.4.0) (2019-12-11)
+
+
+### @hzcore/draftail-renderer
+
+* use draftjs api to render blocks ([d273728](https://github.com/hzdg/hz-core/commit/d273728))
+
+* upgrade jest, jsdom & co ([03c1ee4](https://github.com/hzdg/hz-core/commit/03c1ee4))
+
+
 # [1.3.0](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.2.0...@hzcore/draftail-renderer@1.3.0) (2019-10-31)
 
 

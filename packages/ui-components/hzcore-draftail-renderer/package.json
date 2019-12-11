@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/draftail-renderer",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
