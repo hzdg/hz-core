@@ -129,7 +129,7 @@ export interface GestureEndEvent {
 // Based on https://github.com/facebookarchive/fixed-data-table/blob/3a9bf338b22406169e7261f85ddeda22ddce3b6f/src/vendor_upstream/dom/normalizeWheel.js
 function normalizeWheel(event: UnnormalizedWheelEvent): WheelGestureEvent {
   let {deltaX, deltaY} = event;
-  const {deltaMode} = event;
+  const {deltaMode, timeStamp = Date.now()} = event;
 
   if ((deltaX || deltaY) && deltaMode) {
     if (deltaMode === 1) {
@@ -177,6 +177,7 @@ function normalizeWheel(event: UnnormalizedWheelEvent): WheelGestureEvent {
     deltaX,
     deltaY,
     deltaMode,
+    timeStamp,
   };
 }
 
