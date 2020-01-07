@@ -8,6 +8,7 @@ import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import scan from 'callbag-scan';
 import asObservable from './asObservable';
+import {parseConfig} from './ObservableConfig';
 
 export const KEY_DOWN = 'keydown';
 export const KEY_UP = 'keyup';
@@ -54,7 +55,7 @@ const CODES: [
   typeof ARROW_LEFT,
   typeof ARROW_UP,
   typeof ARROW_RIGHT,
-  typeof ARROW_DOWN
+  typeof ARROW_DOWN,
 ] = [
   SPACE,
   PAGE_UP,
@@ -197,18 +198,6 @@ const DEFAULT_INITIAL_STATE: KeyboardGestureBaseState = {
   duration: 0,
   elapsed: 0,
 };
-
-const DEFAULT_CONFIG: KeyboardGestureObservableConfig = {
-  passive: false,
-  preventDefault: false,
-};
-
-function parseConfig(
-  config?: Partial<KeyboardGestureObservableConfig> | null,
-): KeyboardGestureObservableConfig {
-  if (!config) return {...DEFAULT_CONFIG};
-  return {...DEFAULT_CONFIG, ...config};
-}
 
 function reduceGestureState(
   state: KeyboardGestureBaseState,

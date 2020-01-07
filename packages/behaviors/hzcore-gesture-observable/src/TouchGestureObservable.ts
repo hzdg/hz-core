@@ -9,6 +9,7 @@ import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import asObservable from './asObservable';
 import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
+import {parseConfig, ObservableConfig} from './ObservableConfig';
 
 export {HORIZONTAL, VERTICAL};
 
@@ -19,31 +20,7 @@ export const TOUCH_END = 'touchend';
 /**
  * Configuration for a TouchGestureObservable.
  */
-export interface TouchGestureObservableConfig {
-  /**
-   * Whether or not to prevent the default action
-   * for `touchmove` events during a gesture.
-   */
-  preventDefault: boolean;
-  /**
-   * Whether or not to listen to touch events passively.
-   * If `true`, then `preventDefault` will have no effect.
-   */
-  passive: boolean;
-  /**
-   * How 'far' a series of touch events must cumulatively move
-   * in a consistent direction before a touch gesture is detected,
-   * or `false`, if _any_ touch event should be considered part of a gesture.
-   */
-  threshold?: number | false;
-  /**
-   * The orientation in which a series of touch events
-   * can move in order to be considered part of a gesture.
-   * If not provided, then touch events in _any_ orientation
-   * can be considered part of a gesture.
-   */
-  orientation?: Orientation;
-}
+export type TouchGestureObservableConfig = ObservableConfig;
 
 /**
  * An event assocated with a touch gesture.
@@ -134,19 +111,6 @@ const DEFAULT_INITIAL_STATE: TouchGestureBaseState = {
   elapsed: 0,
 };
 
-const DEFAULT_CONFIG: TouchGestureObservableConfig = {
-  passive: false,
-  preventDefault: false,
-  threshold: false,
-};
-
-function parseConfig(
-  config?: Partial<TouchGestureObservableConfig> | null,
-): TouchGestureObservableConfig {
-  if (!config) return {...DEFAULT_CONFIG};
-  return {...DEFAULT_CONFIG, ...config};
-}
-
 function reduceGestureState(
   state: TouchGestureBaseState,
   event: TouchGestureEvent,
@@ -205,7 +169,7 @@ function reduceGestureState(
 function shouldGesture(
   fromEvent: TouchGestureEvent,
   toEvent: TouchGestureEvent,
-  threshold?: number | false,
+  threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (!threshold) return true;
@@ -229,7 +193,7 @@ function shouldGesture(
 function shouldCancel(
   fromEvent: TouchGestureEvent,
   toEvent: TouchGestureEvent,
-  threshold?: number | false,
+  threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (threshold && orientation) {
@@ -306,7 +270,13 @@ export function createSource(
 ): Source<TouchGestureState | TouchGestureEndState> {
   ensureDOMInstance(element, Element);
 
-  const {preventDefault, passive, orientation, threshold} = parseConfig(config);
+  const {
+    preventDefault,
+    passive,
+    orientation,
+    threshold,
+    cancelThreshold,
+  } = parseConfig(config);
 
   let gesturing = false;
   let firstEvent: TouchGestureEvent | null = null;
@@ -339,7 +309,12 @@ export function createSource(
           if (!threshold || canceled) return false;
           gesturing = shouldGesture(firstEvent, event, threshold, orientation);
           if (!gesturing) {
-            canceled = shouldCancel(firstEvent, event, threshold, orientation);
+            canceled = shouldCancel(
+              firstEvent,
+              event,
+              cancelThreshold,
+              orientation,
+            );
             return false;
           }
         }

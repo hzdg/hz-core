@@ -12,6 +12,7 @@ import fromEvent from 'callbag-from-event';
 import createSubject from 'callbag-subject';
 import asObservable from './asObservable';
 import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
+import {parseConfig, ObservableConfig} from './ObservableConfig';
 
 export {HORIZONTAL, VERTICAL};
 
@@ -21,35 +22,7 @@ export const GESTURE_END = 'gestureend';
 /**
  * Configuration for a WheelGestureObservable.
  */
-export interface WheelGestureObservableConfig {
-  /**
-   * Whether or not to prevent the default action
-   * for `wheel` events during a gesture.
-   */
-  preventDefault: boolean;
-  /**
-   * Whether or not to listen to wheel events passively.
-   * If `true`, then `preventDefault` will have no effect.
-   */
-  passive: boolean;
-  /**
-   * How 'far' a series of wheel events must cumulatively move
-   * in a consistent direction before a wheel gesture is detected,
-   * or `false`, if _any_ wheel event should be considered part of a gesture.
-   */
-  threshold?: number | false;
-  /**
-   * The orientation in which a series of wheel events
-   * can move in order to be considered part of a gesture.
-   * If not provided, then wheel events in _any_ orientation
-   * can be considered part of a gesture.
-   */
-  orientation?: Orientation;
-}
-
-// TODO: Find the smallest timeout that won't ever get tricked by inertia.
-const GESTURE_END_TIMEOUT = 60;
-const GESTURE_THRESHOLD = 40;
+export type WheelGestureObservableConfig = ObservableConfig;
 
 const LEFT = 'left';
 const RIGHT = 'right';
@@ -63,6 +36,7 @@ const direction = (
   Math.abs(x) > Math.abs(y) ? (x > 0 ? LEFT : RIGHT) : y > 0 ? UP : DOWN;
 
 // Reasonable defaults
+const GESTURE_END_TIMEOUT = 140;
 const LINE_HEIGHT = 40;
 const PAGE_HEIGHT = 800;
 const WHEEL_FACTOR = 120;
@@ -266,19 +240,6 @@ const DEFAULT_INITIAL_STATE: WheelGestureBaseState = {
   elapsed: 0,
 };
 
-const DEFAULT_CONFIG: WheelGestureObservableConfig = {
-  passive: false,
-  preventDefault: false,
-  threshold: GESTURE_THRESHOLD,
-};
-
-function parseConfig(
-  config?: Partial<WheelGestureObservableConfig> | null,
-): WheelGestureObservableConfig {
-  if (!config) return {...DEFAULT_CONFIG};
-  return {...DEFAULT_CONFIG, ...config};
-}
-
 function reduceGestureState(
   state: WheelGestureBaseState,
   event: WheelGestureEvent | GestureEndEvent,
@@ -344,7 +305,7 @@ function reduceGestureState(
 function shouldGesture(
   accX: number,
   accY: number,
-  threshold?: number | false,
+  threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (!threshold) return true;
@@ -364,7 +325,7 @@ function shouldGesture(
 function shouldCancel(
   accX: number,
   accY: number,
-  threshold?: number | false,
+  threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (threshold && orientation) {
@@ -390,7 +351,13 @@ export function createSource(
   config?: Partial<WheelGestureObservableConfig> | null,
 ): Source<WheelGestureState | WheelGestureEndState> {
   ensureDOMInstance(element, Element);
-  let {threshold, preventDefault, passive, orientation} = parseConfig(config);
+  let {
+    threshold,
+    cancelThreshold,
+    preventDefault,
+    passive,
+    orientation,
+  } = parseConfig(config);
   if (!threshold) {
     threshold = 0;
   }
@@ -465,7 +432,7 @@ export function createSource(
     if (!gesturing) {
       gesturing = shouldGesture(accX, accY, threshold, orientation);
       if (!gesturing) {
-        canceled = shouldCancel(accX, accY, threshold, orientation);
+        canceled = shouldCancel(accX, accY, cancelThreshold, orientation);
         if (canceled) return false;
       }
     }

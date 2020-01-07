@@ -7,6 +7,7 @@ import * as WheelGestureObservable from './WheelGestureObservable';
 import * as MouseGestureObservable from './MouseGestureObservable';
 import * as TouchGestureObservable from './TouchGestureObservable';
 import * as KeyboardGestureObservable from './KeyboardGestureObservable';
+import * as ObservableConfig from './ObservableConfig';
 
 export {
   WheelGestureObservable,
@@ -103,39 +104,13 @@ interface GestureSourceConfig {
   wheel: boolean;
 }
 
-type MouseEnabledConfig = Partial<
-  GestureSourceConfig & MouseGestureObservableConfig
-> & {
-  mouse: true;
-};
-type TouchEnabledConfig = Partial<
-  GestureSourceConfig & TouchGestureObservableConfig
-> & {
-  touch: true;
-};
-type KeyboardEnabledConfig = Partial<
-  GestureSourceConfig & KeyboardGestureObservableConfig
-> & {
-  keyboard: true;
-};
-type WheelEnabledConfig = Partial<
-  GestureSourceConfig & WheelGestureObservableConfig
-> & {
-  wheel: true;
-};
-
 /**
  * Configuration for a GestureObservable.
  */
-export type GestureObservableConfig =
-  | MouseEnabledConfig
-  | TouchEnabledConfig
-  | KeyboardEnabledConfig
-  | WheelEnabledConfig;
+export type GestureObservableConfig = GestureSourceConfig &
+  ObservableConfig.ObservableConfig;
 
-const DEFAULT_CONFIG: GestureObservableConfig = {
-  passive: false,
-  preventDefault: false,
+const DEFAULT_SOURCE_CONFIG: Partial<GestureObservableConfig> = {
   keyboard: true,
   mouse: true,
   touch: true,
@@ -146,10 +121,10 @@ export function parseConfig(
   config?: Partial<GestureObservableConfig> | null,
 ): GestureObservableConfig {
   if (!config) {
-    return {...DEFAULT_CONFIG};
+    return ObservableConfig.parseConfig(DEFAULT_SOURCE_CONFIG);
   } else {
-    const {keyboard, mouse, touch, wheel, ...unionConfig} = config;
-    let parsedConfig = {...DEFAULT_CONFIG, ...unionConfig};
+    const {keyboard, mouse, touch, wheel} = config;
+    let parsedConfig = ObservableConfig.parseConfig(config);
     if (keyboard || mouse || touch || wheel) {
       parsedConfig.keyboard = Boolean(keyboard);
       parsedConfig.mouse = Boolean(mouse);

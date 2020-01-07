@@ -9,6 +9,7 @@ import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import asObservable from './asObservable';
 import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
+import {parseConfig, ObservableConfig} from './ObservableConfig';
 
 export {HORIZONTAL, VERTICAL};
 
@@ -26,31 +27,7 @@ export interface MouseGestureEvent extends MouseEvent {
 /**
  * Configuration for a MouseGestureObservable.
  */
-export interface MouseGestureObservableConfig {
-  /**
-   * Whether or not to prevent the default action
-   * for `mousemove` events during a gesture.
-   */
-  preventDefault: boolean;
-  /**
-   * Whether or not to listen to mouse events passively.
-   * If `true`, then `preventDefault` will have no effect.
-   */
-  passive: boolean;
-  /**
-   * How 'far' a series of mouse events must cumulatively move
-   * in a consistent direction before a mouse gesture is detected,
-   * or `false`, if _any_ mouse event should be considered part of a gesture.
-   */
-  threshold?: number | false;
-  /**
-   * The orientation in which a series of mouse events
-   * can move in order to be considered part of a gesture.
-   * If not provided, then mouse events in _any_ orientation
-   * can be considered part of a gesture.
-   */
-  orientation?: Orientation;
-}
+export type MouseGestureObservableConfig = ObservableConfig;
 
 /**
  * An event type associated with a mouse gesture.
@@ -134,19 +111,6 @@ const DEFAULT_INITIAL_STATE: MouseGestureBaseState = {
   elapsed: 0,
 };
 
-const DEFAULT_CONFIG: MouseGestureObservableConfig = {
-  passive: false,
-  preventDefault: false,
-  threshold: false,
-};
-
-function parseConfig(
-  config?: Partial<MouseGestureObservableConfig> | null,
-): MouseGestureObservableConfig {
-  if (!config) return {...DEFAULT_CONFIG};
-  return {...DEFAULT_CONFIG, ...config};
-}
-
 function reduceGestureState(
   state: MouseGestureBaseState,
   event: MouseGestureEvent,
@@ -205,7 +169,7 @@ function reduceGestureState(
 function shouldGesture(
   fromEvent: MouseGestureEvent,
   toEvent: MouseGestureEvent,
-  threshold?: number | false,
+  threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (!threshold) return true;
@@ -229,7 +193,7 @@ function shouldGesture(
 function shouldCancel(
   fromEvent: MouseGestureEvent,
   toEvent: MouseGestureEvent,
-  threshold?: number | false,
+  threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (threshold && orientation) {
@@ -282,7 +246,13 @@ export function createSource(
 ): Source<MouseGestureState | MouseGestureEndState> {
   ensureDOMInstance(element, Element);
 
-  const {preventDefault, passive, orientation, threshold} = parseConfig(config);
+  const {
+    preventDefault,
+    passive,
+    orientation,
+    threshold,
+    cancelThreshold,
+  } = parseConfig(config);
 
   let gesturing = false;
   let firstEvent: MouseGestureEvent | null = null;
@@ -317,7 +287,12 @@ export function createSource(
           if (!threshold || canceled) return false;
           gesturing = shouldGesture(firstEvent, event, threshold, orientation);
           if (!gesturing) {
-            canceled = shouldCancel(firstEvent, event, threshold, orientation);
+            canceled = shouldCancel(
+              firstEvent,
+              event,
+              cancelThreshold,
+              orientation,
+            );
             return false;
           }
         }
