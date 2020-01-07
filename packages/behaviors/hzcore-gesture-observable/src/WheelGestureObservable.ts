@@ -1,6 +1,5 @@
 import Observable from 'zen-observable';
 import {ensureDOMInstance} from '@hzcore/dom-utils';
-import {Lethargy} from 'lethargy';
 import {Source} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
@@ -13,6 +12,7 @@ import createSubject from 'callbag-subject';
 import asObservable from './asObservable';
 import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
 import {parseConfig, ObservableConfig} from './ObservableConfig';
+import MovingAverage from './MovingAverage';
 
 export {HORIZONTAL, VERTICAL};
 
@@ -24,22 +24,22 @@ export const GESTURE_END = 'gestureend';
  */
 export type WheelGestureObservableConfig = ObservableConfig;
 
-const LEFT = 'left';
-const RIGHT = 'right';
-const UP = 'up';
-const DOWN = 'down';
-
-const direction = (
-  x: number,
-  y: number,
-): typeof LEFT | typeof RIGHT | typeof UP | typeof DOWN =>
-  Math.abs(x) > Math.abs(y) ? (x > 0 ? LEFT : RIGHT) : y > 0 ? UP : DOWN;
-
-// Reasonable defaults
+/**
+ * How long to wait for additional intentional events
+ * before ending a gesture.
+ */
 const GESTURE_END_TIMEOUT = 140;
+/**
+ * How big the absolute difference between an event delta
+ * and the average must be to be considered intentional.
+ */
+const DEVIATION_THRESHOLD = 1;
+/** How many pixels one delta{X,Y} unit is when `wheelMode` is 'line'. */
 const LINE_HEIGHT = 40;
+/** How many pixels one delta{X,Y} unit is when `wheelMode` is 'page'. */
 const PAGE_HEIGHT = 800;
-const WHEEL_FACTOR = 120;
+/** How many pixels one native wheelDelta{X,Y} 'spin' (probably) covers. */
+const SPIN_FACTOR = 120;
 
 type UnnormalizedWheelEvent = WheelEvent & {
   wheelDelta: number;
@@ -124,13 +124,13 @@ function normalizeWheel(event: UnnormalizedWheelEvent): WheelGestureEvent {
     spinY = event.detail;
   }
   if ('wheelDelta' in event) {
-    spinY = -event.wheelDelta / WHEEL_FACTOR;
+    spinY = -event.wheelDelta / SPIN_FACTOR;
   }
   if ('wheelDeltaY' in event) {
-    spinY = -event.wheelDeltaY / WHEEL_FACTOR;
+    spinY = -event.wheelDeltaY / SPIN_FACTOR;
   }
   if ('wheelDeltaX' in event) {
-    spinX = -event.wheelDeltaX / WHEEL_FACTOR;
+    spinX = -event.wheelDeltaX / SPIN_FACTOR;
   }
 
   // Fall-back if spin cannot be determined
@@ -303,38 +303,36 @@ function reduceGestureState(
 }
 
 function shouldGesture(
-  accX: number,
-  accY: number,
+  x: MovingAverage,
+  y: MovingAverage,
   threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (!threshold) return true;
-  if (orientation) {
-    switch (orientation) {
-      case VERTICAL: {
-        return Math.abs(accY) > threshold;
-      }
-      case HORIZONTAL: {
-        return Math.abs(accX) > threshold;
-      }
-    }
+  if (orientation === VERTICAL || Math.abs(y.delta) > Math.abs(x.delta)) {
+    return Math.abs(y.delta) > threshold && y.deviation > threshold;
+  } else {
+    return Math.abs(x.delta) > threshold && x.deviation > threshold;
   }
-  return Math.max(Math.abs(accX), Math.abs(accY)) > threshold;
 }
 
 function shouldCancel(
-  accX: number,
-  accY: number,
+  x: MovingAverage,
+  y: MovingAverage,
   threshold?: number,
   orientation?: Orientation,
 ): boolean {
   if (threshold && orientation) {
     switch (orientation) {
       case VERTICAL: {
-        return shouldGesture(accX, accY, threshold, HORIZONTAL);
+        return (
+          Math.abs(y.delta) < threshold && Math.abs(x.delta) > Math.abs(y.delta)
+        );
       }
       case HORIZONTAL: {
-        return shouldGesture(accX, accY, threshold, VERTICAL);
+        return (
+          Math.abs(x.delta) < threshold && Math.abs(y.delta) > Math.abs(x.delta)
+        );
       }
     }
   }
@@ -351,34 +349,25 @@ export function createSource(
   config?: Partial<WheelGestureObservableConfig> | null,
 ): Source<WheelGestureState | WheelGestureEndState> {
   ensureDOMInstance(element, Element);
-  let {
+  const {
     threshold,
     cancelThreshold,
     preventDefault,
     passive,
     orientation,
   } = parseConfig(config);
-  if (!threshold) {
-    threshold = 0;
-  }
-  if (!passive && preventDefault) {
-    passive = false;
-  }
 
-  let intent:
-    | false
-    | typeof DOWN
-    | typeof UP
-    | typeof LEFT
-    | typeof RIGHT = false;
   let endTimeout: NodeJS.Timeout | null = null;
   let gesturing = false;
   let canceled = false;
-  let accX = 0;
-  let accY = 0;
+  let lastEventTimeStamp: number | null = null;
+
+  const x = new MovingAverage({weight: 0});
+  const y = new MovingAverage({weight: 0});
+  const t = new MovingAverage({round: true});
+  t.pin(GESTURE_END_TIMEOUT);
 
   const endEvents = createSubject<GestureEndEvent>();
-  const lethargy = new Lethargy(8, threshold, 0, GESTURE_END_TIMEOUT);
 
   const gestureEnd = (): void => {
     if (endTimeout) {
@@ -386,12 +375,23 @@ export function createSource(
       endTimeout = null;
     }
     const wasGesturing = gesturing;
-    accX = 0;
-    accY = 0;
-    intent = false;
-    gesturing = false;
-    canceled = false;
-    if (wasGesturing) endEvents(1, new WheelEvent(GESTURE_END));
+    if (wasGesturing || canceled) {
+      x.reset();
+      y.reset();
+      t.reset();
+      t.pin(GESTURE_END_TIMEOUT);
+      gesturing = false;
+      canceled = false;
+      lastEventTimeStamp = null;
+      if (wasGesturing) {
+        endEvents(1, new WheelEvent(GESTURE_END) as GestureEndEvent);
+      }
+    }
+  };
+
+  const scheduleGestureEnd = (timeout: MovingAverage | number = t): void => {
+    if (endTimeout) clearTimeout(endTimeout);
+    endTimeout = setTimeout(gestureEnd, (timeout as unknown) as number);
   };
 
   const shouldPreventDefault = (event: UnnormalizedWheelEvent): boolean => {
@@ -407,33 +407,48 @@ export function createSource(
 
   const filterEvents = (event: WheelGestureEvent): boolean => {
     if (canceled) return false;
-    // Assume we're gesturing if this wheel event seems intentional
-    // (as opposed to inertial).
-    let maybeGesturing = Boolean(lethargy.check(event.originalEvent));
-    if (!maybeGesturing && intent) {
-      // If we aren't gesturing, but we have an assigned gesture intent,
-      // Check if the intent has changed.
-      // If it has, assume we're still gesturing.
-      maybeGesturing =
-        intent !== direction(accX + event.deltaX, accY + event.deltaY);
-    }
-    if (maybeGesturing) {
-      // We might be gesturing, so assign an intent for the gesture,
-      // based on the cumulative change of the gesture.
-      accX += event.deltaX;
-      accY += event.deltaY;
-      intent = direction(accX, accY);
+    x.push(event.deltaX);
+    y.push(event.deltaY);
 
-      // Debounce the gesture end event.
-      if (endTimeout) clearTimeout(endTimeout);
-      endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
+    if (lastEventTimeStamp !== null) {
+      t.push(event.timeStamp - lastEventTimeStamp);
+    }
+    lastEventTimeStamp = event.timeStamp;
+
+    if (!gesturing) {
+      gesturing = shouldGesture(x, y, threshold, orientation);
     }
 
     if (!gesturing) {
-      gesturing = shouldGesture(accX, accY, threshold, orientation);
-      if (!gesturing) {
-        canceled = shouldCancel(accX, accY, cancelThreshold, orientation);
-        if (canceled) return false;
+      canceled = shouldCancel(x, y, cancelThreshold, orientation);
+      if (canceled) {
+        scheduleGestureEnd(GESTURE_END_TIMEOUT);
+        return false;
+      }
+    }
+
+    // Debounce the gesture end event.
+    if (!endTimeout || !threshold) {
+      scheduleGestureEnd();
+    } else {
+      switch (orientation) {
+        case HORIZONTAL: {
+          if (x.deviation > DEVIATION_THRESHOLD) {
+            scheduleGestureEnd();
+          }
+          break;
+        }
+        case VERTICAL: {
+          if (y.deviation > DEVIATION_THRESHOLD) {
+            scheduleGestureEnd();
+          }
+          break;
+        }
+        default: {
+          if (Math.max(x.deviation, y.deviation) > DEVIATION_THRESHOLD) {
+            scheduleGestureEnd();
+          }
+        }
       }
     }
 
@@ -470,7 +485,7 @@ export function createSource(
  * Also uses a `gestureend` event to indicate when the intent
  * to end a wheel gesture has been detected. This is useful
  * because there is no native representation of a 'wheelend' event
- * (like you get from touch with 'touchend' or wheel with 'wheelup'),
+ * (like you get from touch with 'touchend' or mouse with 'mouseup'),
  * which makes it difficult to decide when to resolve a guess
  * for a gesturing user's intention.
  */

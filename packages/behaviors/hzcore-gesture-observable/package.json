@@ -28,7 +28,6 @@
     "callbag-share": "^1.2.0",
     "callbag-subject": "^1.0.2",
     "callbag-subscribe": "^1.5.1",
-    "lethargy": "^1.0.4",
     "zen-observable": "^0.8.14"
   }
 }
