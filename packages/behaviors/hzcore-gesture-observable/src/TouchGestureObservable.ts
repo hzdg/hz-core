@@ -175,17 +175,19 @@ function shouldGesture(
   if (orientation) {
     switch (orientation) {
       case VERTICAL: {
-        let yDelta = fromEvent.touches[0].clientY - toEvent.touches[0].clientY;
+        const yDelta =
+          fromEvent.touches[0].clientY - toEvent.touches[0].clientY;
         return Math.abs(yDelta) > threshold;
       }
       case HORIZONTAL: {
-        let xDelta = fromEvent.touches[0].clientX - toEvent.touches[0].clientX;
+        const xDelta =
+          fromEvent.touches[0].clientX - toEvent.touches[0].clientX;
         return Math.abs(xDelta) > threshold;
       }
     }
   }
-  let yDelta = fromEvent.touches[0].clientY - toEvent.touches[0].clientY;
-  let xDelta = fromEvent.touches[0].clientX - toEvent.touches[0].clientX;
+  const yDelta = fromEvent.touches[0].clientY - toEvent.touches[0].clientY;
+  const xDelta = fromEvent.touches[0].clientX - toEvent.touches[0].clientX;
   return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > threshold;
 }
 
@@ -232,7 +234,7 @@ class WebkitHack {
     }
   }
 
-  shouldPreventDefault: boolean = false;
+  shouldPreventDefault = false;
 
   destroy(): void {
     if (typeof window === 'undefined') return;
@@ -243,7 +245,7 @@ class WebkitHack {
     );
   }
 
-  handleTouchMove = (event: Event) => {
+  handleTouchMove = (event: Event): void => {
     if (this.shouldPreventDefault && !event.defaultPrevented) {
       event.preventDefault();
     }
@@ -348,7 +350,7 @@ export function createSource(
       case TOUCH_END: {
         if (!firstEvent) return false;
         if (webkitHack) webkitHack.allowTouchMove();
-        let wasGesturing = gesturing;
+        const wasGesturing = gesturing;
         firstEvent = null;
         canceled = false;
         gesturing = false;

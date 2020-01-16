@@ -175,17 +175,17 @@ function shouldGesture(
   if (orientation) {
     switch (orientation) {
       case VERTICAL: {
-        let yDelta = fromEvent.clientY - toEvent.clientY;
+        const yDelta = fromEvent.clientY - toEvent.clientY;
         return Math.abs(yDelta) > threshold;
       }
       case HORIZONTAL: {
-        let xDelta = fromEvent.clientX - toEvent.clientX;
+        const xDelta = fromEvent.clientX - toEvent.clientX;
         return Math.abs(xDelta) > threshold;
       }
     }
   }
-  let yDelta = fromEvent.clientY - toEvent.clientY;
-  let xDelta = fromEvent.clientX - toEvent.clientX;
+  const yDelta = fromEvent.clientY - toEvent.clientY;
+  const xDelta = fromEvent.clientX - toEvent.clientX;
   return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > threshold;
 }
 
@@ -212,7 +212,7 @@ const CLICK = 'click';
 
 class ClickHack {
   clickTimeout: NodeJS.Timeout | null = null;
-  clickHandler = (event: Event) => {
+  clickHandler = (event: Event): void => {
     event.preventDefault();
     if (typeof window === 'undefined') return;
     window.removeEventListener(CLICK, this.clickHandler, true);
@@ -323,7 +323,7 @@ export function createSource(
       case MOUSE_UP: {
         if (!firstEvent) return false;
         if (gesturing && clickHack) clickHack.preventNextClick();
-        let wasGesturing = gesturing;
+        const wasGesturing = gesturing;
         firstEvent = null;
         canceled = false;
         gesturing = false;
