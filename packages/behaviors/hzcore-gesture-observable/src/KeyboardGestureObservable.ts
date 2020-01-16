@@ -1,4 +1,3 @@
-import Observable from 'zen-observable';
 import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
@@ -7,8 +6,8 @@ import merge from 'callbag-merge';
 import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import scan from 'callbag-scan';
-import asObservable from './asObservable';
-import {parseConfig} from './ObservableConfig';
+import asObservable, {DebugObservable} from './asObservable';
+import {parseConfig, DebugConfig} from './ObservableConfig';
 
 export const KEY_DOWN = 'keydown';
 export const KEY_UP = 'keyup';
@@ -255,9 +254,30 @@ export function createSource(
   element: Element,
   /** Configuration for the keyboard gesture source. */
   config?: Partial<KeyboardGestureObservableConfig> | null,
-): Source<KeyboardGestureState | KeyboardGestureEndState> {
+): Source<KeyboardGestureState | KeyboardGestureEndState>;
+export function createSource(
+  /** The DOM element to observe for keyboard events. */
+  element: Element,
+  /** Configuration for debugging the keyboard gesture source. */
+  config: DebugConfig,
+): Source<KeyboardGestureEvent>;
+export function createSource(
+  element: Element,
+  config?: Partial<KeyboardGestureObservableConfig> | DebugConfig | null,
+):
+  | Source<KeyboardGestureState | KeyboardGestureEndState>
+  | Source<KeyboardGestureEvent> {
   ensureDOMInstance(element, Element);
-  const {preventDefault} = parseConfig(config);
+  const {preventDefault, __debug: isDebug} = parseConfig(config);
+
+  const eventSource = merge(
+    fromEvent(getNearestFocusableNode(element), KEY_DOWN),
+    fromEvent(document, KEY_UP),
+  );
+
+  if (isDebug) {
+    return share(eventSource);
+  }
 
   let gesturingKey: KeyboardGestureEvent | null = null;
 
@@ -299,10 +319,7 @@ export function createSource(
 
   return share(
     pipe(
-      merge(
-        fromEvent(getNearestFocusableNode(element), KEY_DOWN),
-        fromEvent(document, KEY_UP),
-      ),
+      eventSource,
       filter(filterEvents),
       scan(reduceGestureState, DEFAULT_INITIAL_STATE),
     ),
@@ -317,8 +334,14 @@ export function create(
   element: Element,
   /** Configuration for the KeyboardGestureObservable. */
   config?: Partial<KeyboardGestureObservableConfig> | null,
-): Observable<KeyboardGestureState | KeyboardGestureEndState> {
-  return asObservable(createSource(element, config));
+): DebugObservable<
+  KeyboardGestureState | KeyboardGestureEndState,
+  KeyboardGestureEvent
+> {
+  return asObservable(
+    createSource(element, config),
+    createSource(element, {__debug: true}),
+  );
 }
 
 export default {create, createSource};

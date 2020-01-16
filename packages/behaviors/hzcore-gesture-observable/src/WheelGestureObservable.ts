@@ -1,4 +1,3 @@
-import Observable from 'zen-observable';
 import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
@@ -9,9 +8,9 @@ import merge from 'callbag-merge';
 import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import createSubject from 'callbag-subject';
-import asObservable from './asObservable';
+import asObservable, {DebugObservable} from './asObservable';
 import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
-import {parseConfig, ObservableConfig} from './ObservableConfig';
+import {parseConfig, ObservableConfig, DebugConfig} from './ObservableConfig';
 import MovingAverage from './MovingAverage';
 
 export {HORIZONTAL, VERTICAL};
@@ -347,7 +346,19 @@ export function createSource(
   element: Element,
   /** Configuration for the wheel gesture source. */
   config?: Partial<WheelGestureObservableConfig> | null,
-): Source<WheelGestureState | WheelGestureEndState> {
+): Source<WheelGestureState | WheelGestureEndState>;
+export function createSource(
+  /** The DOM element to observe for wheel events. */
+  element: Element,
+  /** Configuration for debugging the wheel gesture source. */
+  config: DebugConfig,
+): Source<WheelGestureEvent>;
+export function createSource(
+  element: Element,
+  config?: Partial<WheelGestureObservableConfig> | DebugConfig | null,
+):
+  | Source<WheelGestureState | WheelGestureEndState>
+  | Source<WheelGestureEvent> {
   ensureDOMInstance(element, Element);
   const {
     threshold,
@@ -355,7 +366,16 @@ export function createSource(
     preventDefault,
     passive,
     orientation,
+    __debug: isDebug,
   } = parseConfig(config);
+
+  const eventSource = pipe(
+    fromEvent(element, WHEEL, {passive}),
+    map(normalizeWheel),
+  );
+  if (isDebug) {
+    return share(eventSource);
+  }
 
   let endTimeout: NodeJS.Timeout | null = null;
   let gesturing = false;
@@ -460,14 +480,7 @@ export function createSource(
 
   return share(
     pipe(
-      merge(
-        pipe(
-          fromEvent(element, WHEEL, {passive}),
-          map(normalizeWheel),
-          filter(filterEvents),
-        ),
-        endEvents,
-      ),
+      merge(pipe(eventSource, filter(filterEvents)), endEvents),
       scan(reduceGestureState, DEFAULT_INITIAL_STATE),
     ),
   );
@@ -494,8 +507,14 @@ export function create(
   element: Element,
   /** Configuration for the WheelGestureObservable. */
   config?: Partial<WheelGestureObservableConfig> | null,
-): Observable<WheelGestureState | WheelGestureEndState> {
-  return asObservable(createSource(element, config));
+): DebugObservable<
+  WheelGestureState | WheelGestureEndState,
+  WheelGestureEvent
+> {
+  return asObservable(
+    createSource(element, config),
+    createSource(element, {__debug: true}),
+  );
 }
 
 export default {create, createSource};

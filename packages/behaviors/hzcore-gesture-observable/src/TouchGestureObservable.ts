@@ -1,4 +1,3 @@
-import Observable from 'zen-observable';
 import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
@@ -7,9 +6,9 @@ import scan from 'callbag-scan';
 import merge from 'callbag-merge';
 import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
-import asObservable from './asObservable';
+import asObservable, {DebugObservable} from './asObservable';
 import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
-import {parseConfig, ObservableConfig} from './ObservableConfig';
+import {parseConfig, ObservableConfig, DebugConfig} from './ObservableConfig';
 
 export {HORIZONTAL, VERTICAL};
 
@@ -267,7 +266,19 @@ export function createSource(
   element: Element,
   /** Configuration for the touch gesture source. */
   config?: Partial<TouchGestureObservableConfig> | null,
-): Source<TouchGestureState | TouchGestureEndState> {
+): Source<TouchGestureState | TouchGestureEndState>;
+export function createSource(
+  /** The DOM element to observe for touch events. */
+  element: Element,
+  /** Configuration for debugging touch gesture source. */
+  config: DebugConfig,
+): Source<TouchGestureEvent>;
+export function createSource(
+  element: Element,
+  config?: Partial<TouchGestureObservableConfig> | DebugConfig | null,
+):
+  | Source<TouchGestureState | TouchGestureEndState>
+  | Source<TouchGestureEvent> {
   ensureDOMInstance(element, Element);
 
   const {
@@ -276,7 +287,18 @@ export function createSource(
     orientation,
     threshold,
     cancelThreshold,
+    __debug: isDebug,
   } = parseConfig(config);
+
+  const eventSource = merge(
+    fromEvent(element, TOUCH_START),
+    fromEvent(document, TOUCH_END),
+    fromEvent(document, TOUCH_MOVE, {passive}),
+  );
+
+  if (isDebug) {
+    return share(eventSource);
+  }
 
   let gesturing = false;
   let firstEvent: TouchGestureEvent | null = null;
@@ -338,11 +360,7 @@ export function createSource(
 
   return share(
     pipe(
-      merge(
-        fromEvent(element, TOUCH_START),
-        fromEvent(document, TOUCH_END),
-        fromEvent(document, TOUCH_MOVE, {passive}),
-      ),
+      eventSource,
       filter(filterEvents),
       scan(reduceGestureState, DEFAULT_INITIAL_STATE),
     ),
@@ -357,8 +375,14 @@ export function create(
   element: Element,
   /** Configuration for the TouchGestureObservable. */
   config?: Partial<TouchGestureObservableConfig> | null,
-): Observable<TouchGestureState | TouchGestureEndState> {
-  return asObservable(createSource(element, config));
+): DebugObservable<
+  TouchGestureState | TouchGestureEndState,
+  TouchGestureEvent
+> {
+  return asObservable(
+    createSource(element, config),
+    createSource(element, {__debug: true}),
+  );
 }
 
 export default {create, createSource};
