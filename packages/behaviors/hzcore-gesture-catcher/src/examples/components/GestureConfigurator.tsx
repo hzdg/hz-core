@@ -123,7 +123,8 @@ export default function GestureConfigurator({
     <form
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(max-content, 0px))',
+        justifyContent: 'space-between',
+        gridTemplateColumns: 'repeat(auto-fill, minmax(max-content, 168px))',
       }}
     >
       <Label
