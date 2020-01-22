@@ -214,6 +214,7 @@ class ClickHack {
   clickTimeout: NodeJS.Timeout | null = null;
   clickHandler = (event: Event): void => {
     event.preventDefault();
+    event.stopPropagation();
     if (typeof window === 'undefined') return;
     window.removeEventListener(CLICK, this.clickHandler, true);
   };
