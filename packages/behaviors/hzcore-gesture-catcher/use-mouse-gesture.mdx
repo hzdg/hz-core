@@ -7,10 +7,16 @@ route: /use-mouse-gesture
 import {Playground, Props} from 'docz';
 import useMouseGesture from './src/useMouseGesture';
 import useRefCallback from '@hzcore/hook-ref-callback';
+import MouseGestureVisualizer from './src/examples/MouseGestureVisualizer';
 
 # useMouseGesture
 
 A React [hook] for components that want to handle mouse gesture intent.
+
+<MouseGestureVisualizer>
+  <p style={{color: 'lightgray'}}>Use mouse drag to gesture!</p>
+  <p style={{color: 'lightgray'}}>Click to reset</p>
+</MouseGestureVisualizer>
 
 ## Installation
 

@@ -7,10 +7,17 @@ route: /use-keyboard-gesture
 import {Playground, Props} from 'docz';
 import useKeyboardGesture from './src/useKeyboardGesture';
 import useRefCallback from '@hzcore/hook-ref-callback';
+import KeyboardGestureVisualizer from './src/examples/KeyboardGestureVisualizer';
+
 
 # useKeyboardGesture
 
 A React [hook] for components that want to handle keyboard gesture intent.
+
+<KeyboardGestureVisualizer>
+  <p style={{color: 'lightgray'}}>Use arrow keys, spacebar, home, end, pgup, pgdown to gesture!</p>
+  <p style={{color: 'lightgray'}}>Click to reset</p>
+</KeyboardGestureVisualizer>
 
 ## Installation
 

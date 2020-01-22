@@ -5,12 +5,18 @@ route: /use-wheel-gesture
 ---
 
 import {Playground, Props} from 'docz';
-import useWheelGesture from './src/useWheelGesture';
+import {useWheelGesture} from '@hzcore/gesture-catcher';
 import useRefCallback from '@hzcore/hook-ref-callback';
+import WheelGestureVisualizer from './src/examples/WheelGestureVisualizer';
 
 # useWheelGesture
 
 A React [hook] for components that want to handle wheel gesture intent.
+
+<WheelGestureVisualizer>
+  <p style={{color: 'lightgray'}}>Use wheel or trackpad to gesture!</p>
+  <p style={{color: 'lightgray'}}>Click to reset</p>
+</WheelGestureVisualizer>
 
 ## Installation
 
