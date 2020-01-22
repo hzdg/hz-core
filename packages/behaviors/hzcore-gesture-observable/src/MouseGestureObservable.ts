@@ -273,7 +273,26 @@ export function createSource(
   );
 
   if (isDebug) {
-    return share(eventSource);
+    let firstDebugEvent: MouseGestureEvent | null = null;
+    const filterDebugEvents = (event: MouseGestureEvent): boolean => {
+      switch (event.type) {
+        case MOUSE_DOWN: {
+          if (firstDebugEvent) return false;
+          firstDebugEvent = event;
+          return true;
+        }
+        case MOUSE_MOVE: {
+          if (!firstDebugEvent) return false;
+          return true;
+        }
+        case MOUSE_UP: {
+          if (!firstDebugEvent) return false;
+          firstDebugEvent = null;
+          return true;
+        }
+      }
+    };
+    return share(pipe(eventSource, filter(filterDebugEvents)));
   }
 
   let gesturing = false;

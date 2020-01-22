@@ -299,7 +299,26 @@ export function createSource(
   );
 
   if (isDebug) {
-    return share(eventSource);
+    let firstDebugEvent: TouchGestureEvent | null = null;
+    const filterDebugEvents = (event: TouchGestureEvent): boolean => {
+      switch (event.type) {
+        case TOUCH_START: {
+          if (firstDebugEvent) return false;
+          firstDebugEvent = event;
+          return true;
+        }
+        case TOUCH_MOVE: {
+          if (!firstDebugEvent) return false;
+          return true;
+        }
+        case TOUCH_END: {
+          if (!firstDebugEvent) return false;
+          firstDebugEvent = null;
+          return true;
+        }
+      }
+    };
+    return share(pipe(eventSource, filter(filterDebugEvents)));
   }
 
   let gesturing = false;
