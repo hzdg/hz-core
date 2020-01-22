@@ -15,8 +15,26 @@ interface GestureHandlers<S extends GestureState> {
   onEnd?: (state: S) => void;
 }
 
-interface ObservableFactory<T extends GestureState | null> {
-  create(...args: unknown[]): Observable<T>;
+interface DebugHandler {
+  __debug: (event: Event) => void;
+}
+
+interface DebugObservable<T, E> extends Observable<T> {
+  __debug(
+    debugHandler: (e: E) => void,
+    ...observerArgs: Parameters<Observable<T>['subscribe']>
+  ): ZenObservable.Subscription;
+}
+
+interface ObservableFactory<T extends GestureState | null, E> {
+  create(...args: unknown[]): Observable<T> | DebugObservable<T, E>;
+}
+
+function dispatchGestureDebug<E extends Event>(
+  handler?: (event: E) => void,
+  event?: E,
+): void {
+  if (event && typeof handler === 'function') handler(event);
 }
 
 function dispatchGestureStateChange<S extends GestureState>(
@@ -47,6 +65,15 @@ function dispatchGestureStateChange<S extends GestureState>(
   }
 }
 
+function isDebugHandler(handler: unknown): handler is DebugHandler {
+  return (
+    handler &&
+    typeof handler !== 'function' &&
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    typeof (handler as any).__debug === 'function'
+  );
+}
+
 /**
  * `useObservableGestureEffect` will manage a subscription to the given
  * gesture `Observable` on the `ref` DOM element with the given `config`,
@@ -62,7 +89,7 @@ export function useObservableGestureEffect<
    * The gesture observable to use. Expected to have a `create`
    * static method that returns an `Observable` instance.
    */
-  Observable: ObservableFactory<S>,
+  Observable: ObservableFactory<S, Event>,
   /**
    * A ref to the DOM element to observe.
    */
@@ -90,6 +117,19 @@ export function useObservableGestureEffect<
     subscribed.current = false;
   }, [subscriptions]);
 
+  const debugHandler: DebugHandler['__debug'] | null = isDebugHandler(handler)
+    ? handler.__debug
+    : null;
+
+  const handleGestureDebug = useCallback(
+    function handleGestureDebug(event) {
+      if (subscribed.current && debugHandler) {
+        dispatchGestureDebug(debugHandler, event);
+      }
+    },
+    [debugHandler],
+  );
+
   const handleGestureStateChange = useCallback(
     /**
      * `handleGestureStateChange` will call the correct
@@ -110,6 +150,7 @@ export function useObservableGestureEffect<
   useEffect(() => cleanupSubscriptions, [
     cleanupSubscriptions,
     handleGestureStateChange,
+    handleGestureDebug,
     config,
   ]);
 
@@ -124,11 +165,12 @@ export function useObservableGestureEffect<
       if (!element || !subscriptions.has(element)) {
         cleanupSubscriptions();
         if (element) {
+          const subject = Observable.create(element, config);
           subscriptions.set(
             element,
-            Observable.create(element, config).subscribe(
-              handleGestureStateChange,
-            ),
+            handleGestureDebug && '__debug' in subject
+              ? subject.__debug(handleGestureDebug, handleGestureStateChange)
+              : subject.subscribe(handleGestureStateChange),
           );
           subscribed.current = true;
         }
