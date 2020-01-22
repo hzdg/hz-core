@@ -34,8 +34,6 @@ export {
   ARROW_DOWN,
 } from './KeyboardGestureObservable';
 
-export type Orientation = Orientation.Orientation;
-
 export type WheelGestureType = WheelGestureObservable.WheelGestureType;
 export type WheelGestureEvent = WheelGestureObservable.WheelGestureEvent;
 export type GestureEndEvent = WheelGestureObservable.GestureEndEvent;
@@ -116,6 +114,8 @@ const DEFAULT_SOURCE_CONFIG: Partial<GestureObservableConfig> = {
   touch: true,
   wheel: true,
 };
+
+export {Orientation};
 
 export function parseConfig(
   config?: Partial<GestureObservableConfig> | null,
