@@ -276,7 +276,23 @@ export function createSource(
   );
 
   if (isDebug) {
-    return share(eventSource);
+    let firstDebugEvent: KeyboardGestureEvent | null = null;
+    const filterDebugEvents = (event: KeyboardGestureEvent): boolean => {
+      switch (event.type) {
+        case KEY_DOWN: {
+          if (!firstDebugEvent && isGestureKey(event)) {
+            firstDebugEvent = event;
+          }
+          return firstDebugEvent ? true : false;
+        }
+        case KEY_UP: {
+          if (!firstDebugEvent) return false;
+          firstDebugEvent = null;
+          return true;
+        }
+      }
+    };
+    return share(pipe(eventSource, filter(filterDebugEvents)));
   }
 
   let gesturingKey: KeyboardGestureEvent | null = null;
