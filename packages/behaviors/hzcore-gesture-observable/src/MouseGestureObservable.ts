@@ -322,11 +322,8 @@ export function createSource(
       }
       case MOUSE_MOVE: {
         if (!firstEvent) return false;
-        if (shouldPreventDefault(event)) {
-          event.preventDefault();
-        }
+        if (canceled) return false;
         if (!gesturing) {
-          if (!threshold || canceled) return false;
           gesturing = shouldGesture(firstEvent, event, threshold, orientation);
           if (!gesturing) {
             canceled = shouldCancel(
@@ -337,6 +334,9 @@ export function createSource(
             );
             return false;
           }
+        }
+        if (shouldPreventDefault(event)) {
+          event.preventDefault();
         }
         return true;
       }

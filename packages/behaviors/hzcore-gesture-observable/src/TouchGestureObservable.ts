@@ -348,8 +348,8 @@ export function createSource(
       }
       case TOUCH_MOVE: {
         if (!firstEvent) return false;
+        if (canceled) return false;
         if (!gesturing) {
-          if (!threshold || canceled) return false;
           gesturing = shouldGesture(firstEvent, event, threshold, orientation);
           if (!gesturing) {
             canceled = shouldCancel(
