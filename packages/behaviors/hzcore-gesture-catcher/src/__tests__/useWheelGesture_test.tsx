@@ -193,17 +193,17 @@ test('useWheelGesture resubscribes on config changes', async () => {
     return <div ref={ref} data-testid="gesture-target" />;
   };
   const {getByTestId, rerender} = render(
-    <WheelGestureUser config={{threshold: 20}} />,
+    <WheelGestureUser config={{threshold: 9}} />,
   );
   const target = getByTestId('gesture-target');
-  await new WheelSequence(target).wheel().wheel({deltaX: 11});
+  await new WheelSequence(target).wheel({deltaX: 1}).repeat(8);
   runAllTimers();
   expect(handler.mock.calls).toHaveLength(0);
 
   handler.mockReset();
 
   rerender(<WheelGestureUser config={{threshold: 10}} />);
-  await new WheelSequence(target).wheel().wheel({deltaX: 11});
+  await new WheelSequence(target).wheel({deltaX: 1}).repeat(10);
   runAllTimers();
   expect(handler.mock.calls).toHaveLength(2);
   handler.mock.calls.forEach(([state]) => {

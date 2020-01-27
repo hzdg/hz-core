@@ -29,10 +29,17 @@ export type WheelGestureObservableConfig = ObservableConfig;
  */
 const GESTURE_END_TIMEOUT = 140;
 /**
+ * The lower bound on the average intentional event delta.
+ * When the average delta is smaller than this, incoming
+ * wheel events won't be considered 'intentional'
+ * unless they deviate significantly from the average.
+ */
+const VELOCITY_THRESHOLD = 0.1;
+/**
  * How big the absolute difference between an event delta
  * and the average must be to be considered intentional.
  */
-const DEVIATION_THRESHOLD = 1;
+const VELOCITY_DEVIATION_THRESHOLD = 0.01;
 /** How many pixels one delta{X,Y} unit is when `wheelMode` is 'line'. */
 const LINE_HEIGHT = 40;
 /** How many pixels one delta{X,Y} unit is when `wheelMode` is 'page'. */
@@ -90,6 +97,21 @@ export interface WheelGestureEvent extends WheelEvent {
 }
 
 /**
+ * A payload for debugging wheel gestures.
+ *
+ * This is the payload passed to the `__debug` gesture handler.
+ */
+export interface WheelGestureEventDebug {
+  event: WheelGestureEvent;
+  gesturing: boolean;
+  blocked: boolean;
+  canceled: boolean;
+  x: MovingAverage;
+  y: MovingAverage;
+  v: MovingAverage;
+}
+
+/**
  * An event assocated with the end of a wheel gesture.
  * This is needed for wheel gestures because
  * there is nothing that natively represents 'wheel end'.
@@ -99,7 +121,7 @@ export interface GestureEndEvent {
   timeStamp: number;
 }
 
-// Based on https://github.com/facebookarchive/fixed-data-table/blob/3a9bf338b22406169e7261f85ddeda22ddce3b6f/src/vendor_upstream/dom/normalizeWheel.js
+// Based on https://github.com/facebookarchive/fixed-data-table/blob/3a9bf3/src/vendor_upstream/dom/normalizeWheel.js
 function normalizeWheel(event: UnnormalizedWheelEvent): WheelGestureEvent {
   let {deltaX, deltaY} = event;
   const {deltaMode, timeStamp = Date.now()} = event;
@@ -309,9 +331,9 @@ function shouldGesture(
 ): boolean {
   if (!threshold) return true;
   if (orientation === VERTICAL || Math.abs(y.delta) > Math.abs(x.delta)) {
-    return Math.abs(y.delta) > threshold && y.deviation > threshold;
+    return Math.abs(y.delta) > threshold;
   } else {
-    return Math.abs(x.delta) > threshold && x.deviation > threshold;
+    return Math.abs(x.delta) > threshold;
   }
 }
 
@@ -352,13 +374,13 @@ export function createSource(
   element: Element,
   /** Configuration for debugging the wheel gesture source. */
   config: DebugConfig,
-): Source<WheelGestureEvent>;
+): Source<WheelGestureEventDebug>;
 export function createSource(
   element: Element,
   config?: Partial<WheelGestureObservableConfig> | DebugConfig | null,
 ):
   | Source<WheelGestureState | WheelGestureEndState>
-  | Source<WheelGestureEvent> {
+  | Source<WheelGestureEventDebug> {
   ensureDOMInstance(element, Element);
   const {
     threshold,
@@ -369,23 +391,68 @@ export function createSource(
     __debug: isDebug,
   } = parseConfig(config);
 
-  const eventSource = pipe(
-    fromEvent(element, WHEEL, {passive}),
-    map(normalizeWheel),
-  );
-  if (isDebug) {
-    return share(eventSource);
-  }
-
+  // State for the gesture source.
+  const x = new MovingAverage({size: 6});
+  const y = new MovingAverage({size: 6});
+  const v = new MovingAverage({size: 6});
   let endTimeout: NodeJS.Timeout | null = null;
   let gesturing = false;
   let canceled = false;
-  let lastEventTimeStamp: number | null = null;
+  let blocked = false;
 
-  const x = new MovingAverage({weight: 0});
-  const y = new MovingAverage({weight: 0});
-  const t = new MovingAverage({round: true});
-  t.pin(GESTURE_END_TIMEOUT);
+  const updateSourceState = (event: WheelGestureEvent): WheelGestureEvent => {
+    v.push(
+      Math.hypot(
+        isNaN(x.peek()) ? 0 : event.spinX - x.peek(),
+        isNaN(y.peek()) ? 0 : event.spinY - y.peek(),
+      ),
+    );
+    x.push(event.spinX);
+    y.push(event.spinY);
+
+    if (!canceled && !blocked) {
+      const wasGesturing = gesturing;
+      gesturing = gesturing || shouldGesture(x, y, threshold, orientation);
+      if (!gesturing) {
+        canceled = shouldCancel(x, y, cancelThreshold, orientation);
+      } else {
+        blocked =
+          wasGesturing &&
+          v.rolling &&
+          v.value < VELOCITY_THRESHOLD &&
+          v.deviation < VELOCITY_DEVIATION_THRESHOLD;
+      }
+    }
+
+    return event;
+  };
+
+  const eventSource = pipe(
+    fromEvent(element, WHEEL, {passive}),
+    map(normalizeWheel),
+    map(updateSourceState),
+  );
+
+  if (isDebug) {
+    return share(
+      pipe(
+        eventSource,
+        map(
+          (event: WheelGestureEvent): WheelGestureEventDebug => {
+            return {
+              event: event,
+              gesturing,
+              canceled,
+              blocked,
+              x,
+              y,
+              v,
+            };
+          },
+        ),
+      ),
+    );
+  }
 
   const endEvents = createSubject<GestureEndEvent>();
 
@@ -395,23 +462,22 @@ export function createSource(
       endTimeout = null;
     }
     const wasGesturing = gesturing;
-    if (wasGesturing || canceled) {
+    if (wasGesturing || canceled || blocked) {
       x.reset();
       y.reset();
-      t.reset();
-      t.pin(GESTURE_END_TIMEOUT);
+      v.reset();
       gesturing = false;
       canceled = false;
-      lastEventTimeStamp = null;
+      blocked = false;
       if (wasGesturing) {
         endEvents(1, new WheelEvent(GESTURE_END) as GestureEndEvent);
       }
     }
   };
 
-  const scheduleGestureEnd = (timeout: MovingAverage | number = t): void => {
+  const scheduleGestureEnd = (): void => {
     if (endTimeout) clearTimeout(endTimeout);
-    endTimeout = setTimeout(gestureEnd, (timeout as unknown) as number);
+    endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
   };
 
   const shouldPreventDefault = (event: UnnormalizedWheelEvent): boolean => {
@@ -426,55 +492,29 @@ export function createSource(
   };
 
   const filterEvents = (event: WheelGestureEvent): boolean => {
-    if (canceled) return false;
-    x.push(event.deltaX);
-    y.push(event.deltaY);
-
-    if (lastEventTimeStamp !== null) {
-      t.push(event.timeStamp - lastEventTimeStamp);
-    }
-    lastEventTimeStamp = event.timeStamp;
-
-    if (!gesturing) {
-      gesturing = shouldGesture(x, y, threshold, orientation);
-    }
-
-    if (!gesturing) {
-      canceled = shouldCancel(x, y, cancelThreshold, orientation);
-      if (canceled) {
-        scheduleGestureEnd(GESTURE_END_TIMEOUT);
-        return false;
-      }
-    }
-
-    // Debounce the gesture end event.
-    if (!endTimeout || !threshold) {
+    if (canceled) {
+      // Debounce the cancel end timeout.
       scheduleGestureEnd();
-    } else {
-      switch (orientation) {
-        case HORIZONTAL: {
-          if (x.deviation > DEVIATION_THRESHOLD) {
-            scheduleGestureEnd();
-          }
-          break;
-        }
-        case VERTICAL: {
-          if (y.deviation > DEVIATION_THRESHOLD) {
-            scheduleGestureEnd();
-          }
-          break;
-        }
-        default: {
-          if (Math.max(x.deviation, y.deviation) > DEVIATION_THRESHOLD) {
-            scheduleGestureEnd();
-          }
-        }
-      }
+      return false;
+    }
+
+    if (gesturing && blocked) {
+      // We seem to be below the threshold for intentful gesturing,
+      // so end the gesture now, and block gesture detection
+      // until the current post-gesture activity ends.
+      gesturing = false;
+      endEvents(1, new WheelEvent(GESTURE_END, event) as GestureEndEvent);
+    }
+
+    if (gesturing || blocked) {
+      // Debounce the gesture end timeout.
+      scheduleGestureEnd();
     }
 
     if (shouldPreventDefault(event.originalEvent)) {
       event.originalEvent.preventDefault();
     }
+
     return gesturing;
   };
 
@@ -509,7 +549,7 @@ export function create(
   config?: Partial<WheelGestureObservableConfig> | null,
 ): DebugObservable<
   WheelGestureState | WheelGestureEndState,
-  WheelGestureEvent
+  WheelGestureEventDebug
 > {
   return asObservable(
     createSource(element, config),

@@ -59,21 +59,22 @@ export default class MovingAverage {
   protected _round: boolean;
   protected _store: number[];
   protected _pointer: number;
-  protected _pins: number[];
   protected _delta: number;
+  protected _count: number;
   protected _average: number | null;
 
   constructor(options?: MovingAverageOptions) {
     this._size = options?.size ?? 10;
+    this._count = 0;
     this._scale = options?.weight ?? 1;
     this._round = options?.round ?? false;
     if (!this._size || !(this._size > 0)) {
       throw new Error('A positive size is required!');
     }
     this._store = new Array(this._size);
-    this._pins = [];
     this._pointer = 0;
     this._delta = 0;
+    this._count = 0;
     this._average = null;
   }
 
@@ -83,22 +84,7 @@ export default class MovingAverage {
     this._store[this._pointer] = v;
     this._average = null;
     this._delta += v;
-  }
-
-  /**
-   * 'Pin' a value to the moving average.
-   *
-   * A pinned value will always be used in the average, meaning
-   * the effective size of the moving average storage is increased by 1
-   * for every pinned value.
-   *
-   * A pinned value will be weighed as though it were the oldest
-   * value in the storage. If more than one value is pinned, then they
-   * will be weighed in reverse order to when they were pinned.
-   */
-  pin(v: number): void {
-    this._pins.push(v);
-    this._average = null;
+    if (this._count < this._size) this._count += 1;
   }
 
   /** View the last added value. */
@@ -113,20 +99,15 @@ export default class MovingAverage {
    */
   reset(): void {
     this._store = new Array(this._size);
-    this._pins = [];
     this._pointer = 0;
     this._delta = 0;
+    this._count = 0;
     this._average = null;
   }
 
   /** The absolute deviation of the last value from the moving average. */
   get deviation(): number {
-    return Math.abs(this.value - this.average);
-  }
-
-  /** The last value added to the moving average. */
-  get value(): number {
-    return this.peek();
+    return Math.abs(this.peek() - this.value);
   }
 
   /** The cumulative change (from 0) of the value since the last reset. */
@@ -135,31 +116,28 @@ export default class MovingAverage {
   }
 
   /**
+   * Whether or not the average is rolling. The average starts rolling
+   * once the number of items added to the average meets or exceeds the size.
+   */
+  get rolling(): boolean {
+    return this._count >= this._size;
+  }
+
+  /**
    * The moving average of the value since the last reset.
    * This average is based on the last `size` number of values,
    * and may be optionally weighted and rounded.
    */
-  get average(): number {
+  get value(): number {
     if (this._average === null) {
-      const totalSize = this._size + this._pins.length;
       let sum = 0;
       let sumWeight = 0;
       let i = 0;
-      while (i < this._size) {
+      while (i < this._count) {
         const index = (this._pointer + i) % this._size;
         const value = this._store[index];
         if (value != null) {
-          const weight = weigh(i, totalSize, this._scale);
-          sumWeight += weight;
-          sum += value * weight;
-        }
-        i += 1;
-      }
-      while (i < totalSize) {
-        const index = i - this._size;
-        const value = this._pins[index];
-        if (value != null) {
-          const weight = weigh(i, totalSize, this._scale);
+          const weight = weigh(i, this._count, this._scale);
           sumWeight += weight;
           sum += value * weight;
         }
@@ -177,6 +155,6 @@ export default class MovingAverage {
    * and may be optionally weighted and rounded.
    */
   valueOf(): number {
-    return this.average;
+    return this.value;
   }
 }

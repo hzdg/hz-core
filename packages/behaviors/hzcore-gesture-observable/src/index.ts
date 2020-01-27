@@ -36,6 +36,7 @@ export {
 
 export type WheelGestureType = WheelGestureObservable.WheelGestureType;
 export type WheelGestureEvent = WheelGestureObservable.WheelGestureEvent;
+export type WheelGestureEventDebug = WheelGestureObservable.WheelGestureEventDebug;
 export type GestureEndEvent = WheelGestureObservable.GestureEndEvent;
 export type WheelGestureState = WheelGestureObservable.WheelGestureState;
 export type WheelGestureEndState = WheelGestureObservable.WheelGestureEndState;
