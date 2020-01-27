@@ -108,7 +108,7 @@ interface GestureSourceConfig {
 export type GestureObservableConfig = GestureSourceConfig &
   ObservableConfig.ObservableConfig;
 
-const DEFAULT_SOURCE_CONFIG: Partial<GestureObservableConfig> = {
+const DEFAULT_SOURCE_CONFIG: GestureSourceConfig = {
   keyboard: true,
   mouse: true,
   touch: true,
@@ -120,19 +120,20 @@ export {Orientation};
 export function parseConfig(
   config?: Partial<GestureObservableConfig> | null,
 ): GestureObservableConfig {
-  if (!config) {
-    return ObservableConfig.parseConfig(DEFAULT_SOURCE_CONFIG);
-  } else {
+  const parsedConfig = Object.assign(
+    ObservableConfig.parseConfig(config),
+    DEFAULT_SOURCE_CONFIG,
+  );
+  if (config) {
     const {keyboard, mouse, touch, wheel} = config;
-    let parsedConfig = ObservableConfig.parseConfig(config);
     if (keyboard || mouse || touch || wheel) {
       parsedConfig.keyboard = Boolean(keyboard);
       parsedConfig.mouse = Boolean(mouse);
       parsedConfig.touch = Boolean(touch);
       parsedConfig.wheel = Boolean(wheel);
     }
-    return parsedConfig;
   }
+  return parsedConfig;
 }
 
 /**
