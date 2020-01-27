@@ -12,6 +12,7 @@
     "cjs",
     "es",
     "src",
+    "!*/examples",
     "!*/__test*"
   ],
   "peerDependencies": {
