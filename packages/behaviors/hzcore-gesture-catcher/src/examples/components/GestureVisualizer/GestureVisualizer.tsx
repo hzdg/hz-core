@@ -16,23 +16,40 @@ import {
   GestureState,
   GestureEndState,
   GestureHandler,
+  WheelGestureEventDebug,
 } from '@hzcore/gesture-catcher';
 import TooltipArea, {TooltipContent} from './TooltipArea';
 import EventAreas from './EventAreas';
 import Legend from './Legend';
+import MovingAverage from '@hzcore/gesture-observable/src/MovingAverage';
+
+export interface MovingAverageSnapshot {
+  readonly value: number;
+  readonly average: number;
+  readonly deviation: number;
+}
+
+export interface SnapshotState {
+  readonly gesturing?: boolean;
+  readonly blocked?: boolean;
+  readonly canceled?: boolean;
+}
 
 export interface Snapshot {
-  eventType: string;
-  timeStamp: number;
-  delta: number;
-  gesturing?: boolean;
+  readonly eventType: string;
+  readonly timeStamp: number;
+  readonly delta: number;
+  readonly state?: SnapshotState;
+  readonly x?: number | MovingAverageSnapshot;
+  readonly y?: number | MovingAverageSnapshot;
+  readonly v?: number | MovingAverageSnapshot;
 }
 
 export interface GestureVisualizerState {
-  id: string;
-  data: Snapshot[];
-  initialTimeStamp: number;
-  lastTimeStamp: number;
+  readonly id: string;
+  readonly data: Snapshot[];
+  readonly initialTimeStamp: number;
+  readonly lastTimeStamp: number;
 }
 
 export interface GestureVisualizerProps {
@@ -46,12 +63,17 @@ type TimeStampedObject =
   | GestureEndState
   | WheelEvent
   | React.WheelEvent
+  | WheelGestureEventDebug
   | MouseEvent
   | React.MouseEvent
   | TouchEvent
   | React.TouchEvent
   | KeyboardEvent
   | React.KeyboardEvent;
+
+type Mutable<T> = {
+  -readonly [P in keyof T]: T[P];
+};
 
 const INITIAL_TIME_SCALE = 100;
 const PADDING_HORIZONTAL = 0.0;
@@ -73,11 +95,15 @@ interface ResetAction {
 function timeExtent(
   series: GestureVisualizerState[],
   minDuration: number,
-): [number, number] {
-  const result = ([] as unknown) as [number, number];
+): Readonly<[number, number]> {
+  const result = [0, 0] as [number, number];
   for (const {initialTimeStamp, lastTimeStamp} of series) {
-    result[0] = Math.min(result[0] ?? initialTimeStamp, initialTimeStamp);
-    result[1] = Math.max(result[1] ?? result[0] + minDuration, lastTimeStamp);
+    result[0] = initialTimeStamp
+      ? result[0]
+        ? Math.min(result[0], initialTimeStamp)
+        : initialTimeStamp
+      : result[0];
+    result[1] = Math.max(result[1] || result[0] + minDuration, lastTimeStamp);
   }
   return result;
 }
@@ -153,28 +179,87 @@ function useColorScale(
   return colorScale;
 }
 
-const getTimeStamp = (event: TimeStampedObject): number =>
-  Math.round('timeStamp' in event ? event.timeStamp : event.time);
+const takeEventTypeSnapshot = (obj: TimeStampedObject): string =>
+  'event' in obj ? obj.event.type : obj.type;
 
-const getGesturing = (event: TimeStampedObject): boolean | undefined =>
-  'gesturing' in event ? event.gesturing : undefined;
+const takeStateSnapshot = (
+  obj: TimeStampedObject,
+): SnapshotState | undefined => {
+  if ('gesturing' in obj || 'blocked' in obj || 'canceled' in obj) {
+    const snapshot = {} as Mutable<SnapshotState>;
+    if ('gesturing' in obj) {
+      snapshot.gesturing = Boolean(obj.gesturing);
+    }
+    if ('blocked' in obj) {
+      snapshot.blocked = Boolean(obj.blocked);
+    }
+    if ('canceled' in obj) {
+      snapshot.canceled = Boolean(obj.canceled);
+    }
+    return snapshot;
+  }
+};
 
 const absMax = (a: number, b: number): number =>
   Math.max(Math.abs(a), Math.abs(b));
 
-const getDelta = (event: TimeStampedObject): number => {
-  if ('deltaX' in event) return absMax(event.deltaX, event.deltaY);
-  if ('movementX' in event) return absMax(event.movementX, event.movementY);
-  if ('xVelocity' in event) return absMax(event.xVelocity, event.yVelocity);
+const takeDeltaSnapshot = (obj: TimeStampedObject): number => {
+  if ('event' in obj) obj = obj.event;
+  if ('deltaX' in obj) return absMax(obj.deltaX, obj.deltaY);
+  if ('movementX' in obj) return absMax(obj.movementX, obj.movementY);
+  if ('xVelocity' in obj) return absMax(obj.xVelocity, obj.yVelocity);
   return 0;
 };
 
-const takeSnapshot = (event: TimeStampedObject): Snapshot => {
+const takeMovingAverageSnapshot = (
+  obj: MovingAverage,
+): MovingAverageSnapshot => ({
+  value: Math.round(obj.peek() * 100) / 100,
+  average: Math.round(obj.value * 100) / 100,
+  deviation: Math.round(obj.deviation * 100) / 100,
+});
+
+const takeXSnapshot = (
+  obj: TimeStampedObject,
+): number | MovingAverageSnapshot | undefined =>
+  'x' in obj
+    ? typeof obj.x === 'number'
+      ? obj.x
+      : takeMovingAverageSnapshot(obj.x)
+    : undefined;
+
+const takeYSnapshot = (
+  obj: TimeStampedObject,
+): number | MovingAverageSnapshot | undefined =>
+  'y' in obj
+    ? typeof obj.y === 'number'
+      ? obj.y
+      : takeMovingAverageSnapshot(obj.y)
+    : undefined;
+
+const takeVSnapshot = (
+  obj: TimeStampedObject,
+): MovingAverageSnapshot | undefined =>
+  'v' in obj ? takeMovingAverageSnapshot(obj.v) : undefined;
+
+const takeTimeStampSnapshot = (obj: TimeStampedObject): number =>
+  Math.round(
+    'timeStamp' in obj
+      ? obj.timeStamp
+      : 'event' in obj
+      ? obj.event.timeStamp
+      : obj.time,
+  );
+
+const takeSnapshot = (obj: TimeStampedObject): Snapshot => {
   return {
-    eventType: event.type,
-    gesturing: getGesturing(event),
-    timeStamp: getTimeStamp(event),
-    delta: getDelta(event),
+    eventType: takeEventTypeSnapshot(obj),
+    timeStamp: takeTimeStampSnapshot(obj),
+    state: takeStateSnapshot(obj),
+    delta: takeDeltaSnapshot(obj),
+    x: takeXSnapshot(obj),
+    y: takeYSnapshot(obj),
+    v: takeVSnapshot(obj),
   };
 };
 
@@ -188,7 +273,7 @@ const reduceGestureVisualizerState = (
         id: action.payload,
         data: [],
         initialTimeStamp: 0,
-        lastTimeStamp: 1000,
+        lastTimeStamp: 0,
       };
     }
     case ADD_SNAPSHOT: {
@@ -213,14 +298,14 @@ const reduceGestureVisualizerState = (
 
 function useGestureData(
   id: string,
-): [GestureVisualizerState, (event: TimeStampedObject) => void] {
+): [GestureVisualizerState, (obj: TimeStampedObject) => void] {
   const [state, dispatch] = useReducer(
     reduceGestureVisualizerState,
     null,
     () => ({
       id,
       initialTimeStamp: 0,
-      lastTimeStamp: 1000,
+      lastTimeStamp: 0,
       data: [],
     }),
   );
@@ -231,8 +316,8 @@ function useGestureData(
     }
   }, [id]);
 
-  const handleEvent = useCallback((event: TimeStampedObject) => {
-    dispatch({type: ADD_SNAPSHOT, payload: takeSnapshot(event)});
+  const handleEvent = useCallback((obj: TimeStampedObject) => {
+    dispatch({type: ADD_SNAPSHOT, payload: takeSnapshot(obj)});
   }, []);
 
   return [state, handleEvent];

@@ -14,14 +14,14 @@ export interface EventAreasProps {
 }
 
 function groupDataByGesture(series: GestureVisualizerState): Snapshot[][] {
-  if (!series.data.length || series.data[0].gesturing == null) {
+  if (!series.data.length || series.data[0].state?.gesturing == null) {
     return [series.data];
   }
   const regions: Snapshot[][] = [];
   let wasGesturing = false;
   let region: Snapshot[] | null = null;
   for (const snapshot of series.data) {
-    if (!wasGesturing && snapshot.gesturing) {
+    if (!wasGesturing && snapshot.state?.gesturing) {
       if (region) {
         throw new Error(
           `Unexpected gesture region start; A region was already started!`,
@@ -29,14 +29,14 @@ function groupDataByGesture(series: GestureVisualizerState): Snapshot[][] {
       }
       region = [snapshot];
       regions.push(region);
-    } else if (wasGesturing && snapshot.gesturing) {
+    } else if (wasGesturing && snapshot.state?.gesturing) {
       if (!region) {
         throw new Error(
           `Unexpected gesture region end; No region was started!`,
         );
       }
       region.push(snapshot);
-    } else if (wasGesturing && !snapshot.gesturing) {
+    } else if (wasGesturing && !snapshot.state?.gesturing) {
       if (!region) {
         throw new Error(
           `Unexpected gesture region end; No region was started!`,
@@ -45,7 +45,7 @@ function groupDataByGesture(series: GestureVisualizerState): Snapshot[][] {
       region.push(snapshot);
       region = null;
     }
-    wasGesturing = Boolean(snapshot.gesturing);
+    wasGesturing = Boolean(snapshot.state?.gesturing);
   }
   return regions;
 }

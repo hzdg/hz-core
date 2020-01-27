@@ -12,7 +12,12 @@ import {localPoint} from '@vx/event';
 import {scaleQuantize} from '@vx/scale';
 import {ScaleLinear, ScaleOrdinal, ScaleQuantize} from 'd3-scale';
 import {bisector} from 'd3-array';
-import {Snapshot, GestureVisualizerState} from './GestureVisualizer';
+import {
+  Snapshot,
+  GestureVisualizerState,
+  MovingAverageSnapshot,
+  SnapshotState,
+} from './GestureVisualizer';
 
 interface TooltipState {
   label: string;
@@ -141,31 +146,67 @@ function TooltipDataField({
   value,
 }: {
   name: string;
-  value: string | number | boolean;
+  value: string | number | boolean | MovingAverageSnapshot | SnapshotState;
 }): JSX.Element {
   return (
-    <Fragment>
-      <dt style={{margin: 0, fontWeight: 'bold', textAlign: 'right'}}>
+    <tr>
+      <td
+        style={{fontWeight: 'bold', textAlign: 'right', paddingRight: '0.5em'}}
+      >
         {name}
-      </dt>
-      <dd style={{marginLeft: '1em'}}>{JSON.stringify(value)}</dd>
-    </Fragment>
+      </td>
+      {typeof value === 'object' ? (
+        Object.entries(value).map(([key, nestedValue]) =>
+          nestedValue === false ? null : nestedValue === true ? (
+            <td key={key}>{key}</td>
+          ) : (
+            <td key={key}>{JSON.stringify(nestedValue)}</td>
+          ),
+        )
+      ) : (
+        <td>{JSON.stringify(value)}</td>
+      )}
+    </tr>
   );
 }
 
 function TooltipData(props: TooltipState): JSX.Element {
+  const hasMovingAverage =
+    typeof props.data.x === 'object' ||
+    typeof props.data.y === 'object' ||
+    typeof props.data.v === 'object';
+
   return (
     <figure style={{margin: '0.5em'}}>
       <h3 style={{textAlign: 'center', margin: '0.5em'}}>
         {formatLabel(props.label)}
       </h3>
-      <dl style={{display: 'grid', gridTemplateColumns: '1fr 1fr', margin: 0}}>
-        {props.data.gesturing != null && (
-          <TooltipDataField name="gesturing" value={props.data.gesturing} />
-        )}
-        <TooltipDataField name="timeStamp" value={props.data.timeStamp} />
-        <TooltipDataField name="delta" value={props.data.delta} />
-      </dl>
+      <table>
+        <tbody>
+          <TooltipDataField name="timeStamp" value={props.data.timeStamp} />
+          <TooltipDataField name="delta" value={props.data.delta} />
+          {typeof props.data.state === 'object' && (
+            <TooltipDataField name="state" value={props.data.state} />
+          )}
+        </tbody>
+      </table>
+      {hasMovingAverage && (
+        <table>
+          <thead>
+            <tr>
+              <th></th>
+              <th style={{paddingRight: '0.5em'}}>value</th>
+              <th style={{paddingRight: '0.5em'}}>average</th>
+              <th>deviation</th>
+            </tr>
+          </thead>
+          <tbody>
+            {props.data.x && <TooltipDataField name="x" value={props.data.x} />}
+            {props.data.y && <TooltipDataField name="y" value={props.data.y} />}
+            {props.data.v && <TooltipDataField name="t" value={props.data.v} />}
+          </tbody>
+        </table>
+      )}
     </figure>
   );
 }
@@ -193,8 +234,8 @@ export default function TooltipArea({
   allSeries,
   onTooltipChange,
 }: TooltipAreaProps): JSX.Element {
-  const translateX = useTranslateScale(width, '0%', '-50%', '-100%');
-  const translateY = useTranslateScale(height, '10%', '-110%');
+  const translateX = useTranslateScale(width, '10%', '-110%');
+  const translateY = useTranslateScale(height, '10%', '-50%', '-110%');
   const [tooltip, showTooltip] = useState<TooltipState | null>(null);
   const hideTooltip = useCallback(() => showTooltip(null), []);
   useEffect(() => {

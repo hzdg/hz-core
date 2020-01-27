@@ -32,6 +32,7 @@ export type WheelGestureConfig = wheel.WheelGestureConfig;
 export type WheelGestureState = wheel.WheelGestureState;
 export type WheelGestureEndState = wheel.WheelGestureEndState;
 export type WheelGestureHandler = wheel.WheelGestureHandler;
+export type WheelGestureEventDebug = GestureObservable.WheelGestureEventDebug;
 
 export type GestureConfig = gesture.GestureConfig;
 export type GestureState = gesture.GestureState;
