@@ -36,7 +36,7 @@ type KeyboardDownEventInit = UnnormalizedKeyboardEventInit & {
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
 interface KeyboardDownSequence extends Omit<KeyboardSequence, 'down'> {
-  repeat(): KeyboardDownSequence;
+  repeat(count?: number): KeyboardDownSequence;
   up(): KeyboardSequence;
 }
 
@@ -96,8 +96,14 @@ export default class KeyboardSequence extends EventSequence<
       downOpts,
     ).expose({
       down: false,
-      repeat: (): KeyboardDownSequence =>
-        downSequence.dispatch(KEY_DOWN, {repeat: true}),
+      repeat(count = 1): KeyboardDownSequence {
+        if (count <= 0) throw new Error('count must be a positive integer!');
+        let d = downSequence;
+        for (let i = 0; i < count; i++) {
+          d = downSequence.dispatch(KEY_DOWN, {repeat: true});
+        }
+        return d;
+      },
       up: (): KeyboardSequence => this.dispatch(KEY_UP),
     });
     return downSequence;

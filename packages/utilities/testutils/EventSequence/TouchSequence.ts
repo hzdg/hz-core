@@ -18,8 +18,14 @@ type UnnormalizedTouchEventInit = TouchEventInit & {
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
+interface TouchMoveSequence extends Omit<TouchSequence, 'start'> {
+  repeat(count?: number): TouchMoveSequence;
+  move(opts?: UnnormalizedTouchEventInit): TouchMoveSequence;
+  end(): TouchSequence;
+}
+
 interface TouchStartSequence extends Omit<TouchSequence, 'start'> {
-  move(opts?: UnnormalizedTouchEventInit): TouchStartSequence;
+  move(opts?: UnnormalizedTouchEventInit): TouchMoveSequence;
   end(): TouchSequence;
 }
 
@@ -140,8 +146,25 @@ export default class TouchSequence extends EventSequence<
   ): TouchStartSequence {
     const startSequence = this.dispatch(TOUCH_START, startOpts).expose({
       start: false,
-      move: (moveOpts: UnnormalizedTouchEventInit) =>
-        startSequence.dispatch(TOUCH_MOVE, moveOpts),
+      move(moveOpts: UnnormalizedTouchEventInit): TouchMoveSequence {
+        const moveSequence = startSequence
+          .dispatch(TOUCH_MOVE, moveOpts)
+          .expose({
+            repeat(count = 1): TouchMoveSequence {
+              if (count <= 0)
+                throw new Error('count must be a positive integer!');
+              let seq = moveSequence;
+              const eventToRepeat = seq.eventQueue[seq.eventQueue.length - 1];
+              if (eventToRepeat) {
+                for (let i = 0; i < count; i++) {
+                  seq = seq.dispatch(...eventToRepeat);
+                }
+              }
+              return seq;
+            },
+          });
+        return moveSequence;
+      },
       end: () => this.dispatch(TOUCH_END),
     });
     return startSequence;

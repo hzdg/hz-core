@@ -49,9 +49,10 @@ export default class EventSequence<
     return this;
   }
 
-  expose<E extends Extensions>(
+  expose<T extends object, E extends Extensions>(
+    this: T,
     extensions: E,
-  ): Pick<this, Exclude<keyof this, keyof E>> & PickType<E, Function> {
+  ): Pick<T, Exclude<keyof T, keyof E>> & PickType<E, Function> {
     const extended = Object.assign(Object.create(this), extensions);
     for (const key in extensions) {
       if (key === 'dispatch' || key === 'expose' || key === 'run') continue;

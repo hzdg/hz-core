@@ -10,6 +10,10 @@ type WheelDeltaMode =
   | typeof DOM_DELTA_LINE
   | typeof DOM_DELTA_PAGE;
 
+interface WheelSubsequence extends WheelSequence {
+  repeat(count?: number): WheelSubsequence;
+}
+
 const DEFAULT_WHEEL_EVENT_INIT = {
   deltaX: 0,
   deltaY: 1,
@@ -77,8 +81,23 @@ export default class WheelSequence extends EventSequence<
       ),
     );
   }
-  wheel(wheelOpts?: WheelEventInit): WheelSequence {
-    const downSequence: WheelSequence = this.dispatch(WHEEL, wheelOpts);
-    return downSequence;
+  wheel(wheelOpts?: WheelEventInit): WheelSubsequence {
+    const subsequence: WheelSubsequence = this.dispatch(
+      WHEEL,
+      wheelOpts,
+    ).expose({
+      repeat(count = 1): WheelSubsequence {
+        if (count <= 0) throw new Error('count must be a positive integer!');
+        let seq = subsequence;
+        const eventToRepeat = seq.eventQueue[seq.eventQueue.length - 1];
+        if (eventToRepeat) {
+          for (let i = 0; i < count; i++) {
+            seq = seq.dispatch(...eventToRepeat);
+          }
+        }
+        return seq;
+      },
+    });
+    return subsequence;
   }
 }

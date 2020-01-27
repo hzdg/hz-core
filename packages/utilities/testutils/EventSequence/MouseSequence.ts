@@ -12,8 +12,14 @@ type UnnormalizedMouseEventInit = MouseEventInit & {
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
+interface MouseMoveSequence extends Omit<MouseSequence, 'down'> {
+  repeat(count?: number): MouseMoveSequence;
+  move(opts?: UnnormalizedMouseEventInit): MouseMoveSequence;
+  up(): MouseSequence;
+}
+
 interface MouseDownSequence extends Omit<MouseSequence, 'down'> {
-  move(opts?: UnnormalizedMouseEventInit): MouseDownSequence;
+  move(opts?: UnnormalizedMouseEventInit): MouseMoveSequence;
   up(): MouseSequence;
 }
 
@@ -82,8 +88,25 @@ export default class MouseSequence extends EventSequence<
   down(downOpts?: UnnormalizedMouseEventInit): MouseDownSequence {
     const downSequence = this.dispatch(MOUSE_DOWN, downOpts).expose({
       down: false,
-      move: (moveOpts: UnnormalizedMouseEventInit) =>
-        downSequence.dispatch(MOUSE_MOVE, moveOpts),
+      move(moveOpts: UnnormalizedMouseEventInit): MouseMoveSequence {
+        const moveSequence = downSequence
+          .dispatch(MOUSE_MOVE, moveOpts)
+          .expose({
+            repeat(count = 1): MouseMoveSequence {
+              if (count <= 0)
+                throw new Error('count must be a positive integer!');
+              let seq = moveSequence;
+              const eventToRepeat = seq.eventQueue[seq.eventQueue.length - 1];
+              if (eventToRepeat) {
+                for (let i = 0; i < count; i++) {
+                  seq = seq.dispatch(...eventToRepeat);
+                }
+              }
+              return seq;
+            },
+          });
+        return moveSequence;
+      },
       up: () => this.dispatch(MOUSE_UP),
     });
     return downSequence;

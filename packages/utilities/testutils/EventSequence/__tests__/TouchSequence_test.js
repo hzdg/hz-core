@@ -16,21 +16,37 @@ test('TouchSequence.start() reveals subsequence', async () => {
   let sequence = TouchSequence.create(node);
 
   expect(sequence).not.toHaveProperty('move', expect.any(Function));
+  expect(sequence).not.toHaveProperty('repeat', expect.any(Function));
   expect(sequence).not.toHaveProperty('end', expect.any(Function));
 
   sequence = sequence.start();
   expect(sequence).not.toHaveProperty('start', expect.any(Function));
+  expect(sequence).not.toHaveProperty('repeat', expect.any(Function));
   expect(sequence).toHaveProperty('move', expect.any(Function));
   expect(sequence).toHaveProperty('end', expect.any(Function));
 
   sequence = sequence.move();
   expect(sequence).not.toHaveProperty('start', expect.any(Function));
   expect(sequence).toHaveProperty('move', expect.any(Function));
+  expect(sequence).toHaveProperty('repeat', expect.any(Function));
+  expect(sequence).toHaveProperty('end', expect.any(Function));
+
+  sequence = sequence.repeat();
+  expect(sequence).not.toHaveProperty('start', expect.any(Function));
+  expect(sequence).toHaveProperty('move', expect.any(Function));
+  expect(sequence).toHaveProperty('repeat', expect.any(Function));
+  expect(sequence).toHaveProperty('end', expect.any(Function));
+
+  sequence = sequence.repeat(2);
+  expect(sequence).not.toHaveProperty('start', expect.any(Function));
+  expect(sequence).toHaveProperty('move', expect.any(Function));
+  expect(sequence).toHaveProperty('repeat', expect.any(Function));
   expect(sequence).toHaveProperty('end', expect.any(Function));
 
   sequence = sequence.end();
   expect(sequence).toHaveProperty('start', expect.any(Function));
   expect(sequence).not.toHaveProperty('move', expect.any(Function));
+  expect(sequence).not.toHaveProperty('repeat', expect.any(Function));
   expect(sequence).not.toHaveProperty('end', expect.any(Function));
 
   await sequence.then(handler);
@@ -39,10 +55,13 @@ test('TouchSequence.start() reveals subsequence', async () => {
   node.removeEventListener('touchmove', handler);
   node.removeEventListener('touchend', handler);
 
-  expect(handler).toHaveBeenCalledTimes(4);
+  expect(handler).toHaveBeenCalledTimes(7);
 
   const expectedOrder = [
     expect.objectContaining({type: 'touchstart'}),
+    expect.objectContaining({type: 'touchmove'}),
+    expect.objectContaining({type: 'touchmove'}),
+    expect.objectContaining({type: 'touchmove'}),
     expect.objectContaining({type: 'touchmove'}),
     expect.objectContaining({type: 'touchend'}),
   ];
@@ -55,16 +74,21 @@ test('TouchSequence.start() reveals subsequence', async () => {
   expect(handler).toHaveBeenLastCalledWith(expectedOrder);
 });
 
-test('TouchSequence.move().end() builds on initialized start()', async () => {
+test('TouchSequence.move().repeat().end() builds on initialized start()', async () => {
   const result = await TouchSequence.create(document.createElement('div'))
     .start()
     .move({x: 5, y: 3})
+    .repeat()
     .end();
 
   expect(result).toEqual([
     expect.objectContaining({
       type: 'touchstart',
       touches: [expect.objectContaining({clientX: 0, clientY: 0})],
+    }),
+    expect.objectContaining({
+      type: 'touchmove',
+      touches: [expect.objectContaining({clientX: 5, clientY: 3})],
     }),
     expect.objectContaining({
       type: 'touchmove',
