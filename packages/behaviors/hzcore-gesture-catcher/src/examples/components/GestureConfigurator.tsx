@@ -55,7 +55,6 @@ function reduceGestureConfig(
     }
     case 'preventDefault': {
       const preventDefault = target.checked;
-      console.log('hello', {preventDefault});
       if (preventDefault !== state.preventDefault) {
         return {...state, preventDefault};
       }
@@ -63,7 +62,6 @@ function reduceGestureConfig(
     }
     case 'passive': {
       const passive = target.checked;
-      console.log('hello', {passive});
       if (passive !== state.passive) {
         return {...state, passive};
       }
