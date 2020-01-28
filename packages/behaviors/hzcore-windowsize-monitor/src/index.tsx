@@ -38,7 +38,7 @@ const getWindowSize = ({
   return {width: initialWidth, height: initialHeight};
 };
 
-const windowSizeSubscribers = new Set();
+const windowSizeSubscribers = new Set<() => void>();
 
 const dispatchWindowSizeChange = (): void => {
   windowSizeSubscribers.forEach(cb => cb());
