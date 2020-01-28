@@ -133,15 +133,15 @@ type PageGestureState =
 export type PageGestureRenderProps =
   | (PageGestureState & {
       /**
-       * A callback ref that should be passed to an underlying DOM node.
+       * A ref that should be passed to an underlying DOM node.
        */
-      gestureRef: (node: HTMLElement | null) => void;
+      gestureRef: React.Ref<HTMLElement | null>;
     })
   | {
       /**
-       * A callback ref that should be passed to an underlying DOM node.
+       * A ref that should be passed to an underlying DOM node.
        */
-      gestureRef: (node: HTMLElement | null) => void;
+      gestureRef: React.Ref<HTMLElement | null>;
     };
 
 function pageGestureStateReducer(
