@@ -1,6 +1,7 @@
 import React, {Fragment} from 'react';
 import {AreaClosed} from '@vx/shape';
 import {curveMonotoneX} from '@vx/curve';
+import {ScaleType} from '@vx/scale';
 import {ScaleLinear} from 'd3-scale';
 import {GestureVisualizerState, Snapshot} from './GestureVisualizer';
 
@@ -68,7 +69,7 @@ export default function EventAreas({
           x={d => timeStampScale(d.timeStamp)}
           y0={d => height - deltaScale(d.delta) * yFactor}
           y1={height}
-          yScale={deltaScale}
+          yScale={deltaScale as ScaleType}
           curve={curveMonotoneX}
           fill={fillColor}
         />
