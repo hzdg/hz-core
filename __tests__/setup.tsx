@@ -8,7 +8,7 @@ import chalk from 'chalk';
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
-    interface Matchers<R> {
+    interface Matchers<R, T> {
       /**
        * Check that a package JSON object has the specified dependency.
        */
