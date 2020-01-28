@@ -112,7 +112,7 @@ export interface Subscribe {
  * Returns a `Subscribe` function that is called with an `EventListener`
  * and returns an `Unsubscribe` callback.
  */
-export function useSubscribableEvent<T extends EventTarget>(
+export function useSubscribableEvent<T extends EventTarget | null>(
   /**
    * A ref to a DOM `EventTarget`.
    * This is the target that can emit events of the type specified by `event`.
@@ -137,7 +137,7 @@ export function useSubscribableEvent<T extends EventTarget>(
   // on every subsequent render.
   const [subscribers] = useState(() => new Map<EventListener, boolean>());
   const [listeners] = useState(
-    () => new Map<EventTarget, (force?: boolean) => void>(),
+    () => new Map<NonNullable<T>, (force?: boolean) => void>(),
   );
 
   const forceUpdate = useForceUpdate();
@@ -183,9 +183,10 @@ export function useSubscribableEvent<T extends EventTarget>(
      * already listening, or if there are no subscribers, it will do nothing.
      */
     function addListenerIfNecessary() {
-      const eventTarget = ref.current;
+      if (!ref.current) return;
+      const eventTarget = ref.current as NonNullable<T>;
       const eventOptions = listenerOptions.current;
-      if (eventTarget && !listeners.has(eventTarget) && subscribers.size > 0) {
+      if (!listeners.has(eventTarget) && subscribers.size > 0) {
         eventTarget.addEventListener(event, handleEvent, eventOptions);
         listeners.set(
           eventTarget,
@@ -256,7 +257,7 @@ const LISTENER_OPTIONS: AddEventListenerOptions = {passive: true};
  * A memoized version of the `listener` callback will be used
  * until one of the `inputs` has changed.
  */
-export function useScrollEffect<T extends EventTarget>(
+export function useScrollEffect<T extends EventTarget | null>(
   scrollRef: React.RefObject<T>,
   listener: EventListener,
   deps: unknown[],
