@@ -59,7 +59,9 @@ export default function EventAreas({
   yFactor,
   height,
 }: EventAreasProps): JSX.Element {
-  const gestures = groupDataByGesture(series);
+  const gestures = series.continuous
+    ? [series.data]
+    : groupDataByGesture(series);
   return (
     <Fragment>
       {gestures.map((data, index) => (

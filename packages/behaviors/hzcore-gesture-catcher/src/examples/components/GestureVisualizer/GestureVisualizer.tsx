@@ -47,6 +47,7 @@ export interface Snapshot {
 
 export interface GestureVisualizerState {
   readonly id: string;
+  readonly continuous: boolean;
   readonly data: Snapshot[];
   readonly initialTimeStamp: number;
   readonly lastTimeStamp: number;
@@ -89,7 +90,7 @@ interface AddSnapshotAction {
 
 interface ResetAction {
   type: typeof RESET;
-  payload: string;
+  payload: {id: string; continuous: boolean};
 }
 
 function timeExtent(
@@ -270,7 +271,8 @@ const reduceGestureVisualizerState = (
   switch (action.type) {
     case RESET: {
       return {
-        id: action.payload,
+        id: action.payload.id,
+        continuous: action.payload.continuous,
         data: [],
         initialTimeStamp: 0,
         lastTimeStamp: 0,
@@ -298,12 +300,14 @@ const reduceGestureVisualizerState = (
 
 function useGestureData(
   id: string,
+  continuous?: boolean,
 ): [GestureVisualizerState, (obj: TimeStampedObject) => void] {
   const [state, dispatch] = useReducer(
     reduceGestureVisualizerState,
     null,
     () => ({
       id,
+      continuous: Boolean(continuous),
       initialTimeStamp: 0,
       lastTimeStamp: 0,
       data: [],
@@ -312,9 +316,9 @@ function useGestureData(
 
   useEffect(() => {
     if (id != null) {
-      dispatch({type: RESET, payload: id});
+      dispatch({type: RESET, payload: {id, continuous: Boolean(continuous)}});
     }
-  }, [id]);
+  }, [id, continuous]);
 
   const handleEvent = useCallback((obj: TimeStampedObject) => {
     dispatch({type: ADD_SNAPSHOT, payload: takeSnapshot(obj)});
@@ -328,7 +332,7 @@ export function useGestureVisualizer(
 ): [GestureHandler, {data: GestureVisualizerState[]; onClick: () => void}] {
   const [id, setId] = useState(0);
   const onClick = useCallback(() => setId(v => v + 1), [setId]);
-  const [eventData, eventHandler] = useGestureData(`${inputType}-${id}`);
+  const [eventData, eventHandler] = useGestureData(`${inputType}-${id}`, true);
   const [gestureData, gestureHandler] = useGestureData(`Gesture State-${id}`);
   const gestureHandlers = useMemo(
     () => ({

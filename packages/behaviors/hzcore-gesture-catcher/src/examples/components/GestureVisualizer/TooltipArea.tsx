@@ -203,7 +203,7 @@ function TooltipData(props: TooltipState): JSX.Element {
           <tbody>
             {props.data.x && <TooltipDataField name="x" value={props.data.x} />}
             {props.data.y && <TooltipDataField name="y" value={props.data.y} />}
-            {props.data.v && <TooltipDataField name="t" value={props.data.v} />}
+            {props.data.v && <TooltipDataField name="v" value={props.data.v} />}
           </tbody>
         </table>
       )}
