@@ -1,5 +1,5 @@
 import {ensureDOMInstance} from '@hzcore/dom-utils';
-import {Source} from 'callbag';
+import {Source, Sink} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
 import scan from 'callbag-scan';
@@ -9,25 +9,32 @@ import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import createSubject from 'callbag-subject';
 import asObservable, {DebugObservable} from './asObservable';
-import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
-import {parseConfig, ObservableConfig, DebugConfig} from './ObservableConfig';
+import {HORIZONTAL, VERTICAL} from './Orientation';
+import {parseConfig, ObservableConfig} from './ObservableConfig';
 import MovingAverage from './MovingAverage';
+
+type Subject<T> = Source<T> & Sink<T>;
 
 export {HORIZONTAL, VERTICAL};
 
 export const WHEEL = 'wheel';
 export const GESTURE_END = 'gestureend';
+const UNBLOCK = 'UNBLOCK';
 
 /**
  * Configuration for a WheelGestureObservable.
  */
-export type WheelGestureObservableConfig = ObservableConfig;
+export interface WheelGestureObservableConfig extends ObservableConfig {
+  velocityThreshold?: number;
+  velocityDeviationThreshold?: number;
+}
 
 /**
  * How long to wait for additional intentional events
  * before ending a gesture.
  */
-const GESTURE_END_TIMEOUT = 140;
+const GESTURE_END_TIMEOUT_MIN = 35;
+const GESTURE_END_TIMEOUT_MAX = 140;
 /**
  * The lower bound on the average intentional event delta.
  * When the average delta is smaller than this, incoming
@@ -97,21 +104,6 @@ export interface WheelGestureEvent extends WheelEvent {
 }
 
 /**
- * A payload for debugging wheel gestures.
- *
- * This is the payload passed to the `__debug` gesture handler.
- */
-export interface WheelGestureEventDebug {
-  event: WheelGestureEvent;
-  gesturing: boolean;
-  blocked: boolean;
-  canceled: boolean;
-  x: MovingAverage;
-  y: MovingAverage;
-  v: MovingAverage;
-}
-
-/**
  * An event assocated with the end of a wheel gesture.
  * This is needed for wheel gestures because
  * there is nothing that natively represents 'wheel end'.
@@ -120,6 +112,14 @@ export interface GestureEndEvent {
   type: typeof GESTURE_END;
   timeStamp: number;
 }
+
+interface UnblockEvent {
+  type: typeof UNBLOCK;
+}
+
+const isGestureEndEvent = (
+  event: {type?: string | null} | null,
+): event is GestureEndEvent => event?.type === GESTURE_END;
 
 // Based on https://github.com/facebookarchive/fixed-data-table/blob/3a9bf3/src/vendor_upstream/dom/normalizeWheel.js
 function normalizeWheel(event: UnnormalizedWheelEvent): WheelGestureEvent {
@@ -240,7 +240,7 @@ export interface WheelGestureEndState extends WheelGestureBaseState {
   type: typeof GESTURE_END;
 }
 
-const DEFAULT_INITIAL_STATE: WheelGestureBaseState = {
+const INITIAL_GESTURE_STATE: WheelGestureBaseState = {
   x: 0,
   y: 0,
   xSpin: 0,
@@ -261,7 +261,7 @@ const DEFAULT_INITIAL_STATE: WheelGestureBaseState = {
   elapsed: 0,
 };
 
-function reduceGestureState(
+function updateGestureState(
   state: WheelGestureBaseState,
   event: WheelGestureEvent | GestureEndEvent,
 ): WheelGestureBaseState | WheelGestureState | WheelGestureEndState {
@@ -323,12 +323,62 @@ function reduceGestureState(
   throw new Error(`Could not handle event ${event}`);
 }
 
-function shouldGesture(
-  x: MovingAverage,
-  y: MovingAverage,
-  threshold?: number,
-  orientation?: Orientation,
-): boolean {
+/**
+ * A payload for debugging wheel gestures.
+ *
+ * This is the payload passed to the `__debug` gesture handler.
+ */
+export interface WheelGestureEventSourceState
+  extends WheelGestureObservableConfig {
+  event?: WheelGestureEvent;
+  x: MovingAverage;
+  y: MovingAverage;
+  v: MovingAverage;
+  t: MovingAverage;
+  endTimeout: NodeJS.Timeout | null;
+  blockedTimeout: NodeJS.Timeout | null;
+  gesturing: boolean;
+  canceled: boolean;
+  blocked: boolean;
+  lastTimestamp: number | null;
+}
+
+type EventSource = Source<WheelGestureEventSourceState>;
+type GestureSource = Source<WheelGestureState | WheelGestureEndState>;
+type MaybeConfig = Partial<WheelGestureObservableConfig> | null;
+type ActionsSubject = Subject<GestureEndEvent | UnblockEvent>;
+
+const extractEvent = ({
+  event,
+}: WheelGestureEventSourceState): WheelGestureEvent =>
+  event as WheelGestureEvent;
+
+function initSourceState(
+  config: WheelGestureObservableConfig,
+): WheelGestureEventSourceState {
+  const state = {
+    x: new MovingAverage({size: 6, weight: -1}),
+    y: new MovingAverage({size: 6, weight: -1}),
+    v: new MovingAverage({size: 6, weight: -1}),
+    t: new MovingAverage({size: 6, weight: 0, round: true}),
+    endTimeout: null,
+    blockedTimeout: null,
+    gesturing: false,
+    canceled: false,
+    blocked: false,
+    lastTimestamp: null,
+    ...config,
+  };
+  state.t.push(GESTURE_END_TIMEOUT_MAX);
+  return state;
+}
+
+function shouldGesture({
+  x,
+  y,
+  threshold,
+  orientation,
+}: WheelGestureEventSourceState): boolean {
   if (!threshold) return true;
   if (orientation === VERTICAL || Math.abs(y.delta) > Math.abs(x.delta)) {
     return Math.abs(y.delta) > threshold;
@@ -337,12 +387,12 @@ function shouldGesture(
   }
 }
 
-function shouldCancel(
-  x: MovingAverage,
-  y: MovingAverage,
-  threshold?: number,
-  orientation?: Orientation,
-): boolean {
+function shouldCancel({
+  x,
+  y,
+  threshold,
+  orientation,
+}: WheelGestureEventSourceState): boolean {
   if (threshold && orientation) {
     switch (orientation) {
       case VERTICAL: {
@@ -360,6 +410,117 @@ function shouldCancel(
   return false;
 }
 
+function shouldBlock({
+  v,
+  velocityThreshold,
+  velocityDeviationThreshold,
+}: WheelGestureEventSourceState): boolean {
+  let block = false;
+  if (velocityThreshold || velocityDeviationThreshold) {
+    block = v.rolling;
+    if (block && velocityThreshold) block = v.value < velocityThreshold;
+    if (block && velocityDeviationThreshold)
+      block = v.deviation < velocityDeviationThreshold;
+  }
+  return block;
+}
+
+function shouldPreventDefault({
+  event,
+  preventDefault,
+  passive,
+}: WheelGestureEventSourceState): boolean {
+  return (
+    event?.originalEvent instanceof WheelEvent &&
+    event.originalEvent.type === WHEEL &&
+    preventDefault &&
+    !passive &&
+    !event.originalEvent.defaultPrevented &&
+    typeof event.originalEvent.preventDefault === 'function'
+  );
+}
+
+function updateSourceState(
+  state: WheelGestureEventSourceState,
+  action: WheelGestureEvent | GestureEndEvent | UnblockEvent,
+): WheelGestureEventSourceState {
+  if (action.type === UNBLOCK) {
+    state.blocked = false;
+  } else if (action.type === GESTURE_END) {
+    const wasGesturing = state.gesturing;
+    if (wasGesturing || state.canceled) {
+      state.x.reset();
+      state.y.reset();
+      state.v.reset();
+      state.t.reset();
+      state.t.push(GESTURE_END_TIMEOUT_MAX);
+      state.lastTimestamp = null;
+      state.gesturing = false;
+      state.canceled = false;
+    }
+  } else {
+    state.event = action;
+    state.v.push(
+      Math.hypot(
+        isNaN(state.x.peek()) ? 0 : action.spinX - state.x.peek(),
+        isNaN(state.y.peek()) ? 0 : action.spinY - state.y.peek(),
+      ),
+    );
+    state.x.push(action.spinX);
+    state.y.push(action.spinY);
+
+    if (state.lastTimestamp) {
+      state.t.push(
+        Math.min(
+          GESTURE_END_TIMEOUT_MAX,
+          Math.max(
+            GESTURE_END_TIMEOUT_MIN,
+            (action.timeStamp - state.lastTimestamp) * 2,
+          ),
+        ),
+      );
+    }
+    state.lastTimestamp = action.timeStamp;
+
+    if (state.blocked || state.canceled) return state;
+
+    state.gesturing = state.gesturing || shouldGesture(state);
+    if (!state.gesturing) {
+      state.canceled = shouldCancel(state);
+    } else {
+      state.blocked = shouldBlock(state);
+    }
+  }
+  return state;
+}
+
+function createEventSource(
+  /** The state update action stream. */
+  actions: ActionsSubject,
+  /** The DOM element to observe for wheel events. */
+  element: Element,
+  /** Configuration for the wheel gesture source. */
+  config?: MaybeConfig,
+): EventSource {
+  // Make sure we have a DOM element to observe.
+  ensureDOMInstance(element, Element);
+  // Parse and extract the config (with defaults).
+  const parsedConfig = parseConfig<WheelGestureObservableConfig>({
+    ...config,
+    velocityThreshold: config?.velocityThreshold ?? VELOCITY_THRESHOLD,
+    velocityDeviationThreshold:
+      config?.velocityDeviationThreshold ?? VELOCITY_DEVIATION_THRESHOLD,
+  });
+  const eventSource = pipe(
+    fromEvent(element, WHEEL, {passive: parsedConfig.passive}),
+    map(normalizeWheel),
+  );
+  return pipe(
+    merge(eventSource, actions),
+    scan(updateSourceState, initSourceState(parsedConfig)),
+  );
+}
+
 /**
  * A wheel gesture callbag source.
  */
@@ -367,161 +528,105 @@ export function createSource(
   /** The DOM element to observe for wheel events. */
   element: Element,
   /** Configuration for the wheel gesture source. */
-  config?: Partial<WheelGestureObservableConfig> | null,
-): Source<WheelGestureState | WheelGestureEndState>;
+  config?: MaybeConfig,
+): GestureSource;
 export function createSource(
-  /** The DOM element to observe for wheel events. */
-  element: Element,
-  /** Configuration for debugging the wheel gesture source. */
-  config: DebugConfig,
-): Source<WheelGestureEventDebug>;
+  /** The gesture event source. */
+  source: EventSource,
+  /** The state update action stream. */
+  actions: ActionsSubject,
+): GestureSource;
 export function createSource(
-  element: Element,
-  config?: Partial<WheelGestureObservableConfig> | DebugConfig | null,
-):
-  | Source<WheelGestureState | WheelGestureEndState>
-  | Source<WheelGestureEventDebug> {
-  ensureDOMInstance(element, Element);
-  const {
-    threshold,
-    cancelThreshold,
-    preventDefault,
-    passive,
-    orientation,
-    __debug: isDebug,
-  } = parseConfig(config);
-
-  // State for the gesture source.
-  const x = new MovingAverage({size: 6});
-  const y = new MovingAverage({size: 6});
-  const v = new MovingAverage({size: 6});
-  let endTimeout: NodeJS.Timeout | null = null;
-  let gesturing = false;
-  let canceled = false;
-  let blocked = false;
-
-  const updateSourceState = (event: WheelGestureEvent): WheelGestureEvent => {
-    v.push(
-      Math.hypot(
-        isNaN(x.peek()) ? 0 : event.spinX - x.peek(),
-        isNaN(y.peek()) ? 0 : event.spinY - y.peek(),
-      ),
-    );
-    x.push(event.spinX);
-    y.push(event.spinY);
-
-    if (!canceled && !blocked) {
-      const wasGesturing = gesturing;
-      gesturing = gesturing || shouldGesture(x, y, threshold, orientation);
-      if (!gesturing) {
-        canceled = shouldCancel(x, y, cancelThreshold, orientation);
-      } else {
-        blocked =
-          wasGesturing &&
-          v.rolling &&
-          v.value < VELOCITY_THRESHOLD &&
-          v.deviation < VELOCITY_DEVIATION_THRESHOLD;
-      }
+  elementOrSource: Element | EventSource,
+  actionsOrConfig?: MaybeConfig | ActionsSubject,
+): GestureSource {
+  let source: EventSource;
+  let actions: ActionsSubject;
+  if (typeof elementOrSource === 'function') {
+    source = elementOrSource;
+    if (typeof actionsOrConfig !== 'function') {
+      throw new Error(
+        'an actions source is required when using an event source!',
+      );
     }
-
-    return event;
-  };
-
-  const eventSource = pipe(
-    fromEvent(element, WHEEL, {passive}),
-    map(normalizeWheel),
-    map(updateSourceState),
-  );
-
-  if (isDebug) {
-    return share(
-      pipe(
-        eventSource,
-        map(
-          (event: WheelGestureEvent): WheelGestureEventDebug => {
-            return {
-              event: event,
-              gesturing,
-              canceled,
-              blocked,
-              x,
-              y,
-              v,
-            };
-          },
-        ),
-      ),
+    actions = actionsOrConfig;
+  } else {
+    actions = createSubject<GestureEndEvent | UnblockEvent>();
+    source = createEventSource(
+      actions,
+      elementOrSource,
+      actionsOrConfig as MaybeConfig,
     );
   }
 
-  const endEvents = createSubject<GestureEndEvent>();
-
-  const gestureEnd = (): void => {
-    if (endTimeout) {
-      clearTimeout(endTimeout);
-      endTimeout = null;
-    }
-    const wasGesturing = gesturing;
-    if (wasGesturing || canceled || blocked) {
-      x.reset();
-      y.reset();
-      v.reset();
-      gesturing = false;
-      canceled = false;
-      blocked = false;
-      if (wasGesturing) {
-        endEvents(1, new WheelEvent(GESTURE_END) as GestureEndEvent);
-      }
-    }
+  const dispatch = (action: GestureEndEvent | UnblockEvent): void => {
+    actions(1, action);
   };
 
-  const scheduleGestureEnd = (): void => {
+  let endTimeout: NodeJS.Timeout | null = null;
+  let unblockTimeout: NodeJS.Timeout | null = null;
+  let lastEvent: WheelGestureEvent | undefined;
+
+  const dispatchEndEvent = (): void => {
     if (endTimeout) clearTimeout(endTimeout);
-    endTimeout = setTimeout(gestureEnd, GESTURE_END_TIMEOUT);
+    endTimeout = null;
+    dispatch(new WheelEvent(GESTURE_END, lastEvent) as GestureEndEvent);
   };
 
-  const shouldPreventDefault = (event: UnnormalizedWheelEvent): boolean => {
-    return (
-      event instanceof WheelEvent &&
-      event.type === WHEEL &&
-      preventDefault &&
-      !passive &&
-      !event.defaultPrevented &&
-      typeof event.preventDefault === 'function'
-    );
+  const dispatchUnblockEvent = (): void => {
+    if (unblockTimeout) clearTimeout(unblockTimeout);
+    unblockTimeout = null;
+    dispatch({type: UNBLOCK});
   };
 
-  const filterEvents = (event: WheelGestureEvent): boolean => {
-    if (canceled) {
+  const scheduleGestureEnd = (delay: number): void => {
+    if (endTimeout) clearTimeout(endTimeout);
+    endTimeout = setTimeout(dispatchEndEvent, delay);
+  };
+
+  const scheduleUnblock = (delay: number): void => {
+    if (unblockTimeout) clearTimeout(unblockTimeout);
+    unblockTimeout = setTimeout(dispatchUnblockEvent, delay);
+  };
+
+  const isGesturing = (sourceState: WheelGestureEventSourceState): boolean => {
+    lastEvent = sourceState.event;
+
+    if (sourceState.canceled) {
       // Debounce the cancel end timeout.
-      scheduleGestureEnd();
+      scheduleGestureEnd(sourceState.t.value);
       return false;
     }
 
-    if (gesturing && blocked) {
-      // We seem to be below the threshold for intentful gesturing,
-      // so end the gesture now, and block gesture detection
-      // until the current post-gesture activity ends.
-      gesturing = false;
-      endEvents(1, new WheelEvent(GESTURE_END, event) as GestureEndEvent);
+    if (shouldPreventDefault(sourceState)) {
+      sourceState.event?.originalEvent.preventDefault();
     }
 
-    if (gesturing || blocked) {
+    if (sourceState.blocked) {
+      if (sourceState.gesturing) {
+        // We seem to be below the threshold for intentful gesturing,
+        // so end the gesture now.
+        dispatchEndEvent();
+      }
+      scheduleUnblock(GESTURE_END_TIMEOUT_MAX);
+      return false;
+    }
+
+    if (sourceState.gesturing) {
       // Debounce the gesture end timeout.
-      scheduleGestureEnd();
+      scheduleGestureEnd(sourceState.t.value);
     }
 
-    if (shouldPreventDefault(event.originalEvent)) {
-      event.originalEvent.preventDefault();
-    }
-
-    return gesturing;
+    return sourceState.gesturing;
   };
 
   return share(
     pipe(
-      merge(pipe(eventSource, filter(filterEvents)), endEvents),
-      scan(reduceGestureState, DEFAULT_INITIAL_STATE),
+      merge(
+        pipe(source, filter(isGesturing), map(extractEvent)),
+        pipe(actions, filter(isGestureEndEvent)),
+      ),
+      scan(updateGestureState, INITIAL_GESTURE_STATE),
     ),
   );
 }
@@ -546,15 +651,14 @@ export function create(
   /** The DOM element to observe for wheel events. */
   element: Element,
   /** Configuration for the WheelGestureObservable. */
-  config?: Partial<WheelGestureObservableConfig> | null,
+  config?: MaybeConfig,
 ): DebugObservable<
   WheelGestureState | WheelGestureEndState,
-  WheelGestureEventDebug
+  WheelGestureEventSourceState
 > {
-  return asObservable(
-    createSource(element, config),
-    createSource(element, {__debug: true}),
-  );
+  const actions = createSubject<GestureEndEvent | UnblockEvent>();
+  const eventSource = share(createEventSource(actions, element, config));
+  return asObservable(createSource(eventSource, actions), eventSource);
 }
 
 export default {create, createSource};

@@ -2,13 +2,14 @@ import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
+import map from 'callbag-map';
 import scan from 'callbag-scan';
 import merge from 'callbag-merge';
 import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import asObservable, {DebugObservable} from './asObservable';
-import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
-import {parseConfig, ObservableConfig, DebugConfig} from './ObservableConfig';
+import {HORIZONTAL, VERTICAL} from './Orientation';
+import {parseConfig, ObservableConfig} from './ObservableConfig';
 
 export {HORIZONTAL, VERTICAL};
 
@@ -110,7 +111,7 @@ const DEFAULT_INITIAL_STATE: MouseGestureBaseState = {
   elapsed: 0,
 };
 
-function reduceGestureState(
+function updateGestureState(
   state: MouseGestureBaseState,
   event: MouseGestureEvent,
 ): MouseGestureBaseState | MouseGestureState | MouseGestureEndState {
@@ -165,43 +166,45 @@ function reduceGestureState(
   throw new Error(`Could not handle event ${event}`);
 }
 
-function shouldGesture(
-  fromEvent: MouseGestureEvent,
-  toEvent: MouseGestureEvent,
-  threshold?: number,
-  orientation?: Orientation,
-): boolean {
+function shouldGesture({
+  threshold,
+  orientation,
+  firstEvent,
+  event,
+}: MouseGestureEventSourceState): boolean {
+  if (!firstEvent) return false;
+  if (!event) return false;
   if (!threshold) return true;
   if (orientation) {
     switch (orientation) {
       case VERTICAL: {
-        const yDelta = fromEvent.clientY - toEvent.clientY;
+        const yDelta = firstEvent.clientY - event.clientY;
         return Math.abs(yDelta) > threshold;
       }
       case HORIZONTAL: {
-        const xDelta = fromEvent.clientX - toEvent.clientX;
+        const xDelta = firstEvent.clientX - event.clientX;
         return Math.abs(xDelta) > threshold;
       }
     }
   }
-  const yDelta = fromEvent.clientY - toEvent.clientY;
-  const xDelta = fromEvent.clientX - toEvent.clientX;
+  const yDelta = firstEvent.clientY - event.clientY;
+  const xDelta = firstEvent.clientX - event.clientX;
   return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > threshold;
 }
 
-function shouldCancel(
-  fromEvent: MouseGestureEvent,
-  toEvent: MouseGestureEvent,
-  threshold?: number,
-  orientation?: Orientation,
-): boolean {
-  if (threshold && orientation) {
+function shouldCancel({
+  orientation,
+  ...state
+}: MouseGestureEventSourceState): boolean {
+  if (!state.firstEvent) return false;
+  if (!state.event) return false;
+  if (state.threshold && orientation) {
     switch (orientation) {
       case VERTICAL: {
-        return shouldGesture(fromEvent, toEvent, threshold, HORIZONTAL);
+        return shouldGesture({...state, orientation: HORIZONTAL});
       }
       case HORIZONTAL: {
-        return shouldGesture(fromEvent, toEvent, threshold, VERTICAL);
+        return shouldGesture({...state, orientation: VERTICAL});
       }
     }
   }
@@ -236,128 +239,166 @@ class ClickHack {
 }
 
 /**
+ * A payload for debugging mouse gestures.
+ *
+ * This is the payload passed to the `__debug` gesture handler.
+ */
+export interface MouseGestureEventSourceState
+  extends MouseGestureObservableConfig {
+  event?: MouseGestureEvent;
+  firstEvent: MouseGestureEvent | null;
+  gesturing: boolean;
+  canceled: boolean;
+  clickHack: ClickHack | null;
+}
+
+type EventSource = Source<MouseGestureEventSourceState>;
+type GestureSource = Source<MouseGestureState | MouseGestureEndState>;
+type MaybeConfig = Partial<MouseGestureObservableConfig> | null;
+
+const extractEvent = ({
+  event,
+}: MouseGestureEventSourceState): MouseGestureEvent =>
+  event as MouseGestureEvent;
+
+function initEventSourceState(
+  config: MouseGestureObservableConfig,
+): MouseGestureEventSourceState {
+  return {
+    ...config,
+    firstEvent: null,
+    gesturing: false,
+    canceled: false,
+    clickHack: config.preventDefault ? new ClickHack() : null,
+  };
+}
+
+function shouldPreventDefault(state: MouseGestureEventSourceState): boolean {
+  return (
+    state.event instanceof MouseEvent &&
+    state.event.type === MOUSE_MOVE &&
+    state.preventDefault &&
+    !state.event.defaultPrevented &&
+    typeof state.event.preventDefault === 'function'
+  );
+}
+
+function updateEventSourceState(
+  state: MouseGestureEventSourceState,
+  action: MouseGestureEvent,
+): MouseGestureEventSourceState {
+  state.event = action;
+
+  switch (action.type) {
+    case MOUSE_DOWN: {
+      if (state.firstEvent) return state;
+      state.firstEvent = action;
+      if (state.threshold) return state;
+      state.gesturing = true;
+      return state;
+    }
+    case MOUSE_MOVE: {
+      if (!state.firstEvent) return state;
+      if (state.canceled) return state;
+      if (!state.gesturing) {
+        state.gesturing = shouldGesture(state);
+        if (!state.gesturing) {
+          state.canceled = shouldCancel(state);
+          return state;
+        }
+      }
+      return state;
+    }
+    case MOUSE_UP: {
+      if (!state.firstEvent) return state;
+      if (state.gesturing && state.clickHack) {
+        state.clickHack.preventNextClick();
+      }
+      state.firstEvent = null;
+      state.canceled = false;
+      state.gesturing = false;
+      return state;
+    }
+  }
+}
+
+function createEventSource(
+  /** The DOM element to observe for mouse events. */
+  element: Element,
+  /** Configuration for the mouse gesture source. */
+  config?: MaybeConfig,
+): EventSource {
+  // Make sure we have a DOM element to observe.
+  ensureDOMInstance(element, Element);
+  // Parse and extract the config (with defaults).
+  const parsedConfig = parseConfig<MouseGestureObservableConfig>(config);
+  const eventSource = merge(
+    fromEvent(element, MOUSE_DOWN),
+    fromEvent(document, MOUSE_UP),
+    fromEvent(document, MOUSE_MOVE, {passive: parsedConfig.passive}),
+  );
+
+  let hasFirstEvent = false;
+  const maybeGestureEvent = (state: MouseGestureEventSourceState): boolean => {
+    const hadFirstEvent = hasFirstEvent;
+    hasFirstEvent = Boolean(state.firstEvent);
+    // If state has a 'firstEvent', or had a `firstEvent`
+    // on the last update, we might be gesturing.
+    return hasFirstEvent || hadFirstEvent;
+  };
+
+  return pipe(
+    eventSource,
+    scan(updateEventSourceState, initEventSourceState(parsedConfig)),
+    filter(maybeGestureEvent),
+  );
+}
+
+/**
  * A mouse gesture callbag source.
  */
 export function createSource(
   /** The DOM element to observe for mouse events. */
   element: Element,
   /** Configuration for the mouse gesture source. */
-  config?: Partial<MouseGestureObservableConfig> | null,
-): Source<MouseGestureState | MouseGestureEndState>;
+  config?: MaybeConfig,
+): GestureSource;
 export function createSource(
-  /** The DOM element to observe for mouse events. */
-  element: Element,
-  /** Configuration for debugging the mouse gesture source. */
-  config: DebugConfig,
-): Source<MouseGestureEvent>;
+  /** The mouse gesture event source. */
+  source: EventSource,
+): GestureSource;
 export function createSource(
-  element: Element,
-  config?: Partial<MouseGestureObservableConfig> | DebugConfig | null,
-):
-  | Source<MouseGestureState | MouseGestureEndState>
-  | Source<MouseGestureEvent> {
-  ensureDOMInstance(element, Element);
+  elementOrSource: Element | EventSource,
+  config?: MaybeConfig,
+): GestureSource {
+  const eventSource =
+    typeof elementOrSource === 'function'
+      ? elementOrSource
+      : createEventSource(elementOrSource, config);
 
-  const {
-    preventDefault,
-    passive,
-    orientation,
-    threshold,
-    cancelThreshold,
-    __debug: isDebug,
-  } = parseConfig(config);
-
-  const eventSource = merge(
-    fromEvent(element, MOUSE_DOWN),
-    fromEvent(document, MOUSE_UP),
-    fromEvent(document, MOUSE_MOVE, {passive}),
-  );
-
-  if (isDebug) {
-    let firstDebugEvent: MouseGestureEvent | null = null;
-    const filterDebugEvents = (event: MouseGestureEvent): boolean => {
-      switch (event.type) {
-        case MOUSE_DOWN: {
-          if (firstDebugEvent) return false;
-          firstDebugEvent = event;
-          return true;
-        }
-        case MOUSE_MOVE: {
-          if (!firstDebugEvent) return false;
-          return true;
-        }
-        case MOUSE_UP: {
-          if (!firstDebugEvent) return false;
-          firstDebugEvent = null;
-          return true;
-        }
-      }
-    };
-    return share(pipe(eventSource, filter(filterDebugEvents)));
-  }
-
-  let gesturing = false;
-  let firstEvent: MouseGestureEvent | null = null;
-  let canceled = false;
-  const clickHack = preventDefault ? new ClickHack() : null;
-
-  const shouldPreventDefault = (event: MouseGestureEvent): boolean => {
-    return (
-      event instanceof MouseEvent &&
-      event.type === MOUSE_MOVE &&
-      preventDefault &&
-      !event.defaultPrevented &&
-      typeof event.preventDefault === 'function'
-    );
-  };
-
-  const filterEvents = (event: MouseGestureEvent): boolean => {
-    switch (event.type) {
-      case MOUSE_DOWN: {
-        if (firstEvent) return false;
-        firstEvent = event;
-        if (threshold) return false;
-        gesturing = true;
-        return true;
-      }
-      case MOUSE_MOVE: {
-        if (!firstEvent) return false;
-        if (canceled) return false;
-        if (!gesturing) {
-          gesturing = shouldGesture(firstEvent, event, threshold, orientation);
-          if (!gesturing) {
-            canceled = shouldCancel(
-              firstEvent,
-              event,
-              cancelThreshold,
-              orientation,
-            );
-            return false;
-          }
-        }
-        if (shouldPreventDefault(event)) {
-          event.preventDefault();
-        }
-        return true;
-      }
-      case MOUSE_UP: {
-        if (!firstEvent) return false;
-        if (gesturing && clickHack) clickHack.preventNextClick();
-        const wasGesturing = gesturing;
-        firstEvent = null;
-        canceled = false;
-        gesturing = false;
-        return wasGesturing;
-      }
+  let wasGesturing = false;
+  const isGesturing = (sourceState: MouseGestureEventSourceState): boolean => {
+    if (sourceState.canceled) {
+      return false;
     }
-    return false;
+    if (shouldPreventDefault(sourceState)) {
+      sourceState.event?.preventDefault();
+    }
+    if (wasGesturing && !sourceState.gesturing) {
+      // Let the 'end' event through.
+      wasGesturing = sourceState.gesturing;
+      return true;
+    }
+    wasGesturing = sourceState.gesturing;
+    return sourceState.gesturing;
   };
 
   return share(
     pipe(
       eventSource,
-      filter(filterEvents),
-      scan(reduceGestureState, DEFAULT_INITIAL_STATE),
+      filter(isGesturing),
+      map(extractEvent),
+      scan(updateGestureState, DEFAULT_INITIAL_STATE),
     ),
   );
 }
@@ -372,12 +413,10 @@ export const create = (
   config?: Partial<MouseGestureObservableConfig> | null,
 ): DebugObservable<
   MouseGestureState | MouseGestureEndState,
-  MouseGestureEvent
+  MouseGestureEventSourceState
 > => {
-  return asObservable(
-    createSource(element, config),
-    createSource(element, {__debug: true}),
-  );
+  const eventSource = share(createEventSource(element, config));
+  return asObservable(createSource(eventSource), eventSource);
 };
 
 export default {create, createSource};

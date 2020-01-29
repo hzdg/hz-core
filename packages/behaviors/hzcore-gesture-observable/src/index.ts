@@ -36,7 +36,7 @@ export {
 
 export type WheelGestureType = WheelGestureObservable.WheelGestureType;
 export type WheelGestureEvent = WheelGestureObservable.WheelGestureEvent;
-export type WheelGestureEventDebug = WheelGestureObservable.WheelGestureEventDebug;
+export type WheelGestureEventSourceState = WheelGestureObservable.WheelGestureEventSourceState;
 export type GestureEndEvent = WheelGestureObservable.GestureEndEvent;
 export type WheelGestureState = WheelGestureObservable.WheelGestureState;
 export type WheelGestureEndState = WheelGestureObservable.WheelGestureEndState;
@@ -44,18 +44,21 @@ export type WheelGestureObservableConfig = WheelGestureObservable.WheelGestureOb
 
 export type MouseGestureType = MouseGestureObservable.MouseGestureType;
 export type MouseGestureEvent = MouseGestureObservable.MouseGestureEvent;
+export type MouseGestureEventSourceState = MouseGestureObservable.MouseGestureEventSourceState;
 export type MouseGestureState = MouseGestureObservable.MouseGestureState;
 export type MouseGestureEndState = MouseGestureObservable.MouseGestureEndState;
 export type MouseGestureObservableConfig = MouseGestureObservable.MouseGestureObservableConfig;
 
 export type TouchGestureType = TouchGestureObservable.TouchGestureType;
 export type TouchGestureEvent = TouchGestureObservable.TouchGestureEvent;
+export type TouchGestureEventSourceState = TouchGestureObservable.TouchGestureEventSourceState;
 export type TouchGestureState = TouchGestureObservable.TouchGestureState;
 export type TouchGestureEndState = TouchGestureObservable.TouchGestureEndState;
 export type TouchGestureObservableConfig = TouchGestureObservable.TouchGestureObservableConfig;
 
 export type KeyboardGestureType = KeyboardGestureObservable.KeyboardGestureType;
 export type KeyboardGestureEvent = KeyboardGestureObservable.KeyboardGestureEvent;
+export type KeyboardGestureEventSourceState = KeyboardGestureObservable.KeyboardGestureEventSourceState;
 export type KeyboardGestureState = KeyboardGestureObservable.KeyboardGestureState;
 export type KeyboardGestureEndState = KeyboardGestureObservable.KeyboardGestureEndState;
 export type KeyboardGestureObservableConfig = KeyboardGestureObservable.KeyboardGestureObservableConfig;

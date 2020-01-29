@@ -1,9 +1,5 @@
 import {Orientation} from './Orientation';
 
-export interface DebugConfig {
-  __debug: true;
-}
-
 /**
  * Configuration for GestureObservable.
  */
@@ -53,25 +49,21 @@ export interface ObservableConfig {
 const GESTURE_THRESHOLD = 0;
 const CANCEL_THRESHOLD = 3;
 
-export function parseConfig<T extends ObservableConfig & DebugConfig>(
+export function parseConfig<T extends ObservableConfig>(
   config?: Partial<T> | null,
 ): T {
-  const debug = config?.__debug ?? false;
   const orientation = config?.orientation;
-  const preventDefault = debug ? false : config?.preventDefault ?? false;
-  const passive = debug ? true : config?.passive ?? !preventDefault;
-  const threshold = debug ? 0 : (config?.threshold ?? GESTURE_THRESHOLD) || 0;
-  const cancelThreshold = debug
-    ? undefined
-    : config?.cancelThreshold ?? orientation
-    ? CANCEL_THRESHOLD
-    : undefined;
+  const preventDefault = config?.preventDefault ?? false;
+  const passive = config?.passive ?? !preventDefault;
+  const threshold = (config?.threshold ?? GESTURE_THRESHOLD) || 0;
+  const cancelThreshold =
+    config?.cancelThreshold ?? orientation ? CANCEL_THRESHOLD : undefined;
   return ({
+    ...config,
     orientation,
     preventDefault,
     passive,
     threshold,
     cancelThreshold,
-    __debug: debug,
   } as unknown) as T;
 }

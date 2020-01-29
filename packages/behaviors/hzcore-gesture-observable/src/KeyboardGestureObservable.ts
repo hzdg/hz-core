@@ -2,12 +2,13 @@ import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
+import map from 'callbag-map';
 import merge from 'callbag-merge';
 import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import scan from 'callbag-scan';
 import asObservable, {DebugObservable} from './asObservable';
-import {parseConfig, DebugConfig} from './ObservableConfig';
+import {parseConfig} from './ObservableConfig';
 
 export const KEY_DOWN = 'keydown';
 export const KEY_UP = 'keyup';
@@ -198,7 +199,7 @@ const DEFAULT_INITIAL_STATE: KeyboardGestureBaseState = {
   elapsed: 0,
 };
 
-function reduceGestureState(
+function updateGestureState(
   state: KeyboardGestureBaseState,
   event: KeyboardGestureEvent,
 ): KeyboardGestureBaseState | KeyboardGestureState | KeyboardGestureEndState {
@@ -247,97 +248,144 @@ function reduceGestureState(
 }
 
 /**
+ * A payload for debugging keyboard gestures.
+ *
+ * This is the payload passed to the `__debug` gesture handler.
+ */
+export interface KeyboardGestureEventSourceState
+  extends KeyboardGestureObservableConfig {
+  event?: KeyboardGestureEvent;
+  firstEvent: KeyboardGestureEvent | null;
+  gesturing: boolean;
+  canceled: boolean;
+}
+
+type EventSource = Source<KeyboardGestureEventSourceState>;
+type GestureSource = Source<KeyboardGestureState | KeyboardGestureEndState>;
+type MaybeConfig = Partial<KeyboardGestureObservableConfig> | null;
+
+const extractEvent = ({
+  event,
+}: KeyboardGestureEventSourceState): KeyboardGestureEvent =>
+  event as KeyboardGestureEvent;
+
+function initEventSourceState(
+  config: KeyboardGestureObservableConfig,
+): KeyboardGestureEventSourceState {
+  return {
+    ...config,
+    firstEvent: null,
+    gesturing: false,
+    canceled: false,
+  };
+}
+
+function shouldPreventDefault(state: KeyboardGestureEventSourceState): boolean {
+  return (
+    state.event instanceof KeyboardEvent &&
+    isGestureKey(state.event) &&
+    state.preventDefault &&
+    !state.event.defaultPrevented &&
+    typeof state.event.preventDefault === 'function'
+  );
+}
+
+function updateEventSourceState(
+  state: KeyboardGestureEventSourceState,
+  action: KeyboardGestureEvent,
+): KeyboardGestureEventSourceState {
+  if (!isGestureKey(action)) return state;
+  state.event = action;
+  switch (action.type) {
+    case KEY_DOWN: {
+      if (state.firstEvent) {
+        if (isRepeatKey(state.firstEvent, action)) {
+          return state;
+        }
+      }
+      state.firstEvent = action;
+      state.gesturing = true;
+      return state;
+    }
+    case KEY_UP: {
+      if (state.firstEvent && isSameKey(state.firstEvent, action)) {
+        state.firstEvent = null;
+        state.canceled = false;
+        state.gesturing = false;
+        return state;
+      }
+      return state;
+    }
+  }
+}
+
+function createEventSource(
+  /** The DOM element to observe for keyboard events. */
+  element: Element,
+  /** Configuration for the keyboard gesture source. */
+  config?: MaybeConfig,
+): EventSource {
+  // Make sure we have a DOM element to observe.
+  ensureDOMInstance(element, Element);
+  // Parse and extract the config (with defaults).
+  const parsedConfig = parseConfig<KeyboardGestureObservableConfig>(config);
+  const eventSource = merge(
+    fromEvent(getNearestFocusableNode(element), KEY_DOWN),
+    fromEvent(document, KEY_UP),
+  );
+  return pipe(
+    eventSource,
+    scan(updateEventSourceState, initEventSourceState(parsedConfig)),
+  );
+}
+
+/**
  * A keyboard gesture callbag source.
  */
 export function createSource(
   /** The DOM element to observe for keyboard events. */
   element: Element,
   /** Configuration for the keyboard gesture source. */
-  config?: Partial<KeyboardGestureObservableConfig> | null,
-): Source<KeyboardGestureState | KeyboardGestureEndState>;
+  config?: MaybeConfig,
+): GestureSource;
 export function createSource(
-  /** The DOM element to observe for keyboard events. */
-  element: Element,
-  /** Configuration for debugging the keyboard gesture source. */
-  config: DebugConfig,
-): Source<KeyboardGestureEvent>;
+  /** The keyboard gesture event source. */
+  source: EventSource,
+): GestureSource;
 export function createSource(
-  element: Element,
-  config?: Partial<KeyboardGestureObservableConfig> | DebugConfig | null,
-):
-  | Source<KeyboardGestureState | KeyboardGestureEndState>
-  | Source<KeyboardGestureEvent> {
-  ensureDOMInstance(element, Element);
-  const {preventDefault, __debug: isDebug} = parseConfig(config);
+  elementOrSource: Element | EventSource,
+  config?: MaybeConfig,
+): GestureSource {
+  const eventSource =
+    typeof elementOrSource === 'function'
+      ? elementOrSource
+      : createEventSource(elementOrSource, config);
 
-  const eventSource = merge(
-    fromEvent(getNearestFocusableNode(element), KEY_DOWN),
-    fromEvent(document, KEY_UP),
-  );
-
-  if (isDebug) {
-    let firstDebugEvent: KeyboardGestureEvent | null = null;
-    const filterDebugEvents = (event: KeyboardGestureEvent): boolean => {
-      switch (event.type) {
-        case KEY_DOWN: {
-          if (!firstDebugEvent && isGestureKey(event)) {
-            firstDebugEvent = event;
-          }
-          return firstDebugEvent ? true : false;
-        }
-        case KEY_UP: {
-          if (!firstDebugEvent) return false;
-          firstDebugEvent = null;
-          return true;
-        }
-      }
-    };
-    return share(pipe(eventSource, filter(filterDebugEvents)));
-  }
-
-  let gesturingKey: KeyboardGestureEvent | null = null;
-
-  const shouldPreventDefault = (event: KeyboardGestureEvent): boolean => {
-    return (
-      event instanceof KeyboardEvent &&
-      isGestureKey(event) &&
-      preventDefault &&
-      !event.defaultPrevented &&
-      typeof event.preventDefault === 'function'
-    );
-  };
-
-  const filterEvents = (event: KeyboardEvent): boolean => {
-    if (!isGestureKey(event)) return false;
-    if (shouldPreventDefault(event)) event.preventDefault();
-    switch (event.type) {
-      case KEY_DOWN: {
-        if (gesturingKey) {
-          if (isRepeatKey(gesturingKey, event)) {
-            return true;
-          }
-        } else {
-          gesturingKey = event;
-          return true;
-        }
-        break;
-      }
-      case KEY_UP: {
-        if (gesturingKey && isSameKey(gesturingKey, event)) {
-          gesturingKey = null;
-          return true;
-        }
-        break;
-      }
+  let wasGesturing = false;
+  const isGesturing = (
+    sourceState: KeyboardGestureEventSourceState,
+  ): boolean => {
+    if (sourceState.canceled) {
+      return false;
     }
-    return false;
+    if (shouldPreventDefault(sourceState)) {
+      sourceState.event?.preventDefault();
+    }
+    if (wasGesturing && !sourceState.gesturing) {
+      // Let the 'end' event through.
+      wasGesturing = sourceState.gesturing;
+      return true;
+    }
+    wasGesturing = sourceState.gesturing;
+    return sourceState.gesturing;
   };
 
   return share(
     pipe(
       eventSource,
-      filter(filterEvents),
-      scan(reduceGestureState, DEFAULT_INITIAL_STATE),
+      filter(isGesturing),
+      map(extractEvent),
+      scan(updateGestureState, DEFAULT_INITIAL_STATE),
     ),
   );
 }
@@ -349,15 +397,13 @@ export function create(
   /** The DOM element to observe for keyboard events. */
   element: Element,
   /** Configuration for the KeyboardGestureObservable. */
-  config?: Partial<KeyboardGestureObservableConfig> | null,
+  config?: MaybeConfig,
 ): DebugObservable<
   KeyboardGestureState | KeyboardGestureEndState,
-  KeyboardGestureEvent
+  KeyboardGestureEventSourceState
 > {
-  return asObservable(
-    createSource(element, config),
-    createSource(element, {__debug: true}),
-  );
+  const eventSource = share(createEventSource(element, config));
+  return asObservable(createSource(eventSource), eventSource);
 }
 
 export default {create, createSource};

@@ -2,13 +2,14 @@ import {ensureDOMInstance} from '@hzcore/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
+import map from 'callbag-map';
 import scan from 'callbag-scan';
 import merge from 'callbag-merge';
 import filter from 'callbag-filter';
 import fromEvent from 'callbag-from-event';
 import asObservable, {DebugObservable} from './asObservable';
-import {HORIZONTAL, VERTICAL, Orientation} from './Orientation';
-import {parseConfig, ObservableConfig, DebugConfig} from './ObservableConfig';
+import {HORIZONTAL, VERTICAL} from './Orientation';
+import {parseConfig, ObservableConfig} from './ObservableConfig';
 
 export {HORIZONTAL, VERTICAL};
 
@@ -110,7 +111,7 @@ const DEFAULT_INITIAL_STATE: TouchGestureBaseState = {
   elapsed: 0,
 };
 
-function reduceGestureState(
+function updateGestureState(
   state: TouchGestureBaseState,
   event: TouchGestureEvent,
 ): TouchGestureBaseState | TouchGestureState | TouchGestureEndState {
@@ -165,45 +166,45 @@ function reduceGestureState(
   throw new Error(`Could not handle event ${event}`);
 }
 
-function shouldGesture(
-  fromEvent: TouchGestureEvent,
-  toEvent: TouchGestureEvent,
-  threshold?: number,
-  orientation?: Orientation,
-): boolean {
+function shouldGesture({
+  threshold,
+  orientation,
+  firstEvent,
+  event,
+}: TouchGestureEventSourceState): boolean {
+  if (!firstEvent) return false;
+  if (!event) return false;
   if (!threshold) return true;
   if (orientation) {
     switch (orientation) {
       case VERTICAL: {
-        const yDelta =
-          fromEvent.touches[0].clientY - toEvent.touches[0].clientY;
+        const yDelta = firstEvent.touches[0].clientY - event.touches[0].clientY;
         return Math.abs(yDelta) > threshold;
       }
       case HORIZONTAL: {
-        const xDelta =
-          fromEvent.touches[0].clientX - toEvent.touches[0].clientX;
+        const xDelta = firstEvent.touches[0].clientX - event.touches[0].clientX;
         return Math.abs(xDelta) > threshold;
       }
     }
   }
-  const yDelta = fromEvent.touches[0].clientY - toEvent.touches[0].clientY;
-  const xDelta = fromEvent.touches[0].clientX - toEvent.touches[0].clientX;
+  const yDelta = firstEvent.touches[0].clientY - event.touches[0].clientY;
+  const xDelta = firstEvent.touches[0].clientX - event.touches[0].clientX;
   return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > threshold;
 }
 
-function shouldCancel(
-  fromEvent: TouchGestureEvent,
-  toEvent: TouchGestureEvent,
-  threshold?: number,
-  orientation?: Orientation,
-): boolean {
-  if (threshold && orientation) {
+function shouldCancel({
+  orientation,
+  ...state
+}: TouchGestureEventSourceState): boolean {
+  if (!state.firstEvent) return false;
+  if (!state.event) return false;
+  if (state.threshold && orientation) {
     switch (orientation) {
       case VERTICAL: {
-        return shouldGesture(fromEvent, toEvent, threshold, HORIZONTAL);
+        return shouldGesture({...state, orientation: HORIZONTAL});
       }
       case HORIZONTAL: {
-        return shouldGesture(fromEvent, toEvent, threshold, VERTICAL);
+        return shouldGesture({...state, orientation: VERTICAL});
       }
     }
   }
@@ -261,129 +262,165 @@ class WebkitHack {
 }
 
 /**
+ * A payload for debugging touch gestures.
+ *
+ * This is the payload passed to the `__debug` gesture handler.
+ */
+export interface TouchGestureEventSourceState
+  extends TouchGestureObservableConfig {
+  event?: TouchGestureEvent;
+  firstEvent: TouchGestureEvent | null;
+  gesturing: boolean;
+  canceled: boolean;
+  webkitHack: WebkitHack | null;
+}
+
+type EventSource = Source<TouchGestureEventSourceState>;
+type GestureSource = Source<TouchGestureState | TouchGestureEndState>;
+type MaybeConfig = Partial<TouchGestureObservableConfig> | null;
+
+const extractEvent = ({
+  event,
+}: TouchGestureEventSourceState): TouchGestureEvent =>
+  event as TouchGestureEvent;
+
+function initEventSourceState(
+  config: TouchGestureObservableConfig,
+): TouchGestureEventSourceState {
+  const state = {
+    ...config,
+    firstEvent: null,
+    gesturing: false,
+    canceled: false,
+    webkitHack: config.preventDefault ? new WebkitHack() : null,
+  };
+  return state;
+}
+
+function shouldPreventDefault(state: TouchGestureEventSourceState): boolean {
+  return (
+    state.event instanceof TouchEvent &&
+    state.event.type === TOUCH_MOVE &&
+    state.preventDefault &&
+    !state.event.defaultPrevented &&
+    typeof state.event.preventDefault === 'function'
+  );
+}
+
+function updateEventSourceState(
+  state: TouchGestureEventSourceState,
+  action: TouchGestureEvent,
+): TouchGestureEventSourceState {
+  state.event = action;
+  switch (action.type) {
+    case TOUCH_START: {
+      if (state.firstEvent) return state;
+      state.firstEvent = action;
+      if (state.webkitHack) state.webkitHack.preventTouchMove();
+      if (state.threshold) return state;
+      state.gesturing = true;
+      return state;
+    }
+    case TOUCH_MOVE: {
+      if (!state.firstEvent) return state;
+      if (state.canceled) return state;
+      if (!state.gesturing) {
+        state.gesturing = shouldGesture(state);
+        if (!state.gesturing) {
+          state.canceled = shouldCancel(state);
+          return state;
+        }
+      }
+      return state;
+    }
+    case TOUCH_END: {
+      if (!state.firstEvent) return state;
+      if (state.webkitHack) state.webkitHack.allowTouchMove();
+      state.firstEvent = null;
+      state.canceled = false;
+      state.gesturing = false;
+      return state;
+    }
+  }
+}
+
+function createEventSource(
+  /** The DOM element to observe for mouse events. */
+  element: Element,
+  /** Configuration for the mouse gesture source. */
+  config?: MaybeConfig,
+): Source<TouchGestureEventSourceState> {
+  // Make sure we have a DOM element to observe.
+  ensureDOMInstance(element, Element);
+  // Parse and extract the config (with defaults).
+  const parsedConfig = parseConfig<TouchGestureObservableConfig>(config);
+  const eventSource = merge(
+    fromEvent(element, TOUCH_START),
+    fromEvent(document, TOUCH_END),
+    fromEvent(document, TOUCH_MOVE, {passive: parsedConfig.passive}),
+  );
+
+  let hasFirstEvent = false;
+  const maybeGestureEvent = (state: TouchGestureEventSourceState): boolean => {
+    const hadFirstEvent = hasFirstEvent;
+    hasFirstEvent = Boolean(state.firstEvent);
+    // If state has a 'firstEvent', or had a `firstEvent`
+    // on the last update, we might be gesturing.
+    return hasFirstEvent || hadFirstEvent;
+  };
+
+  return pipe(
+    eventSource,
+    scan(updateEventSourceState, initEventSourceState(parsedConfig)),
+    filter(maybeGestureEvent),
+  );
+}
+
+/**
  * A touch gesture callbag source.
  */
 export function createSource(
   /** The DOM element to observe for touch events. */
   element: Element,
   /** Configuration for the touch gesture source. */
-  config?: Partial<TouchGestureObservableConfig> | null,
-): Source<TouchGestureState | TouchGestureEndState>;
+  config?: MaybeConfig,
+): GestureSource;
 export function createSource(
-  /** The DOM element to observe for touch events. */
-  element: Element,
-  /** Configuration for debugging touch gesture source. */
-  config: DebugConfig,
-): Source<TouchGestureEvent>;
+  /** The touch gesture event source. */
+  source: EventSource,
+): GestureSource;
 export function createSource(
-  element: Element,
-  config?: Partial<TouchGestureObservableConfig> | DebugConfig | null,
-):
-  | Source<TouchGestureState | TouchGestureEndState>
-  | Source<TouchGestureEvent> {
-  ensureDOMInstance(element, Element);
+  elementOrSource: Element | EventSource,
+  config?: MaybeConfig,
+): GestureSource {
+  const eventSource =
+    typeof elementOrSource === 'function'
+      ? elementOrSource
+      : createEventSource(elementOrSource, config);
 
-  const {
-    preventDefault,
-    passive,
-    orientation,
-    threshold,
-    cancelThreshold,
-    __debug: isDebug,
-  } = parseConfig(config);
-
-  const eventSource = merge(
-    fromEvent(element, TOUCH_START),
-    fromEvent(document, TOUCH_END),
-    fromEvent(document, TOUCH_MOVE, {passive}),
-  );
-
-  if (isDebug) {
-    let firstDebugEvent: TouchGestureEvent | null = null;
-    const filterDebugEvents = (event: TouchGestureEvent): boolean => {
-      switch (event.type) {
-        case TOUCH_START: {
-          if (firstDebugEvent) return false;
-          firstDebugEvent = event;
-          return true;
-        }
-        case TOUCH_MOVE: {
-          if (!firstDebugEvent) return false;
-          return true;
-        }
-        case TOUCH_END: {
-          if (!firstDebugEvent) return false;
-          firstDebugEvent = null;
-          return true;
-        }
-      }
-    };
-    return share(pipe(eventSource, filter(filterDebugEvents)));
-  }
-
-  let gesturing = false;
-  let firstEvent: TouchGestureEvent | null = null;
-  let canceled = false;
-  const webkitHack = preventDefault ? new WebkitHack() : null;
-
-  const shouldPreventDefault = (event: TouchGestureEvent): boolean => {
-    return (
-      event instanceof TouchEvent &&
-      event.type === TOUCH_MOVE &&
-      preventDefault &&
-      !event.defaultPrevented &&
-      typeof event.preventDefault === 'function'
-    );
-  };
-
-  const filterEvents = (event: TouchGestureEvent): boolean => {
-    switch (event.type) {
-      case TOUCH_START: {
-        if (firstEvent) return false;
-        firstEvent = event;
-        if (webkitHack) webkitHack.preventTouchMove();
-        if (threshold) return false;
-        gesturing = true;
-        return true;
-      }
-      case TOUCH_MOVE: {
-        if (!firstEvent) return false;
-        if (canceled) return false;
-        if (!gesturing) {
-          gesturing = shouldGesture(firstEvent, event, threshold, orientation);
-          if (!gesturing) {
-            canceled = shouldCancel(
-              firstEvent,
-              event,
-              cancelThreshold,
-              orientation,
-            );
-            return false;
-          }
-        }
-        if (shouldPreventDefault(event)) {
-          event.preventDefault();
-        }
-        return true;
-      }
-      case TOUCH_END: {
-        if (!firstEvent) return false;
-        if (webkitHack) webkitHack.allowTouchMove();
-        const wasGesturing = gesturing;
-        firstEvent = null;
-        canceled = false;
-        gesturing = false;
-        return wasGesturing;
-      }
+  let wasGesturing = false;
+  const isGesturing = (sourceState: TouchGestureEventSourceState): boolean => {
+    if (sourceState.canceled) {
+      return false;
     }
-    return false;
+    if (shouldPreventDefault(sourceState)) {
+      sourceState.event?.preventDefault;
+    }
+    if (wasGesturing && !sourceState.gesturing) {
+      // Let the 'end' event through.
+      wasGesturing = sourceState.gesturing;
+      return true;
+    }
+    wasGesturing = sourceState.gesturing;
+    return sourceState.gesturing;
   };
 
   return share(
     pipe(
       eventSource,
-      filter(filterEvents),
-      scan(reduceGestureState, DEFAULT_INITIAL_STATE),
+      filter(isGesturing),
+      map(extractEvent),
+      scan(updateGestureState, DEFAULT_INITIAL_STATE),
     ),
   );
 }
@@ -398,12 +435,10 @@ export function create(
   config?: Partial<TouchGestureObservableConfig> | null,
 ): DebugObservable<
   TouchGestureState | TouchGestureEndState,
-  TouchGestureEvent
+  TouchGestureEventSourceState
 > {
-  return asObservable(
-    createSource(element, config),
-    createSource(element, {__debug: true}),
-  );
+  const eventSource = share(createEventSource(element, config));
+  return asObservable(createSource(eventSource), eventSource);
 }
 
 export default {create, createSource};
