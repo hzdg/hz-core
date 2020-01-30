@@ -74,6 +74,17 @@ export type GestureEvent =
   | GestureEndEvent;
 
 /**
+ * A payload for debugging gestures.
+ *
+ * This is the payload passed to the `__debug` gesture handler.
+ */
+export type GestureEventSourceState =
+  | MouseGestureEventSourceState
+  | TouchGestureEventSourceState
+  | KeyboardGestureEventSourceState
+  | WheelGestureEventSourceState;
+
+/**
  * An event type associated with a gesture.
  */
 export type GestureType =
