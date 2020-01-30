@@ -3,21 +3,25 @@ import useMouseGesture, {
   MouseGestureConfig,
   MouseGestureState,
   MouseGestureEndState,
+  MouseGestureEventSourceState,
 } from './useMouseGesture';
 import useWheelGesture, {
   WheelGestureConfig,
   WheelGestureState,
   WheelGestureEndState,
+  WheelGestureEventSourceState,
 } from './useWheelGesture';
 import useTouchGesture, {
   TouchGestureConfig,
   TouchGestureState,
   TouchGestureEndState,
+  TouchGestureEventSourceState,
 } from './useTouchGesture';
 import useKeyboardGesture, {
   KeyboardGestureConfig,
   KeyboardGestureState,
   KeyboardGestureEndState,
+  KeyboardGestureEventSourceState,
 } from './useKeyboardGesture';
 
 export type GestureState =
@@ -31,6 +35,12 @@ export type GestureEndState =
   | TouchGestureEndState
   | WheelGestureEndState
   | KeyboardGestureEndState;
+
+export type GestureEventSourceState =
+  | MouseGestureEventSourceState
+  | TouchGestureEventSourceState
+  | WheelGestureEventSourceState
+  | KeyboardGestureEventSourceState;
 
 /**
  * A callback for when gesturing state changes.

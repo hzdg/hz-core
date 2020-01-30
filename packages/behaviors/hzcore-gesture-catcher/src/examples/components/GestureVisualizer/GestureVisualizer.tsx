@@ -16,7 +16,7 @@ import {
   GestureState,
   GestureEndState,
   GestureHandler,
-  WheelGestureEventDebug,
+  GestureEventSourceState,
 } from '@hzcore/gesture-catcher';
 import TooltipArea, {TooltipContent} from './TooltipArea';
 import EventAreas from './EventAreas';
@@ -62,9 +62,9 @@ export interface GestureVisualizerProps {
 type TimeStampedObject =
   | GestureState
   | GestureEndState
+  | GestureEventSourceState
   | WheelEvent
   | React.WheelEvent
-  | WheelGestureEventDebug
   | MouseEvent
   | React.MouseEvent
   | TouchEvent
@@ -180,8 +180,11 @@ function useColorScale(
   return colorScale;
 }
 
-const takeEventTypeSnapshot = (obj: TimeStampedObject): string =>
-  'event' in obj ? obj.event.type : obj.type;
+const takeEventTypeSnapshot = (obj: TimeStampedObject): string => {
+  if ('type' in obj) return obj.type;
+  if ('event' in obj && obj.event) return obj.event.type;
+  return 'unknown';
+};
 
 const takeStateSnapshot = (
   obj: TimeStampedObject,
@@ -205,7 +208,7 @@ const absMax = (a: number, b: number): number =>
   Math.max(Math.abs(a), Math.abs(b));
 
 const takeDeltaSnapshot = (obj: TimeStampedObject): number => {
-  if ('event' in obj) obj = obj.event;
+  if ('event' in obj && obj.event) obj = obj.event;
   if ('deltaX' in obj) return absMax(obj.deltaX, obj.deltaY);
   if ('movementX' in obj) return absMax(obj.movementX, obj.movementY);
   if ('xVelocity' in obj) return absMax(obj.xVelocity, obj.yVelocity);
@@ -247,9 +250,11 @@ const takeTimeStampSnapshot = (obj: TimeStampedObject): number =>
   Math.round(
     'timeStamp' in obj
       ? obj.timeStamp
-      : 'event' in obj
+      : 'time' in obj
+      ? obj.time
+      : 'event' in obj && obj.event
       ? obj.event.timeStamp
-      : obj.time,
+      : 0,
   );
 
 const takeSnapshot = (obj: TimeStampedObject): Snapshot => {

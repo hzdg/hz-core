@@ -5,6 +5,7 @@ import {useObservableGestureEffect} from './utils';
 export type TouchGestureObservableConfig = TouchGestureObservable.TouchGestureObservableConfig;
 export type TouchGestureState = TouchGestureObservable.TouchGestureState;
 export type TouchGestureEndState = TouchGestureObservable.TouchGestureEndState;
+export type TouchGestureEventSourceState = TouchGestureObservable.TouchGestureEventSourceState;
 export type TouchGestureConfig = Partial<
   TouchGestureObservable.TouchGestureObservableConfig
 >;

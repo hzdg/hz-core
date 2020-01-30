@@ -5,6 +5,7 @@ import {useObservableGestureEffect} from './utils';
 export type KeyboardGestureObservableConfig = KeyboardGestureObservable.KeyboardGestureObservableConfig;
 export type KeyboardGestureState = KeyboardGestureObservable.KeyboardGestureState;
 export type KeyboardGestureEndState = KeyboardGestureObservable.KeyboardGestureEndState;
+export type KeyboardGestureEventSourceState = KeyboardGestureObservable.KeyboardGestureEventSourceState;
 export type KeyboardGestureConfig = Partial<
   KeyboardGestureObservable.KeyboardGestureObservableConfig
 >;

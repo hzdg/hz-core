@@ -5,6 +5,7 @@ import {useObservableGestureEffect} from './utils';
 export type MouseGestureObservableConfig = MouseGestureObservable.MouseGestureObservableConfig;
 export type MouseGestureState = MouseGestureObservable.MouseGestureState;
 export type MouseGestureEndState = MouseGestureObservable.MouseGestureEndState;
+export type MouseGestureEventSourceState = MouseGestureObservable.MouseGestureEventSourceState;
 export type MouseGestureConfig = Partial<
   MouseGestureObservable.MouseGestureObservableConfig
 >;
