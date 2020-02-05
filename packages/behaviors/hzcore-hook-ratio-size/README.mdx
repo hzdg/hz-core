@@ -1,0 +1,130 @@
+---
+name: useRatioSize
+menu: Hooks
+route: /use-ratio-size
+---
+
+import { Playground, Props } from 'docz'
+import useRatioSize from './src';
+
+# useRatioSize
+
+Calculates a width and a height for a container that covers the current viewport size for a given ratio.
+<hr />
+
+## Installation
+
+```shell
+yarn add @hzcore/hzcore-hook-ratio-size
+```
+<Props of={useRatioSize}  />
+<hr />
+
+## Usage
+
+```js
+const [playerSize, updateRatioSize] = useRatioSize();
+```
+
+### Example
+```js
+import useRatioSize from '@hzcore/hzcore-hook-ratio-size';
+
+function MyContainer = () => {
+  const [playerSize] = useRatioSize();
+
+  return (
+    <>
+      <p>A 16:9 container size to fill current viewport:</p>
+      <p>width: {playerSize.width} height: {playerSize.height}</p>
+    </>
+  );
+}
+```
+
+<Playground>
+  {() => {
+    const MyContainer = () => {
+      const [playerSize] = useRatioSize();
+
+      return (
+        <>
+          <p>A 16:9 container size to fill current viewport:</p>
+          <p>width: {playerSize.width} height: {playerSize.height}</p>
+        </>
+      );
+    }
+    return <MyContainer />;
+  }}
+</Playground>
+
+<hr />
+
+## Config
+```tsx
+export default function useRatioSize(settings: UseRatioProps | null): (RatioSizeProps | (() => void))[];
+```
+
+`settings: UseRatioProps | void`
+
+Optional settings when setting the ratio
+```tsx
+export interface UseRatioProps {
+  initialState?: RatioSizeProps | null;
+  options?: RatioSizeConfigProps | null;
+}
+```
+
+### `initialState?: RatioSizeProps | null`
+Optional initial width and height for container
+```tsx
+export interface RatioSizeProps {
+  width: number | string;
+  height: number | string;
+}
+```
+
+### `options?: RatioSizeConfigProps | null`
+Optional options for calculating ratio size
+```tsx
+export interface RatioSizeOptionsProps {
+  responsiveBreaks: ResponsiveBreakProps[];
+  ratio?: number;
+}
+
+export interface ResponsiveBreakProps {
+  breakpoint: number;
+  ratioSize: RatioSizeProps;
+}
+```
+  Example:
+  ```tsx
+  const [playerSize] = useRatioSize({
+      options: {
+        responsiveBreaks: [
+          {
+            breakpoint: '900',
+            ratioSize: {
+              width: '100%',
+              height: '100%',
+            },
+          },
+        ],
+      },
+    });
+  ```
+
+#### `responsiveBreaks: ResponsiveBreakProps[]`
+Size overrides for certain breakpoints. Breakpoints are applied as mobile-first styling using `min-width`.
+```tsx
+export interface ResponsiveBreakProps {
+  breakpoint: number;
+  ratioSize: RatioSizeProps;
+}
+```
+
+#### `ratio?: number` 
+Optional ratio number, default: 0.5625 (16:9 with `height / width`)
+
+## ToDo
+- Support container size instead of only viewport size
