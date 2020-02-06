@@ -14,34 +14,44 @@ export type GestureCatcherProps<
 > = GestureCatcher.GestureCatcherProps<T>;
 
 export type KeyboardGestureConfig = keyboard.KeyboardGestureConfig;
+export type KeyboardGestureChangeHandler = keyboard.KeyboardGestureChangeHandler;
+export type KeyboardGestureHandler = keyboard.KeyboardGestureHandler;
+export type KeyboardGestureHandlers = keyboard.KeyboardGestureHandlers;
 export type KeyboardGestureState = keyboard.KeyboardGestureState;
 export type KeyboardGestureEndState = keyboard.KeyboardGestureEndState;
 export type KeyboardGestureEventSourceState = keyboard.KeyboardGestureEventSourceState;
-export type KeyboardGestureHandler = keyboard.KeyboardGestureHandler;
 
 export type MouseGestureConfig = mouse.MouseGestureConfig;
+export type MouseGestureChangeHandler = mouse.MouseGestureChangeHandler;
+export type MouseGestureHandler = mouse.MouseGestureHandler;
+export type MouseGestureHandlers = mouse.MouseGestureHandlers;
 export type MouseGestureState = mouse.MouseGestureState;
 export type MouseGestureEndState = mouse.MouseGestureEndState;
 export type MouseGestureEventSourceState = mouse.MouseGestureEventSourceState;
-export type MouseGestureHandler = mouse.MouseGestureHandler;
 
 export type TouchGestureConfig = touch.TouchGestureConfig;
+export type TouchGestureChangeHandler = touch.TouchGestureChangeHandler;
+export type TouchGestureHandler = touch.TouchGestureHandler;
+export type TouchGestureHandlers = touch.TouchGestureHandlers;
 export type TouchGestureState = touch.TouchGestureState;
 export type TouchGestureEndState = touch.TouchGestureEndState;
 export type TouchGestureEventSourceState = touch.TouchGestureEventSourceState;
-export type TouchGestureHandler = touch.TouchGestureHandler;
 
 export type WheelGestureConfig = wheel.WheelGestureConfig;
+export type WheelGestureChangeHandler = wheel.WheelGestureChangeHandler;
+export type WheelGestureHandler = wheel.WheelGestureHandler;
+export type WheelGestureHandlers = wheel.WheelGestureHandlers;
 export type WheelGestureState = wheel.WheelGestureState;
 export type WheelGestureEndState = wheel.WheelGestureEndState;
 export type WheelGestureEventSourceState = wheel.WheelGestureEventSourceState;
-export type WheelGestureHandler = wheel.WheelGestureHandler;
 
 export type GestureConfig = gesture.GestureConfig;
+export type GestureChangeHandler = gesture.GestureChangeHandler;
+export type GestureHandler = gesture.GestureHandler;
+export type GestureHandlers = gesture.GestureHandlers;
 export type GestureState = gesture.GestureState;
 export type GestureEndState = gesture.GestureEndState;
 export type GestureEventSourceState = gesture.GestureEventSourceState;
-export type GestureHandler = gesture.GestureHandler;
 
 export const useKeyboardGesture = keyboard.default;
 export const useMouseGesture = mouse.default;
