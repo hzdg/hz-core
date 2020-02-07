@@ -65,7 +65,8 @@ import useRatioSize from '@hzcore/hzcore-hook-ratio-size';
 
 function MyContainer = () => {
   const parentRef = React.createRef() as React.MutableRefObject<HTMLDivElement | null>;
-  const [playerSize] = useRatioSize();
+  const getParentRef = () => parentRef;
+  const [playerSize] = useRatioSize({options: {containerRef: getParentRef}});
 
   return (
     <>
@@ -221,4 +222,4 @@ export interface ResponsiveBreakProps {
 Optional ratio number, default: 0.5625 (16:9 with `height / width`)
 
 #### `containerRef?: () => {current: {offsetWidth: number | null; offsetHeight: number | null} | null;} | null;`
-The ref of a parent container that dictates the size of the ratio size instead of the default window viewport size.
+The ref of a parent container passed as a function that dictates the size of the ratio size instead of the default window viewport size.
