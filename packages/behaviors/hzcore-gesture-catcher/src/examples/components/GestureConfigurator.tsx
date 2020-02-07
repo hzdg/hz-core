@@ -76,7 +76,7 @@ export function useGestureConfigurator(
     preventDefault: true,
     passive: false,
     threshold: 3,
-    cancelThreshold: 3,
+    cancelThreshold: 0,
   },
 ): [
   GestureConfig,
@@ -154,8 +154,7 @@ export default function GestureConfigurator({
         <input
           id="threshold"
           type="number"
-          min={config.orientation ? 1 : 0}
-          max={20}
+          min={0}
           value={config.threshold}
           onChange={onChange}
         />
@@ -181,8 +180,7 @@ export default function GestureConfigurator({
           <input
             id="cancelThreshold"
             type="number"
-            min={1}
-            max={20}
+            min={0}
             value={config.cancelThreshold}
             onChange={onChange}
           />

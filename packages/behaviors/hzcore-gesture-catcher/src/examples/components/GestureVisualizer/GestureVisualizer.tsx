@@ -31,6 +31,7 @@ export interface MovingAverageSnapshot {
 
 export interface SnapshotState {
   readonly gesturing?: boolean;
+  readonly intentional?: boolean;
   readonly blocked?: boolean;
   readonly canceled?: boolean;
 }
@@ -193,6 +194,9 @@ const takeStateSnapshot = (
     const snapshot = {} as Mutable<SnapshotState>;
     if ('gesturing' in obj) {
       snapshot.gesturing = Boolean(obj.gesturing);
+    }
+    if ('intentional' in obj) {
+      snapshot.intentional = Boolean(obj.intentional);
     }
     if ('blocked' in obj) {
       snapshot.blocked = Boolean(obj.blocked);
