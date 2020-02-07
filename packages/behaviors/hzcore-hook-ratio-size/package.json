@@ -17,6 +17,6 @@
     "!**/__test*"
   ],
   "dependencies": {
-    "lodash.debounce": "^4.0.8"
+    "@hzcore/windowsize-monitor": "^2.0.0"
   }
 }

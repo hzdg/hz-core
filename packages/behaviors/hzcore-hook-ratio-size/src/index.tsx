@@ -1,5 +1,5 @@
-import {useState, useEffect} from 'react';
-import debounce from 'lodash.debounce';
+import {useState} from 'react';
+import {useWindowSize} from '@hzcore/windowsize-monitor';
 
 /**
  * Default ratio set to 16:9
@@ -121,18 +121,11 @@ export default function useRatioSize(
     return initialState || calculateRatioSizes(null, options);
   });
 
-  const updateRatioSize = (): void => {
-    setRatioSize(calculateRatioSizes(options));
+  const updateRatioSize = (windowSize: RatioSizeProps): void => {
+    setRatioSize(calculateRatioSizes(windowSize, options));
   };
 
-  useEffect((): void | undefined | (() => void) => {
-    if (typeof window === 'undefined') return;
-    updateRatioSize();
-    window.addEventListener('resize', debounce(updateRatioSize, 400));
-    return (): void => {
-      window.removeEventListener('resize', updateRatioSize);
-    };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useWindowSize(updateRatioSize, {throttleMs: 400});
 
   return [ratioSize, updateRatioSize];
 }
