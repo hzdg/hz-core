@@ -19,7 +19,6 @@ export {HORIZONTAL, VERTICAL};
 
 export const WHEEL = 'wheel';
 export const GESTURE_END = 'gestureend';
-const UNBLOCK = 'UNBLOCK';
 
 /**
  * Configuration for a WheelGestureObservable.
@@ -111,10 +110,6 @@ export interface WheelGestureEvent extends WheelEvent {
 export interface GestureEndEvent {
   type: typeof GESTURE_END;
   timeStamp: number;
-}
-
-interface UnblockEvent {
-  type: typeof UNBLOCK;
 }
 
 const isGestureEndEvent = (
@@ -335,18 +330,17 @@ export interface WheelGestureEventSourceState
   y: MovingAverage;
   v: MovingAverage;
   t: MovingAverage;
-  endTimeout: NodeJS.Timeout | null;
-  blockedTimeout: NodeJS.Timeout | null;
   gesturing: boolean;
-  canceled: boolean;
+  intentional: boolean;
   blocked: boolean;
+  canceled: boolean;
   lastTimestamp: number | null;
 }
 
 type EventSource = Source<WheelGestureEventSourceState>;
 type GestureSource = Source<WheelGestureState | WheelGestureEndState>;
 type MaybeConfig = Partial<WheelGestureObservableConfig> | null;
-type ActionsSubject = Subject<GestureEndEvent | UnblockEvent>;
+type ActionsSubject = Subject<GestureEndEvent>;
 
 const extractEvent = ({
   event,
@@ -362,10 +356,10 @@ function initSourceState(
     v: new MovingAverage({size: 6, weight: -1}),
     t: new MovingAverage({size: 6, weight: 0, round: true}),
     endTimeout: null,
-    blockedTimeout: null,
     gesturing: false,
-    canceled: false,
+    intentional: false,
     blocked: false,
+    canceled: false,
     lastTimestamp: null,
     ...config,
   };
@@ -409,31 +403,18 @@ function shouldCancel(state: WheelGestureEventSourceState): boolean {
   }
 }
 
-function shouldBlock({
-  v,
-  velocityThreshold,
-  velocityDeviationThreshold,
-}: WheelGestureEventSourceState): boolean {
-  let block = false;
-  if (velocityThreshold || velocityDeviationThreshold) {
-    block = v.rolling;
-    if (block && velocityThreshold) block = v.value < velocityThreshold;
-    if (block && velocityDeviationThreshold)
-      block = v.deviation < velocityDeviationThreshold;
-  }
-  return block;
-}
-
 function shouldPreventDefault({
   event,
   preventDefault,
   passive,
+  canceled,
 }: WheelGestureEventSourceState): boolean {
   return (
     event?.originalEvent instanceof WheelEvent &&
     event.originalEvent.type === WHEEL &&
     preventDefault &&
     !passive &&
+    !canceled &&
     !event.originalEvent.defaultPrevented &&
     typeof event.originalEvent.preventDefault === 'function'
   );
@@ -441,13 +422,11 @@ function shouldPreventDefault({
 
 function updateSourceState(
   state: WheelGestureEventSourceState,
-  action: WheelGestureEvent | GestureEndEvent | UnblockEvent,
+  action: WheelGestureEvent | GestureEndEvent,
 ): WheelGestureEventSourceState {
-  if (action.type === UNBLOCK) {
-    state.blocked = false;
-  } else if (action.type === GESTURE_END) {
+  if (action.type === GESTURE_END) {
     const wasGesturing = state.gesturing;
-    if (wasGesturing || state.canceled) {
+    if (wasGesturing || state.canceled || state.blocked) {
       state.x.reset();
       state.y.reset();
       state.v.reset();
@@ -455,6 +434,8 @@ function updateSourceState(
       state.t.push(GESTURE_END_TIMEOUT_MAX);
       state.lastTimestamp = null;
       state.gesturing = false;
+      state.intentional = false;
+      state.blocked = wasGesturing;
       state.canceled = false;
     }
   } else {
@@ -481,14 +462,14 @@ function updateSourceState(
     }
     state.lastTimestamp = action.timeStamp;
 
-    if (state.blocked || state.canceled) return state;
+    if (state.canceled || state.blocked) return state;
 
     state.gesturing = state.gesturing || shouldGesture(state);
-    if (!state.gesturing) {
-      state.canceled = shouldCancel(state);
-    } else {
-      state.blocked = shouldBlock(state);
-    }
+    state.intentional =
+      !state.v.rolling ||
+      state.v.deviation > VELOCITY_DEVIATION_THRESHOLD ||
+      state.v.value > VELOCITY_THRESHOLD;
+    state.canceled = state.gesturing ? false : shouldCancel(state);
   }
   return state;
 }
@@ -550,7 +531,7 @@ export function createSource(
     }
     actions = actionsOrConfig;
   } else {
-    actions = createSubject<GestureEndEvent | UnblockEvent>();
+    actions = createSubject<GestureEndEvent>();
     source = createEventSource(
       actions,
       elementOrSource,
@@ -558,60 +539,38 @@ export function createSource(
     );
   }
 
-  const dispatch = (action: GestureEndEvent | UnblockEvent): void => {
+  const dispatch = (action: GestureEndEvent): void => {
     actions(1, action);
   };
 
   let endTimeout: NodeJS.Timeout | null = null;
-  let unblockTimeout: NodeJS.Timeout | null = null;
   let lastEvent: WheelGestureEvent | undefined;
 
   const dispatchEndEvent = (): void => {
-    if (endTimeout) clearTimeout(endTimeout);
+    if (endTimeout != null) clearTimeout(endTimeout);
     endTimeout = null;
     dispatch(new WheelEvent(GESTURE_END, lastEvent) as GestureEndEvent);
   };
 
-  const dispatchUnblockEvent = (): void => {
-    if (unblockTimeout) clearTimeout(unblockTimeout);
-    unblockTimeout = null;
-    dispatch({type: UNBLOCK});
-  };
-
   const scheduleGestureEnd = (delay: number): void => {
-    if (endTimeout) clearTimeout(endTimeout);
+    if (endTimeout != null) clearTimeout(endTimeout);
     endTimeout = setTimeout(dispatchEndEvent, delay);
-  };
-
-  const scheduleUnblock = (delay: number): void => {
-    if (unblockTimeout) clearTimeout(unblockTimeout);
-    unblockTimeout = setTimeout(dispatchUnblockEvent, delay);
   };
 
   const isGesturing = (sourceState: WheelGestureEventSourceState): boolean => {
     lastEvent = sourceState.event;
 
-    if (sourceState.canceled) {
+    if (shouldPreventDefault(sourceState)) {
+      sourceState.event?.originalEvent.preventDefault();
+    }
+
+    if (sourceState.canceled || sourceState.blocked) {
       // Debounce the cancel end timeout.
       scheduleGestureEnd(sourceState.t.value);
       return false;
     }
 
-    if (shouldPreventDefault(sourceState)) {
-      sourceState.event?.originalEvent.preventDefault();
-    }
-
-    if (sourceState.blocked) {
-      if (sourceState.gesturing) {
-        // We seem to be below the threshold for intentful gesturing,
-        // so end the gesture now.
-        dispatchEndEvent();
-      }
-      scheduleUnblock(GESTURE_END_TIMEOUT_MAX);
-      return false;
-    }
-
-    if (sourceState.gesturing) {
+    if (sourceState.gesturing && sourceState.intentional) {
       // Debounce the gesture end timeout.
       scheduleGestureEnd(sourceState.t.value);
     }
@@ -655,7 +614,7 @@ export function create(
   WheelGestureState | WheelGestureEndState,
   WheelGestureEventSourceState
 > {
-  const actions = createSubject<GestureEndEvent | UnblockEvent>();
+  const actions = createSubject<GestureEndEvent>();
   const eventSource = share(createEventSource(actions, element, config));
   return asObservable(createSource(eventSource, actions), eventSource);
 }
