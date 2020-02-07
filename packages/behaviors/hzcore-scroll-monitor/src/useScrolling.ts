@@ -23,7 +23,7 @@ const SCROLL_TIMEOUT = 60;
  */
 function useScrolling<T extends HTMLElement>(): [
   boolean,
-  (node: T | null) => void
+  (node: T | null) => void,
 ];
 function useScrolling<T extends HTMLElement>(
   /**
@@ -51,7 +51,7 @@ function useScrolling<T extends HTMLElement>(
    * `clearScrollTimeout` will... uh... clear the scroll timeout.
    */
   const clearScrollTimeout = useCallback(function clearScrollTimeout() {
-    if (scrollTimeout.current) {
+    if (scrollTimeout.current !== null) {
       clearTimeout(scrollTimeout.current);
       scrollTimeout.current = null;
     }
