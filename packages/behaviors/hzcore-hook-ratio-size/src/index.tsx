@@ -117,9 +117,9 @@ export default function useRatioSize(
       : baseInitialState;
   const options = settings && settings.options ? settings.options : null;
 
-  const [ratioSize, setRatioSize] = useState(
-    initialState || calculateRatioSizes(options),
-  );
+  const [ratioSize, setRatioSize] = useState(() => {
+    return initialState || calculateRatioSizes(null, options);
+  });
 
   const updateRatioSize = (): void => {
     setRatioSize(calculateRatioSizes(options));
