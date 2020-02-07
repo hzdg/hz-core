@@ -166,49 +166,42 @@ function updateGestureState(
   throw new Error(`Could not handle event ${event}`);
 }
 
-function shouldGesture({
-  threshold,
-  orientation,
-  firstEvent,
-  event,
-}: MouseGestureEventSourceState): boolean {
-  if (!firstEvent) return false;
-  if (!event) return false;
-  if (!threshold) return true;
-  if (orientation) {
-    switch (orientation) {
-      case VERTICAL: {
-        const yDelta = firstEvent.clientY - event.clientY;
-        return Math.abs(yDelta) > threshold;
-      }
-      case HORIZONTAL: {
-        const xDelta = firstEvent.clientX - event.clientX;
-        return Math.abs(xDelta) > threshold;
-      }
-    }
-  }
-  const yDelta = firstEvent.clientY - event.clientY;
-  const xDelta = firstEvent.clientX - event.clientX;
-  return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > threshold;
-}
-
-function shouldCancel({
-  orientation,
-  ...state
-}: MouseGestureEventSourceState): boolean {
+function shouldGesture(state: MouseGestureEventSourceState): boolean {
   if (!state.firstEvent) return false;
   if (!state.event) return false;
-  if (state.threshold && orientation) {
-    switch (orientation) {
-      case VERTICAL: {
-        return shouldGesture({...state, orientation: HORIZONTAL});
-      }
-      case HORIZONTAL: {
-        return shouldGesture({...state, orientation: VERTICAL});
-      }
+  if (!state.threshold) return true;
+  switch (state.orientation) {
+    case VERTICAL: {
+      const yDelta = Math.abs(state.event.clientY - state.firstEvent.clientY);
+      return yDelta > state.threshold;
+    }
+    case HORIZONTAL: {
+      const xDelta = Math.abs(state.event.clientX - state.firstEvent.clientX);
+      return xDelta > state.threshold;
+    }
+    default: {
+      const yDelta = Math.abs(state.event.clientY - state.firstEvent.clientY);
+      const xDelta = Math.abs(state.event.clientX - state.firstEvent.clientX);
+      return Math.max(xDelta, yDelta) > state.threshold;
     }
   }
-  return false;
+}
+
+function shouldCancel(state: MouseGestureEventSourceState): boolean {
+  if (!state.firstEvent) return false;
+  if (!state.event) return false;
+  if (!state.orientation) return false;
+  const cancelThreshold = Math.max(0, state.cancelThreshold ?? 0);
+  const xDelta = Math.abs(state.event.clientX - state.firstEvent.clientX);
+  const yDelta = Math.abs(state.event.clientY - state.firstEvent.clientY);
+  switch (state.orientation) {
+    case VERTICAL: {
+      return xDelta > yDelta && xDelta > cancelThreshold;
+    }
+    case HORIZONTAL: {
+      return yDelta > xDelta && yDelta > cancelThreshold;
+    }
+  }
 }
 
 const CLICK = 'click';
@@ -229,7 +222,7 @@ class ClickHack {
   }
 
   destroy(): void {
-    if (this.clickTimeout) {
+    if (this.clickTimeout != null) {
       clearTimeout(this.clickTimeout);
       this.clickTimeout = null;
     }

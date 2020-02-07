@@ -373,41 +373,40 @@ function initSourceState(
   return state;
 }
 
-function shouldGesture({
-  x,
-  y,
-  threshold,
-  orientation,
-}: WheelGestureEventSourceState): boolean {
-  if (!threshold) return true;
-  if (orientation === VERTICAL || Math.abs(y.delta) > Math.abs(x.delta)) {
-    return Math.abs(y.delta) > threshold;
-  } else {
-    return Math.abs(x.delta) > threshold;
+function shouldGesture(state: WheelGestureEventSourceState): boolean {
+  if (!state.event) return false;
+  if (!state.threshold) return true;
+  switch (state.orientation) {
+    case VERTICAL: {
+      const yDelta = Math.abs(state.y.delta);
+      return yDelta > state.threshold;
+    }
+    case HORIZONTAL: {
+      const xDelta = Math.abs(state.x.delta);
+      return xDelta > state.threshold;
+    }
+    default: {
+      const yDelta = Math.abs(state.y.delta);
+      const xDelta = Math.abs(state.x.delta);
+      return Math.max(xDelta, yDelta) > state.threshold;
+    }
   }
 }
 
-function shouldCancel({
-  x,
-  y,
-  threshold,
-  orientation,
-}: WheelGestureEventSourceState): boolean {
-  if (threshold && orientation) {
-    switch (orientation) {
-      case VERTICAL: {
-        return (
-          Math.abs(y.delta) < threshold && Math.abs(x.delta) > Math.abs(y.delta)
-        );
-      }
-      case HORIZONTAL: {
-        return (
-          Math.abs(x.delta) < threshold && Math.abs(y.delta) > Math.abs(x.delta)
-        );
-      }
+function shouldCancel(state: WheelGestureEventSourceState): boolean {
+  if (!state.event) return false;
+  if (!state.orientation) return false;
+  const cancelThreshold = Math.max(0, state.cancelThreshold ?? 0);
+  const xDelta = Math.abs(state.x.delta);
+  const yDelta = Math.abs(state.y.delta);
+  switch (state.orientation) {
+    case VERTICAL: {
+      return xDelta > yDelta && xDelta > cancelThreshold;
+    }
+    case HORIZONTAL: {
+      return yDelta > xDelta && yDelta > cancelThreshold;
     }
   }
-  return false;
 }
 
 function shouldBlock({

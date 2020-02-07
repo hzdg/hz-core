@@ -57,7 +57,7 @@ export function parseConfig<T extends ObservableConfig>(
   const passive = config?.passive ?? !preventDefault;
   const threshold = (config?.threshold ?? GESTURE_THRESHOLD) || 0;
   const cancelThreshold =
-    config?.cancelThreshold ?? orientation ? CANCEL_THRESHOLD : undefined;
+    config?.cancelThreshold ?? (orientation ? CANCEL_THRESHOLD : undefined);
   return ({
     ...config,
     orientation,

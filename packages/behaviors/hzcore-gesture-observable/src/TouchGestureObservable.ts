@@ -166,49 +166,47 @@ function updateGestureState(
   throw new Error(`Could not handle event ${event}`);
 }
 
-function shouldGesture({
-  threshold,
-  orientation,
-  firstEvent,
-  event,
-}: TouchGestureEventSourceState): boolean {
-  if (!firstEvent) return false;
-  if (!event) return false;
-  if (!threshold) return true;
-  if (orientation) {
-    switch (orientation) {
-      case VERTICAL: {
-        const yDelta = firstEvent.touches[0].clientY - event.touches[0].clientY;
-        return Math.abs(yDelta) > threshold;
-      }
-      case HORIZONTAL: {
-        const xDelta = firstEvent.touches[0].clientX - event.touches[0].clientX;
-        return Math.abs(xDelta) > threshold;
-      }
-    }
-  }
-  const yDelta = firstEvent.touches[0].clientY - event.touches[0].clientY;
-  const xDelta = firstEvent.touches[0].clientX - event.touches[0].clientX;
-  return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > threshold;
-}
-
-function shouldCancel({
-  orientation,
-  ...state
-}: TouchGestureEventSourceState): boolean {
+function shouldGesture(state: TouchGestureEventSourceState): boolean {
   if (!state.firstEvent) return false;
   if (!state.event) return false;
-  if (state.threshold && orientation) {
-    switch (orientation) {
-      case VERTICAL: {
-        return shouldGesture({...state, orientation: HORIZONTAL});
-      }
-      case HORIZONTAL: {
-        return shouldGesture({...state, orientation: VERTICAL});
-      }
+  if (!state.threshold) return true;
+  const {firstEvent, event} = state;
+  switch (state.orientation) {
+    case VERTICAL: {
+      const yDelta = event.touches[0].clientY - firstEvent.touches[0].clientY;
+      return Math.abs(yDelta) > state.threshold;
+    }
+    case HORIZONTAL: {
+      const xDelta = event.touches[0].clientX - firstEvent.touches[0].clientX;
+      return Math.abs(xDelta) > state.threshold;
+    }
+    default: {
+      const yDelta = event.touches[0].clientY - firstEvent.touches[0].clientY;
+      const xDelta = event.touches[0].clientX - firstEvent.touches[0].clientX;
+      return Math.max(Math.abs(xDelta), Math.abs(yDelta)) > state.threshold;
     }
   }
-  return false;
+}
+
+function shouldCancel(state: TouchGestureEventSourceState): boolean {
+  if (!state.firstEvent) return false;
+  if (!state.event) return false;
+  if (!state.orientation) return false;
+  const cancelThreshold = Math.max(0, state.cancelThreshold ?? 0);
+  const yDelta = Math.abs(
+    state.event.touches[0].clientY - state.firstEvent.touches[0].clientY,
+  );
+  const xDelta = Math.abs(
+    state.event.touches[0].clientX - state.firstEvent.touches[0].clientX,
+  );
+  switch (state.orientation) {
+    case VERTICAL: {
+      return xDelta > yDelta && xDelta > cancelThreshold;
+    }
+    case HORIZONTAL: {
+      return yDelta > xDelta && yDelta > cancelThreshold;
+    }
+  }
 }
 
 const WEBKIT_HACK_OPTIONS: AddEventListenerOptions = {passive: false};
