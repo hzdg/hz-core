@@ -29,6 +29,9 @@ export interface ResponsiveBreakProps {
 export interface RatioSizeOptionsProps {
   responsiveBreaks?: ResponsiveBreakProps[];
   ratio?: number;
+  containerRef?: () => {
+    current: {offsetWidth: number | null; offsetHeight: number | null} | null;
+  } | null;
 }
 
 /**
@@ -49,9 +52,11 @@ export interface UseRatioProps {
 const setResponsive = ({
   ratioSize,
   responsiveBreaks,
+  containerSize,
 }: {
   ratioSize: RatioSizeProps;
   responsiveBreaks?: ResponsiveBreakProps[];
+  containerSize: RatioSizeProps;
 }): RatioSizeProps => {
   if (!responsiveBreaks || typeof window === 'undefined') return ratioSize;
   let newRatioSize = ratioSize;
@@ -62,7 +67,7 @@ const setResponsive = ({
   );
 
   for (const i in sortedResponsiveBreaks) {
-    if (sortedResponsiveBreaks[i].breakpoint > window.innerWidth) {
+    if (sortedResponsiveBreaks[i].breakpoint <= containerSize.width) {
       newRatioSize = sortedResponsiveBreaks[i].ratioSize;
     }
   }
@@ -75,33 +80,72 @@ const setResponsive = ({
  * @param options optionsuration ratio size
  */
 const calculateRatioSizes = (
+  windowSize: RatioSizeProps | null,
   options: RatioSizeOptionsProps | null,
 ): RatioSizeProps => {
-  if (typeof window === 'undefined') return {width: 0, height: 0};
-  const windowWidth = window.innerWidth;
-  const windowHeight = window.innerHeight;
+  let containerWidth = 0;
+  let containerHeight = 0;
+  const defaultWindowSize = {width: 0, height: 0};
+  if (typeof window === 'undefined') return defaultWindowSize;
+  /**
+   * Determine whether to use window viewport size (default) or
+   * passed in container size
+   */
+  if (options && options.containerRef) {
+    const parentRef = options.containerRef();
+    if (
+      parentRef &&
+      parentRef.current &&
+      parentRef.current.offsetWidth !== null &&
+      parentRef.current.offsetHeight !== null
+    ) {
+      containerWidth = parentRef.current.offsetWidth;
+      containerHeight = parentRef.current.offsetHeight;
+    } else {
+      throw new Error(`
+        Error: Provided containerRef does not provide a width and height for useRatioSize. Please see example in docs.
+      `);
+    }
+  } else {
+    const currWindowSize = windowSize ? windowSize : defaultWindowSize;
+    if (currWindowSize && currWindowSize.width && currWindowSize.height) {
+      containerWidth =
+        typeof currWindowSize.width === 'number'
+          ? currWindowSize.width
+          : parseInt(currWindowSize.width);
+      containerHeight =
+        typeof currWindowSize.height === 'number'
+          ? currWindowSize.height
+          : parseInt(currWindowSize.height);
+    } else {
+      throw new Error(`
+        Error: Window size cannot be calculated for useRatioSize.
+      `);
+    }
+  }
+
   const ratio = options
     ? options.ratio
       ? options.ratio
       : DEFAULT_RATIO
     : DEFAULT_RATIO;
-  if (windowHeight / windowWidth <= ratio) {
-    return setResponsive({
-      ratioSize: {
-        width: windowWidth,
-        height: Math.ceil(windowWidth * ratio),
-      },
-      responsiveBreaks: options ? options.responsiveBreaks : [],
-    });
+  let calculatedWidth = 0;
+  let calculatedHeight = 0;
+  if (containerHeight / containerWidth <= ratio) {
+    calculatedWidth = containerWidth;
+    calculatedHeight = Math.ceil(containerWidth * ratio);
   } else {
-    return setResponsive({
-      ratioSize: {
-        width: Math.ceil(windowHeight / ratio),
-        height: windowHeight,
-      },
-      responsiveBreaks: options ? options.responsiveBreaks : [],
-    });
+    calculatedWidth = Math.ceil(containerHeight / ratio);
+    calculatedHeight = containerHeight;
   }
+  return setResponsive({
+    ratioSize: {
+      width: calculatedWidth,
+      height: calculatedHeight,
+    },
+    responsiveBreaks: options ? options.responsiveBreaks : [],
+    containerSize: {width: containerWidth, height: containerHeight},
+  });
 };
 
 /**
@@ -109,7 +153,7 @@ const calculateRatioSizes = (
  */
 export default function useRatioSize(
   settings: UseRatioProps | void,
-): [RatioSizeProps, () => void] {
+): [RatioSizeProps, (windowSize: RatioSizeProps) => void] {
   const baseInitialState = {width: 0, height: 0};
   const initialState =
     settings && settings.initialState
