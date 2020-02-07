@@ -179,8 +179,11 @@ export interface RatioSizeProps {
 Optional options for calculating ratio size
 ```tsx
 export interface RatioSizeOptionsProps {
-  responsiveBreaks: ResponsiveBreakProps[];
+  responsiveBreaks?: ResponsiveBreakProps[];
   ratio?: number;
+  containerRef?: () => {
+    current: {offsetWidth: number | null; offsetHeight: number | null} | null;
+  } | null;
 }
 
 export interface ResponsiveBreakProps {
@@ -216,3 +219,6 @@ export interface ResponsiveBreakProps {
 
 #### `ratio?: number` 
 Optional ratio number, default: 0.5625 (16:9 with `height / width`)
+
+#### `containerRef?: () => {current: {offsetWidth: number | null; offsetHeight: number | null} | null;} | null;`
+The ref of a parent container that dictates the size of the ratio size instead of the default window viewport size.
