@@ -424,8 +424,8 @@ function updateSourceState(
   state: WheelGestureEventSourceState,
   action: WheelGestureEvent | GestureEndEvent,
 ): WheelGestureEventSourceState {
+  const wasGesturing = state.gesturing;
   if (action.type === GESTURE_END) {
-    const wasGesturing = state.gesturing;
     if (wasGesturing || state.canceled || state.blocked) {
       state.x.reset();
       state.y.reset();
@@ -466,6 +466,7 @@ function updateSourceState(
 
     state.gesturing = state.gesturing || shouldGesture(state);
     state.intentional =
+      (state.gesturing && !wasGesturing) ||
       !state.v.rolling ||
       state.v.deviation > VELOCITY_DEVIATION_THRESHOLD ||
       state.v.value > VELOCITY_THRESHOLD;
