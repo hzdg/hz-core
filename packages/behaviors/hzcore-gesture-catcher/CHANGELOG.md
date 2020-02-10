@@ -3,6 +3,29 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [4.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@3.0.5...@hzcore/gesture-catcher@4.0.0) (2020-02-10)
+
+
+### @hzcore/gesture-catcher
+
+* exclude examples from package ([49072da](https://github.com/hzdg/hz-core/commit/49072da))
+* export *GestureHandler, Orientation types ([f57ccb3](https://github.com/hzdg/hz-core/commit/f57ccb3))
+* remove deugging logs ([673f374](https://github.com/hzdg/hz-core/commit/673f374))
+* add gesture visualizers ([7e0b024](https://github.com/hzdg/hz-core/commit/7e0b024))
+* add wheel debug data to gesture visualizer ([7c63cb8](https://github.com/hzdg/hz-core/commit/7c63cb8))
+* allow continuous gesture plots ([f719751](https://github.com/hzdg/hz-core/commit/f719751))
+* export change handler types ([c0468d9](https://github.com/hzdg/hz-core/commit/c0468d9))
+* fix gesture configurator layout ([71fd8a4](https://github.com/hzdg/hz-core/commit/71fd8a4))
+* fix gestureThreshold demo ([b122808](https://github.com/hzdg/hz-core/commit/b122808))
+* use GestureEventSourceState for debugging ([45bea61](https://github.com/hzdg/hz-core/commit/45bea61))
+* add debug instrumentation ([fdc450c](https://github.com/hzdg/hz-core/commit/fdc450c))
+* add missing/corrected d3 and vx types ([489f355](https://github.com/hzdg/hz-core/commit/489f355))
+
+### @hzcore/gesture-observable
+
+* base wheel gestures on normalized 'spin' ([fb02fa9](https://github.com/hzdg/hz-core/commit/fb02fa9))
+
+
 ## [3.0.5](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@3.0.4...@hzcore/gesture-catcher@3.0.5) (2019-11-08)
 
 

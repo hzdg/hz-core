@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@2.0.0...@hzcore/windowsize-monitor@2.0.1) (2020-02-10)
+
+
+### @hzcore/windowsize-monitor
+
+* fix subscribers set type ([0bf7cf0](https://github.com/hzdg/hz-core/commit/0bf7cf0))
+
+
 # [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@1.0.1...@hzcore/windowsize-monitor@2.0.0) (2019-10-26)
 
 

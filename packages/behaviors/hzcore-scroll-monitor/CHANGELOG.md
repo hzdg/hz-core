@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@4.0.2...@hzcore/scroll-monitor@4.0.3) (2020-02-10)
+
+
+### @hzcore/scroll-monitor
+
+* fix act warnings and types ([20c4ada](https://github.com/hzdg/hz-core/commit/20c4ada))
+* fix theoretical timeout clear bug ([afb6b27](https://github.com/hzdg/hz-core/commit/afb6b27))
+* fix nullable ref types in utils ([706bfe2](https://github.com/hzdg/hz-core/commit/706bfe2))
+
+* upgrade jest, jsdom & co ([03c1ee4](https://github.com/hzdg/hz-core/commit/03c1ee4))
+
+
 ## [4.0.2](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@4.0.1...@hzcore/scroll-monitor@4.0.2) (2019-10-29)
 
 

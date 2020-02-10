@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.0.5](https://github.com/hzdg/hz-core/compare/@hzcore/hook-hover@0.0.4...@hzcore/hook-hover@0.0.5) (2020-02-10)
+
+
+### @hzcore/hook-hover
+
+* fix type reexport error ([ed3045b](https://github.com/hzdg/hz-core/commit/ed3045b))
+
+
 ## [0.0.4](https://github.com/hzdg/hz-core/compare/@hzcore/hook-hover@0.0.3...@hzcore/hook-hover@0.0.4) (2019-04-19)
 
 

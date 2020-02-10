@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.2.0...@hzcore/gesture-observable@2.0.0) (2020-02-10)
+
+
+### @hzcore/gesture-observable
+
+* add cancelThreshold option ([c558a96](https://github.com/hzdg/hz-core/commit/c558a96))
+* export Orientation types and consts ([3a89bd6](https://github.com/hzdg/hz-core/commit/3a89bd6))
+* block gesture when mouse/touch canceled ([8aa9af5](https://github.com/hzdg/hz-core/commit/8aa9af5))
+* fix cancelThreshold behavior ([2cf0476](https://github.com/hzdg/hz-core/commit/2cf0476))
+* fix double gesture streams ([0f485f7](https://github.com/hzdg/hz-core/commit/0f485f7))
+* fix gesture observable config parsing ([237318a](https://github.com/hzdg/hz-core/commit/237318a))
+* fix wheel gesture end blocking ([fbdafd3](https://github.com/hzdg/hz-core/commit/fbdafd3))
+* include timeStamp in wheel gesture event ([1f7fa95](https://github.com/hzdg/hz-core/commit/1f7fa95))
+* make first wheel gesture intentional ([7be54fc](https://github.com/hzdg/hz-core/commit/7be54fc))
+* only debug keyboard events after start ([015db7a](https://github.com/hzdg/hz-core/commit/015db7a))
+* only debug move events after start ([ad0b3ed](https://github.com/hzdg/hz-core/commit/ad0b3ed))
+* prevent multiple gesture end events ([6c08fac](https://github.com/hzdg/hz-core/commit/6c08fac))
+* stop prevented clicks from propagating ([bd84ec6](https://github.com/hzdg/hz-core/commit/bd84ec6))
+* base wheel gestures on normalized 'spin' ([fb02fa9](https://github.com/hzdg/hz-core/commit/fb02fa9))
+* change wheel gesture end detection ([f913a6f](https://github.com/hzdg/hz-core/commit/f913a6f))
+* export GestureEventSourceState type ([bada569](https://github.com/hzdg/hz-core/commit/bada569))
+* add debug instrumentation ([4b49fa6](https://github.com/hzdg/hz-core/commit/4b49fa6))
+* prefer const, etc ([ce91b53](https://github.com/hzdg/hz-core/commit/ce91b53))
+
+
 # [1.2.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.1.2...@hzcore/gesture-observable@1.2.0) (2019-11-01)
 
 

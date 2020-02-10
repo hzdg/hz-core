@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.1](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.4.0...@hzcore/draftail-renderer@1.4.1) (2020-02-10)
+
+
+### @hzcore/draftail-renderer
+
+* Align immutable.js version ranges ([0f33c02](https://github.com/hzdg/hz-core/commit/0f33c02)), closes [/github.com/hzdg/hz-core/blob/8edcbd023af0882365ea266e431512d363296d9d/packages/ui-components/hzcore-draftail-renderer/package.json#L24](https://github.com//github.com/hzdg/hz-core/blob/8edcbd023af0882365ea266e431512d363296d9d/packages/ui-components/hzcore-draftail-renderer/package.json/issues/L24) [/github.com/facebook/draft-js/blob/64b51dff37dbc385532a56ed19e23a9da1437385/package.json#L39](https://github.com//github.com/facebook/draft-js/blob/64b51dff37dbc385532a56ed19e23a9da1437385/package.json/issues/L39)
+
+
 # [1.4.0](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.3.0...@hzcore/draftail-renderer@1.4.0) (2019-12-11)
 
 

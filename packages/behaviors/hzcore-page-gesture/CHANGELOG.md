@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.8](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@2.0.7...@hzcore/page-gesture@2.0.8) (2020-02-10)
+
+
+### @hzcore/page-gesture
+
+* fix render props ref type ([c549721](https://github.com/hzdg/hz-core/commit/c549721))
+
+
 ## [2.0.7](https://github.com/hzdg/hz-core/compare/@hzcore/page-gesture@2.0.6...@hzcore/page-gesture@2.0.7) (2019-11-08)
 
 

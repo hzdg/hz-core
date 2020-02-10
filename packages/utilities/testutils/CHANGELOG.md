@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/hzdg/hz-core/compare/testutils@1.0.1...testutils@1.1.0) (2020-02-10)
+
+
+### testutils
+
+* add repeat() to {Mouse,Touch,Wheel}Sequence ([b0ebe9a](https://github.com/hzdg/hz-core/commit/b0ebe9a))
+* fix getComputedValue overload types ([bfc6031](https://github.com/hzdg/hz-core/commit/bfc6031))
+
+
 ## [1.0.1](https://github.com/hzdg/hz-core/compare/testutils@1.0.0...testutils@1.0.1) (2019-11-08)
 
 
