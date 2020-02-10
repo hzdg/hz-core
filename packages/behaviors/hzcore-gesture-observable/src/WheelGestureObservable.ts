@@ -19,6 +19,8 @@ export {HORIZONTAL, VERTICAL};
 
 export const WHEEL = 'wheel';
 export const GESTURE_END = 'gestureend';
+export const UNBLOCK = 'unblock';
+export const CANCEL_END = 'cancelend';
 
 /**
  * Configuration for a WheelGestureObservable.
@@ -111,6 +113,18 @@ export interface GestureEndEvent {
   type: typeof GESTURE_END;
   timeStamp: number;
 }
+
+interface UnblockEvent {
+  type: typeof UNBLOCK;
+  timeStamp: number;
+}
+
+interface CancelEndEvent {
+  type: typeof CANCEL_END;
+  timeStamp: number;
+}
+
+type WheelGestureAction = GestureEndEvent | UnblockEvent | CancelEndEvent;
 
 const isGestureEndEvent = (
   event: {type?: string | null} | null,
@@ -340,7 +354,7 @@ export interface WheelGestureEventSourceState
 type EventSource = Source<WheelGestureEventSourceState>;
 type GestureSource = Source<WheelGestureState | WheelGestureEndState>;
 type MaybeConfig = Partial<WheelGestureObservableConfig> | null;
-type ActionsSubject = Subject<GestureEndEvent>;
+type ActionsSubject = Subject<WheelGestureAction>;
 
 const extractEvent = ({
   event,
@@ -422,56 +436,64 @@ function shouldPreventDefault({
 
 function updateSourceState(
   state: WheelGestureEventSourceState,
-  action: WheelGestureEvent | GestureEndEvent,
+  action: WheelGestureEvent | WheelGestureAction,
 ): WheelGestureEventSourceState {
   const wasGesturing = state.gesturing;
-  if (action.type === GESTURE_END) {
-    if (wasGesturing || state.canceled || state.blocked) {
-      state.x.reset();
-      state.y.reset();
-      state.v.reset();
-      state.t.reset();
-      state.t.push(GESTURE_END_TIMEOUT_MAX);
-      state.lastTimestamp = null;
-      state.gesturing = false;
-      state.intentional = false;
-      state.blocked = wasGesturing;
-      state.canceled = false;
+  switch (action.type) {
+    case CANCEL_END:
+    case GESTURE_END:
+    case UNBLOCK: {
+      if (wasGesturing || state.canceled || state.blocked) {
+        state.x.reset();
+        state.y.reset();
+        state.v.reset();
+        state.t.reset();
+        state.t.push(GESTURE_END_TIMEOUT_MAX);
+        state.lastTimestamp = null;
+        state.gesturing = false;
+        state.intentional = false;
+        state.blocked = wasGesturing;
+        state.canceled = false;
+      }
+      break;
     }
-  } else {
-    state.event = action;
-    state.v.push(
-      Math.hypot(
-        isNaN(state.x.peek()) ? 0 : action.spinX - state.x.peek(),
-        isNaN(state.y.peek()) ? 0 : action.spinY - state.y.peek(),
-      ),
-    );
-    state.x.push(action.spinX);
-    state.y.push(action.spinY);
-
-    if (state.lastTimestamp) {
-      state.t.push(
-        Math.min(
-          GESTURE_END_TIMEOUT_MAX,
-          Math.max(
-            GESTURE_END_TIMEOUT_MIN,
-            (action.timeStamp - state.lastTimestamp) * 2,
-          ),
+    default: {
+      state.event = action;
+      state.v.push(
+        Math.hypot(
+          isNaN(state.x.peek()) ? 0 : action.spinX - state.x.peek(),
+          isNaN(state.y.peek()) ? 0 : action.spinY - state.y.peek(),
         ),
       );
+      state.x.push(action.spinX);
+      state.y.push(action.spinY);
+
+      if (state.lastTimestamp) {
+        state.t.push(
+          Math.min(
+            GESTURE_END_TIMEOUT_MAX,
+            Math.max(
+              GESTURE_END_TIMEOUT_MIN,
+              (action.timeStamp - state.lastTimestamp) * 2,
+            ),
+          ),
+        );
+      }
+      state.lastTimestamp = action.timeStamp;
+
+      if (state.canceled || state.blocked) return state;
+
+      state.gesturing = state.gesturing || shouldGesture(state);
+      state.intentional =
+        (state.gesturing && !wasGesturing) ||
+        !state.v.rolling ||
+        state.v.deviation > VELOCITY_DEVIATION_THRESHOLD ||
+        state.v.value > VELOCITY_THRESHOLD;
+      state.canceled = state.gesturing ? false : shouldCancel(state);
+      break;
     }
-    state.lastTimestamp = action.timeStamp;
-
-    if (state.canceled || state.blocked) return state;
-
-    state.gesturing = state.gesturing || shouldGesture(state);
-    state.intentional =
-      (state.gesturing && !wasGesturing) ||
-      !state.v.rolling ||
-      state.v.deviation > VELOCITY_DEVIATION_THRESHOLD ||
-      state.v.value > VELOCITY_THRESHOLD;
-    state.canceled = state.gesturing ? false : shouldCancel(state);
   }
+
   return state;
 }
 
@@ -532,7 +554,7 @@ export function createSource(
     }
     actions = actionsOrConfig;
   } else {
-    actions = createSubject<GestureEndEvent>();
+    actions = createSubject<WheelGestureAction>();
     source = createEventSource(
       actions,
       elementOrSource,
@@ -540,25 +562,39 @@ export function createSource(
     );
   }
 
-  const dispatch = (action: GestureEndEvent): void => {
+  const dispatch = (action: WheelGestureAction): void => {
     actions(1, action);
   };
 
   let endTimeout: NodeJS.Timeout | null = null;
   let lastEvent: WheelGestureEvent | undefined;
 
-  const dispatchEndEvent = (): void => {
+  const dispatchEndEvent = (
+    sourceState: WheelGestureEventSourceState,
+  ) => (): void => {
     if (endTimeout != null) clearTimeout(endTimeout);
     endTimeout = null;
-    dispatch(new WheelEvent(GESTURE_END, lastEvent) as GestureEndEvent);
+    if (sourceState.gesturing) {
+      dispatch(new WheelEvent(GESTURE_END, lastEvent) as GestureEndEvent);
+    } else if (sourceState.blocked) {
+      dispatch(new WheelEvent(UNBLOCK, lastEvent) as UnblockEvent);
+    } else if (sourceState.canceled) {
+      dispatch(new WheelEvent(CANCEL_END, lastEvent) as CancelEndEvent);
+    }
   };
 
-  const scheduleGestureEnd = (delay: number): void => {
+  const scheduleGestureEnd = (
+    sourceState: WheelGestureEventSourceState,
+  ): void => {
     if (endTimeout != null) clearTimeout(endTimeout);
-    endTimeout = setTimeout(dispatchEndEvent, delay);
+    endTimeout = setTimeout(dispatchEndEvent(sourceState), sourceState.t.value);
   };
 
   const isGesturing = (sourceState: WheelGestureEventSourceState): boolean => {
+    if (!sourceState.event || isGestureEndEvent(sourceState.event)) {
+      return false;
+    }
+
     lastEvent = sourceState.event;
 
     if (shouldPreventDefault(sourceState)) {
@@ -567,13 +603,13 @@ export function createSource(
 
     if (sourceState.canceled || sourceState.blocked) {
       // Debounce the cancel end timeout.
-      scheduleGestureEnd(sourceState.t.value);
+      scheduleGestureEnd(sourceState);
       return false;
     }
 
     if (sourceState.gesturing && sourceState.intentional) {
       // Debounce the gesture end timeout.
-      scheduleGestureEnd(sourceState.t.value);
+      scheduleGestureEnd(sourceState);
     }
 
     return sourceState.gesturing;
@@ -615,7 +651,7 @@ export function create(
   WheelGestureState | WheelGestureEndState,
   WheelGestureEventSourceState
 > {
-  const actions = createSubject<GestureEndEvent>();
+  const actions = createSubject<WheelGestureAction>();
   const eventSource = share(createEventSource(actions, element, config));
   return asObservable(createSource(eventSource, actions), eventSource);
 }
