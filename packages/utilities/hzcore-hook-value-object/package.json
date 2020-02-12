@@ -1,0 +1,25 @@
+{
+  "name": "@hzcore/hook-value-object",
+  "version": "0.0.1",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.tsx",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "types",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.4"
+  }
+}
