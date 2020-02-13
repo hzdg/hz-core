@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@4.1.0...@hzcore/gesture-catcher@4.1.1) (2020-02-13)
+
+**Note:** Version bump only for package @hzcore/gesture-catcher
+
+
+
+
+
 # [4.1.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-catcher@4.0.0...@hzcore/gesture-catcher@4.1.0) (2020-02-13)
 
 
