@@ -2990,99 +2990,89 @@
   resolved "http://npmregistry.hzdg.com/@verdaccio%2fstreams/-/streams-1.0.0.tgz#d5d24c6747208728b9fd16b908e3932c3fb1f864"
   integrity sha512-AjEo5LXk4Yf0SaXSc3y4i1t+wxY552O7WrVJPtnC6H7nUsSrygg/ODCG1RSKelskOq6b5p/LyXnsTkmCFXyjDQ==
 
-"@vx/axis@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2faxis/-/axis-0.0.193-alpha.1.tgz#78e4a4aaedd98520e199c4b980f91ecf02b24ba3"
-  integrity sha512-DgNMEBX6Sswxj0gWvapj23G8ev8wsZq8OkZr4C19BBp6avtpzxq9iJ/LAEt06x7HSXwoVWzjhsYPAcRCaxG94w==
+"@vx/axis@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2faxis/-/axis-0.0.193.tgz#4634a9ef297538cfbcda40f5fff1cc3b9ce94e48"
+  integrity sha512-96mfy9lx3XY2ZVi25LYCKzrIFuyKNuXc3GIDF3uyhRxt5XiwSUc14W+HyJgbH/5F3RezwQ8CXrXdzDXcoP6hkQ==
   dependencies:
     "@types/classnames" "^2.2.9"
     "@types/react" "*"
-    "@vx/group" "0.0.193-alpha.1"
-    "@vx/point" "0.0.193-alpha.1"
-    "@vx/shape" "0.0.193-alpha.1"
-    "@vx/text" "0.0.193-alpha.1"
+    "@vx/group" "0.0.193"
+    "@vx/point" "0.0.193"
+    "@vx/shape" "0.0.193"
+    "@vx/text" "0.0.193"
     classnames "^2.2.5"
     prop-types "^15.6.0"
 
-"@vx/bounds@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fbounds/-/bounds-0.0.193-alpha.1.tgz#40fb2962654bf5c13502d85e82da3198129bb6a2"
-  integrity sha512-C6nuCqBPrjHHeAQztgcIP/M7XlWtHgbfoE6L184W61qnu8GZXU/XkG/kAFd2enyss8t9ztSJZj1s64N+3kpavw==
+"@vx/bounds@0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fbounds/-/bounds-0.0.193.tgz#0b565355d8e482c9818ecfa46281e457833f5830"
+  integrity sha512-E72umCGXblIclqcMUt9T+/NPf4FaGZdfEF9wSZGTyQvnwPRlYLLgferk2D5IJTSmZ+DRQ15tCuGnYXx1GWEwGw==
   dependencies:
     "@types/react" "*"
     "@types/react-dom" "*"
     prop-types "^15.5.10"
 
-"@vx/curve@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fcurve/-/curve-0.0.193-alpha.1.tgz#8cfb52d748f2d18e5cdf947a6d7fa32b869bcbf1"
-  integrity sha512-X1KUbx+OVafWeiTBCmlBMwm4VNI6gWUIJukyTgIt6quiI+ux0VNZSWi3xLsWJPTZpiZa/5kyaj3D1Z/zmQvriQ==
+"@vx/curve@0.0.193", "@vx/curve@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fcurve/-/curve-0.0.193.tgz#019b6715473f579d75c268bebbdbf007ef49abfa"
+  integrity sha512-/TZM45aiDJRrOSHdt6wVOXfdLrrNrqRJT5dj/e0QGzgsPQDto020XRwinLbNn3OOOWmR51DODf+m/P7LUEryhw==
   dependencies:
     "@types/d3-shape" "^1.3.1"
     d3-shape "^1.0.6"
 
-"@vx/event@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fevent/-/event-0.0.193-alpha.1.tgz#38ac729cb9c632687813e423fc09f860a97debe0"
-  integrity sha512-gHlmcqu5mm5JUux4udPM0tj9kJYlASvMgBveYm/wDNriHviJ4uuN728FR+fblQN5QFKjh+PfA5qGCdjx+GyRqA==
+"@vx/event@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fevent/-/event-0.0.193.tgz#28abaa3fc395db0f550516b261077496452c6c5d"
+  integrity sha512-eF1g4S3HaG0Gn5qeOVkntf2/CP2iGkFoIgTadY1U4/BdetrxVDgLnjx3sLY10ORSzljhnn9XtC0N1Ms3Jo26dA==
   dependencies:
     "@types/react" "*"
-    "@vx/point" "0.0.193-alpha.1"
+    "@vx/point" "0.0.193"
 
-"@vx/grid@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fgrid/-/grid-0.0.193-alpha.1.tgz#62b7646cc048f135db2f27cbb54a03494a462bf7"
-  integrity sha512-FbjlInvpD0NVMK/rYuDuAby4wyjtM2DS+63XH/X/pKsUbeSrkERW/eFgC8PrLmBEzgJszNxSBKe7dKGps2PpcA==
-  dependencies:
-    "@types/classnames" "^2.2.9"
-    "@types/react" "*"
-    "@vx/group" "0.0.193-alpha.1"
-    "@vx/point" "0.0.193-alpha.1"
-    "@vx/shape" "0.0.193-alpha.1"
-    classnames "^2.2.5"
-    prop-types "^15.6.2"
-
-"@vx/group@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fgroup/-/group-0.0.193-alpha.1.tgz#c623c84e6f4416752f4f09dd832bad7ca6290f19"
-  integrity sha512-TaDJXdXZvtTT3fWsyDM8Zan6y4YJ4SEDX2KWQXMkLaauOzZj1H2Op2VVhRoFbhy7s8shJfldAzvs+ZKTGHipiQ==
+"@vx/grid@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fgrid/-/grid-0.0.193.tgz#7c933d4cac5b56647c572f1b74fb5bb52c8dc698"
+  integrity sha512-wPreibH5omOrMTXWvXwGrwvltIC3Px0UTdMUhwpppi+uCBYuiqN396HP7xlV0tn6u6jvnaYdAs1W6ORkJ76C7A==
   dependencies:
     "@types/classnames" "^2.2.9"
     "@types/react" "*"
+    "@vx/group" "0.0.193"
+    "@vx/point" "0.0.193"
+    "@vx/shape" "0.0.193"
     classnames "^2.2.5"
     prop-types "^15.6.2"
 
-"@vx/group@0.0.193-alpha.2":
-  version "0.0.193-alpha.2"
-  resolved "http://npmregistry.hzdg.com/@vx%2fgroup/-/group-0.0.193-alpha.2.tgz#eeb8f93908924f014be6774606ea295601415434"
-  integrity sha512-VV5hxqrZoUuReHHlhTYTTvha7GgsM6M6l6+Q5dRHH4lUBUY//5MDAPGk49e0SGfFhwnKBx6l4HTWj9ymfiJHfQ==
+"@vx/group@0.0.193", "@vx/group@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fgroup/-/group-0.0.193.tgz#b492e9e4d7dc31a002094ec95220cff5ec3ec0ea"
+  integrity sha512-MNJDPgTN0PK8UiV+8XPvZqokYtswH+mfSQMHZXnANfg14jAIfVMeW/TRfDX9FRK2SVI8aOJmMXYOfNVL3y7ewA==
   dependencies:
     "@types/classnames" "^2.2.9"
     "@types/react" "*"
     classnames "^2.2.5"
     prop-types "^15.6.2"
 
-"@vx/legend@0.0.193-alpha.2":
-  version "0.0.193-alpha.2"
-  resolved "http://npmregistry.hzdg.com/@vx%2flegend/-/legend-0.0.193-alpha.2.tgz#cf5da808be1f73985f009d9de339062f8d237fb0"
-  integrity sha512-3c5nlxxhqy9ikRKdSQvwEjj9PfyjovL20TW9kSA6Okkq1ao+cXbsvtAlmfpjEk19lN2Ydms1A3OpG10uMvIT2Q==
+"@vx/legend@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2flegend/-/legend-0.0.193.tgz#612b25dd3d60bb380299b5c2b3bcd80be521bdc7"
+  integrity sha512-WskQGhrPhG67KqTrHIFNc+3/I9/rce2Pcu+nCTvvpEY4EILvpJwZLb5vcnmla9lIeh0ZGkwFQLujLMB9zRpjSg==
   dependencies:
     "@types/classnames" "^2.2.9"
     "@types/d3-scale" "^2.1.1"
     "@types/react" "*"
-    "@vx/group" "0.0.193-alpha.2"
+    "@vx/group" "0.0.193"
     classnames "^2.2.5"
     prop-types "^15.5.10"
 
-"@vx/point@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fpoint/-/point-0.0.193-alpha.1.tgz#45845e1b2adbdc8eed3206ca03bcc5abb42a9d9b"
-  integrity sha512-xetgQiqCJq5XALSym3VyAVmzdyMk955s/eyPJKKUafmjhVQ38k3cbZ982aeuEOE7RlVJXdaH3xKpsH/gaGrJ4A==
+"@vx/point@0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fpoint/-/point-0.0.193.tgz#af6fccbc1389d7365ce7e84719d9426bdd592aac"
+  integrity sha512-lMp03xvi8oo8dtfx4/VmC5Pa++PNRM9Xw/P6Lv7Hl+zJSAF84O2DpQ8dhhm547QSY1rRlEc7LzKHl97jDN0rjg==
 
-"@vx/responsive@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fresponsive/-/responsive-0.0.193-alpha.1.tgz#81d5fcc093362c1ec4df044a520a33262e93c441"
-  integrity sha512-Syujhi6MBzFeZxgoRwZT+XhVRBxB4ZxsanTnU6gGD64EeY8+kO0rvucA8S0YuxqpQ0jwbLJ3SG20AbCkcQP2/Q==
+"@vx/responsive@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fresponsive/-/responsive-0.0.193.tgz#bde9756dbe0423014120e1e5db7df2d08563de4f"
+  integrity sha512-Dw3v/tZFOxVXIjWVIX7eSHSyr+67gTTphtWoZitGxAKj3xEweTsTZiGhuC3Kqi/Ux1y1/sm0vbOSgzahglPD1g==
   dependencies:
     "@types/lodash" "^4.14.146"
     "@types/react" "*"
@@ -3090,34 +3080,34 @@
     prop-types "^15.6.1"
     resize-observer-polyfill "1.5.1"
 
-"@vx/scale@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fscale/-/scale-0.0.193-alpha.1.tgz#3eaa0bcb302d733b9542bfe93304e1805a09d3d2"
-  integrity sha512-oo1wpinWbmcOEzFPKE2b4fbCyLeTnmIhM8sbKylMEuXuxrQtJoB99fNP93a3aaMNwsEKu3o2VG9+dKUnu3bDlw==
+"@vx/scale@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fscale/-/scale-0.0.193.tgz#4bc3770ca887a38c6a9bd70d8d4e2aa77eadf306"
+  integrity sha512-p1pbCB/+w5CzpDgn4eiaq/vq7rm8mORZxRQuLgk8sBhTdphFyczBdNG8Xr+HDIjNrAsJJLArDuiqQfEy/3ChNQ==
   dependencies:
     "@types/d3-scale" "^2.1.1"
     d3-scale "^2.2.2"
 
-"@vx/shape@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2fshape/-/shape-0.0.193-alpha.1.tgz#7a62ef1960ce69f6243426f647aba32b2c03e378"
-  integrity sha512-uTgjvKoeYMR+a/5MRLgVA94aX8PeTm0Wi9qgQAHO25nGys7QT8fxONE4x9CPE/nmbV8iw3C/68V32eidhPjV1A==
+"@vx/shape@0.0.193", "@vx/shape@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2fshape/-/shape-0.0.193.tgz#93af1ff8238912a99d97219b6c197ef821e92ca7"
+  integrity sha512-Rawz7KktSO94AuFDvmJg0K7gkUXt8B9IPGGyI+Xyf99kiyQoCVxWZvdf3Z80RmxOkz8LhNFtu5c+RsJ9EIY8ew==
   dependencies:
     "@types/classnames" "^2.2.9"
     "@types/d3-path" "^1.0.8"
     "@types/d3-shape" "^1.3.1"
     "@types/react" "*"
-    "@vx/curve" "0.0.193-alpha.1"
-    "@vx/group" "0.0.193-alpha.1"
+    "@vx/curve" "0.0.193"
+    "@vx/group" "0.0.193"
     classnames "^2.2.5"
     d3-path "^1.0.5"
     d3-shape "^1.2.0"
     prop-types "^15.5.10"
 
-"@vx/text@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2ftext/-/text-0.0.193-alpha.1.tgz#8db37d24a95e641a213a38e97732fa73ccdf4e3d"
-  integrity sha512-512mytHPKM1gdezZ5h5erus+rpbfIdcZ3YbRIxCJj1AfPFof6/4NP8m8JVbhE1D/+XbzT7bUvMgv4OA/DQi2IQ==
+"@vx/text@0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2ftext/-/text-0.0.193.tgz#bad5560b7af647c8a994d10dcedd620f4220aebb"
+  integrity sha512-8ONWbrC8s+nCLKfJwr96XMjCDsD3ZYJ2rxmRjgrQNj9nYSfR5RGNLt2mKGM0BS0FbOBuPUnVBz6gjTr7DqivMQ==
   dependencies:
     "@types/classnames" "^2.2.9"
     "@types/lodash" "^4.14.146"
@@ -3127,14 +3117,14 @@
     prop-types "^15.7.2"
     reduce-css-calc "^1.3.0"
 
-"@vx/tooltip@0.0.193-alpha.1":
-  version "0.0.193-alpha.1"
-  resolved "http://npmregistry.hzdg.com/@vx%2ftooltip/-/tooltip-0.0.193-alpha.1.tgz#dffc986b88153f12ba0808fff735ac47f835f36d"
-  integrity sha512-zRQlGOzIKhtQsDTAigiHJ9ADvYlCVb9EsFNlWCbi/LSXhM490Bmj1ysR3Zkc1hWfzu437S66sQ12uQun8D597A==
+"@vx/tooltip@^0.0.193":
+  version "0.0.193"
+  resolved "http://npmregistry.hzdg.com/@vx%2ftooltip/-/tooltip-0.0.193.tgz#dedd735826658b05cf3b4d7b772bf3a2bc2a45b2"
+  integrity sha512-vnO7kTk/hN+v9FCXVJxiYTLVmcMFf/Be0pZM4u70BmDFH8HaNlQcYezwGgUK5WJvg/oGnnmLNsDhYnVEBCM4Og==
   dependencies:
     "@types/classnames" "^2.2.9"
     "@types/react" "*"
-    "@vx/bounds" "0.0.193-alpha.1"
+    "@vx/bounds" "0.0.193"
     classnames "^2.2.5"
     prop-types "^15.5.10"
 
