@@ -74,6 +74,7 @@ export interface GestureVisualizerProps {
 }
 
 type TimeStampedObject =
+  | {timeStamp: number; delta: number}
   | GestureState
   | GestureEndState
   | GestureEventSourceState
@@ -225,6 +226,7 @@ const absMax = (a: number, b: number): number =>
   Math.max(Math.abs(a), Math.abs(b));
 
 const takeDeltaSnapshot = (obj: TimeStampedObject): number => {
+  if ('delta' in obj) return obj.delta;
   if ('event' in obj && obj.event) obj = obj.event;
   if ('deltaX' in obj) return absMax(obj.deltaX, obj.deltaY);
   if ('movementX' in obj) return absMax(obj.movementX, obj.movementY);
