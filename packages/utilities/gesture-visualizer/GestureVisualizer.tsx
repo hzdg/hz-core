@@ -16,12 +16,24 @@ import useSize from '@hzcore/hook-size';
 import {
   GestureState,
   GestureEndState,
-  GestureHandler,
   GestureEventSourceState,
 } from '@hzcore/gesture-catcher';
 import TooltipArea, {TooltipContent} from './TooltipArea';
 import EventAreas from './EventAreas';
+import EventLines from './EventLines';
 import Legend from './Legend';
+
+interface VisualizerHandler {
+  (e: TimeStampedObject): void;
+}
+
+export interface VisualizerHandlers {
+  onStart: VisualizerHandler;
+  onMove: VisualizerHandler;
+  onEnd: VisualizerHandler;
+  onInput: VisualizerHandler;
+  __debug: VisualizerHandler;
+}
 
 export interface MovingAverageSnapshot {
   readonly value: number;
@@ -56,6 +68,7 @@ export interface GestureVisualizerState {
 
 export interface GestureVisualizerProps {
   data: GestureVisualizerState | GestureVisualizerState[];
+  discrete?: boolean;
   onClick?: React.EventHandler<React.MouseEvent>;
   children?: React.ReactNode;
 }
@@ -338,29 +351,31 @@ function useGestureData(
 
 export function useGestureVisualizer(
   inputType: string,
-): [GestureHandler, {data: GestureVisualizerState[]; onClick: () => void}] {
+  gestureType = 'Gesture State',
+): [VisualizerHandlers, {data: GestureVisualizerState[]; onClick: () => void}] {
   const [id, setId] = useState(0);
   const onClick = useCallback(() => setId(v => v + 1), [setId]);
-  const [eventData, eventHandler] = useGestureData(`${inputType}-${id}`, true);
-  const [gestureData, gestureHandler] = useGestureData(`Gesture State-${id}`);
+  const [inputData, inputHandler] = useGestureData(`${inputType}-${id}`, true);
+  const [gestureData, gestureHandler] = useGestureData(`${gestureType}-${id}`);
   const gestureHandlers = useMemo(
     () => ({
       onStart: gestureHandler,
       onMove: gestureHandler,
       onEnd: gestureHandler,
-      __debug: eventHandler,
+      onInput: inputHandler,
+      __debug: inputHandler,
     }),
-    [gestureHandler, eventHandler],
+    [gestureHandler, inputHandler],
   );
-  const data = useMemo(() => [eventData, gestureData], [
-    eventData,
+  const data = useMemo(() => [inputData, gestureData], [
+    inputData,
     gestureData,
   ]);
   return [gestureHandlers, {data, onClick}];
 }
 
 export default forwardRef(function GestureVisualizer(
-  {data, children, ...props}: GestureVisualizerProps,
+  {data, children, discrete, ...props}: GestureVisualizerProps,
   forwardedRef: React.Ref<HTMLDivElement>,
 ): JSX.Element {
   const [ref, setRef] = useRefCallback(null, forwardedRef);
@@ -405,17 +420,29 @@ export default forwardRef(function GestureVisualizer(
         <Legend colorScale={colorScale} />
       </div>
       <ScaleSVG width={width} height={height}>
-        {allSeries.map((series, index) => (
-          <EventAreas
-            key={`series-${index}`}
-            series={series}
-            timeStampScale={xScale}
-            deltaScale={yScale}
-            fillColor={colorScale(String(series.id))}
-            yFactor={yFactor(index)}
-            height={height}
-          />
-        ))}
+        {discrete
+          ? allSeries.map((series, index) => (
+              <EventLines
+                key={`series-discrete-${index}`}
+                series={series}
+                timeStampScale={xScale}
+                deltaScale={yScale}
+                fillColor={colorScale(String(series.id))}
+                yFactor={yFactor(index)}
+                height={height}
+              />
+            ))
+          : allSeries.map((series, index) => (
+              <EventAreas
+                key={`series-${index}`}
+                series={series}
+                timeStampScale={xScale}
+                deltaScale={yScale}
+                fillColor={colorScale(String(series.id))}
+                yFactor={yFactor(index)}
+                height={height}
+              />
+            ))}
         <TooltipArea
           width={width}
           height={height}
