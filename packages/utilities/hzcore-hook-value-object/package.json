@@ -1,7 +1,7 @@
 {
   "name": "@hzcore/hook-value-object",
   "description": "A React hook for components that want to memoize shallowly equal values",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
