@@ -1,7 +1,7 @@
 {
   "name": "gesture-visualizer",
   "description": "A fancypants visualizer for showing off gestures and such",
-  "version": "1.0.0-beta.0",
+  "version": "1.0.0",
   "main": "index.ts",
   "license": "UNLISCENSED",
   "private": true,
@@ -17,7 +17,7 @@
     "react-dom": "^16.8.0"
   },
   "dependencies": {
-    "@hzcore/gesture-catcher": "*",
+    "@hzcore/gesture-catcher": "^4.2.0",
     "@hzcore/hook-ref-callback": "*",
     "@hzcore/hook-size": "*",
     "@hzcore/moving-average": "*",
