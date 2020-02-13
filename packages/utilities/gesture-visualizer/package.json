@@ -1,7 +1,7 @@
 {
   "name": "gesture-visualizer",
   "description": "A fancypants visualizer for showing off gestures and such",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.ts",
   "license": "UNLISCENSED",
   "private": true,

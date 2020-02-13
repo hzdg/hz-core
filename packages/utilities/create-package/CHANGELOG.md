@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.4](https://github.com/hzdg/hz-core/compare/create-package@1.0.3...create-package@1.0.4) (2020-02-13)
+
+
+### create-package
+
+* exclude examples from published packages by default ([6d62f13](https://github.com/hzdg/hz-core/commit/6d62f13))
+
+* upgrade jest, jsdom & co ([03c1ee4](https://github.com/hzdg/hz-core/commit/03c1ee4))
+
+
 ## [1.0.3](https://github.com/hzdg/hz-core/compare/create-package@1.0.2...create-package@1.0.3) (2019-05-03)
 
 
