@@ -21,6 +21,7 @@ const PACKAGE_JSON = options => `
     "es",
     "src",
     "types",
+    "!**/examples",
     "!**/__test*"
   ]
 }
