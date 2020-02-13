@@ -68,6 +68,7 @@ export interface GestureVisualizerState {
 
 export interface GestureVisualizerProps {
   data: GestureVisualizerState | GestureVisualizerState[];
+  withCount?: boolean;
   discrete?: boolean;
   onClick?: React.EventHandler<React.MouseEvent>;
   children?: React.ReactNode;
@@ -377,7 +378,7 @@ export function useGestureVisualizer(
 }
 
 export default forwardRef(function GestureVisualizer(
-  {data, children, discrete, ...props}: GestureVisualizerProps,
+  {data, children, discrete, withCount, ...props}: GestureVisualizerProps,
   forwardedRef: React.Ref<HTMLDivElement>,
 ): JSX.Element {
   const [ref, setRef] = useRefCallback(null, forwardedRef);
@@ -419,7 +420,11 @@ export default forwardRef(function GestureVisualizer(
         {children}
       </div>
       <div style={{position: 'absolute'}}>
-        <Legend colorScale={colorScale} />
+        <Legend
+          data={allSeries}
+          withCount={withCount}
+          colorScale={colorScale}
+        />
       </div>
       <ScaleSVG width={width} height={height}>
         {discrete
