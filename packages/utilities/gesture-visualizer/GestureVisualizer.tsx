@@ -173,7 +173,7 @@ function useColorScale(
   allSeries: GestureVisualizerState[],
 ): ScaleOrdinal<string, string> {
   const [colorScale] = useState(() =>
-    scaleOrdinal<string>({range: schemeTableau10}),
+    scaleOrdinal<string, string>({range: schemeTableau10}),
   );
   useMemo(() => {
     colorScale.domain(allSeries.map(({id}) => String(id)));
