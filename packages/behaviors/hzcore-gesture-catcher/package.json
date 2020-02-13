@@ -23,6 +23,7 @@
     "@babel/runtime": "^7.4.4",
     "@hzcore/gesture-observable": "^2.0.0",
     "@hzcore/hook-ref-callback": "^2.0.0",
+    "@hzcore/moving-average": "^1.0.0-beta.0",
     "prop-types": "15.x.x"
   }
 }

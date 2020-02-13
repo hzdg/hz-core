@@ -41,10 +41,11 @@ export interface MovingAverageOptions {
  */
 function weigh(value: number, max: number, scale = 0): number {
   let weight = 1;
+  if (!scale) return weight;
   if (scale > 0) {
     weight = ((max - value) / max) * scale;
   } else if (scale < 0) {
-    weight = (value / max) * Math.abs(scale);
+    weight = ((value + 1) / max) * Math.abs(scale);
   }
   return weight;
 }
@@ -80,7 +81,9 @@ export default class MovingAverage {
 
   /** Add a value to the moving average. */
   push(v: number): void {
-    this._pointer = (this._pointer + 1) % this._size;
+    this._pointer = this._count
+      ? (this._pointer + 1) % this._size
+      : this._pointer;
     this._store[this._pointer] = v;
     this._average = null;
     this._delta += v;
@@ -89,6 +92,7 @@ export default class MovingAverage {
 
   /** View the last added value. */
   peek(): number {
+    let count = Math.min(this._count, this._size);
     return this._store[this._pointer] ?? NaN;
   }
 
@@ -132,12 +136,14 @@ export default class MovingAverage {
     if (this._average === null) {
       let sum = 0;
       let sumWeight = 0;
+      let count = Math.min(this._count, this._size);
       let i = 0;
-      while (i < this._count) {
-        const index = (this._pointer + i) % this._size;
+
+      while (i < count) {
+        const index = (this._pointer - i + count) % count;
         const value = this._store[index];
         if (value != null) {
-          const weight = weigh(i, this._count, this._scale);
+          const weight = weigh(i, count, this._scale);
           sumWeight += weight;
           sum += value * weight;
         }

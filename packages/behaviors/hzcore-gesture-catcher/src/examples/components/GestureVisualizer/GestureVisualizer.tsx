@@ -11,6 +11,7 @@ import {ScaleSVG} from '@vx/responsive';
 import {scaleLinear, scaleOrdinal} from '@vx/scale';
 import {schemeTableau10} from 'd3-scale-chromatic';
 import useRefCallback from '@hzcore/hook-ref-callback';
+import MovingAverage from '@hzcore/moving-average';
 import useSize from '@hzcore/hook-size';
 import {
   GestureState,
@@ -21,7 +22,6 @@ import {
 import TooltipArea, {TooltipContent} from './TooltipArea';
 import EventAreas from './EventAreas';
 import Legend from './Legend';
-import MovingAverage from '@hzcore/gesture-observable/src/MovingAverage';
 
 export interface MovingAverageSnapshot {
   readonly value: number;
