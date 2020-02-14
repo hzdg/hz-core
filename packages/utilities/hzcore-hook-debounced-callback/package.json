@@ -2,7 +2,6 @@
   "name": "@hzcore/hook-debounced-callback",
   "description": "A React hook for components that want to debounce a callback",
   "version": "1.0.0",
-  "private": true,
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
