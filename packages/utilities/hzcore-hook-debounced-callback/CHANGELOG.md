@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-debounced-callback@1.0.0...@hzcore/hook-debounced-callback@1.0.1) (2020-02-14)
+
+
+### @hzcore/hook-debounced-callback
+
+* make public ([490a36b](https://github.com/hzdg/hz-core/commit/490a36b))
+
+
 # [1.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-debounced-callback@0.1.0...@hzcore/hook-debounced-callback@1.0.0) (2020-02-14)
 
 
