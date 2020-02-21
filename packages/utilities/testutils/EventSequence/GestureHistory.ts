@@ -2,14 +2,14 @@ export default class GestureHistory<T>
   implements ZenObservable.Observer<T>, Iterable<T> {
   history: T[] = [];
   _error: Error | null = null;
-  _complete: boolean = false;
-  next = (value: T) => {
+  _complete = false;
+  next = (value: T): void => {
     this.history.push(value);
   };
-  error = (error: Error) => {
+  error = (error: Error): void => {
     this._error = error;
   };
-  complete = () => {
+  complete = (): void => {
     this._complete = true;
   };
   nth(i: number): T | null {
