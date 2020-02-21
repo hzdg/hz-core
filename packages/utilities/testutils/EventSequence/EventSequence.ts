@@ -40,12 +40,19 @@ export default class EventSequence<
     return new Event(type, init) as EventType;
   }
 
+  normalizeEventInit(
+    type: string,
+    init?: EventInitType,
+  ): EventInitType | undefined {
+    return init;
+  }
+
   dispatch<T extends EventSequence<EventType, EventInitType>>(
     this: T,
     type: string,
     init?: EventInitType,
   ): T {
-    this.eventQueue.push([type, init]);
+    this.eventQueue.push([type, this.normalizeEventInit(type, init)]);
     return this;
   }
 

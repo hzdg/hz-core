@@ -71,6 +71,196 @@ test('KeyboardSequence.repeat().up() builds on initialized down()', async () => 
   ]);
 });
 
+test('KeyboardSequence continues a down sequence', async () => {
+  let sequence = KeyboardSequence.create(document.createElement('div'));
+  const expected = [];
+
+  sequence = sequence.space();
+  expected.push({key: ' ', type: 'keydown', repeat: false, ctrlKey: false});
+
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.repeat();
+  expected.push({key: ' ', type: 'keydown', repeat: true, ctrlKey: false});
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.modify({ctrlKey: true});
+  expected.push({key: ' ', type: 'keydown', repeat: true, ctrlKey: true});
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.repeat();
+  expected.push({key: ' ', type: 'keydown', repeat: true, ctrlKey: true});
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.up();
+  expected.push({key: ' ', type: 'keyup', repeat: false, ctrlKey: true});
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+});
+
+test('KeyboardSequence supports modifier keys', async () => {
+  let sequence = KeyboardSequence.create(document.createElement('div'));
+  expect(sequence).toHaveProperty('modify', expect.any(Function));
+  expect(sequence).toHaveProperty('ctrl', expect.any(Function));
+  expect(sequence).toHaveProperty('alt', expect.any(Function));
+  expect(sequence).toHaveProperty('meta', expect.any(Function));
+  expect(sequence).toHaveProperty('shift', expect.any(Function));
+
+  const expected = [];
+
+  sequence = sequence.modify({ctrlKey: true});
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.down({key: 'e'});
+  expected.push({
+    key: 'e',
+    type: 'keydown',
+    ctrlKey: true,
+    altKey: false,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.modify({ctrlKey: false});
+  expected.push({
+    key: 'e',
+    type: 'keydown',
+    ctrlKey: false,
+    altKey: false,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.ctrl();
+  expected.push({
+    key: 'e',
+    type: 'keydown',
+    ctrlKey: true,
+    altKey: false,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.up();
+  expected.push({
+    key: 'e',
+    type: 'keyup',
+    ctrlKey: true,
+    altKey: false,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.ctrl();
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.down({key: 'f'});
+  expected.push({
+    key: 'f',
+    type: 'keydown',
+    ctrlKey: true,
+    altKey: false,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.alt(false);
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.alt();
+  expected.push({
+    key: 'f',
+    type: 'keydown',
+    ctrlKey: true,
+    altKey: true,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.ctrl(false);
+  expected.push({
+    key: 'f',
+    type: 'keydown',
+    ctrlKey: false,
+    altKey: true,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.up();
+  expected.push({
+    key: 'f',
+    type: 'keyup',
+    ctrlKey: false,
+    altKey: true,
+    metaKey: false,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.modify({altKey: false});
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.shift();
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.meta();
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.space();
+  expected.push({
+    key: ' ',
+    type: 'keydown',
+    ctrlKey: false,
+    altKey: false,
+    metaKey: true,
+    shiftKey: true,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.meta(false);
+  expected.push({
+    key: ' ',
+    type: 'keydown',
+    ctrlKey: false,
+    altKey: false,
+    metaKey: false,
+    shiftKey: true,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.modify({shiftKey: false, metaKey: true});
+  expected.push({
+    key: ' ',
+    type: 'keydown',
+    ctrlKey: false,
+    altKey: false,
+    metaKey: true,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.up();
+  expected.push({
+    key: ' ',
+    type: 'keyup',
+    ctrlKey: false,
+    altKey: false,
+    metaKey: true,
+    shiftKey: false,
+  });
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+
+  sequence = sequence.meta(false);
+  expect(await sequence).toEqual(expected.map(expect.objectContaining));
+});
+
 test.each([
   ['space', {key: ' ', code: 'Space', keyCode: 32}],
   ['pageUp', {key: 'PageUp', code: 'PageUp', keyCode: 33}],
@@ -91,17 +281,9 @@ test.each([
   const result = await sequence[name]()
     .repeat()
     .up();
-  expect(
-    result.map(({type, repeat, key, code, keyCode}) => ({
-      type,
-      repeat,
-      key,
-      code,
-      keyCode,
-    })),
-  ).toMatchObject([
-    {type: 'keydown', repeat: false, ...expected},
-    {type: 'keydown', repeat: true, ...expected},
-    {type: 'keyup', repeat: false, ...expected},
+  expect(result).toEqual([
+    expect.objectContaining({type: 'keydown', repeat: false, ...expected}),
+    expect.objectContaining({type: 'keydown', repeat: true, ...expected}),
+    expect.objectContaining({type: 'keyup', repeat: false, ...expected}),
   ]);
 });
