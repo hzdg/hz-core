@@ -13,24 +13,24 @@ type PickType<B, T> = Pick<
   {[K in keyof B]: B[K] extends T ? K : never}[keyof B]
 >;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Newable = new (...args: any[]) => any;
+
 export default class EventSequence<
   EventType extends Event = Event,
   EventInitType extends EventInit = EventInit
 > implements PromiseLike<EventType[]> {
-  constructor(node: HTMLElement | Document) {
-    this.node = node;
-    this.eventQueue = [];
-  }
+  constructor(public node: HTMLElement | Document) {}
 
-  node: HTMLElement | Document;
-  eventQueue: [string, EventInitType?][];
-
-  static create<T extends typeof EventSequence>(
+  static create<T extends Newable>(
     this: T,
-    node: HTMLElement | Document,
+    ...args: ConstructorParameters<T>
   ): InstanceType<T> {
-    return new this(node) as InstanceType<T>;
+    return new this(...args);
   }
+
+  eventQueue: [string, EventInitType?][] = [];
+  dispatched: EventType[] = [];
 
   createNextEvent(
     type: string,
@@ -49,7 +49,10 @@ export default class EventSequence<
     return this;
   }
 
-  expose<T extends object, E extends Extensions>(
+  expose<
+    T extends EventSequence<EventType, EventInitType>,
+    E extends Extensions
+  >(
     this: T,
     extensions: E,
   ): Pick<T, Exclude<keyof T, keyof E>> & PickType<E, Function> {
@@ -63,7 +66,7 @@ export default class EventSequence<
   }
 
   run(): Promise<EventType[]> {
-    const eventSequence = this.eventQueue.reduce(
+    return this.eventQueue.splice(0, this.eventQueue.length).reduce(
       (lastEvent, [eventType, eventInit]) =>
         lastEvent.then(async dispatched => {
           const nextEvent = this.createNextEvent(
@@ -75,10 +78,8 @@ export default class EventSequence<
           dispatched.push(nextEvent);
           return dispatched;
         }),
-      Promise.resolve<EventType[]>([]),
+      Promise.resolve(this.dispatched),
     );
-    this.eventQueue = [];
-    return eventSequence;
   }
 
   async then<Result = EventType[], Reason = never>(
