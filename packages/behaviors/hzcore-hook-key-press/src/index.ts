@@ -1,4 +1,4 @@
-import {useState, useCallback, useRef} from 'react';
+import {useState, useCallback, useRef, useEffect} from 'react';
 import {
   KeyPressHandler,
   KeyPressState,
@@ -28,7 +28,13 @@ type DomTarget = EventTarget | React.RefObject<EventTarget>;
 interface EventOptions {
   /** If `true`, keyboard events will be captured.*/
   capture?: boolean;
-  /** If `true`, the listener should not call `preventDefault()`. */
+  /**
+   * If `true`, the listener should not call `preventDefault()`.
+   *
+   * Note that this will have no effect if binding to a React element,
+   * as ReactDOM events do not support passive listeners.
+   * See https://github.com/facebook/react/issues/6436
+   */
   passive?: boolean;
 }
 
@@ -71,6 +77,8 @@ type KeyPressUserHandlers = GenericKeyPressUserHandlers &
 type KeyPressUserHandlersPartial = AtLeastOneOf<KeyPressUserHandlers>;
 
 interface ReactEventHandlers {
+  onKeyDownCapture?: React.KeyboardEventHandler;
+  onKeyUpCapture?: React.KeyboardEventHandler;
   onKeyDown?: React.KeyboardEventHandler;
   onKeyUp?: React.KeyboardEventHandler;
 }
@@ -78,7 +86,7 @@ interface ReactEventHandlers {
 type Bind<
   T extends UseKeyPressConfig
 > = T extends UseKeyPressWithDomTargetConfig
-  ? () => () => void
+  ? () => void
   : () => ReactEventHandlers;
 
 type Subscription =
@@ -96,18 +104,14 @@ function applyGenericHandlers(
   pickHandlers(handlers, 'onKeyPress', 'onKey', 'onKeyRelease')(phase)?.(state);
 }
 
-function hasDomTarget(
-  config?: UseKeyPressConfig,
-): config is UseKeyPressWithDomTargetConfig {
-  return Boolean(config?.domTarget);
-}
-
 function getDomTarget(
-  config: UseKeyPressWithDomTargetConfig,
+  domTarget: UseKeyPressConfig['domTarget'],
 ): EventTarget | null {
-  return 'current' in config.domTarget
-    ? config.domTarget.current
-    : config.domTarget;
+  return domTarget
+    ? 'current' in domTarget
+      ? domTarget.current
+      : domTarget
+    : null;
 }
 
 type KeyPressStateInternal = KeyPressState & {activeKeys: Set<string>};
@@ -120,6 +124,9 @@ function updateState(
 ): void {
   const phase = getPhase(action);
   const timeStamp = getTimeStamp(action);
+  if (action.key === 'Unidentified') {
+    throw new Error(action.key);
+  }
   state.event = action;
   state.key = action.key;
   state.shiftKey = action.shiftKey;
@@ -172,24 +179,23 @@ function snapshotState(state: KeyPressStateInternal): KeyPressState {
 }
 
 function useKeyPress(
-  handlers: KeyPressUserHandlersPartial,
+  handlers: KeyPressHandler | KeyPressUserHandlersPartial,
   config: UseKeyPressWithDomTargetConfig,
 ): Bind<UseKeyPressWithDomTargetConfig>;
 function useKeyPress(
-  handlers: KeyPressUserHandlersPartial,
+  handlers: KeyPressHandler | KeyPressUserHandlersPartial,
   config?: UseKeyPressConfig,
 ): Bind<UseKeyPressConfig>;
 function useKeyPress<Config extends UseKeyPressConfig>(
-  handlersProp: KeyPressUserHandlersPartial,
+  handlersProp: KeyPressHandler | KeyPressUserHandlersPartial,
   configProp?: Config,
 ): Bind<Config> {
   const handlers = useRef(handlersProp);
   handlers.current = handlersProp;
 
-  const config = useRef(configProp);
-  config.current = configProp;
-
-  const eventOptions = useValueObject(config.current?.eventOptions);
+  const enabled = configProp?.enabled ?? true;
+  const domTarget = configProp?.domTarget;
+  const eventOptions = useValueObject(configProp?.eventOptions);
 
   const [state] = useState<KeyPressStateInternal>(() => ({
     event: null,
@@ -212,6 +218,9 @@ function useKeyPress<Config extends UseKeyPressConfig>(
 
   const dispatch = useCallback(
     (nextState: KeyPressState, phase: KeyPressPhase) => {
+      if (typeof handlers.current === 'function') {
+        return handlers.current(nextState);
+      }
       applyUIHandlers(nextState, phase, handlers.current);
       applyNavigationHandlers(nextState, phase, handlers.current);
       applyWhitespaceHandlers(nextState, phase, handlers.current);
@@ -263,7 +272,7 @@ function useKeyPress<Config extends UseKeyPressConfig>(
   const [subscription] = useState<Subscription>(() => ({target: null}));
 
   const subscribeIfNecessary = useCallback(() => {
-    if (config.current?.enabled === false) {
+    if (enabled === false) {
       if (subscription.target) {
         subscription.unsubscribe();
         Object.assign(subscription, {target: null, unsubscribe: null});
@@ -271,31 +280,47 @@ function useKeyPress<Config extends UseKeyPressConfig>(
       return;
     }
 
-    if (hasDomTarget(config.current)) {
-      const domTarget = getDomTarget(config.current);
-      if (subscription.target && subscription.target !== domTarget) {
+    const target = getDomTarget(domTarget);
+    if (target) {
+      if (subscription.target && subscription.target !== target) {
         subscription.unsubscribe();
         Object.assign(subscription, {target: null, unsubscribe: null});
       }
-      if (domTarget && subscription.target !== domTarget) {
-        domTarget.addEventListener('keydown', eventHandler, eventOptions);
-        domTarget.addEventListener('keyup', eventHandler, eventOptions);
+      if (target && subscription.target !== target) {
+        target.addEventListener('keydown', eventHandler, eventOptions);
+        target.addEventListener('keyup', eventHandler, eventOptions);
         const unsubscribe = (): void => {
-          domTarget.removeEventListener('keydown', eventHandler, eventOptions);
-          domTarget.removeEventListener('keyup', eventHandler, eventOptions);
+          target.removeEventListener('keydown', eventHandler, eventOptions);
+          target.removeEventListener('keyup', eventHandler, eventOptions);
         };
-        Object.assign(subscription, {target: domTarget, unsubscribe});
+        Object.assign(subscription, {target, unsubscribe});
       }
     }
-  }, [subscription, eventHandler, eventOptions]);
+  }, [subscription, eventHandler, eventOptions, enabled, domTarget]);
+
+  useEffect(
+    () => () => {
+      if (subscription.target) {
+        subscription.unsubscribe();
+        Object.assign(subscription, {target: null, unsubscribe: null});
+      }
+    },
+    [eventOptions, domTarget, enabled, subscription],
+  );
 
   const bind = useCallback(() => {
-    if (hasDomTarget(config.current)) {
-      return subscribeIfNecessary;
+    if (getDomTarget(domTarget)) {
+      return subscribeIfNecessary();
     } else {
-      return {onKeyDown: eventHandler, onKeyUp: eventHandler};
+      const capture = Boolean(eventOptions?.capture);
+      return {
+        onKeyDownCapture: enabled && capture ? eventHandler : null,
+        onKeyUpCapture: enabled && capture ? eventHandler : null,
+        onKeyDown: enabled && !capture ? eventHandler : null,
+        onKeyUp: enabled && !capture ? eventHandler : null,
+      };
     }
-  }, [eventHandler, subscribeIfNecessary]);
+  }, [eventHandler, eventOptions, enabled, domTarget, subscribeIfNecessary]);
 
   return bind as Bind<Config>;
 }

@@ -23,36 +23,36 @@ export enum Navigation {
 
 export interface NavigationKeyPressUserHandlers {
   onArrowDown?: KeyPressHandler;
-  onArrowDownRelease?: KeyPressHandler;
   onArrowDownPress?: KeyPressHandler;
+  onArrowDownRelease?: KeyPressHandler;
 
   onArrowLeft?: KeyPressHandler;
-  onArrowLeftRelease?: KeyPressHandler;
   onArrowLeftPress?: KeyPressHandler;
+  onArrowLeftRelease?: KeyPressHandler;
 
   onArrowRight?: KeyPressHandler;
-  onArrowRightRelease?: KeyPressHandler;
   onArrowRightPress?: KeyPressHandler;
+  onArrowRightRelease?: KeyPressHandler;
 
   onArrowUp?: KeyPressHandler;
-  onArrowUpRelease?: KeyPressHandler;
   onArrowUpPress?: KeyPressHandler;
+  onArrowUpRelease?: KeyPressHandler;
 
   onEnd?: KeyPressHandler;
-  onEndRelease?: KeyPressHandler;
   onEndPress?: KeyPressHandler;
+  onEndRelease?: KeyPressHandler;
 
   onHome?: KeyPressHandler;
-  onHomeRelease?: KeyPressHandler;
   onHomePress?: KeyPressHandler;
+  onHomeRelease?: KeyPressHandler;
 
   onPageDown?: KeyPressHandler;
-  onPageDownRelease?: KeyPressHandler;
   onPageDownPress?: KeyPressHandler;
+  onPageDownRelease?: KeyPressHandler;
 
   onPageUp?: KeyPressHandler;
-  onPageUpRelease?: KeyPressHandler;
   onPageUpPress?: KeyPressHandler;
+  onPageUpRelease?: KeyPressHandler;
 }
 
 export function applyNavigationHandlers(

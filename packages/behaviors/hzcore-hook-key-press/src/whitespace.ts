@@ -14,9 +14,9 @@ export enum Whitespace {
 }
 
 export interface WhitespaceKeyPressUserHandlers {
+  onEnter?: KeyPressHandler;
   onEnterPress?: KeyPressHandler;
   onEnterRelease?: KeyPressHandler;
-  onEnter?: KeyPressHandler;
 
   onTab?: KeyPressHandler;
   onTabPress?: KeyPressHandler;

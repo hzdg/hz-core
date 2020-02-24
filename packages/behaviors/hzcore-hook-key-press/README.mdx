@@ -327,7 +327,13 @@ interface UseKeyPressConfig {
   eventOptions?: {
     /** If `true`, keyboard events will be captured.*/
     capture?: boolean;
-    /** If `true`, handlers cannot call `preventDefault()`. */
+    /**
+     * If `true`, the listener should not call `preventDefault()`.
+     *
+     * Note that this will have no effect if binding to a React element,
+     * as ReactDOM events do not support passive listeners.
+     * See https://github.com/facebook/react/issues/6436
+     */
     passive?: boolean;
   };
   /**
