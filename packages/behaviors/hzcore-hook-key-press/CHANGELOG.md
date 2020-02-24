@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-key-press@1.0.0...@hzcore/hook-key-press@1.0.1) (2020-02-24)
+
+
+### @hzcore/hook-key-press
+
+* fix typings ([2d54675](https://github.com/hzdg/hz-core/commit/2d54675))
+
+
 # 1.0.0 (2020-02-24)
 
 
