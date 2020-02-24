@@ -1,4 +1,5 @@
-import {useState, useCallback, useRef, useEffect} from 'react';
+import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
+import warning from 'tiny-warning';
 import {
   KeyPressHandler,
   KeyPressState,
@@ -178,6 +179,57 @@ function snapshotState(state: KeyPressStateInternal): KeyPressState {
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type Callback = (...args: any[]) => any;
+
+/**
+ * A callback that memoizes its result until the
+ * configured wait period has elapsed since the last invocation.
+ *
+ * Has two utility `cancel` and `flush` methods that allow
+ * canceling the next delayed invocation and forcing immediate
+ * invocation, respectively.
+ */
+export interface Debounced<T extends Callback> {
+  (...args: Parameters<T>): ReturnType<T> | undefined;
+  /** Cancel the next scheduled invocation of the callback. */
+  cancel(): void;
+  /** Force the next invocation of the callback to occur immediately. */
+  flush(): void;
+}
+
+/**
+ * `useBind` will return a _referentially transparent_ version of
+ * a given 'bind' callback. In dev builds, this hook will warn
+ * when it looks like the returned `bind` is being spread as props
+ * without being called.
+ */
+function useBind<T extends Callback>(callback: T): T {
+  const cb = useRef<T>(callback);
+  cb.current = callback;
+  const bind = useCallback((...args: Parameters<T>): ReturnType<T> => {
+    return cb.current(...args);
+  }, []) as T;
+  return useMemo((): T => {
+    if (__DEV__) {
+      const msg =
+        'bind appears to be spread as props without having been called! Did you mean `{...bind()}`?' +
+        '\n\nThis is most likely a bug in a component using the `useKeyPress` hook.';
+      return new Proxy(bind, {
+        ownKeys(target) {
+          warning(false, msg);
+          return Reflect.ownKeys(target);
+        },
+        get(target, prop, receiver) {
+          warning(prop !== 'key', msg);
+          return Reflect.get(target, prop, receiver);
+        },
+      });
+    }
+    return bind;
+  }, [bind]) as T;
+}
+
 function useKeyPress(
   handlers: KeyPressHandler | KeyPressUserHandlersPartial,
   config: UseKeyPressWithDomTargetConfig,
@@ -308,7 +360,7 @@ function useKeyPress<Config extends UseKeyPressConfig>(
     [eventOptions, domTarget, enabled, subscription],
   );
 
-  const bind = useCallback(() => {
+  return useBind(() => {
     if (getDomTarget(domTarget)) {
       return subscribeIfNecessary();
     } else {
@@ -320,9 +372,7 @@ function useKeyPress<Config extends UseKeyPressConfig>(
         onKeyUp: enabled && !capture ? eventHandler : null,
       };
     }
-  }, [eventHandler, eventOptions, enabled, domTarget, subscribeIfNecessary]);
-
-  return bind as Bind<Config>;
+  }) as Bind<Config>;
 }
 
 export default useKeyPress;

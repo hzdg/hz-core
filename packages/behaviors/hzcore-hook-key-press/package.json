@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzcore/hook-value-object": "^1.0.2"
+    "@hzcore/hook-value-object": "^1.0.2",
+    "tiny-warning": "^1.0.3"
   }
 }

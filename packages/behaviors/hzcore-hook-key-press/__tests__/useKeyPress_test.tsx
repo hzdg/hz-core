@@ -3,6 +3,7 @@ import React from 'react';
 import {render} from '@testing-library/react';
 import {renderHook} from '@testing-library/react-hooks';
 import {KeyboardSequence} from 'testutils/EventSequence';
+jest.mock('tiny-warning');
 import useKeyPress, {UseKeyPressConfig} from '../src';
 import {Navigation} from '../src/navigation';
 import {Whitespace} from '../src/whitespace';
@@ -18,7 +19,7 @@ describe('useKeyPress', () => {
     const lastResult = result.current;
     rerender({domTarget: document.createElement('input')});
     expect(result.current).toBeInstanceOf(Function);
-    expect(result.current).not.toBe(lastResult);
+    expect(result.current).toBe(lastResult);
   });
 
   test('binds to a React element', async () => {
@@ -522,5 +523,21 @@ describe('useKeyPress', () => {
         timeStamp: expect.any(Number),
       });
     });
+  });
+
+  test('bind warns if being spread without being called (nice to have)', async () => {
+    const mockWarn = require('tiny-warning') as jest.Mock;
+    mockWarn.mockReset();
+    expect(mockWarn).not.toHaveBeenCalled();
+    const KeyPressUser = (props: {type?: string}): JSX.Element => {
+      const bind = useKeyPress(jest.fn());
+      return props.type ? <input {...bind} {...props} /> : <input {...bind} />;
+    };
+    const {rerender} = render(<KeyPressUser />);
+    expect(mockWarn).toHaveBeenCalled();
+    mockWarn.mockReset();
+    expect(mockWarn).not.toHaveBeenCalled();
+    rerender(<KeyPressUser type="text" />);
+    expect(mockWarn).toHaveBeenCalled();
   });
 });
