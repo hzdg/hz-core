@@ -75,8 +75,6 @@ type KeyPressUserHandlers = GenericKeyPressUserHandlers &
   UIKeyPressUserHandlers &
   NavigationKeyPressUserHandlers;
 
-type KeyPressUserHandlersPartial = AtLeastOneOf<KeyPressUserHandlers>;
-
 interface ReactEventHandlers {
   onKeyDownCapture?: React.KeyboardEventHandler;
   onKeyUpCapture?: React.KeyboardEventHandler;
@@ -183,22 +181,6 @@ function snapshotState(state: KeyPressStateInternal): KeyPressState {
 type Callback = (...args: any[]) => any;
 
 /**
- * A callback that memoizes its result until the
- * configured wait period has elapsed since the last invocation.
- *
- * Has two utility `cancel` and `flush` methods that allow
- * canceling the next delayed invocation and forcing immediate
- * invocation, respectively.
- */
-export interface Debounced<T extends Callback> {
-  (...args: Parameters<T>): ReturnType<T> | undefined;
-  /** Cancel the next scheduled invocation of the callback. */
-  cancel(): void;
-  /** Force the next invocation of the callback to occur immediately. */
-  flush(): void;
-}
-
-/**
  * `useBind` will return a _referentially transparent_ version of
  * a given 'bind' callback. In dev builds, this hook will warn
  * when it looks like the returned `bind` is being spread as props
@@ -230,16 +212,19 @@ function useBind<T extends Callback>(callback: T): T {
   }, [bind]) as T;
 }
 
+export type UseKeyPressHandler = KeyPressHandler;
+export type UseKeyPressHandlers = AtLeastOneOf<KeyPressUserHandlers>;
+
 function useKeyPress(
-  handlers: KeyPressHandler | KeyPressUserHandlersPartial,
+  handlers: UseKeyPressHandler | UseKeyPressHandlers,
   config: UseKeyPressWithDomTargetConfig,
 ): Bind<UseKeyPressWithDomTargetConfig>;
 function useKeyPress(
-  handlers: KeyPressHandler | KeyPressUserHandlersPartial,
+  handlers: UseKeyPressHandler | UseKeyPressHandlers,
   config?: UseKeyPressConfig,
 ): Bind<UseKeyPressConfig>;
 function useKeyPress<Config extends UseKeyPressConfig>(
-  handlersProp: KeyPressHandler | KeyPressUserHandlersPartial,
+  handlersProp: UseKeyPressHandler | UseKeyPressHandlers,
   configProp?: Config,
 ): Bind<Config> {
   const handlers = useRef(handlersProp);
