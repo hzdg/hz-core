@@ -79,6 +79,51 @@ export default class MovingAverage {
     this._average = null;
   }
 
+  /**
+   * Returns a portion of the stored values in this `MovingAverage`
+   * as a new `MovingAverage`. The new `MovingAverage` will inherit the
+   * configuration of this `MovingAverage`, with the exception of `size`.
+   * The size of the new `MovingAverage` will be determined by `end - start`,
+   * where `end` defaults to the size of the originating `MovingAverage`,
+   * and `start` defaults to `0`.
+   */
+  slice(start?: number, end?: number): MovingAverage {
+    start = start ?? 0;
+    if (start > this._size) start = this._size;
+    if (start < 0) start = Math.max(0, this._size + start);
+
+    end = end ?? this._size;
+    if (end > this._size) end = this._size;
+    if (end < 0) end = Math.max(start, this._size + end);
+    if (end < start) end = start;
+
+    const size = end - start;
+    if (!size) {
+      return new MovingAverage({
+        size: 1,
+        weight: this._scale,
+        round: this._round,
+      });
+    }
+
+    const sliced = new MovingAverage({
+      size,
+      weight: this._scale,
+      round: this._round,
+    });
+    const pCount = Math.min(this._count, this._size);
+    const pStart = (this._pointer + 1 - pCount + pCount) % pCount;
+    const count = Math.min(size, pCount);
+    let i = 0;
+    while (i < count) {
+      const index = (pStart + start + i) % pCount;
+      const value = this._store[index];
+      sliced.push(value);
+      i++;
+    }
+    return sliced;
+  }
+
   /** Add a value to the moving average. */
   push(v: number): void {
     this._pointer = this._count

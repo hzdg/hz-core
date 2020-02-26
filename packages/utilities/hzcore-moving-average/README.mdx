@@ -94,6 +94,19 @@ Whether or not the moving average is rounded to the nearest integer.
 const movingAverage = new MovingAverage(options?: MovingAverageOptions);
 ```
 
+### slice
+
+```ts
+slice(start?: number, end?: number): MovingAverage
+```
+
+Returns a portion of the stored values in this `MovingAverage`
+as a new `MovingAverage`. The new `MovingAverage` will inherit the
+configuration of this `MovingAverage`, with the exception of `size`.
+The size of the new `MovingAverage` will be determined by `end - start`,
+where `end` defaults to the size of the originating `MovingAverage`,
+and `start` defaults to `0`.
+
 ### push
 
 ```ts

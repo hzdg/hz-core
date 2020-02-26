@@ -54,6 +54,88 @@ describe('MovingAverage', () => {
     expect(avg.value).toBe(1);
   });
 
+  describe('slice()', () => {
+    it('returns a new MovingAverage', () => {
+      const avg = new MovingAverage({size: 2});
+      avg.push(25);
+      expect(avg.rolling).toBe(false);
+
+      const sliced = avg.slice();
+      expect(sliced).toBeInstanceOf(MovingAverage);
+      expect(sliced).not.toBe(avg);
+
+      sliced.push(125);
+      expect(sliced.rolling).toBe(true);
+      expect(sliced.peek()).not.toBe(avg.peek());
+      expect(sliced.rolling).not.toBe(avg.rolling);
+      expect(sliced.value).not.toBe(avg.value);
+      expect(sliced.deviation).not.toBe(avg.deviation);
+    });
+
+    it('includes sliced data from the parent', () => {
+      const avg = new MovingAverage({size: 2});
+      avg.push(25);
+      expect(avg.rolling).toBe(false);
+      let sliced = avg.slice();
+      expect(sliced.peek()).toBe(avg.peek());
+      expect(sliced.rolling).toBe(avg.rolling);
+      expect(sliced.value).toBe(avg.value);
+      expect(sliced.deviation).toBe(avg.deviation);
+
+      avg.push(125);
+      expect(avg.rolling).toBe(true);
+      sliced = avg.slice();
+      expect(sliced.peek()).toBe(avg.peek());
+      expect(sliced.rolling).toBe(avg.rolling);
+      expect(sliced.value).toBe(avg.value);
+      expect(sliced.deviation).toBe(avg.deviation);
+
+      avg.push(25);
+      sliced = avg.slice();
+      expect(sliced.peek()).toBe(avg.peek());
+      expect(sliced.rolling).toBe(avg.rolling);
+      expect(sliced.value).toBe(avg.value);
+      expect(sliced.deviation).toBe(avg.deviation);
+    });
+
+    it.each`
+      start | end          | expectedPeek | expectedValue
+      ${1}  | ${undefined} | ${125}       | ${125}
+      ${2}  | ${undefined} | ${NaN}       | ${NaN}
+      ${3}  | ${undefined} | ${NaN}       | ${NaN}
+      ${-1} | ${undefined} | ${125}       | ${125}
+      ${-2} | ${undefined} | ${125}       | ${(25 * 0.5 + 125) / (0.5 + 1)}
+      ${-3} | ${undefined} | ${125}       | ${(25 * 0.5 + 125) / (0.5 + 1)}
+      ${0}  | ${0}         | ${NaN}       | ${NaN}
+      ${0}  | ${1}         | ${25}        | ${25}
+      ${0}  | ${2}         | ${125}       | ${(25 * 0.5 + 125) / (0.5 + 1)}
+      ${0}  | ${3}         | ${125}       | ${(25 * 0.5 + 125) / (0.5 + 1)}
+      ${0}  | ${-1}        | ${25}        | ${25}
+      ${0}  | ${-2}        | ${NaN}       | ${NaN}
+      ${0}  | ${-3}        | ${NaN}       | ${NaN}
+      ${1}  | ${0}         | ${NaN}       | ${NaN}
+      ${1}  | ${1}         | ${NaN}       | ${NaN}
+      ${1}  | ${2}         | ${125}       | ${125}
+      ${1}  | ${3}         | ${125}       | ${125}
+      ${1}  | ${-1}        | ${NaN}       | ${NaN}
+      ${1}  | ${-2}        | ${NaN}       | ${NaN}
+      ${1}  | ${-3}        | ${NaN}       | ${NaN}
+      ${-1} | ${0}         | ${NaN}       | ${NaN}
+      ${-1} | ${-3}        | ${NaN}       | ${NaN}
+      ${-2} | ${-1}        | ${25}        | ${25}
+    `(
+      'handles `({size: 2}).slice($start, $end)`',
+      ({start, end, expectedPeek, expectedValue}) => {
+        const avg = new MovingAverage({size: 2});
+        avg.push(25);
+        avg.push(125);
+        const slice = avg.slice(start, end);
+        expect(slice.peek()).toBe(expectedPeek);
+        expect(slice.value).toBe(expectedValue);
+      },
+    );
+  });
+
   describe('peek()', () => {
     it('returns the last pushed value', () => {
       const avg = new MovingAverage();
