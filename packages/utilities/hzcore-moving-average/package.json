@@ -1,7 +1,7 @@
 {
   "name": "@hzcore/moving-average",
   "description": "A simple utility for keeping an average of the latest fixed number of values over time",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",

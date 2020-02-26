@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.1](https://github.com/hzdg/hz-core/compare/gesture-visualizer@1.1.0...gesture-visualizer@1.1.1) (2020-02-26)
+
+**Note:** Version bump only for package gesture-visualizer
+
+
+
+
+
 # [1.1.0](https://github.com/hzdg/hz-core/compare/gesture-visualizer@1.0.1...gesture-visualizer@1.1.0) (2020-02-14)
 
 

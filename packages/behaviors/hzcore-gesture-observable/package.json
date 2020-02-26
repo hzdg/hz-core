@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/gesture-observable",
-  "version": "2.1.1",
+  "version": "2.1.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",
@@ -18,7 +18,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@hzcore/dom-utils": "^1.0.1",
-    "@hzcore/moving-average": "^1.0.1",
+    "@hzcore/moving-average": "^1.1.0",
     "callbag": "^1.2.0",
     "callbag-filter": "^1.1.0",
     "callbag-from-event": "^1.2.1",
