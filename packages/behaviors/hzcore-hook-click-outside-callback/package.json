@@ -1,0 +1,23 @@
+{
+  "name": "@hzcore/hook-click-outside-callback",
+  "version": "0.0.1",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.tsx",
+  "license": "MIT",
+  "private": true,
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "types",
+    "!**/examples",
+    "!**/__test*"
+  ],
+  "dependencies": {
+    "mini-svg-data-uri": "^1.1.3"
+  }
+}

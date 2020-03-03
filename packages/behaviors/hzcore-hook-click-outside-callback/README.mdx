@@ -1,0 +1,214 @@
+---
+name: useClickOutsideCallback
+menu: Hooks
+route: /use-click-outside-callback
+---
+
+import {Playground, Props} from 'docz';
+import useClickOutsideCallback from './src';
+import {useState} from 'react';
+import Styles from './ReadmeStyles.tsx';
+
+# useClickOutsideCallback
+
+## Installation
+
+```shell
+yarn add @hzcore/hook-click-outside-callback
+```
+
+## Usage
+
+```js
+import useClickOutsideCallback from '@hzcore/hook-click-outside-callback';
+```
+
+### To use the hook:
+
+1. Create a callback function that accepts a `MouseEvent`
+2. Pass that callback to `useClickOutsideCallback` to get a React `ref`
+3. Add the ref to the target element/component
+
+```typescript
+  const onClickOutside = (event: MouseEvent) => {/* ...do something */};
+  const clickRef = useClickOutsideCallback(onClickOutside);
+  const el = <div ref={clickRef}>This div will respond to outside clicks</div>
+```
+
+## Simple Example 
+
+Check out the example's code to see the above steps in context. 
+
+Here two event listeners are set up: one for clicks inside the element, and one
+for outside clicks. The text in the box will update to show the source of the
+last click (anywhere on this page) as 'Inside' or 'Outside'
+
+<Playground>
+  {() => {
+    const Demo = () => {
+      // const [clickCount, setClickCount] = useState(0);
+      const [lastClick, setLastClick] = useState('(none)');
+
+      const clickInside = (e) => {
+        setLastClick('Inside');
+        e.preventDefault();
+      };
+
+      const clickOutside = (e) => {
+        setLastClick('Outside');
+        e.preventDefault();
+      };
+      
+      // Pass in callback (clickOutside) and get reference to affix to an element 
+      const clickRef = useClickOutsideCallback(clickOutside)
+
+      return (
+        <div ref={clickRef} onClick={clickInside} className="clickBox">
+          <p>This box is listening for clicks, inside and out. Click stuff.</p>
+          <p>Last clicked: {lastClick}</p>
+          <button>This is a button.</button>
+        </div>
+      );
+    };
+    return <Styles><Demo /></Styles>;
+  }}
+</Playground>
+
+## Composing Components 
+
+We can use this hook to compose higher level components like a pop-up info
+dialog. In the following example the `InfoPopup` component is built to accept
+`isOpen` and `onClose` props, delegating its state management.
+
+The component encapsulates the usage of the hook, and presents a popup dialog
+that will call the passed callback when the user clicks either outside of the
+dialog or on the close button.
+
+<Playground>
+  {() => { 
+    const Demo = () => {
+
+      // example component that accepts isOpen and onClose props
+      const InfoPopup = (props) => { 
+        // bind passed callback to outside click
+        const clickRef = useClickOutsideCallback(props.onClose)
+        // only return body when isOpen == true
+        return !props.isOpen ? null : (
+          <div ref={clickRef} className="info-popup">
+            <div className="info-popup-top">
+              <div className="info-popup-title">info</div>
+              {/* also bind passed callback to classic close button */}
+              <div className="info-popup-close" onClick={props.onClose}></div>
+            </div>
+            <div className="info-popup-content">  
+              {props.children}
+            </div>
+        </div>)
+      }
+
+      // setup events to hide and show an instance of the popup component
+      const [showingPopup, setShowingPopup] = useState(false)
+      const showPopup = (e) => { 
+        setShowingPopup(true) 
+        e.preventDefault()
+      }
+      const closePopup = (e) => { 
+        setShowingPopup(false) 
+        e.preventDefault()
+      }
+
+      // render a button to trigger the popup, and the popup itself,
+      // passing in content and the onClose callback
+      return (<div className="stage">
+        <button onClick={showPopup}>Show info modal</button>
+        <InfoPopup isOpen={showingPopup} onClose={closePopup}>
+          <p>
+            This is an info popup, a helpful interuption, but not 
+            so critical that we can't click out of it.
+          </p>
+          <p>
+            To close it:
+          </p>
+          <ul>
+            <li>click the close button</li>
+            <li>OR just click outside the dialog</li>
+          </ul>
+        </InfoPopup>
+      </div>)
+
+    }
+    return <Styles><Demo /></Styles>;
+  }}
+</Playground>
+
+## Nullable callback parameter
+
+When composing a component it may be useful to toggle outside click handling
+via some prop or state. One way to do this is to pass `null` as the callback
+parameter to the `useClickOutsideCallback` hook. 
+
+When `null` is passed as the callback, no event listeners are registerd, but a
+ref is still returned and can be safely attached without further logic.
+
+As an example, if our component had a prop called `shouldCloseOnClick` we could
+toggle the behavior with the following code. In this case, the event listener is 
+only registered if `shouldCloseOnClick` is truthy
+
+```js
+useClickOutsideCallback(shouldCloseOnClick ? handler : null)
+```
+
+## Typescript Considerations
+
+When using typescript react elements expect properly typed props. Here's how to
+keep React and Typescript happy:
+
+### the ref element
+
+If we are attaching the returned `ref` to a div element, react will expect that
+ref to be of the type `React.RefObject<HTMLDivElement>`. We can meet this
+requirement by specifying the element type `<HTMLDivElement>` when calling the
+hook.
+
+```typescript
+// receives a ref of type React.RefObject<HTMLDivElement>
+const clickRef = useClickOutsideCallback<HTMLDivElement>(clickOutside);
+
+// then it's ok to feed that ref to a react component
+const el = <div ref={clickRef} className="clickBox">...</div>
+```
+
+### The callback
+
+React generally expects to work with React event objects, but the
+`useClickOutsideCallback` requires a standard (non-react) MouseEvent. This is
+because the outside click monitoring relies on a document level click handler
+that is propogated back down to the target element. 
+
+As a result, the callback should be of type `MouseEvent`.  However if the 
+callback might also be used as a standard react callback (see above modal example)
+then we also need it to work with `React.MouseEvent`. In that case, we can implement
+our call back like this:
+
+```typescript
+const clickOutsideOrClose = (e: MouseEvent | React.MouseEvent) => {
+  closeTheDialog();
+  e.stopPropagation();
+};
+```
+
+This will work for both cases. If the handler is only passed to the hook we can
+omit the union with the latter type:
+
+```typescript
+const clickOutsideOrClose = (e: MouseEvent | React.MouseEvent) => {/*...*/}
+```
+
+## Event weirdness. 
+
+React consumes standard browser events at the document level before repackaging
+them as React events. As a result, when using outside clicks to close a dialog,
+it is possible for the dialog to close, but still handle latent react click
+events that may have happened inside that dialog. Do not rely on the closing
+the dialog to cancel all pending listeners; use `stopPropogation` to keep your
+events in check.
