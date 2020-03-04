@@ -1,0 +1,25 @@
+{
+  "name": "@hzcore/icons-video-controls",
+  "version": "0.0.1",
+  "author": "Caroline Lee",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.tsx",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "types",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.3"
+  }
+}
