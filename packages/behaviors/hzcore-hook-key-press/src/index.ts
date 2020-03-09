@@ -1,8 +1,8 @@
 import {useState, useCallback, useRef, useEffect, useMemo} from 'react';
 import warning from 'tiny-warning';
 import {
-  KeyPressHandler,
-  KeyPressState,
+  KeyPressHandler as _KeyPressHandler,
+  KeyPressState as _KeyPressState,
   KeyPressPhase,
   pickHandlers,
   getPhase,
@@ -20,6 +20,10 @@ import {
   applyNavigationHandlers,
 } from './navigation';
 import useValueObject from '@hzcore/hook-value-object';
+
+// Reexport types in a babel-friendly way.
+export type KeyPressState = _KeyPressState;
+export type KeyPressHandler = _KeyPressHandler;
 
 type AtLeastOneOf<T, U = {[K in keyof T]: Pick<T, K>}> = Partial<T> &
   U[keyof U];
