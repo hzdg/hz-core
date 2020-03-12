@@ -188,21 +188,40 @@ export default class FocusManager {
    * Focus the first focusable element in the _deep_ `FocusManager` scope,
    * or if `tabbable` is `true`, the first tabbable element in the scope.
    *
+   * Accepts either a `tabbable` boolean, or a focus options object
+   * that may include a `tabbable` boolean field. See `focus` for
+   * more on focus options.
+   *
    * An element is in the _deep_ scope if it is:
    *  - focusable
    *  - a descendant of the `FocusManager` element
    *  - a descendant of any nested `FocusManager` element.
    */
   focusFirst(
-    /** If `true`, focus the first _tabbable_ element instead. */
-    tabbable?: boolean,
+    /**
+     * Either an optional boolean indicating whether to focus
+     * the first _tabbable_ element instead, or an optional object
+     * for controlling aspects of the focusing process.
+     */
+    tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
   ): Element | null {
-    return this._focusTreeNode.focusFirst(tabbable ? isTabbable : isFocusable);
+    const {tabbable, ...options} =
+      typeof tabbableOrOptions === 'object'
+        ? tabbableOrOptions
+        : {tabbable: tabbableOrOptions};
+    return this._focusTreeNode.focusFirst(
+      tabbable ? isTabbable : isFocusable,
+      options,
+    );
   }
 
   /**
    * Focus the last focusable element in the _deep_ `FocusManager` scope,
    * or if `tabbable` is `true`, the last tabbable element in the scope.
+   *
+   * Accepts either a `tabbable` boolean, or a focus options object
+   * that may include a `tabbable` boolean field. See `focus` for
+   * more on focus options.
    *
    * An element is in the _deep_ scope if it is:
    *  - focusable
@@ -210,17 +229,38 @@ export default class FocusManager {
    *  - a descendant of any nested `FocusManager` element.
    */
   focusLast(
-    /** if `true`, focus the last _tabbable_ element instead. */
-    tabbable?: boolean,
+    /**
+     * Either an optional boolean indicating whether to focus
+     * the last _tabbable_ element instead, or an optional object
+     * for controlling aspects of the focusing process.
+     */
+    tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
   ): Element | null {
-    return this._focusTreeNode.focusLast(tabbable ? isTabbable : isFocusable);
+    const {tabbable, ...options} =
+      typeof tabbableOrOptions === 'object'
+        ? tabbableOrOptions
+        : {tabbable: tabbableOrOptions};
+    return this._focusTreeNode.focusLast(
+      tabbable ? isTabbable : isFocusable,
+      options,
+    );
   }
 
   /**
    * Focus the given element if it is focusable.
+   *
+   * Accepts an optional focus options object that matches the options
+   * accepted by the DOM `HTMLElement.focus` method.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/HTMLOrForeignElement/focus
    */
-  focus(target: Element): Element | null {
-    return this._focusTreeNode.focus(target);
+  focus(
+    /** The element to focus. */
+    target: Element,
+    /** Optional options for controlling aspects of the focusing process. */
+    options?: FocusOptions,
+  ): Element | null {
+    return this._focusTreeNode.focus(target, options);
   }
 
   /**
@@ -229,17 +269,30 @@ export default class FocusManager {
    * or if `tabbable` is `true`, the previous tabbable element
    * relative to the currently focused element in scope.
    *
+   * Accepts either a `tabbable` boolean, or a focus options object
+   * that may include a `tabbable` boolean field. See `focus` for
+   * more on focus options.
+   *
    * An element is in the _deep_ scope if it is:
    *  - focusable
    *  - a descendant of the `FocusManager` element
    *  - a descendant of any nested `FocusManager` element.
    */
   focusPrevious(
-    /** if `true`, focus the previous _tabbable_ element instead. */
-    tabbable?: boolean,
+    /**
+     * Either an optional boolean indicating whether to focus
+     * the previous _tabbable_ element instead, or an optional object
+     * for controlling aspects of the focusing process.
+     */
+    tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
   ): Element | null {
+    const {tabbable, ...options} =
+      typeof tabbableOrOptions === 'object'
+        ? tabbableOrOptions
+        : {tabbable: tabbableOrOptions};
     return this._focusTreeNode.focusPrevious(
       tabbable ? isTabbable : isFocusable,
+      options,
     );
   }
 
@@ -249,15 +302,30 @@ export default class FocusManager {
    * or if `tabbable` is `true`, the next tabbable element
    * relative to the currently focused element in scope.
    *
+   * Accepts either a `tabbable` boolean, or a focus options object
+   * that may include a `tabbable` boolean field. See `focus` for
+   * more on focus options.
+   *
    * An element is in the _deep_ scope if it is:
    *  - focusable
    *  - a descendant of the `FocusManager` element
    *  - a descendant of any nested `FocusManager` element.
    */
   focusNext(
-    /** if `true`, focus the next _tabbable_ element instead. */
-    tabbable?: boolean,
+    /**
+     * Either an optional boolean indicating whether to focus
+     * the next _tabbable_ element instead, or an optional object
+     * for controlling aspects of the focusing process.
+     */
+    tabbableOrOptions?: boolean | (FocusOptions & {tabbable?: boolean}),
   ): Element | null {
-    return this._focusTreeNode.focusNext(tabbable ? isTabbable : isFocusable);
+    const {tabbable, ...options} =
+      typeof tabbableOrOptions === 'object'
+        ? tabbableOrOptions
+        : {tabbable: tabbableOrOptions};
+    return this._focusTreeNode.focusNext(
+      tabbable ? isTabbable : isFocusable,
+      options,
+    );
   }
 }

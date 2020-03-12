@@ -980,6 +980,18 @@ describe('FocusTreeNode', () => {
       child.focus(parentElement);
       expect(parentElement).toHaveFocus();
     });
+
+    it('accepts focus options', () => {
+      const focusSpy = jest.spyOn(HTMLElement.prototype, 'focus');
+      const element = document.createElement('div');
+      document.body.appendChild(element);
+      const node = new FocusTreeNode(element);
+      const options = {};
+      node.focus(element, options);
+      expect(focusSpy).toHaveBeenCalledTimes(1);
+      expect(focusSpy).toHaveBeenLastCalledWith(options);
+      focusSpy.mockRestore();
+    });
   });
 
   describe('focusPrevious', () => {

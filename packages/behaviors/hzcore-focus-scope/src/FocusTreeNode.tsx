@@ -564,6 +564,9 @@ export default class FocusTreeNode {
    * Focus the first element in the _deep_ `FocusTreeNode` scope
    * that matches the `predicate`.
    *
+   * Optionally accepts a focus options object.
+   * See `focus` for more on focus options.
+   *
    * An element is in the _deep_ scope if it is:
    *  - a descendant of the `FocusTreeNode` element
    *  - a descendant of any nested `FocusTreeNode` element
@@ -574,13 +577,15 @@ export default class FocusTreeNode {
      * Defaults to `isFocusable`.
      */
     predicate: ((node: Node) => boolean) | null = isFocusable,
+    /** Optional options for controlling aspects of the focusing process. */
+    options?: FocusOptions,
   ): Element | null {
     const firstNode = this.getFocusableElementsAndTreeNodes(predicate)[0];
     if (firstNode) {
       if ('focusFirst' in firstNode) {
-        return firstNode.focusFirst(predicate);
+        return firstNode.focusFirst(predicate, options);
       }
-      return this.focus(firstNode);
+      return this.focus(firstNode, options);
     }
     return null;
   }
@@ -588,6 +593,9 @@ export default class FocusTreeNode {
   /*
    * Focus the last focusable element in the _deep_ `FocusTreeNode` scope
    * that matches the `predicate`.
+   *
+   * Optionally accepts a focus options object.
+   * See `focus` for more on focus options.
    *
    * An element is in the _deep_ scope if it is:
    *  - a descendant of the `FocusTreeNode` element
@@ -599,25 +607,37 @@ export default class FocusTreeNode {
      * Defaults to `isFocusable`.
      */
     predicate: ((node: Node) => boolean) | null = isFocusable,
+    /** Optional options for controlling aspects of the focusing process. */
+    options?: FocusOptions,
   ): Element | null {
     const focusableNodes = this.getFocusableElementsAndTreeNodes(predicate);
     const lastnode = focusableNodes[focusableNodes.length - 1];
     if (lastnode) {
       if ('focusLast' in lastnode) {
-        return lastnode.focusLast(predicate);
+        return lastnode.focusLast(predicate, options);
       }
-      return this.focus(lastnode);
+      return this.focus(lastnode, options);
     }
     return null;
   }
 
   /**
    * Focus the given element if it is focusable.
+   *
+   * Accepts an optional focus options object that matches the options
+   * accepted by the DOM `HTMLElement.focus` method.
+   *
+   * See https://developer.mozilla.org/en-US/docs/Web/API/HTMLOrForeignElement/focus
    */
-  focus(target: Element): Element | null {
+  focus(
+    /** The element to focus. */
+    target: Element,
+    /** Optional options for controlling aspects of the focusing process. */
+    options?: FocusOptions,
+  ): Element | null {
     if (target != null) {
       try {
-        (target as HTMLElement).focus();
+        (target as HTMLElement).focus(options);
         return target;
       } catch (err) {
         /* noop */
@@ -634,6 +654,9 @@ export default class FocusTreeNode {
    * the currently focused element in the _deep_ `FocusTreeNode` scope
    * that matches the `predicate`.
    *
+   * Optionally accepts a focus options object.
+   * See `focus` for more on focus options.
+   *
    * An element is in the _deep_ scope if it is:
    *  - a descendant of the `FocusTreeNode` element
    *  - a descendant of any nested `FocusTreeNode` element
@@ -644,6 +667,8 @@ export default class FocusTreeNode {
      * Defaults to `isFocusable`.
      */
     predicate: ((node: Node) => boolean) | null = isFocusable,
+    /** Optional options for controlling aspects of the focusing process. */
+    options?: FocusOptions,
   ): Element | null {
     let focusedElement = this.getFocusedElement();
     // If the focused element is in this scope,
@@ -656,9 +681,9 @@ export default class FocusTreeNode {
       const previousNode = focusableNodes[position - 1];
       if (previousNode) {
         if ('focusLast' in previousNode) {
-          return previousNode.focusLast(predicate);
+          return previousNode.focusLast(predicate, options);
         }
-        return this.focus(previousNode);
+        return this.focus(previousNode, options);
       }
     } else {
       focusedElement = this.getFocusedElement(true);
@@ -669,7 +694,7 @@ export default class FocusTreeNode {
       // the nested scope is at its first node.
       let nestedNode = this.findClosestNode(focusedElement);
       while (nestedNode && nestedNode !== this) {
-        const previous = nestedNode.focusPrevious();
+        const previous = nestedNode.focusPrevious(predicate, options);
         if (previous) return previous;
         if (nestedNode.parent === this) {
           const focusableNodes = this.getFocusableElementsAndTreeNodes(
@@ -681,9 +706,9 @@ export default class FocusTreeNode {
           const previousNode = focusableNodes[position - 1];
           if (previousNode) {
             if ('focusLast' in previousNode) {
-              return previousNode.focusLast(predicate);
+              return previousNode.focusLast(predicate, options);
             }
-            return this.focus(previousNode);
+            return this.focus(previousNode, options);
           }
         }
         nestedNode = nestedNode.parent;
@@ -698,6 +723,9 @@ export default class FocusTreeNode {
    * the currently focused element in the _deep_ `FocusTreeNode` scope
    * that passes the `predicate`.
    *
+   * Optionally accepts a focus options object.
+   * See `focus` for more on focus options.
+   *
    * An element is in the _deep_ scope if it is:
    *  - a descendant of the `FocusTreeNode` element
    *  - a descendant of any nested `FocusTreeNode` element.
@@ -708,6 +736,8 @@ export default class FocusTreeNode {
      * Defaults to `isFocusable`.
      */
     predicate: ((node: Node) => boolean) | null = isFocusable,
+    /** Optional options for controlling aspects of the focusing process. */
+    options?: FocusOptions,
   ): Element | null {
     let focusedElement = this.getFocusedElement();
     // If the focused element is in this scope,
@@ -720,9 +750,9 @@ export default class FocusTreeNode {
       const nextNode = focusableNodes[position + 1];
       if (nextNode) {
         if ('focusFirst' in nextNode) {
-          return nextNode.focusFirst(predicate);
+          return nextNode.focusFirst(predicate, options);
         }
-        return this.focus(nextNode);
+        return this.focus(nextNode, options);
       }
     } else {
       focusedElement = this.getFocusedElement(true);
@@ -733,7 +763,7 @@ export default class FocusTreeNode {
       // the nested scope is at its first node.
       let nestedNode = this.findClosestNode(focusedElement);
       while (nestedNode && nestedNode !== this) {
-        const next = nestedNode.focusNext();
+        const next = nestedNode.focusNext(predicate, options);
         if (next) return next;
         if (nestedNode.parent === this) {
           const focusableNodes = this.getFocusableElementsAndTreeNodes(
@@ -746,9 +776,9 @@ export default class FocusTreeNode {
           const nextNode = focusableNodes[position + 1];
           if (nextNode) {
             if ('focusFirst' in nextNode) {
-              return nextNode.focusFirst(predicate);
+              return nextNode.focusFirst(predicate, options);
             }
-            return this.focus(nextNode);
+            return this.focus(nextNode, options);
           }
         }
         nestedNode = nestedNode.parent;
