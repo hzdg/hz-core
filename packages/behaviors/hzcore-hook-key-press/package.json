@@ -1,7 +1,7 @@
 {
   "name": "@hzcore/hook-key-press",
   "description": "A React hook for components that care about keyboard input",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",
