@@ -16,7 +16,11 @@
     "types",
     "!**/__test*"
   ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
   "dependencies": {
+    "@babel/runtime": "^7.4.4",
     "@hzcore/windowsize-monitor": "^2.0.0"
   }
 }
