@@ -154,7 +154,6 @@ export default function DraftailRenderer({
   );
 }
 
-
 /**
  * Scans through content to identity link entities
  *
@@ -185,20 +184,20 @@ export function DraftailRender({
   body = {},
   componentBlockMap = null,
   linkComponent = null,
-  customDecoratorStrategies = []
-} : DraftailRenderProps) : JSX.Element {
+  customDecoratorStrategies = [],
+}: DraftailRenderProps): JSX.Element {
   const contentState = convertFromRaw(body);
   const editorState = EditorState.createWithContent(contentState);
-  const extendedBlockRenderMap = componentBlockMap ? DefaultDraftBlockRenderMap.merge(
-    componentBlockMap,
-  ) : DefaultDraftBlockRenderMap;
-  const linkStrategy = linkComponent
-    ? {
-      strategy: findLinkEntities,
-      component: linkComponent,
-    } : {};
+  const extendedBlockRenderMap = componentBlockMap
+    ? DefaultDraftBlockRenderMap.merge(componentBlockMap)
+    : DefaultDraftBlockRenderMap;
+  const linkStrategy = {
+    strategy: findLinkEntities,
+    component: linkComponent,
+  };
   const decorator = new CompositeDecorator([
-    {...customDecoratorStrategies, ...linkStrategy},
+    ...customDecoratorStrategies,
+    linkStrategy,
   ]);
   return (
     <Editor
