@@ -1,4 +1,5 @@
 import {ensureDOMInstance} from '@hzcore/dom-utils';
+import MovingAverage from '@hzcore/moving-average';
 import {Source, Sink} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
@@ -11,7 +12,6 @@ import createSubject from 'callbag-subject';
 import asObservable, {DebugObservable} from './asObservable';
 import {HORIZONTAL, VERTICAL} from './Orientation';
 import {parseConfig, ObservableConfig} from './ObservableConfig';
-import MovingAverage from './MovingAverage';
 
 type Subject<T> = Source<T> & Sink<T>;
 

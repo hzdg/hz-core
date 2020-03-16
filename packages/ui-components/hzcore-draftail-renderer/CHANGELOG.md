@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.4.2](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.4.1...@hzcore/draftail-renderer@1.4.2) (2020-03-16)
+
+
+### @hzcore/draftail-renderer
+
+* update custom decorator composition ([14d250d](https://github.com/hzdg/hz-core/commit/14d250d))
+
+
 ## [1.4.1](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.4.0...@hzcore/draftail-renderer@1.4.1) (2020-02-10)
 
 

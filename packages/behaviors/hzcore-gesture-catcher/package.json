@@ -1,6 +1,6 @@
 {
   "name": "@hzcore/gesture-catcher",
-  "version": "4.0.0",
+  "version": "4.2.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -21,8 +21,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/gesture-observable": "^2.0.0",
+    "@hzcore/gesture-observable": "^2.1.2",
     "@hzcore/hook-ref-callback": "^2.0.0",
+    "@hzcore/moving-average": "^1.1.0",
     "prop-types": "15.x.x"
   }
 }

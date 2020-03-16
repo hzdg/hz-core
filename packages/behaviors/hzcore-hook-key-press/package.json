@@ -1,0 +1,28 @@
+{
+  "name": "@hzcore/hook-key-press",
+  "description": "A React hook for components that care about keyboard input",
+  "version": "1.0.3",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.ts",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "http://npmregistry.hzdg.com"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "types",
+    "!**/examples",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.3",
+    "@hzcore/hook-value-object": "^1.0.2",
+    "tiny-warning": "^1.0.3"
+  }
+}

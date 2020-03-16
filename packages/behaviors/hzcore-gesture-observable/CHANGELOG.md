@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@2.1.1...@hzcore/gesture-observable@2.1.2) (2020-02-26)
+
+**Note:** Version bump only for package @hzcore/gesture-observable
+
+
+
+
+
+## [2.1.1](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@2.1.0...@hzcore/gesture-observable@2.1.1) (2020-02-13)
+
+**Note:** Version bump only for package @hzcore/gesture-observable
+
+
+
+
+
+# [2.1.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@2.0.0...@hzcore/gesture-observable@2.1.0) (2020-02-13)
+
+
+### @hzcore/moving-average
+
+* extract MovingAverage package ([88ff4e4](https://github.com/hzdg/hz-core/commit/88ff4e4))
+
+
 # [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@1.2.0...@hzcore/gesture-observable@2.0.0) (2020-02-10)
 
 

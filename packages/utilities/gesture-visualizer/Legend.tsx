@@ -1,16 +1,36 @@
 import React from 'react';
 import {ScaleOrdinal} from 'd3-scale';
 import {LegendOrdinal, LegendItem, LegendLabel} from '@vx/legend';
+import {GestureVisualizerState} from './GestureVisualizer';
 
 export interface LegendProps {
+  data: GestureVisualizerState[];
   colorScale: ScaleOrdinal<string, string>;
+  withCount?: boolean;
 }
 
-const formatLabel = (label: string): string => `${label.split('-').shift()}`;
+const getCount = (data: GestureVisualizerState[], id: string): number => {
+  for (const d of data) {
+    if (d.id === id) return d.data.length;
+  }
+  return 0;
+};
 
-export default function Legend({colorScale}: LegendProps): JSX.Element {
+const formatLabel = (data: GestureVisualizerState[], withCount?: boolean) => (
+  label: string,
+): string =>
+  `${label.split('-').shift()}${withCount ? ` ${getCount(data, label)}` : ''}`;
+
+export default function Legend({
+  data,
+  colorScale,
+  withCount,
+}: LegendProps): JSX.Element {
   return (
-    <LegendOrdinal scale={colorScale} labelFormat={formatLabel}>
+    <LegendOrdinal
+      scale={colorScale}
+      labelFormat={formatLabel(data, withCount)}
+    >
       {labels => {
         return (
           <div style={{display: 'flex', flexDirection: 'row'}}>

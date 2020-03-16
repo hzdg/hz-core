@@ -1,7 +1,7 @@
 {
   "name": "create-package",
   "description": "Create a new @hzcore- package",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "bin": "bin/create-package.js",
   "license": "UNLICENSED",
   "private": true,
@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@types/dashify": "^1.0.0",
-    "@types/inquirer": "^6.0.0",
+    "@types/inquirer": "^6.5.0",
     "@types/mkdirp": "^0.5.2",
     "dashify": "^2.0.0",
     "fuse.js": "^3.4.4",

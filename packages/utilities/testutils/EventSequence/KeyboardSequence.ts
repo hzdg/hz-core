@@ -35,8 +35,24 @@ type KeyboardDownEventInit = UnnormalizedKeyboardEventInit & {
 
 type Omit<T, K> = Pick<T, Exclude<keyof T, K>>;
 
-interface KeyboardDownSequence extends Omit<KeyboardSequence, 'down'> {
+interface Modifiers {
+  ctrlKey: boolean;
+  altKey: boolean;
+  metaKey: boolean;
+  shiftKey: boolean;
+}
+
+interface KeyboardDownSequence
+  extends Omit<
+    KeyboardSequence,
+    'down' | 'modify' | 'ctrl' | 'alt' | 'meta' | 'shift'
+  > {
   repeat(count?: number): KeyboardDownSequence;
+  modify(modifiers: Partial<Modifiers>): KeyboardDownSequence;
+  ctrl(active?: boolean): KeyboardDownSequence;
+  alt(active?: boolean): KeyboardDownSequence;
+  meta(active?: boolean): KeyboardDownSequence;
+  shift(active?: boolean): KeyboardDownSequence;
   up(): KeyboardSequence;
 }
 
@@ -56,21 +72,21 @@ function getKeyCode(key: string): number {
 
 function normalizeKeyboardEventInit(
   init: UnnormalizedKeyboardEventInit,
-  from: KeyboardEvent,
+  from: KeyboardEventInit,
 ): EventInit & UnnormalizedKeyboardEventInit {
   const key = getValue(init, 'key', from.key);
   return {
     key,
-    code: getCode(key),
-    keyCode: getKeyCode(key),
-    which: getKeyCode(key),
+    code: key ? getCode(key) : undefined,
+    keyCode: key ? getKeyCode(key) : undefined,
+    which: key ? getKeyCode(key) : undefined,
     charCode: 0,
     ctrlKey: getFlag(init, 'ctrlKey', from.ctrlKey),
     shiftKey: getFlag(init, 'shiftKey', from.shiftKey),
     altKey: getFlag(init, 'altKey', from.altKey),
     metaKey: getFlag(init, 'metaKey', from.metaKey),
     location: getValue(init, 'location', from.location),
-    repeat: getFlag(init, 'repeat', false),
+    repeat: getFlag(init, 'repeat', from.repeat),
     bubbles: true,
     cancelable: true,
     view: window,
@@ -80,6 +96,13 @@ export default class KeyboardSequence extends EventSequence<
   KeyboardEvent,
   UnnormalizedKeyboardEventInit
 > {
+  modifiers: Modifiers = {
+    ctrlKey: false,
+    altKey: false,
+    metaKey: false,
+    shiftKey: false,
+  };
+
   createNextEvent(
     type: KeyboardEventType,
     init: UnnormalizedKeyboardEventInit = {},
@@ -90,12 +113,46 @@ export default class KeyboardSequence extends EventSequence<
       normalizeKeyboardEventInit(init, lastEvent || new KeyboardEvent('init')),
     );
   }
+  normalizeEventInit(
+    type: KeyboardEventType,
+    init: UnnormalizedKeyboardEventInit = {},
+  ): UnnormalizedKeyboardEventInit {
+    return {...this.modifiers, ...init};
+  }
   down(downOpts: KeyboardDownEventInit): KeyboardDownSequence {
     const downSequence: KeyboardDownSequence = this.dispatch(
       KEY_DOWN,
       downOpts,
     ).expose({
       down: false,
+      ctrl(active = true): KeyboardDownSequence {
+        return downSequence.modify({ctrlKey: active});
+      },
+      alt(active = true): KeyboardDownSequence {
+        return downSequence.modify({altKey: active});
+      },
+      meta(active = true): KeyboardDownSequence {
+        return downSequence.modify({metaKey: active});
+      },
+      shift(active = true): KeyboardDownSequence {
+        return downSequence.modify({shiftKey: active});
+      },
+      modify: (modifiers: Partial<Modifiers>): KeyboardDownSequence => {
+        const lastEvent = this.eventQueue[this.eventQueue.length - 1];
+        if (lastEvent && lastEvent[0] !== KEY_UP) {
+          this.modify(modifiers);
+        } else {
+          this.modifiers = {...this.modifiers, ...modifiers};
+          const lastDispatched = this.dispatched[this.dispatched.length - 1];
+          if (lastDispatched && lastDispatched.type !== KEY_UP) {
+            this._dispatchModificationIfNecessary(
+              lastDispatched.type,
+              lastDispatched,
+            );
+          }
+        }
+        return downSequence;
+      },
       repeat(count = 1): KeyboardDownSequence {
         if (count <= 0) throw new Error('count must be a positive integer!');
         let d = downSequence;
@@ -104,7 +161,7 @@ export default class KeyboardSequence extends EventSequence<
         }
         return d;
       },
-      up: (): KeyboardSequence => this.dispatch(KEY_UP),
+      up: (): KeyboardSequence => this.dispatch(KEY_UP, {repeat: false}),
     });
     return downSequence;
   }
@@ -146,5 +203,42 @@ export default class KeyboardSequence extends EventSequence<
   }
   escape(): KeyboardDownSequence {
     return this.down({key: ESCAPE});
+  }
+  private _dispatchModificationIfNecessary(
+    type: string,
+    init: KeyboardEventInit,
+  ): KeyboardSequence {
+    if (
+      Boolean(init.ctrlKey) !== this.modifiers.ctrlKey ||
+      Boolean(init.altKey) !== this.modifiers.altKey ||
+      Boolean(init.metaKey) !== this.modifiers.metaKey ||
+      Boolean(init.shiftKey) !== this.modifiers.shiftKey
+    ) {
+      return this.dispatch(
+        type,
+        normalizeKeyboardEventInit(this.modifiers, init),
+      );
+    }
+    return this;
+  }
+  modify(modifiers: Partial<Modifiers>): KeyboardSequence {
+    this.modifiers = {...this.modifiers, ...modifiers};
+    const lastEvent = this.eventQueue[this.eventQueue.length - 1];
+    if (lastEvent && lastEvent[0] !== KEY_UP && lastEvent[1]) {
+      return this._dispatchModificationIfNecessary(lastEvent[0], lastEvent[1]);
+    }
+    return this;
+  }
+  ctrl(active = true): KeyboardSequence {
+    return this.modify({ctrlKey: active});
+  }
+  alt(active = true): KeyboardSequence {
+    return this.modify({altKey: active});
+  }
+  meta(active = true): KeyboardSequence {
+    return this.modify({metaKey: active});
+  }
+  shift(active = true): KeyboardSequence {
+    return this.modify({shiftKey: active});
   }
 }

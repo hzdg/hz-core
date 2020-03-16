@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.2.0](https://github.com/hzdg/hz-core/compare/testutils@1.1.0...testutils@1.2.0) (2020-02-24)
+
+
+### testutils
+
+* add KeyboardSequence modifier methods ([0b7b50e](https://github.com/hzdg/hz-core/commit/0b7b50e))
+* fix EventSequence run queue continuation ([c217066](https://github.com/hzdg/hz-core/commit/c217066))
+* add return types ([f487679](https://github.com/hzdg/hz-core/commit/f487679))
+
+
 # [1.1.0](https://github.com/hzdg/hz-core/compare/testutils@1.0.1...testutils@1.1.0) (2020-02-10)
 
 

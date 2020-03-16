@@ -1,8 +1,6 @@
 import React from 'react';
 import {useMouseGesture} from '@hzcore/gesture-catcher';
-import GestureVisualizer, {
-  useGestureVisualizer,
-} from './components/GestureVisualizer';
+import GestureVisualizer, {useGestureVisualizer} from 'gesture-visualizer';
 import GestureConfigurator, {
   useGestureConfigurator,
 } from './components/GestureConfigurator';

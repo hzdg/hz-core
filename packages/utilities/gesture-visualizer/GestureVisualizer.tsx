@@ -11,17 +11,29 @@ import {ScaleSVG} from '@vx/responsive';
 import {scaleLinear, scaleOrdinal} from '@vx/scale';
 import {schemeTableau10} from 'd3-scale-chromatic';
 import useRefCallback from '@hzcore/hook-ref-callback';
+import MovingAverage from '@hzcore/moving-average';
 import useSize from '@hzcore/hook-size';
 import {
   GestureState,
   GestureEndState,
-  GestureHandler,
   GestureEventSourceState,
 } from '@hzcore/gesture-catcher';
 import TooltipArea, {TooltipContent} from './TooltipArea';
 import EventAreas from './EventAreas';
+import EventLines from './EventLines';
 import Legend from './Legend';
-import MovingAverage from '@hzcore/gesture-observable/src/MovingAverage';
+
+interface VisualizerHandler {
+  (e: TimeStampedObject): void;
+}
+
+export interface VisualizerHandlers {
+  onStart: VisualizerHandler;
+  onMove: VisualizerHandler;
+  onEnd: VisualizerHandler;
+  onInput: VisualizerHandler;
+  __debug: VisualizerHandler;
+}
 
 export interface MovingAverageSnapshot {
   readonly value: number;
@@ -56,11 +68,14 @@ export interface GestureVisualizerState {
 
 export interface GestureVisualizerProps {
   data: GestureVisualizerState | GestureVisualizerState[];
+  withCount?: boolean;
+  discrete?: boolean;
   onClick?: React.EventHandler<React.MouseEvent>;
   children?: React.ReactNode;
 }
 
 type TimeStampedObject =
+  | {timeStamp: number; delta: number}
   | GestureState
   | GestureEndState
   | GestureEventSourceState
@@ -173,7 +188,7 @@ function useColorScale(
   allSeries: GestureVisualizerState[],
 ): ScaleOrdinal<string, string> {
   const [colorScale] = useState(() =>
-    scaleOrdinal<string>({range: schemeTableau10}),
+    scaleOrdinal<string, string>({range: schemeTableau10}),
   );
   useMemo(() => {
     colorScale.domain(allSeries.map(({id}) => String(id)));
@@ -212,6 +227,7 @@ const absMax = (a: number, b: number): number =>
   Math.max(Math.abs(a), Math.abs(b));
 
 const takeDeltaSnapshot = (obj: TimeStampedObject): number => {
+  if ('delta' in obj) return obj.delta;
   if ('event' in obj && obj.event) obj = obj.event;
   if ('deltaX' in obj) return absMax(obj.deltaX, obj.deltaY);
   if ('movementX' in obj) return absMax(obj.movementX, obj.movementY);
@@ -338,29 +354,31 @@ function useGestureData(
 
 export function useGestureVisualizer(
   inputType: string,
-): [GestureHandler, {data: GestureVisualizerState[]; onClick: () => void}] {
+  gestureType = 'Gesture State',
+): [VisualizerHandlers, {data: GestureVisualizerState[]; onClick: () => void}] {
   const [id, setId] = useState(0);
   const onClick = useCallback(() => setId(v => v + 1), [setId]);
-  const [eventData, eventHandler] = useGestureData(`${inputType}-${id}`, true);
-  const [gestureData, gestureHandler] = useGestureData(`Gesture State-${id}`);
+  const [inputData, inputHandler] = useGestureData(`${inputType}-${id}`, true);
+  const [gestureData, gestureHandler] = useGestureData(`${gestureType}-${id}`);
   const gestureHandlers = useMemo(
     () => ({
       onStart: gestureHandler,
       onMove: gestureHandler,
       onEnd: gestureHandler,
-      __debug: eventHandler,
+      onInput: inputHandler,
+      __debug: inputHandler,
     }),
-    [gestureHandler, eventHandler],
+    [gestureHandler, inputHandler],
   );
-  const data = useMemo(() => [eventData, gestureData], [
-    eventData,
+  const data = useMemo(() => [inputData, gestureData], [
+    inputData,
     gestureData,
   ]);
   return [gestureHandlers, {data, onClick}];
 }
 
 export default forwardRef(function GestureVisualizer(
-  {data, children, ...props}: GestureVisualizerProps,
+  {data, children, discrete, withCount, ...props}: GestureVisualizerProps,
   forwardedRef: React.Ref<HTMLDivElement>,
 ): JSX.Element {
   const [ref, setRef] = useRefCallback(null, forwardedRef);
@@ -402,20 +420,36 @@ export default forwardRef(function GestureVisualizer(
         {children}
       </div>
       <div style={{position: 'absolute'}}>
-        <Legend colorScale={colorScale} />
+        <Legend
+          data={allSeries}
+          withCount={withCount}
+          colorScale={colorScale}
+        />
       </div>
       <ScaleSVG width={width} height={height}>
-        {allSeries.map((series, index) => (
-          <EventAreas
-            key={`series-${index}`}
-            series={series}
-            timeStampScale={xScale}
-            deltaScale={yScale}
-            fillColor={colorScale(String(series.id))}
-            yFactor={yFactor(index)}
-            height={height}
-          />
-        ))}
+        {discrete
+          ? allSeries.map((series, index) => (
+              <EventLines
+                key={`series-discrete-${index}`}
+                series={series}
+                timeStampScale={xScale}
+                deltaScale={yScale}
+                fillColor={colorScale(String(series.id))}
+                yFactor={yFactor(index)}
+                height={height}
+              />
+            ))
+          : allSeries.map((series, index) => (
+              <EventAreas
+                key={`series-${index}`}
+                series={series}
+                timeStampScale={xScale}
+                deltaScale={yScale}
+                fillColor={colorScale(String(series.id))}
+                yFactor={yFactor(index)}
+                height={height}
+              />
+            ))}
         <TooltipArea
           width={width}
           height={height}

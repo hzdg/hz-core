@@ -1,7 +1,7 @@
 {
   "name": "build-packages",
   "description": "Build @hzcore- packages",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "bin": "bin/build-packages.js",
   "license": "UNLICENSED",
   "private": true,
@@ -9,7 +9,7 @@
     "registry": "http://npmregistry.hzdg.com"
   },
   "dependencies": {
-    "@babel/core": "^7.4.3",
+    "@babel/core": "^7.8.6",
     "@lerna/project": "^3.13.1",
     "@types/async-retry": "^1.4.1",
     "@types/mkdirp": "^0.5.2",
