@@ -23,6 +23,7 @@
     "packages/conventional-commits/*",
     "packages/simple-actions/*",
     "packages/utilities/*",
-    "packages/ui-components/*"
+    "packages/ui-components/*",
+    "packages/icons/*"
   ]
 }
