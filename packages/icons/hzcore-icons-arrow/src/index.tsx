@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ThinLeftArrow = () => {
+export const ThinLeftArrow = color => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -8,7 +8,7 @@ export const ThinLeftArrow = () => {
       x="0px"
       y="0px"
       width="90px"
-      fill="currentColor"
+      fill={color}
       viewBox="0 0 477.175 477.175"
     >
       <g>
@@ -21,7 +21,7 @@ export const ThinLeftArrow = () => {
   );
 };
 
-export const ThinRightArrow = () => {
+export const ThinRightArrow = color => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
@@ -29,7 +29,7 @@ export const ThinRightArrow = () => {
       x="0px"
       y="0px"
       width="90px"
-      fill="currentColor"
+      fill={color}
       viewBox="0 0 477.175 477.175"
     >
       <g>
@@ -43,14 +43,14 @@ export const ThinRightArrow = () => {
   );
 };
 
-export const ThinUpArrow = () => {
+export const ThinUpArrow = color => {
   return (
     <svg
       x="0px"
       y="0px"
       width="90"
       viewBox="0 0 490.656 490.656"
-      fill="currentColor"
+      fill={color}
       xmlns="http://www.w3.org/2000/svg"
     >
       <path
@@ -62,14 +62,14 @@ export const ThinUpArrow = () => {
   );
 };
 
-export const ThinDownArrow = () => {
+export const ThinDownArrow = color => {
   return (
     <svg
       x="0px"
       y="0px"
       width="90"
       viewBox="0 0 490.656 490.656"
-      fill="currentColor"
+      fill={color}
       xmlns="http://www.w3.org/2000/svg"
     >
       <g>
@@ -85,14 +85,14 @@ export const ThinDownArrow = () => {
   );
 };
 
-export const LeftArrow = () => {
+export const LeftArrow = color => {
   return (
     <svg
       x="0px"
       y="0px"
       width="90"
       viewBox="0 0 512 512"
-      fill="currentColor"
+      fill={color}
       xmlns="http://www.w3.org/2000/svg"
     >
       <g>
@@ -109,14 +109,14 @@ export const LeftArrow = () => {
   );
 };
 
-export const RightArrow = () => {
+export const RightArrow = color => {
   return (
     <svg
       x="0px"
       y="0px"
       width="90"
       viewBox="0 0 512 512"
-      fill="currentColor"
+      fill={color}
       xmlns="http://www.w3.org/2000/svg"
     >
       <g>
