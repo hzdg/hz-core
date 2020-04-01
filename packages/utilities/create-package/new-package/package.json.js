@@ -20,7 +20,7 @@ const PACKAGE_JSON = options => `
   "repository" : {
     "type" : "git",
     "url": "ssh://git@github.com/hzdg/hz-core.git",
-    "directory": "packages/${options.type}/hzcore-${options.name}"
+    "directory": "packages/${options.type}/${options.name}"
   },
   "files": [
     "cjs",
