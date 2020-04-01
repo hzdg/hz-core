@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/scroll-monitor",
+  "name": "@hzdg/scroll-monitor",
   "description": "A React component and set of hooks for monitoring and interacting with scroll position",
   "version": "4.0.3",
   "main": "cjs/index.js",
@@ -7,7 +7,12 @@
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-scroll-monitor"
   },
   "files": [
     "cjs",
@@ -22,7 +27,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzcore/hook-ref-callback": "^2.0.0",
+    "@hzdg/hook-ref-callback": "^2.0.0",
     "invariant": "^2.2.4"
   }
 }

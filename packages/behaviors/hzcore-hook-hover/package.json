@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/hook-hover",
+  "name": "@hzdg/hook-hover",
   "version": "0.0.5",
   "author": "Andrey Morozov",
   "license": "MIT",
@@ -7,7 +7,12 @@
   "module": "es/index.js",
   "typings": "src/index.ts",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-hook-hover"
   },
   "files": [
     "cjs",

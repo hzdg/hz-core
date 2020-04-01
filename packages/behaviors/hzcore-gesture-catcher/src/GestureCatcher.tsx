@@ -1,6 +1,6 @@
 import React, {useState, useMemo} from 'react';
 import PropTypes from 'prop-types';
-import useRefCallback from '@hzcore/hook-ref-callback';
+import useRefCallback from '@hzdg/hook-ref-callback';
 import useKeyboardGesture, {KeyboardGestureConfig} from './useKeyboardGesture';
 import useMouseGesture, {MouseGestureConfig} from './useMouseGesture';
 import useTouchGesture, {TouchGestureConfig} from './useTouchGesture';

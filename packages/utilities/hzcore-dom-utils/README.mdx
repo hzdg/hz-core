@@ -16,7 +16,7 @@ Who knows, maybe some of them might be directly useful in an application, too?
 ## Installation
 
 ```shell
-yarn add @hzcore/dom-utils
+yarn add @hzdg/dom-utils
 ```
 
 ## ensureDOMInstance
@@ -40,7 +40,7 @@ function ensureDOMInstance<T extends Node>(
 ### Usage
 
 ```js
-import {ensureDOMInstance} from '@hzcore/dom-utils';
+import {ensureDOMInstance} from '@hzdg/dom-utils';
 
 const div = document.createElement('div');
 
@@ -90,7 +90,7 @@ function getDocument(node?: Node | null): Document | null;
 ### Usage
 
 ```js
-import {getDocument} from '@hzcore/dom-utils';
+import {getDocument} from '@hzdg/dom-utils';
 
 const globalDocument = getDocument(); // Same as `document`
 
@@ -120,7 +120,7 @@ function getWindow(node?: Node | null): Window | null;
 ### Usage
 
 ```js
-import {getWindow} from '@hzcore/dom-utils';
+import {getWindow} from '@hzdg/dom-utils';
 
 const globalWindow = getWindow(); // Same as `window`
 

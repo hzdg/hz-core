@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/focus-scope",
+  "name": "@hzdg/focus-scope",
   "description": "Components and hooks for managing focus in React apps",
   "version": "1.1.0",
   "main": "cjs/index.js",
@@ -7,7 +7,12 @@
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-focus-scope"
   },
   "files": [
     "cjs",
@@ -23,9 +28,9 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/dom-utils": "^1.0.1",
-    "@hzcore/hook-key-press": "^1.0.3",
-    "@hzcore/hook-value-object": "^1.0.2",
+    "@hzdg/dom-utils": "^1.0.1",
+    "@hzdg/hook-key-press": "^1.0.3",
+    "@hzdg/hook-value-object": "^1.0.2",
     "tiny-warning": "^1.0.3"
   }
 }

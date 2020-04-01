@@ -19,7 +19,7 @@ object with 2 event props:
 #### To use (requires react v. 16.8+)
 
 ```js
-import useHover from '@hzcore/hook-hover';
+import useHover from '@hzdg/hook-hover';
 
 function Box() {
     const [isHovering, hoverProps] = useHover({

@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/fade-into-view",
+  "name": "@hzdg/fade-into-view",
   "version": "0.0.3",
   "description": "Fades into view its child component",
   "main": "cjs/index.js",

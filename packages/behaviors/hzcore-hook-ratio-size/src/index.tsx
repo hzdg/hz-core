@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {useWindowSize} from '@hzcore/windowsize-monitor';
+import {useWindowSize} from '@hzdg/windowsize-monitor';
 
 /**
  * Default ratio set to 16:9

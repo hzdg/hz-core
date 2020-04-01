@@ -10,14 +10,14 @@ import {ScaleLinear, ScaleOrdinal} from 'd3-scale';
 import {ScaleSVG} from '@vx/responsive';
 import {scaleLinear, scaleOrdinal} from '@vx/scale';
 import {schemeTableau10} from 'd3-scale-chromatic';
-import useRefCallback from '@hzcore/hook-ref-callback';
-import MovingAverage from '@hzcore/moving-average';
-import useSize from '@hzcore/hook-size';
+import useRefCallback from '@hzdg/hook-ref-callback';
+import MovingAverage from '@hzdg/moving-average';
+import useSize from '@hzdg/hook-size';
 import {
   GestureState,
   GestureEndState,
   GestureEventSourceState,
-} from '@hzcore/gesture-catcher';
+} from '@hzdg/gesture-catcher';
 import TooltipArea, {TooltipContent} from './TooltipArea';
 import EventAreas from './EventAreas';
 import EventLines from './EventLines';

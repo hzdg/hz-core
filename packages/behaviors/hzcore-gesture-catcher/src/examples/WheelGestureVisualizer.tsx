@@ -1,5 +1,5 @@
 import React from 'react';
-import {useWheelGesture} from '@hzcore/gesture-catcher';
+import {useWheelGesture} from '@hzdg/gesture-catcher';
 import GestureVisualizer, {useGestureVisualizer} from 'gesture-visualizer';
 import GestureConfigurator, {
   useGestureConfigurator,

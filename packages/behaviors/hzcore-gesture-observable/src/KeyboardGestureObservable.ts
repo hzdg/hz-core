@@ -1,4 +1,4 @@
-import {ensureDOMInstance} from '@hzcore/dom-utils';
+import {ensureDOMInstance} from '@hzdg/dom-utils';
 import {Source} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';

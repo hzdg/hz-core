@@ -6,7 +6,12 @@
   "license": "UNLISCENSED",
   "private": true,
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/gesture-visualizer"
   },
   "files": [
     "**/*.{js,jsx,ts,tsx}",
@@ -17,10 +22,10 @@
     "react-dom": "^16.8.0"
   },
   "dependencies": {
-    "@hzcore/gesture-catcher": "^4.2.1",
-    "@hzcore/hook-ref-callback": "*",
-    "@hzcore/hook-size": "*",
-    "@hzcore/moving-average": "^1.1.0",
+    "@hzdg/gesture-catcher": "^4.2.1",
+    "@hzdg/hook-ref-callback": "*",
+    "@hzdg/hook-size": "*",
+    "@hzdg/moving-average": "^1.1.0",
     "@types/d3-array": "^2.0.0",
     "@types/d3-scale": "^2.1.1",
     "@types/d3-scale-chromatic": "^1.3.1",

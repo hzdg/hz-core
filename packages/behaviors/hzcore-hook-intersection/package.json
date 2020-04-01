@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/hook-intersection",
+  "name": "@hzdg/hook-intersection",
   "description": "A React hook for components that care about interesction with an ancestor element or viewport.",
   "version": "2.0.1",
   "main": "cjs/index.js",
@@ -7,7 +7,12 @@
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-hook-intersection"
   },
   "files": [
     "cjs",
@@ -18,7 +23,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/hook-ref-callback": "^2.0.0",
+    "@hzdg/hook-ref-callback": "^2.0.0",
     "intersection-observer": "^0.7.0"
   }
 }

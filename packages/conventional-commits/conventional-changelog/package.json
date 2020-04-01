@@ -1,16 +1,20 @@
 {
-  "name": "@hzcore/conventional-changelog",
+  "name": "@hzdg/conventional-changelog",
   "version": "1.1.0",
-  "description": "The hzcore conventional changelog preset",
+  "description": "The hzdg conventional changelog preset",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
   },
-  "repository": "git@github.com:hzdg/hz-core.git",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/conventional-commits/conventional-changelog"
+  },
   "author": "Eric Eldredge <lettertwo@gmail.com>",
   "private": true,
   "main": "index.js",
   "dependencies": {
-    "@hzcore/gitmoji": "^1.0.2"
+    "@hzdg/gitmoji": "^1.0.2"
   }
 }

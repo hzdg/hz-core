@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/hook-size",
+  "name": "@hzdg/hook-size",
   "description": "A React hook for components that care about their size.",
   "version": "4.0.2",
   "main": "cjs/index.js",
@@ -7,7 +7,12 @@
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-hook-size"
   },
   "files": [
     "cjs",
@@ -17,9 +22,9 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/hook-ref-callback": "^2.0.0",
-    "@hzcore/resize-observable": "^2.0.0",
-    "@hzcore/windowsize-monitor": "^2.0.1",
+    "@hzdg/hook-ref-callback": "^2.0.0",
+    "@hzdg/resize-observable": "^2.0.0",
+    "@hzdg/windowsize-monitor": "^2.0.1",
     "memoize-one": "5.1.1"
   }
 }

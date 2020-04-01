@@ -1,5 +1,5 @@
-import {TouchGestureObservable} from '@hzcore/gesture-observable';
-import useRefCallback from '@hzcore/hook-ref-callback';
+import {TouchGestureObservable} from '@hzdg/gesture-observable';
+import useRefCallback from '@hzdg/hook-ref-callback';
 import {useObservableGestureEffect} from './utils';
 
 export type TouchGestureObservableConfig = TouchGestureObservable.TouchGestureObservableConfig;

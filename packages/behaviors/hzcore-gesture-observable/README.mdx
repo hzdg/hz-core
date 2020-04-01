@@ -13,13 +13,13 @@ Uses the [zen-observable] implementation of Observable.
 ## Installation
 
 ```shell
-yarn add @hzcore/gesture-observable
+yarn add @hzdg/gesture-observable
 ```
 
 ## Usage
 
 ```js
-import GestureObservable from '@hzcore/gesture-observable';
+import GestureObservable from '@hzdg/gesture-observable';
 ```
 
 Create an observable by passing the element
@@ -111,7 +111,7 @@ const observable = GestureObservable.create(someElement, {
 import {
   MouseGestureObservable,
   TouchGestureObservable,
-} from '@hzcore/gesture-observable';
+} from '@hzdg/gesture-observable';
 // Use just mouse and touch support, but as separate observables.
 // You might use some rx-style combinators to merge these,
 // or subscribe to them individually.
@@ -160,7 +160,7 @@ An Observable of touch gestures.
 ### Creating a TouchGestureObservable
 
 ```ts
-import {TouchGestureObservable} from '@hzcore/gesture-observable';
+import {TouchGestureObservable} from '@hzdg/gesture-observable';
 
 const observable: Observable<
   TouchGestureState | TouchGestureEndState
@@ -263,7 +263,7 @@ An Observable of mouse gestures.
 ### Creating a MouseGestureObservable
 
 ```ts
-import {MouseGestureObservable} from '@hzcore/gesture-observable';
+import {MouseGestureObservable} from '@hzdg/gesture-observable';
 
 const observable: Observable<
   MouseGestureState | MouseGestureEndState
@@ -379,7 +379,7 @@ for a gesturing user's intention.
 ### Creating a WheelGestureObservable
 
 ```ts
-import {WheelGestureObservable} from '@hzcore/gesture-observable';
+import {WheelGestureObservable} from '@hzdg/gesture-observable';
 
 const observable: Observable<
   WheelGestureState | WheelGestureEndState
@@ -486,7 +486,7 @@ An Observable of keyboard gestures.
 ### Creating a KeyboardGestureObservable
 
 ```ts
-import {KeyboardGestureObservable} from '@hzcore/gesture-observable';
+import {KeyboardGestureObservable} from '@hzdg/gesture-observable';
 
 const observable: Observable<
   KeyboardGestureState | KeyboardGestureEndState

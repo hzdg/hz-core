@@ -1,5 +1,5 @@
 const project = require('@lerna/project');
-const emojiTypes = require('@hzcore/gitmoji');
+const emojiTypes = require('@hzdg/gitmoji');
 
 module.exports = async () => {
   const scopes = await project.getPackages(process.cwd());
@@ -37,9 +37,9 @@ module.exports = async () => {
 #
 #   🚨 squash linting errors
 #
-#   ➕ (@hzcore/scroll-monitor) add react-dom@^16.3.1
+#   ➕ (@hzdg/scroll-monitor) add react-dom@^16.3.1
 #
-#   🐛 (@hzcore/scroll-monitor) fix wheel delta and velocity
+#   🐛 (@hzdg/scroll-monitor) fix wheel delta and velocity
 #
 # Valid values for <type> are:
 ${emojiTypes.map(({emoji, description}) => `#   ${emoji} - ${description}`).join('\n')}

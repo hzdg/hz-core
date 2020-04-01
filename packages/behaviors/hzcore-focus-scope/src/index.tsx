@@ -8,7 +8,7 @@ import React, {
   useLayoutEffect,
 } from 'react';
 import warning from 'tiny-warning';
-import useKeyPress, {KeyPressState} from '@hzcore/hook-key-press';
+import useKeyPress, {KeyPressState} from '@hzdg/hook-key-press';
 import FocusTreeNode, {isTabbable} from './FocusTreeNode';
 import FocusManager from './FocusManager';
 

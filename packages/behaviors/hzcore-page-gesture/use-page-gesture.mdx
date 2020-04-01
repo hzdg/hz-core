@@ -12,9 +12,9 @@ import {
   PREVIOUS,
   FIRST,
   LAST,
-} from '@hzcore/page-gesture';
-import {useGesture} from '@hzcore/gesture-catcher';
-import useSize from '@hzcore/hook-size';
+} from '@hzdg/page-gesture';
+import {useGesture} from '@hzdg/gesture-catcher';
+import useSize from '@hzdg/hook-size';
 import {useSpring, animated, config as springConfig} from 'react-spring';
 
 # usePageGesture
@@ -49,13 +49,13 @@ pagination. Some things it does:
 ## Installation
 
 ```shell
-yarn add @hzcore/page-gesture
+yarn add @hzdg/page-gesture
 ```
 
 ## Usage
 
 ```
-import {usePageGesture} from '@hzcore/page-gesture';
+import {usePageGesture} from '@hzdg/page-gesture';
 ```
 
 ### Signature
@@ -109,7 +109,7 @@ import {
   PREVIOUS,
   FIRST,
   LAST,
-} from '@hzcore/page-gesture';
+} from '@hzdg/page-gesture';
 function usePagination(numPages) {
   const [index, setPage] = React.useState(0);
   const handleGesture = usePageGesture(action => {
@@ -153,7 +153,7 @@ For example, these methods can do things like increment or decrement
 an index when called:
 
 ```ts
-import {usePageGesture} from '@hzcore/page-gesture';
+import {usePageGesture} from '@hzdg/page-gesture';
 function usePagination(numPages) {
   const [index, setIndex] = React.useState(0);
   const handleGesture = usePageGesture({

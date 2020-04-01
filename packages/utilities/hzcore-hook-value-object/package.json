@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/hook-value-object",
+  "name": "@hzdg/hook-value-object",
   "description": "A React hook for components that want to memoize shallowly equal values",
   "version": "1.0.2",
   "main": "cjs/index.js",
@@ -7,7 +7,12 @@
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/hzcore-hook-value-object"
   },
   "files": [
     "cjs",

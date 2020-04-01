@@ -1,12 +1,17 @@
 {
-  "name": "@hzcore/gesture-observable",
+  "name": "@hzdg/gesture-observable",
   "version": "2.1.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-gesture-observable"
   },
   "files": [
     "cjs",
@@ -17,8 +22,8 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/dom-utils": "^1.0.1",
-    "@hzcore/moving-average": "^1.1.0",
+    "@hzdg/dom-utils": "^1.0.1",
+    "@hzdg/moving-average": "^1.1.0",
     "callbag": "^1.2.0",
     "callbag-filter": "^1.1.0",
     "callbag-from-event": "^1.2.1",

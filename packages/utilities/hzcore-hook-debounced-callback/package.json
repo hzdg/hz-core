@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/hook-debounced-callback",
+  "name": "@hzdg/hook-debounced-callback",
   "description": "A React hook for components that want to debounce a callback",
   "version": "1.0.1",
   "main": "cjs/index.js",
@@ -7,7 +7,12 @@
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/hzcore-hook-debounced-callback"
   },
   "files": [
     "cjs",
@@ -21,6 +26,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/hook-value-object": "^1.0.2"
+    "@hzdg/hook-value-object": "^1.0.2"
   }
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import {useTouchGesture} from '@hzcore/gesture-catcher';
+import {useTouchGesture} from '@hzdg/gesture-catcher';
 import GestureVisualizer, {useGestureVisualizer} from 'gesture-visualizer';
 import GestureConfigurator, {
   useGestureConfigurator,

@@ -1,4 +1,4 @@
-import {getDocument} from '@hzcore/dom-utils';
+import {getDocument} from '@hzdg/dom-utils';
 export type DomTarget = Element | React.RefObject<Element>;
 type ChildNodeMap = Map<DomTarget, FocusTreeNode>;
 

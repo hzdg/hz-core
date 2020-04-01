@@ -8,7 +8,7 @@ import ResizeObserver from '@juggle/resize-observer';
 import {ResizeObserverSize} from '@juggle/resize-observer/lib/ResizeObserverSize';
 import {ResizeObserverEntry} from '@juggle/resize-observer/lib/ResizeObserverEntry';
 import Observable from 'zen-observable';
-import {ensureDOMInstance} from '@hzcore/dom-utils';
+import {ensureDOMInstance} from '@hzdg/dom-utils';
 
 export interface ResizeObservableSize extends DOMRectReadOnly {
   readonly contentBoxSize: ResizeObserverSize;

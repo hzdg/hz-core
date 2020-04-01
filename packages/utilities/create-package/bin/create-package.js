@@ -1,5 +1,6 @@
 #! /usr/bin/env node
 // @ts-check
+/* eslint-disable @typescript-eslint/explicit-function-return-type, @typescript-eslint/ban-ts-ignore */
 const {promisify} = require('util');
 const path = require('path');
 const fs = require('fs');
@@ -81,7 +82,7 @@ const FUSE_OPTIONS = {
  * @returns {Promise<string>}
  */
 async function createPackageDir(options) {
-  const dirname = `${options.type}/hzcore-${options.name}`;
+  const dirname = `${options.type}/${options.name}`;
   await mkdirp(path.resolve(PACKAGES, dirname));
   return dirname;
 }
@@ -213,11 +214,11 @@ function validateName(value, type) {
   if (/_/.test(value)) {
     return 'dash-case only, please!';
   }
-  if (fs.existsSync(path.resolve(PACKAGES, type, `hzcore-${value}`))) {
-    return `${type}/hzcore-${value} already exists!`;
+  if (fs.existsSync(path.resolve(PACKAGES, type, `${value}`))) {
+    return `${type}/${value} already exists!`;
   }
   /** @type PackageValidationResult */
-  const result = validatePackageName(`@hzcore/${value}`);
+  const result = validatePackageName(`@hzdg/${value}`);
   if (!result.validForNewPackages) {
     if (result.errors && result.errors.length) {
       return result.errors[0];
@@ -252,7 +253,7 @@ function isReactHookName(name) {
 async function promptForOptions() {
   inquirer.registerPrompt('autocomplete', autocompletePrompt);
 
-  let {type} = await inquirer.prompt([
+  const {type} = await inquirer.prompt([
     autocomplete({
       name: 'type',
       message: 'Select the type of package you want to create:',
@@ -292,7 +293,6 @@ async function promptForOptions() {
       name: 'name',
       message: 'Name your new package (dash-case):',
       validate: name => validateName(name, type),
-      transformer: name => `hzcore-${name}`,
       default: () =>
         isReactHookName(main)
           ? `hook-${dashify(main.replace(/use/, ''))}`

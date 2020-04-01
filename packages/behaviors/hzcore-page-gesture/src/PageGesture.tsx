@@ -12,7 +12,7 @@ import {
   useMouseGesture,
   useTouchGesture,
   useWheelGesture,
-} from '@hzcore/gesture-catcher';
+} from '@hzdg/gesture-catcher';
 import usePageGesture, {
   PaginationAction,
   VERTICAL,

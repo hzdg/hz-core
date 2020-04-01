@@ -1,5 +1,5 @@
 import Observable from 'zen-observable';
-import {ensureDOMInstance} from '@hzcore/dom-utils';
+import {ensureDOMInstance} from '@hzdg/dom-utils';
 import merge from 'callbag-merge';
 import asObservable from './asObservable';
 import * as Orientation from './Orientation';

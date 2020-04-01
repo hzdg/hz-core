@@ -1,12 +1,17 @@
 {
   "name": "create-package",
-  "description": "Create a new @hzcore- package",
+  "description": "Create a new @hzdg package",
   "version": "1.0.5",
   "bin": "bin/create-package.js",
   "license": "UNLICENSED",
   "private": true,
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/create-package"
   },
   "dependencies": {
     "@types/dashify": "^1.0.0",

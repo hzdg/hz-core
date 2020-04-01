@@ -5,7 +5,7 @@
   "command": {
     "version": {
       "conventionalCommits": true,
-      "changelogPreset": "@hzcore/conventional-changelog"
+      "changelogPreset": "@hzdg/conventional-changelog"
     },
     "publish": {
       "noPrivate": true,

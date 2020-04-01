@@ -75,9 +75,9 @@ Some examples:
 
 `🚨 squash linting errors`
 
-`➕ (@hzcore/scroll-monitor) add react-dom@^16.3.1`
+`➕ (@hzdg/scroll-monitor) add react-dom@^16.3.1`
 
-`🐛 (@hzcore/scroll-monitor) fix wheel delta and velocity`
+`🐛 (@hzdg/scroll-monitor) fix wheel delta and velocity`
 
 ## How to Create a New Package
 
@@ -98,9 +98,9 @@ the following conventions:
     see [Creating a New Package Type](#creating-a-new-package-type).
 -   The package directory name should be `dash-case`.
 -   The package name (in `package.json`) should be `dash-case`.
--   if it will be namespaced under `@hzcore`:
-    -   the package directory should be named `hzcore-<package-name>`.
-    -   the package name should be namespaced `@hzcore/<package-name>`.
+-   if it will be namespaced under `@hzdg`:
+    -   the package directory should be named `hzdg-<package-name>`.
+    -   the package name should be namespaced `@hzdg/<package-name>`.
 -   if the package exports a React Component, its name should be the
     `dash-case` version of the `ComponentName`, i.e., `hzcore-component-name`.
 -   if the package exports a React hook, its name should be the `dash-case`
@@ -110,7 +110,7 @@ the following conventions:
 -   The package registry should be defined in `package.json` as:
     ```json
     "publishConfig": {
-      "registry": "http://npmregistry.hzdg.com"
+      "registry": "https://npm.pkg.github.com/"
     }
     ```
 

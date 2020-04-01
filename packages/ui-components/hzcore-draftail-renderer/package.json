@@ -1,12 +1,17 @@
 {
-  "name": "@hzcore/draftail-renderer",
+  "name": "@hzdg/draftail-renderer",
   "version": "1.4.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/ui-components/hzcore-draftail-renderer"
   },
   "files": [
     "cjs",

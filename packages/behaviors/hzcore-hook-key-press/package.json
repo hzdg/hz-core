@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/hook-key-press",
+  "name": "@hzdg/hook-key-press",
   "description": "A React hook for components that care about keyboard input",
   "version": "1.0.3",
   "main": "cjs/index.js",
@@ -7,7 +7,12 @@
   "typings": "src/index.ts",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-hook-key-press"
   },
   "files": [
     "cjs",
@@ -22,7 +27,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzcore/hook-value-object": "^1.0.2",
+    "@hzdg/hook-value-object": "^1.0.2",
     "tiny-warning": "^1.0.3"
   }
 }

@@ -1,17 +1,21 @@
 {
-  "name": "@hzcore/commitizen-config",
+  "name": "@hzdg/commitizen-config",
   "version": "1.0.3",
-  "description": "The hzcore commitizen confg",
+  "description": "The hzdg commitizen confg",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
   },
-  "repository": "git@github.com:hzdg/hz-core.git",
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/conventional-commits/commitizen-config"
+  },
   "author": "Eric Eldredge <lettertwo@gmail.com>",
   "private": true,
   "main": "index.js",
   "dependencies": {
-    "@hzcore/gitmoji": "^1.0.2",
+    "@hzdg/gitmoji": "^1.0.2",
     "@lerna/project": "^3.0.0",
     "cli-truncate": "^1.1.0",
     "fuse.js": "^3.2.1",

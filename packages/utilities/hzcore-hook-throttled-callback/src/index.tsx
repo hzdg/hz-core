@@ -1,7 +1,7 @@
-import useValueObject from '@hzcore/hook-value-object';
+import useValueObject from '@hzdg/hook-value-object';
 import useDebouncedCallback, {
   DebounceOptions,
-} from '@hzcore/hook-debounced-callback';
+} from '@hzdg/hook-debounced-callback';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Callback = (...args: any[]) => any;

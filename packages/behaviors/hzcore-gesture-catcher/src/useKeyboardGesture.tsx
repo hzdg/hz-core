@@ -1,5 +1,5 @@
-import {KeyboardGestureObservable} from '@hzcore/gesture-observable';
-import useRefCallback from '@hzcore/hook-ref-callback';
+import {KeyboardGestureObservable} from '@hzdg/gesture-observable';
+import useRefCallback from '@hzdg/hook-ref-callback';
 import {useObservableGestureEffect} from './utils';
 
 export type KeyboardGestureObservableConfig = KeyboardGestureObservable.KeyboardGestureObservableConfig;

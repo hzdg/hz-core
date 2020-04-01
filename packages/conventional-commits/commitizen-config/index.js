@@ -4,7 +4,7 @@ const wrap = require('wrap-ansi');
 const pad = require('pad');
 const Fuse = require('fuse.js');
 const autocompletePrompt = require('inquirer-autocomplete-prompt');
-const emojis = require('@hzcore/gitmoji');
+const emojis = require('@hzdg/gitmoji');
 const project = require('@lerna/project');
 
 /**

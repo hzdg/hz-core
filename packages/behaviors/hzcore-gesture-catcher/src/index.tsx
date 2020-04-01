@@ -1,5 +1,5 @@
 import * as GestureCatcher from './GestureCatcher';
-import * as GestureObservable from '@hzcore/gesture-observable';
+import * as GestureObservable from '@hzdg/gesture-observable';
 import * as keyboard from './useKeyboardGesture';
 import * as mouse from './useMouseGesture';
 import * as touch from './useTouchGesture';

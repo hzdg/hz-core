@@ -1,12 +1,17 @@
 {
-  "name": "@hzcore/dom-utils",
+  "name": "@hzdg/dom-utils",
   "version": "1.0.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/hzcore-dom-utils"
   },
   "files": [
     "cjs",

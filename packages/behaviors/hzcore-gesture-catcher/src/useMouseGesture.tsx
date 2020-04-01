@@ -1,5 +1,5 @@
-import {MouseGestureObservable} from '@hzcore/gesture-observable';
-import useRefCallback from '@hzcore/hook-ref-callback';
+import {MouseGestureObservable} from '@hzdg/gesture-observable';
+import useRefCallback from '@hzdg/hook-ref-callback';
 import {useObservableGestureEffect} from './utils';
 
 export type MouseGestureObservableConfig = MouseGestureObservable.MouseGestureObservableConfig;

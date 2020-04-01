@@ -61,7 +61,7 @@ const verdaccioConfig = {
   port: 4873, // default
   web: {
     enable: true,
-    title: `hzcore-dev`,
+    title: `hzdg-dev`,
   },
   logs: [{type: `stdout`, format: `pretty-timestamped`, level: `warn`}],
   packages: {
@@ -278,7 +278,7 @@ async function startRegistry() {
       verdaccioConfig.port,
       verdaccioConfig.storage,
       `1.0.0`,
-      `hzcore-dev`,
+      `hzdg-dev`,
       // @ts-ignore
       (webServer, addr) => {
         webServer.listen(addr.port || addr.path, addr.host, () => {
@@ -303,7 +303,7 @@ async function startRegistry() {
  */
 async function createTemporaryNPMRC({location}, registry) {
   const NPMRCPath = path.join(location, `.npmrc`);
-  const NPMRC = `${registry.replace(/https?:/g, ``)}/:_authToken="hzcore-dev"`;
+  const NPMRC = `${registry.replace(/https?:/g, ``)}/:_authToken="hzdg-dev"`;
   await writeFile(NPMRCPath, NPMRC);
   return async () => {
     await rm(NPMRCPath);
@@ -358,7 +358,7 @@ async function collectProjectFiles(pkgs, root) {
             // @ts-ignore
             match ? pkg[match] : pattern,
           )
-          .replace('@hzcore/', '')
+          .replace('@hzdg/', '')
           .replace(ExtPattern, '$1');
         projectFiles[root ? path.join(root, filepath) : filepath] = template(
           pkg,
@@ -442,7 +442,7 @@ async function publishPkgs(pkgs, registry) {
           '--loglevel=silent',
           '--no-progress',
           '--tag',
-          'hzcore-dev',
+          'hzdg-dev',
           `--registry=${registry}`,
         ],
         {cwd: pkg.location},
@@ -470,12 +470,12 @@ async function publishPkgs(pkgs, registry) {
  * @returns {Promise<Project>}
  */
 async function installPublishedPkgs(pkgs, registry) {
-  const packagePath = path.join(os.tmpdir(), 'hzcore', 'test');
+  const packagePath = path.join(os.tmpdir(), 'hzdg', 'test');
   const cleanup = await createTestProject(packagePath, pkgs);
   /** @type Set<string> */
   const pkgsToInstall = new Set();
   for (const pkg of pkgs) {
-    pkgsToInstall.add(`${pkg.name}@hzcore-dev`);
+    pkgsToInstall.add(`${pkg.name}@hzdg-dev`);
     for (const dep in pkg.peerDependencies) {
       pkgsToInstall.add(`${dep}@${pkg.peerDependencies[dep]}`);
     }

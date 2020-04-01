@@ -1,5 +1,5 @@
 {
-  "name": "@hzcore/button",
+  "name": "@hzdg/button",
   "version": "0.0.2",
   "main": "cjs/index.js",
   "module": "es/index.js",

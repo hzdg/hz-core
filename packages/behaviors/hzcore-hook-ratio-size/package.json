@@ -1,12 +1,17 @@
 {
-  "name": "@hzcore/hook-ratio-size",
+  "name": "@hzdg/hook-ratio-size",
   "version": "1.0.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/hzcore-hook-ratio-size"
   },
   "files": [
     "cjs",
@@ -20,6 +25,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzcore/windowsize-monitor": "^2.0.0"
+    "@hzdg/windowsize-monitor": "^2.0.0"
   }
 }

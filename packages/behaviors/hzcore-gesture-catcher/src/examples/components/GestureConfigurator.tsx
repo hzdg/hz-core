@@ -1,5 +1,5 @@
 import React, {useReducer, useCallback, useMemo} from 'react';
-import {GestureConfig, Orientation} from '@hzcore/gesture-catcher';
+import {GestureConfig, Orientation} from '@hzdg/gesture-catcher';
 
 export interface GestureConfiguratorProps {
   config: GestureConfig;

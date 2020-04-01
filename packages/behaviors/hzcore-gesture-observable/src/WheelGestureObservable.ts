@@ -1,5 +1,5 @@
-import {ensureDOMInstance} from '@hzcore/dom-utils';
-import MovingAverage from '@hzcore/moving-average';
+import {ensureDOMInstance} from '@hzdg/dom-utils';
+import MovingAverage from '@hzdg/moving-average';
 import {Source, Sink} from 'callbag';
 import share from 'callbag-share';
 import pipe from 'callbag-pipe';
