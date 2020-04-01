@@ -127,7 +127,6 @@
   "resolutions": {
     "docz-plugin-netlify/**/docz-core": "^1.1.0",
     "@babel/core": "^7.8.6",
-    "@octokit/endpoint": "4.0.0",
     "@types/react": "^16.8.12",
     "@types/react-dom": "^16.8.3"
   }
