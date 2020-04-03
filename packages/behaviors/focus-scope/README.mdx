@@ -442,7 +442,8 @@ An element is in scope if it is:
 
 - focusable
 - a descendant of the `FocusManager` element
-- not a descendant of any nested `FocusManager` element.
+- not a descendant of any nested `FocusManager` element
+  _or_ `includeNested` is `true`
 
 ### containsFocusableElements
 
@@ -466,6 +467,7 @@ An element is in scope if it is:
 - focusable
 - a descendant of the `FocusManager` element
 - not a descendant of any nested `FocusManager` element
+  _or_ `includeNested` is `true`
 
 ### containsFocusableElement
 
@@ -617,7 +619,7 @@ An element is in the _deep_ scope if it is:
 ## Trapping Focus
 
 In many UI patterns, it is necessary to carefully implement keyboard
-navigation and focus management to maintain exceptable levels of usability
+navigation and focus management to maintain acceptable levels of usability
 and accessibility. One common example is the [Modal]. This type of UI pattern
 is so common that there is a name for the implementation: the _focus trap_.
 
