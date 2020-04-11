@@ -293,10 +293,7 @@ async function promptForOptions() {
       name: 'name',
       message: 'Name your new package (dash-case):',
       validate: name => validateName(name, type),
-      default: () =>
-        isReactHookName(main)
-          ? `hook-${dashify(main.replace(/use/, ''))}`
-          : dashify(main),
+      default: () => dashify(main),
     },
   ]);
 
