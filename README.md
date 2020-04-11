@@ -102,8 +102,7 @@ the following conventions:
 -   if the package exports a React Component, its name should be the
     `dash-case` version of the `ComponentName`, i.e., `component-name`.
 -   if the package exports a React hook, its name should be the `dash-case`
-    version of the `useThisHook`, with `use` replaced with `hook-`,
-    i.e. `hook-this-hook`
+    version of the `useThisHook`, i.e. `use-this-hook`
 -   The package should include a `CHANGELOG.md`
 -   The package registry should be defined in `package.json` as:
     ```json
