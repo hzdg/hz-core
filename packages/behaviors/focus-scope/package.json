@@ -29,7 +29,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@hzdg/dom-utils": "^1.0.1",
-    "@hzdg/hook-key-press": "^1.0.3",
+    "@hzdg/use-key-press": "^1.0.3",
     "tiny-warning": "^1.0.3"
   }
 }

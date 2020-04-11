@@ -1,5 +1,5 @@
 {
-  "name": "@hzdg/hook-key-press",
+  "name": "@hzdg/use-key-press",
   "description": "A React hook for components that care about keyboard input",
   "version": "1.0.3",
   "main": "cjs/index.js",
@@ -12,7 +12,7 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/hzdg/hz-core.git",
-    "directory": "packages/behaviors/hook-key-press"
+    "directory": "packages/behaviors/use-key-press"
   },
   "files": [
     "cjs",
