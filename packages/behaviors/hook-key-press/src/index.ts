@@ -19,7 +19,7 @@ import {
   NavigationKeyPressUserHandlers,
   applyNavigationHandlers,
 } from './navigation';
-import useValueObject from '@hzdg/hook-value-object';
+import useValueObject from '@hzdg/use-value-object';
 
 // Reexport types in a babel-friendly way.
 export type KeyPressState = _KeyPressState;

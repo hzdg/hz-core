@@ -1,5 +1,5 @@
 {
-  "name": "@hzdg/hook-value-object",
+  "name": "@hzdg/use-value-object",
   "description": "A React hook for components that want to memoize shallowly equal values",
   "version": "1.0.2",
   "main": "cjs/index.js",
@@ -12,7 +12,7 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/hzdg/hz-core.git",
-    "directory": "packages/utilities/hook-value-object"
+    "directory": "packages/utilities/use-value-object"
   },
   "files": [
     "cjs",

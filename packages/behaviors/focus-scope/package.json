@@ -30,7 +30,6 @@
     "@babel/runtime": "^7.4.4",
     "@hzdg/dom-utils": "^1.0.1",
     "@hzdg/hook-key-press": "^1.0.3",
-    "@hzdg/hook-value-object": "^1.0.2",
     "tiny-warning": "^1.0.3"
   }
 }

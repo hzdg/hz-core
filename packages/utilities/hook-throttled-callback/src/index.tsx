@@ -1,4 +1,4 @@
-import useValueObject from '@hzdg/hook-value-object';
+import useValueObject from '@hzdg/use-value-object';
 import useDebouncedCallback, {
   DebounceOptions,
 } from '@hzdg/hook-debounced-callback';

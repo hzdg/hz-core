@@ -1,5 +1,5 @@
 import {useCallback, useRef, useMemo, useEffect} from 'react';
-import useValueObject from '@hzdg/hook-value-object';
+import useValueObject from '@hzdg/use-value-object';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type Callback = (...args: any[]) => any;

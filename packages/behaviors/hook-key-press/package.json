@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzdg/hook-value-object": "^1.0.2",
+    "@hzdg/use-value-object": "^1.0.2",
     "tiny-warning": "^1.0.3"
   }
 }

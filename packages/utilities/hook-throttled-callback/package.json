@@ -28,6 +28,6 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@hzdg/hook-debounced-callback": "^1.0.1",
-    "@hzdg/hook-value-object": "^1.0.2"
+    "@hzdg/use-value-object": "^1.0.2"
   }
 }
