@@ -24,7 +24,7 @@
   "dependencies": {
     "@hzdg/gesture-catcher": "^4.2.1",
     "@hzdg/use-ref-callback": "*",
-    "@hzdg/hook-size": "*",
+    "@hzdg/use-size": "*",
     "@hzdg/moving-average": "^1.1.0",
     "@types/d3-array": "^2.0.0",
     "@types/d3-scale": "^2.1.1",

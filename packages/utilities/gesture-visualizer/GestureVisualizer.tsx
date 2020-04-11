@@ -12,7 +12,7 @@ import {scaleLinear, scaleOrdinal} from '@vx/scale';
 import {schemeTableau10} from 'd3-scale-chromatic';
 import useRefCallback from '@hzdg/use-ref-callback';
 import MovingAverage from '@hzdg/moving-average';
-import useSize from '@hzdg/hook-size';
+import useSize from '@hzdg/use-size';
 import {
   GestureState,
   GestureEndState,
