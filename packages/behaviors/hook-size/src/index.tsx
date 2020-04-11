@@ -1,7 +1,7 @@
 import {useEffect, useState, useRef, useCallback} from 'react';
 import {useWindowSize, WindowSize} from '@hzdg/windowsize-monitor';
 import ResizeObservable, {ResizeObservableSize} from '@hzdg/resize-observable';
-import useRefCallback from '@hzdg/hook-ref-callback';
+import useRefCallback from '@hzdg/use-ref-callback';
 import memoizeOne from 'memoize-one';
 
 // We really would just like to use DOMRect as our type here, but due to

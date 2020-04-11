@@ -1,5 +1,5 @@
 import {useState, useMemo, useEffect, useRef, useCallback} from 'react';
-import useRefCallback from '@hzdg/hook-ref-callback';
+import useRefCallback from '@hzdg/use-ref-callback';
 import 'intersection-observer'; // polyfill
 
 function useIntersectionThreshold(

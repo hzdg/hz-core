@@ -1,5 +1,5 @@
 {
-  "name": "@hzdg/hook-ref-callback",
+  "name": "@hzdg/use-ref-callback",
   "description": "A React hook for components that need to know when a ref changes.",
   "version": "2.0.0",
   "main": "cjs/index.js",
@@ -12,7 +12,7 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/hzdg/hz-core.git",
-    "directory": "packages/behaviors/hook-ref-callback"
+    "directory": "packages/behaviors/use-ref-callback"
   },
   "files": [
     "cjs",

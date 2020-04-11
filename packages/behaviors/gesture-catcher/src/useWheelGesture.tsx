@@ -1,5 +1,5 @@
 import {WheelGestureObservable} from '@hzdg/gesture-observable';
-import useRefCallback from '@hzdg/hook-ref-callback';
+import useRefCallback from '@hzdg/use-ref-callback';
 import {useObservableGestureEffect} from './utils';
 
 export type WheelGestureObservableConfig = WheelGestureObservable.WheelGestureObservableConfig;

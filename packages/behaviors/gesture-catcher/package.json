@@ -27,7 +27,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@hzdg/gesture-observable": "^2.1.2",
-    "@hzdg/hook-ref-callback": "^2.0.0",
+    "@hzdg/use-ref-callback": "^2.0.0",
     "@hzdg/moving-average": "^1.1.0",
     "prop-types": "15.x.x"
   }

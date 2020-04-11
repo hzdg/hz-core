@@ -22,7 +22,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzdg/hook-ref-callback": "^2.0.0",
+    "@hzdg/use-ref-callback": "^2.0.0",
     "@hzdg/resize-observable": "^2.0.0",
     "@hzdg/windowsize-monitor": "^2.0.1",
     "memoize-one": "5.1.1"

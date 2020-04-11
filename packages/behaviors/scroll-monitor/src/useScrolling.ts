@@ -1,5 +1,5 @@
 import {useState, useEffect, useRef, useCallback} from 'react';
-import useRefCallback from '@hzdg/hook-ref-callback';
+import useRefCallback from '@hzdg/use-ref-callback';
 import {useNearestScrollNodeRef, useScrollEffect} from './utils';
 
 const SCROLL_TIMEOUT = 60;
