@@ -15,7 +15,7 @@ Calculates a width and a height for a container that covers the current viewport
 ## Installation
 
 ```shell
-yarn add @hzdg/hook-ratio-size
+yarn add @hzdg/use-ratio-size
 ```
 <Props of={useRatioSize}  />
 <hr />
@@ -29,7 +29,7 @@ const [playerSize, updateRatioSize] = useRatioSize();
 ### Example
 Window Size example using the viewport size (default behavior)
 ```js
-import useRatioSize from '@hzdg/hook-ratio-size';
+import useRatioSize from '@hzdg/use-ratio-size';
 
 function MyContainer = () => {
   const [playerSize] = useRatioSize();
@@ -61,7 +61,7 @@ function MyContainer = () => {
 
 Container Size example using the container's ref
 ```js
-import useRatioSize from '@hzdg/hook-ratio-size';
+import useRatioSize from '@hzdg/use-ratio-size';
 
 function MyContainer = () => {
   const parentRef = React.createRef() as React.MutableRefObject<HTMLDivElement | null>;

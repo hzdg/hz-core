@@ -1,5 +1,5 @@
 {
-  "name": "@hzdg/hook-ratio-size",
+  "name": "@hzdg/use-ratio-size",
   "version": "1.0.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
@@ -11,7 +11,7 @@
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/hzdg/hz-core.git",
-    "directory": "packages/behaviors/hook-ratio-size"
+    "directory": "packages/behaviors/use-ratio-size"
   },
   "files": [
     "cjs",
