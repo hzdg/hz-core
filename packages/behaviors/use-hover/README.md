@@ -4,7 +4,7 @@ menu: Hooks
 route: /use-hover
 ---
 
-# hook-hover
+# use-hover
 
 The hook component to get the hover/focus event props for a component.
 Use it any time you need to apply hover state to any functional component.
@@ -19,7 +19,7 @@ object with 2 event props:
 #### To use (requires react v. 16.8+)
 
 ```js
-import useHover from '@hzdg/hook-hover';
+import useHover from '@hzdg/use-hover';
 
 function Box() {
     const [isHovering, hoverProps] = useHover({
