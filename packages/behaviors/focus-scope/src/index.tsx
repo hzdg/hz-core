@@ -521,3 +521,5 @@ export const FocusScope = React.forwardRef(function FocusScope(
 >(
   props: FocusScopeProps<T, C>,
 ) => JSX.Element;
+
+export default FocusScope;
