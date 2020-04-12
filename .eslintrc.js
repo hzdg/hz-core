@@ -17,4 +17,13 @@ module.exports = {
       },
     },
   },
+  overrides: [
+    {
+      // disable typescript-eslint rules for .jsx?
+      files: ['*.js', '*.jsx'],
+      rules: {
+        '@typescript-eslint/explicit-function-return-type': 'off',
+      },
+    },
+  ],
 };
