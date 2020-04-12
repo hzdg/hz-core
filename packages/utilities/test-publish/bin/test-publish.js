@@ -577,6 +577,7 @@ async function testPublish(options) {
   return pkgsToPublish;
 }
 
+exports.testPublish = testPublish;
 // If this is module is being run as a script,
 // then invoke the testPublish function.
 if (typeof require !== 'undefined' && require.main === module) {
