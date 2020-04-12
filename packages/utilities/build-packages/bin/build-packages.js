@@ -8,9 +8,7 @@ const retry = require('async-retry');
 const babel = require('@babel/core');
 const chalk = require('chalk').default;
 const yargs = require('yargs');
-// @ts-ignore
 const report = require('yurnalist');
-// @ts-ignore
 const project = require('@lerna/project');
 
 const rmdir = promisify(require('rimraf'));
@@ -26,12 +24,7 @@ const EXCLUDE_GLOBS = [
 ];
 
 /**
- * @typedef {Object} Workspace
- * @property {string} name
- * @property {string} location
- * @property {Object[]} [devDependencies]
- * @property {Object[]} [peerDependencies]
- * @property {Boolean} [private]
+ * @typedef {import("@lerna/package").Package} Workspace
  */
 
 /**
@@ -144,7 +137,8 @@ const buildModule = async (pkg, filename, format) => {
   if (!result) {
     throw new Error(`Could not transform file ${filename}`);
   }
-  let {code, map} = result;
+  let {code} = result;
+  const {map} = result;
   if (!map) throw new Error(`No sourcemap found in transform of ${filename}`);
   const basename = path.basename(filename).replace(/\.(?:j|t)sx?$/, '.js');
   const filepath = path.join(
@@ -239,16 +233,20 @@ const isStale = async (pkg, filename, format) => {
  * @returns {Promise<string | undefined>}
  */
 const needsBuild = async pkg =>
-  (await Promise.all(
-    glob
-      .sync(path.join(pkg.src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
-      .map(async input =>
-        (await Promise.all([
-          isStale(pkg, input, 'es'),
-          isStale(pkg, input, 'cjs'),
-        ])).find(Boolean),
-      ),
-  )).find(Boolean);
+  (
+    await Promise.all(
+      glob
+        .sync(path.join(pkg.src, SRC_GLOB), {ignore: EXCLUDE_GLOBS})
+        .map(async input =>
+          (
+            await Promise.all([
+              isStale(pkg, input, 'es'),
+              isStale(pkg, input, 'cjs'),
+            ])
+          ).find(Boolean),
+        ),
+    )
+  ).find(Boolean);
 
 /**
  * @param {Pkg} pkg
@@ -391,8 +389,10 @@ async function build(options) {
 module.exports = build;
 
 // If this is module is being run as a script, invoke the build function.
-// @ts-ignore
-if (typeof require !== 'undefined' && require.main === module) {
+if (
+  typeof require !== 'undefined' &&
+  require.main === /** @type {unknown} */ (module)
+) {
   const options = yargs
     .usage(
       '\nBuilds all public packages found in workspaces.\n\n' +

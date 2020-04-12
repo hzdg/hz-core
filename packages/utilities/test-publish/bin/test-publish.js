@@ -10,9 +10,7 @@ const rmdir = promisify(require('rimraf'));
 const mkdirp = promisify(require('mkdirp'));
 const stoppable = require('stoppable');
 const yargs = require('yargs');
-// @ts-ignore
 const report = require('yurnalist');
-// @ts-ignore
 const {default: verdaccio} = require('verdaccio');
 
 const writeFile = promisify(fs.writeFile);
@@ -20,6 +18,11 @@ const readFile = promisify(fs.readFile);
 const stat = promisify(fs.stat);
 const readdir = promisify(fs.readdir);
 const rm = promisify(fs.unlink);
+
+/**
+ * @template T
+ * @typedef {{[K in keyof T]: T[K] extends string ? K : never}[keyof T]} StringFields
+ */
 
 /**
  * @typedef {Object} Pkg
@@ -279,7 +282,6 @@ async function startRegistry() {
       verdaccioConfig.storage,
       `1.0.0`,
       `hzdg-dev`,
-      // @ts-ignore
       (webServer, addr) => {
         webServer.listen(addr.port || addr.path, addr.host, () => {
           const registryUrl = `http://${addr.host}:${addr.port}`;
@@ -354,10 +356,10 @@ async function collectProjectFiles(pkgs, root) {
       }
       for (const pkg of pkgs) {
         const filepath = templateFilename
-          .replace(TemplatePattern, (pattern, match) =>
-            // @ts-ignore
-            match ? pkg[match] : pattern,
-          )
+          .replace(TemplatePattern, (
+            pattern,
+            /** @type {StringFields<Pkg>} */ match,
+          ) => (match ? pkg[match] : pattern))
           .replace('@hzdg/', '')
           .replace(ExtPattern, '$1');
         projectFiles[root ? path.join(root, filepath) : filepath] = template(
@@ -577,7 +579,6 @@ async function testPublish(options) {
 
 // If this is module is being run as a script,
 // then invoke the testPublish function.
-// @ts-ignore
 if (typeof require !== 'undefined' && require.main === module) {
   const options = yargs
     .usage(

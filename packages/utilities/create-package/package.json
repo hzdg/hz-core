@@ -17,6 +17,7 @@
     "@types/dashify": "^1.0.0",
     "@types/inquirer": "^6.5.0",
     "@types/mkdirp": "^0.5.2",
+    "@types/validate-npm-package-name": "3.0.0",
     "dashify": "^2.0.0",
     "fuse.js": "^3.4.4",
     "inquirer": "^6.3.1",
