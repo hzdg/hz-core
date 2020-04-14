@@ -1,5 +1,6 @@
 {
   "name": "@hzdg/use-hover",
+  "description": "A React hook for hover/focus events",
   "version": "0.0.5",
   "author": "Andrey Morozov",
   "license": "MIT",
