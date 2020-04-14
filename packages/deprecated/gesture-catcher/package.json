@@ -1,11 +1,12 @@
 {
   "name": "@hzdg/gesture-catcher",
-  "description": "A React component and set of hooks that can detect gestures from mouse, touch, or keyboard inputs",
+  "description": "DEPRECATED: A React component and set of hooks that can detect gestures from mouse, touch, or keyboard inputs",
   "version": "4.2.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
   "license": "MIT",
+  "private": true,
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },

@@ -1,6 +1,6 @@
 ---
 name: useKeyboardGesture
-menu: Hooks
+menu: Deprecated
 route: /use-keyboard-gesture
 ---
 
@@ -9,6 +9,11 @@ import useKeyboardGesture from './src/useKeyboardGesture';
 import useRefCallback from '@hzdg/use-ref-callback';
 import KeyboardGestureVisualizer from './src/examples/KeyboardGestureVisualizer';
 
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
 
 # useKeyboardGesture
 
@@ -289,3 +294,4 @@ const SomeRefUsingComponent = () => {
 [keyboardgestureconfig]: #keyboardgestureconfig
 [keyboardgesturestate]: #keyboardgesturestate
 [keyboardgestureendstate]: #keyboardgestureendstate
+[@hzdg/usekeypress]: /use-key-press

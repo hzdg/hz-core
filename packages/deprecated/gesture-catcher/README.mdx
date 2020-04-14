@@ -1,11 +1,18 @@
 ---
 name: GestureCatcher
-menu: Headless Components
+menu: Deprecated
 route: /gesture-catcher
 ---
 
 import {Playground, Props} from 'docz';
 import GestureCatcher from './src';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
+>  - [react-use-gesture] for binding to gestures
 
 # GestureCatcher
 
@@ -279,3 +286,5 @@ const RefForwardingGestureCatcher = React.forwardRef((props, forwardedRef) => {
 [mousegestureendstate]: /use-mouse-gesture#mousegestureendstate
 [touchgestureendstate]: /use-touch-gesture#touchgestureendstate
 [wheelgestureendstate]: /use-wheel-gesture#wheelgestureendstate
+[react-use-gesture]: https://use-gesture.netlify.app/
+[@hzdg/usekeypress]: /use-key-press

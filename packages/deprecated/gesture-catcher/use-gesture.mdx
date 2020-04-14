@@ -1,12 +1,19 @@
 ---
 name: useGesture
-menu: Hooks
+menu: Deprecated
 route: /use-gesture
 ---
 
 import {Playground, Props} from 'docz';
 import useGesture from './src/useGesture';
 import useRefCallback from '@hzdg/use-ref-callback';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
+>  - [react-use-gesture] for binding to gestures
 
 # useGesture
 
@@ -293,3 +300,5 @@ const SomeRefUsingComponent = () => {
 [touchgestureconfig]: /use-touch-gesture#touchgestureconfig
 [wheelgestureconfig]: /use-wheel-gesture#wheelgestureconfig
 [keyboardgestureconfig]: /use-keyboard-gesture#keyboardgestureconfig
+[react-use-gesture]: https://use-gesture.netlify.app/
+[@hzdg/usekeypress]: /use-key-press

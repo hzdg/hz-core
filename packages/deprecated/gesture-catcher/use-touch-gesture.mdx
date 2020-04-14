@@ -1,22 +1,28 @@
 ---
-name: useWheelGesture
-menu: Hooks
-route: /use-wheel-gesture
+name: useTouchGesture
+menu: Deprecated
+route: /use-touch-gesture
 ---
 
 import {Playground, Props} from 'docz';
-import {useWheelGesture} from '@hzdg/gesture-catcher';
+import useTouchGesture from './src/useTouchGesture';
 import useRefCallback from '@hzdg/use-ref-callback';
-import WheelGestureVisualizer from './src/examples/WheelGestureVisualizer';
+import TouchGestureVisualizer from './src/examples/TouchGestureVisualizer';
 
-# useWheelGesture
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [react-use-gesture] for binding to gestures
 
-A React [hook] for components that want to handle wheel gesture intent.
+# useTouchGesture
 
-<WheelGestureVisualizer>
-  <p style={{color: 'lightgray'}}>Use wheel or trackpad to gesture!</p>
-  <p style={{color: 'lightgray'}}>Click to reset</p>
-</WheelGestureVisualizer>
+A React [hook] for components that want to handle touch gesture intent.
+
+<TouchGestureVisualizer>
+  <p style={{color: 'lightgray'}}>Use touch drag to gesture!</p>
+  <p style={{color: 'lightgray'}}>Press to reset</p>
+</TouchGestureVisualizer>
 
 ## Installation
 
@@ -26,21 +32,21 @@ yarn add @hzdg/gesture-catcher
 
 ## Usage
 
-```
-import {useWheelGesture} from '@hzdg/gesture-catcher';
+```js
+import {useTouchGesture} from '@hzdg/gesture-catcher';
 ```
 
-`useWheelGesture` supports using an existing [ref object].
+`useTouchGesture` supports using an existing [ref object].
 (See [shared ref / ref forwarding] for more).
 
-This means `useWheelGesture` has 2 different signatures:
+This means `useTouchGesture` has 2 different signatures:
 
 Without an existing [ref object]:
 
 ```ts
-function useWheelGesture(
-  handler: WheelGestureChangeHandler | WheelGestureHandlers,
-  config?: WheelGestureConfig | null,
+function useTouchGesture(
+  handler: TouchGestureChangeHandler | TouchGestureHandlers,
+  config?: TouchGestureConfig | null,
 ): (node: HTMLElement | null) => void;
 ```
 
@@ -49,45 +55,45 @@ The returned [callback ref] should be passed to an underlying DOM node.
 With an existing [ref object]:
 
 ```ts
-function useWheelGesture(
+function useTouchGesture(
   providedRef: React.RefObject<HTMLElement>,
-  handler: WheelGestureChangeHandler | WheelGestureHandlers,
-  config?: WheelGestureConfig | null,
+  handler: TouchGestureChangeHandler | TouchGestureHandlers,
+  config?: TouchGestureConfig | null,
 ): void;
 ```
 
-Note that `useWheelGesture` will _not_ return a [callback ref] in this case.
+Note that `useTouchGesture` will _not_ return a [callback ref] in this case.
 The provided [ref object] is expected to be passed to an underlying DOM node.
 
 ## Config
 
-`config?: WheelGestureConfig | null,`
+`config?: TouchGestureConfig | null`
 
-An object describing configuration for observing wheel gestures.
-This is optionally provided to [useWheelGesture].
+An object describing configuration for observing touch gestures.
+This is optionally provided to [useTouchGesture].
 
 ```ts
-interface WheelGestureConfig {
+interface TouchGestureConfig {
   /**
    * Whether or not to prevent the default action
-   * for `wheel` events during a gesture.
+   * for `touchmove` events during a gesture.
    */
   preventDefault: boolean;
   /**
-   * Whether or not to listen to wheel events passively.
+   * Whether or not to listen to touch events passively.
    * If `true`, then `preventDefault` will have no effect.
    */
   passive: boolean;
   /**
-   * How 'far' a series of wheel events must cumulatively move
-   * in a consistent direction before a wheel gesture is detected,
-   * or `false`, if _any_ wheel event should be considered part of a gesture.
+   * How 'far' a series of touch events must cumulatively move
+   * in a consistent direction before a touch gesture is detected,
+   * or `false`, if _any_ touch event should be considered part of a gesture.
    */
   threshold?: number | false;
   /**
-   * The orientation in which a series of wheel events
+   * The orientation in which a series of touch events
    * can move in order to be considered part of a gesture.
-   * If not provided, then wheel events in _any_ orientation
+   * If not provided, then touch events in _any_ orientation
    * can be considered part of a gesture.
    */
   orientation?: Orientation;
@@ -96,63 +102,59 @@ interface WheelGestureConfig {
 
 ## Handler
 
-`handler: WheelGestureChangeHandler | WheelGestureHandlers,`
+`handler: TouchGestureChangeHandler | TouchGestureHandlers,`
 
-A function to handle wheel gesture updates, or a configuration of handlers,
+A function to handle touch gesture updates, or a configuration of handlers,
 like `{onStart?, onMove?, onEnd?}`.
 
-See [WheelGestureChangeHandler], [WheelGestureHandlers],
-[WheelGestureState], and [WheelGestureEndState] for more.
+See [TouchGestureChangeHandler], [TouchGestureHandlers],
+[TouchGestureState], and [TouchGestureEndState] for more.
 
-### WheelGestureChangeHandler
+### TouchGestureChangeHandler
 
-A function that handles changes to an ongoing or finished wheel gesture.
-Receives [WheelGestureState] or [WheelGestureEndState] objects.
+A function that handles changes to an ongoing or finished touch gesture.
+Receives [TouchGestureState] or [TouchGestureEndState] objects.
 
 ```ts
-type WheelGestureChangeHandler = (
-  state: WheelGestureState | WheelGestureEndState,
+type TouchGestureChangeHandler = (
+  state: TouchGestureState | TouchGestureEndState,
 ) => void;
 ```
 
-### WheelGestureHandlers
+### TouchGestureHandlers
 
 An object with optional `onStart`, `onMove`, and/or `onEnd` methods.
-If defined, `onStart` and `onMove` will recieve [WheelGestureState] objects,
-while `onEnd` will receive [WheelGestureEndState] objects.
+If defined, `onStart` and `onMove` will recieve [TouchGestureState] objects,
+while `onEnd` will receive [TouchGestureEndState] objects.
 
 ```ts
-interface WheelGestureHandlers {
-  onStart?: (state: WheelGestureState) => void;
-  onMove?: (state: WheelGestureState) => void;
-  onEnd?: (state: WheelGestureEndState) => void;
+interface TouchGestureHandlers {
+  onStart?: (state: TouchGestureState) => void;
+  onMove?: (state: TouchGestureState) => void;
+  onEnd?: (state: TouchGestureEndState) => void;
 }
 ```
 
 ## State
 
-`state: WheelGestureState | WheelGestureEndState`
+`state: TouchGestureState | TouchGestureEndState`
 
-An object describing the state of an ongoing or finished wheel gesture.
+An object describing the state of an ongoing or finished touch gesture.
 This is provided to the [handler] or handlers.
 
-### WheelGestureState
+### TouchGestureState
 
-An object describing the latest state of an ongoing wheel gesture.
+An object describing the latest state of an ongoing touch gesture.
 
-It is passed to the [WheelGestureChangeHandler]
-or `onStart` and `onMove` [WheelGestureHandlers] provided to [useWheelGesture].
+It is passed to the [TouchGestureChangeHandler]
+or `onStart` and `onMove` [TouchGestureHandlers] provided to [useTouchGesture].
 
 ```ts
-interface WheelGestureState {
+interface TouchGestureState {
   /** The latest x position for the gesture. */
   x: number;
   /** The latest y position for the gesture. */
   y: number;
-  /** The cumulative change of the spin speed in the x dimension. */
-  xSpin: number;
-  /** The cumulative change of the spin speed in the y dimension. */
-  ySpin: number;
   /** The cumulative change of the gesture in the x dimension. */
   xDelta: number;
   /** The cumulative change of the gesture in the y dimension. */
@@ -172,36 +174,36 @@ interface WheelGestureState {
   /** Indicates a gesture is ongoing. */
   gesturing: true;
   /** The type of event associated with the gesture. */
-  type: 'wheel';
+  type: 'touchstart' | 'touchmove';
 }
 ```
 
-### WheelGestureEndState
+### TouchGestureEndState
 
-An object describing the last state of a previous wheel gesture.
+An object describing the last state of a previous touch gesture.
 
-It is passed to the [WheelGestureChangeHandler]
-or `onEnd` [WheelGestureHandlers] provided to [useWheelGesture].
+It is passed to the [TouchGestureChangeHandler]
+or `onEnd` [TouchGestureHandlers] provided to [useTouchGesture].
 
 ```ts
-interface WheelGestureEndState extends WheelGestureState {
+interface TouchGestureEndState extends TouchGestureState {
   /** Indicates a gesture is complete */
   gesturing: false;
   /** The type of event associated with the end of the gesture. */
-  type: 'gestureend';
+  type: 'touchend';
 }
 ```
 
 ## Example
 
+> Use a touch-enabled device or [touch emulation] to see the below example!
+
 <Playground>
   {() => {
-    const WheelGestureUser = () => {
-      const [gesture, setGesture] = React.useState(
-        'spin that wheel (or trackpad)!',
-      );
+    const TouchGestureUser = () => {
+      const [gesture, setGesture] = React.useState('touchy draggy!');
       const config = React.useMemo(() => ({preventDefault: true}), []);
-      const ref = useWheelGesture(setGesture, config);
+      const ref = useTouchGesture(setGesture, config);
       return (
         <div
           ref={ref}
@@ -218,14 +220,14 @@ interface WheelGestureEndState extends WheelGestureState {
         </div>
       );
     };
-    return <WheelGestureUser />;
+    return <TouchGestureUser />;
   }}
 </Playground>
 
 ## Shared Ref / Ref Forwarding
 
 > **Note:** Using an existing ref object has a possible gotcha:
-> `useWheelGesture` cannot know when the current value has changed!
+> `useTouchGesture` cannot know when the current value has changed!
 > This means the component is responsible for rerendering
 > whenever the the ref's value has been changed.
 > One easy way to achieve this is with [useRefCallback].
@@ -233,7 +235,7 @@ interface WheelGestureEndState extends WheelGestureState {
 
 Sometimes a component needs to [forward a ref] to its children,
 or [use a ref][useref] with other hooks.
-To support these cases, `useWheelGesture` accepts an optional [ref object].
+To support these cases, `useTouchGesture` accepts an optional [ref object].
 
 It could be used with ref forwarding like:
 
@@ -241,13 +243,13 @@ It could be used with ref forwarding like:
 const SomeRefForwardingComponent = React.forwardRef((props, forwardedRef) => {
   const [gesture, setGesture] = React.useState(null);
   // We pass `forwardedRef` (which _must_ be a ref object)
-  // via the `ref` option to `useWheelGesture`.
+  // via the `ref` option to `useTouchGesture`.
   // Note that a callback ref will _not_ be returned.
-  // Note also that `useWheelGesture` won't be notified if the ref's
+  // Note also that `useTouchGesture` won't be notified if the ref's
   // current value has changed, so it is up to this component
   // (or a parent component) to rerender whenever that happens.
   // In this example, we `useRefCallback` to solve this.
-  useWheelGesture(forwardedRef, setGesture);
+  useTouchGesture(forwardedRef, setGesture);
   const [, setRef] = useRefCallback(null, forwardedRef);
   return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
 });
@@ -260,13 +262,13 @@ const SomeRefUsingComponent = () => {
   const [gesture, setGesture] = React.useState(null);
   // Create our own ref to use.
   const ref = React.useRef(null);
-  // We pass our own ref via the `ref` option to `useWheelGesture`.
+  // We pass our own ref via the `ref` option to `useTouchGesture`.
   // Note that a callback ref will _not_ be returned.
-  // Note also that `useWheelGesture` won't be notified if the ref's
+  // Note also that `useTouchGesture` won't be notified if the ref's
   // current value has changed, so it is up to this component
   // to rerender whenever that happens. In this example,
   // we `useRefCallback` to solve this.
-  useWheelGesture(ref, setGesture);
+  useTouchGesture(ref, setGesture);
   const [, setRef] = useRefCallback(null, ref);
   return <div ref={setRef}>{JSON.stringify(gesture, null, 2)}</div>;
 };
@@ -286,9 +288,11 @@ const SomeRefUsingComponent = () => {
 [state]: #state
 [example]: #example
 [shared ref / ref forwarding]: #shared-ref--ref-forwarding
-[usewheelgesture]: #usage
-[wheelgesturechangehandler]: #wheelgesturechangehandler
-[wheelgesturehandlers]: #wheelgesturehandlers
-[wheelgestureconfig]: #wheelgestureconfig
-[wheelgesturestate]: #wheelgesturestate
-[wheelgestureendstate]: #wheelgestureendstate
+[touch emulation]: https://developers.google.com/web/tools/chrome-devtools/device-mode/
+[usetouchgesture]: #usage
+[touchgesturechangehandler]: #touchgesturechangehandler
+[touchgesturehandlers]: #touchgesturehandlers
+[touchgestureconfig]: #touchgestureconfig
+[touchgesturestate]: #touchgesturestate
+[touchgestureendstate]: #touchgestureendstate
+[react-use-gesture]: https://use-gesture.netlify.app/
