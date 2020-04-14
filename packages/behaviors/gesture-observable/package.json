@@ -1,5 +1,6 @@
 {
   "name": "@hzdg/gesture-observable",
+  "description": "An Observable for gestures",
   "version": "2.1.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
