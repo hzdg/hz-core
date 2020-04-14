@@ -1,5 +1,6 @@
 {
   "name": "@hzdg/page-gesture",
+  "description": "A React component and hook that can interpret gestures as 'next', 'previous', 'first', or 'last' pagination events",
   "version": "2.0.12",
   "main": "cjs/index.js",
   "module": "es/index.js",
