@@ -11,7 +11,8 @@
       "noPrivate": true,
       "ignoreChanges": ["**/*.md", "**/*.mdx", "**/__tests__/**/*"],
       "allowBranch": ["master"],
-      "message": "🔖 publish"
+      "message": "🔖 publish",
+      "registry": "https://npm.pkg.github.com"
     },
     "init": {
       "exact": true
