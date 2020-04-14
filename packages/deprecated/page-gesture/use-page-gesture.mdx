@@ -1,6 +1,6 @@
 ---
 name: usePageGesture
-menu: Hooks
+menu: Deprecated
 route: /use-page-gesture
 ---
 
@@ -16,6 +16,13 @@ import {
 import {useGesture} from '@hzdg/gesture-catcher';
 import useSize from '@hzdg/use-size';
 import {useSpring, animated, config as springConfig} from 'react-spring';
+
+> **DEPRECATED**
+> This package is no longer being maintained as part of hz-core.
+>
+> Possible alternatives:
+>  - [@hzdg/use-key-press] for binding to keyboard inputs
+>  - [react-use-gesture] with [swipe] detection for binding to gestures
 
 # usePageGesture
 
@@ -522,3 +529,6 @@ A vertical example using [gesture] detection and [react-spring] transitions.
 [keygesturelike]: #keygesturelike
 [horizontalgesturelike]: #horizontalgesturelike
 [verticalgesturelike]: #verticalgesturelike
+[react-use-gesture]: https://use-gesture.netlify.app/
+[swipe]: https://use-gesture.netlify.app/docs/state#swipe-drag-only
+[@hzdg/usekeypress]: /use-key-press

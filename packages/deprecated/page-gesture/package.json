@@ -1,18 +1,19 @@
 {
   "name": "@hzdg/page-gesture",
-  "description": "A React component and hook that can interpret gestures as 'next', 'previous', 'first', or 'last' pagination events",
+  "description": "DEPRECATED: A React component and hook that can interpret gestures as 'next', 'previous', 'first', or 'last' pagination events",
   "version": "2.0.12",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",
   "license": "MIT",
+  "private": true,
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/hzdg/hz-core.git",
-    "directory": "packages/behaviors/page-gesture"
+    "directory": "packages/deprecated/page-gesture"
   },
   "files": [
     "cjs",
