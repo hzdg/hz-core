@@ -24,12 +24,6 @@
     "test-publish": "yarn build && ./node_modules/.bin/test-publish",
     "test-publish-debug": "yarn build && node --inspect-brk ./node_modules/.bin/test-publish"
   },
-  "husky": {
-    "hooks": {
-      "prepare-commit-msg": "commit-template",
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
-    }
-  },
   "publishConfig": {
     "access": "restricted",
     "registry": "https://npm.pkg.github.com/"
