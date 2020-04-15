@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/commitizen-config",
   "version": "1.0.4",
-  "description": "The hzdg commitizen confg",
+  "description": "The hzdg commitizen config",
   "license": "MIT",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
@@ -12,9 +12,9 @@
     "directory": "packages/conventional-commits/commitizen-config"
   },
   "author": "Eric Eldredge <lettertwo@gmail.com>",
-  "private": true,
   "main": "index.js",
   "dependencies": {
+    "@babel/runtime": "^7.4.3",
     "@hzdg/gitmoji": "^1.0.3",
     "@lerna/project": "^3.0.0",
     "cli-truncate": "^1.1.0",
@@ -23,5 +23,8 @@
     "inquirer-autocomplete-prompt": "^1.0.1",
     "pad": "^2.2.1",
     "wrap-ansi": "^3.0.1"
+  },
+  "peerDependencies": {
+    "commitizen": "^4.0.4"
   }
 }

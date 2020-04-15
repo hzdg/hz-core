@@ -6,6 +6,11 @@
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
   },
+  "config": {
+    "tests": {
+      "dependencies": false
+    }
+  },
   "repository": {
     "type": "git",
     "url": "ssh://git@github.com/hzdg/hz-core.git",
