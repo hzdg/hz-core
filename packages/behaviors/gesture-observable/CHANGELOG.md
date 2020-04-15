@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.1.3 (2020-04-15)
+
+
+### @hzdg/gesture-observable
+
+* add description ([568487a](https://github.com/hzdg/hz-core/commit/568487a))
+
+* strip hzcore- prefix from package directories ([6aafd85](https://github.com/hzdg/hz-core/commit/6aafd85))
+
+
 ## [2.1.2](https://github.com/hzdg/hz-core/compare/@hzcore/gesture-observable@2.1.1...@hzcore/gesture-observable@2.1.2) (2020-02-26)
 
 **Note:** Version bump only for package @hzcore/gesture-observable

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.0.3 (2020-04-15)
+
+
+### @hzdg/use-size
+
+* rename to use-size ([7a76aaa](https://github.com/hzdg/hz-core/commit/7a76aaa))
+
+
 ## [4.0.2](https://github.com/hzdg/hz-core/compare/@hzcore/hook-size@4.0.1...@hzcore/hook-size@4.0.2) (2020-02-10)
 
 **Note:** Version bump only for package @hzcore/hook-size

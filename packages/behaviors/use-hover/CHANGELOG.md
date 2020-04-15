@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.6 (2020-04-15)
+
+
+### @hzdg/use-hover
+
+* add description ([08e62c5](https://github.com/hzdg/hz-core/commit/08e62c5))
+* rename to use-hover ([d0757f4](https://github.com/hzdg/hz-core/commit/d0757f4))
+
+
 ## [0.0.5](https://github.com/hzdg/hz-core/compare/@hzcore/hook-hover@0.0.4...@hzcore/hook-hover@0.0.5) (2020-02-10)
 
 

@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/commitizen-config",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The hzdg commitizen confg",
   "license": "MIT",
   "publishConfig": {
@@ -15,7 +15,7 @@
   "private": true,
   "main": "index.js",
   "dependencies": {
-    "@hzdg/gitmoji": "^1.0.2",
+    "@hzdg/gitmoji": "^1.0.3",
     "@lerna/project": "^3.0.0",
     "cli-truncate": "^1.1.0",
     "fuse.js": "^3.2.1",

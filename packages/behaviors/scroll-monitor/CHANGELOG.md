@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.0.4 (2020-04-15)
+
+
+### @hzdg/use-size
+
+* rename to use-size ([7a76aaa](https://github.com/hzdg/hz-core/commit/7a76aaa))
+
+### @hzdg/use-ref-callback
+
+* rename hook-ref-callback use-ref-callback ([71eec99](https://github.com/hzdg/hz-core/commit/71eec99))
+
+* strip hzcore- prefix from package directories ([6aafd85](https://github.com/hzdg/hz-core/commit/6aafd85))
+
+
 ## [4.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/scroll-monitor@4.0.2...@hzcore/scroll-monitor@4.0.3) (2020-02-10)
 
 

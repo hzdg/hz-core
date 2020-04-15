@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.0.2 (2020-04-15)
+
+
+### @hzdg/use-throttled-callback
+
+* rename to use-throttled-callback ([7a2f739](https://github.com/hzdg/hz-core/commit/7a2f739))
+
+
 ## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-throttled-callback@1.0.0...@hzcore/hook-throttled-callback@1.0.1) (2020-02-14)
 
 **Note:** Version bump only for package @hzcore/hook-throttled-callback

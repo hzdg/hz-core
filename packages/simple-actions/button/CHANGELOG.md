@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.3 (2020-04-15)
+
+
+* strip hzcore- prefix from package directories ([6aafd85](https://github.com/hzdg/hz-core/commit/6aafd85))
+
+
 ## 0.0.2 (2019-04-19)
 
 

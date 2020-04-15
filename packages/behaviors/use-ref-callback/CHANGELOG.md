@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.0.1 (2020-04-15)
+
+
+### @hzdg/use-ref-callback
+
+* rename hook-ref-callback use-ref-callback ([71eec99](https://github.com/hzdg/hz-core/commit/71eec99))
+
+
 # [2.0.0](https://github.com/hzdg/hz-core/compare/@hzcore/hook-ref-callback@1.0.4...@hzcore/hook-ref-callback@2.0.0) (2019-10-29)
 
 

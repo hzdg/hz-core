@@ -1,7 +1,7 @@
 {
   "name": "testutils",
   "description": "Utilities for testing hzcore packages",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "src/index.ts",
   "license": "UNLISCENSED",
   "private": true,

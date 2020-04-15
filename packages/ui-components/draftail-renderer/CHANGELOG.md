@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.4.3 (2020-04-15)
+
+
+### @hzdg/draftail-renderer
+
+* add description ([00e0093](https://github.com/hzdg/hz-core/commit/00e0093))
+
+* strip hzcore- prefix from package directories ([6aafd85](https://github.com/hzdg/hz-core/commit/6aafd85))
+
+
 ## [1.4.2](https://github.com/hzdg/hz-core/compare/@hzcore/draftail-renderer@1.4.1...@hzcore/draftail-renderer@1.4.2) (2020-03-16)
 
 

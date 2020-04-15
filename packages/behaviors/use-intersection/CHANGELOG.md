@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.0.2 (2020-04-15)
+
+
+### @hzdg/use-intersection
+
+* rename to use-intersection ([202c80c](https://github.com/hzdg/hz-core/commit/202c80c))
+
+
 ## [2.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-intersection@2.0.0...@hzcore/hook-intersection@2.0.1) (2019-10-29)
 
 

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.0.2 (2020-04-15)
+
+
+### @hzdg/windowsize-monitor
+
+* add description ([963409c](https://github.com/hzdg/hz-core/commit/963409c))
+
+* strip hzcore- prefix from package directories ([6aafd85](https://github.com/hzdg/hz-core/commit/6aafd85))
+
+
 ## [2.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/windowsize-monitor@2.0.0...@hzcore/windowsize-monitor@2.0.1) (2020-02-10)
 
 

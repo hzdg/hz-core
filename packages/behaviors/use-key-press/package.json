@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/use-key-press",
   "description": "A React hook for components that care about keyboard input",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.ts",
@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzdg/use-value-object": "^1.0.2",
+    "@hzdg/use-value-object": "^1.0.3",
     "tiny-warning": "^1.0.3"
   }
 }

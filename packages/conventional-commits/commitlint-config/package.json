@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/commitlint-config",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "The hzdg commitlint confg",
   "license": "MIT",
   "publishConfig": {
@@ -16,7 +16,7 @@
   "author": "Eric Eldredge <lettertwo@gmail.com>",
   "dependencies": {
     "@commitlint/config-conventional": "^7.0.1",
-    "@hzdg/conventional-changelog": "^1.1.0",
-    "@hzdg/gitmoji": "^1.0.2"
+    "@hzdg/conventional-changelog": "^1.2.0",
+    "@hzdg/gitmoji": "^1.0.3"
   }
 }

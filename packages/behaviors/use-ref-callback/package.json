@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/use-ref-callback",
   "description": "A React hook for components that need to know when a ref changes.",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",

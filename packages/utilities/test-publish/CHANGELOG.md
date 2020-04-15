@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/hzdg/hz-core/compare/test-publish@1.0.6...test-publish@1.1.0) (2020-04-15)
+
+
+### test-publish
+
+* export testPublish ([e4b976a](https://github.com/hzdg/hz-core/commit/e4b976a))
+
+* remote @ts-ignores; add missing types ([b7bf48c](https://github.com/hzdg/hz-core/commit/b7bf48c))
+* namespace under @hzdg ([b1b92f3](https://github.com/hzdg/hz-core/commit/b1b92f3))
+
+
 ## [1.0.6](https://github.com/hzdg/hz-core/compare/test-publish@1.0.5...test-publish@1.0.6) (2019-11-08)
 
 

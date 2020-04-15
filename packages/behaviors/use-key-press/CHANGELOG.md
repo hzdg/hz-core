@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.0.4 (2020-04-15)
+
+
+### @hzdg/use-key-press
+
+* rename to use-key-press ([688e7e6](https://github.com/hzdg/hz-core/commit/688e7e6))
+
+
 ## [1.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/hook-key-press@1.0.2...@hzcore/hook-key-press@1.0.3) (2020-03-12)
 
 
