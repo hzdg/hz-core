@@ -30,7 +30,6 @@ describe('${name}', () => {
   test('can be loaded as a module', () => {
     const module = require('${name}');
     expect(module).toBeDefined();
-    expect(module.default).toBeDefined();
     expect(Object.keys(module)).toBeDefined();
   });
 });
