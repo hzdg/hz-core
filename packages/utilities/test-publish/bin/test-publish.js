@@ -10,9 +10,7 @@ const rmdir = promisify(require('rimraf'));
 const mkdirp = promisify(require('mkdirp'));
 const stoppable = require('stoppable');
 const yargs = require('yargs');
-// @ts-ignore
 const report = require('yurnalist');
-// @ts-ignore
 const {default: verdaccio} = require('verdaccio');
 
 const writeFile = promisify(fs.writeFile);
@@ -20,6 +18,11 @@ const readFile = promisify(fs.readFile);
 const stat = promisify(fs.stat);
 const readdir = promisify(fs.readdir);
 const rm = promisify(fs.unlink);
+
+/**
+ * @template T
+ * @typedef {{[K in keyof T]: T[K] extends string ? K : never}[keyof T]} StringFields
+ */
 
 /**
  * @typedef {Object} Pkg
@@ -61,7 +64,7 @@ const verdaccioConfig = {
   port: 4873, // default
   web: {
     enable: true,
-    title: `hzcore-dev`,
+    title: `hzdg-dev`,
   },
   logs: [{type: `stdout`, format: `pretty-timestamped`, level: `warn`}],
   packages: {
@@ -278,8 +281,7 @@ async function startRegistry() {
       verdaccioConfig.port,
       verdaccioConfig.storage,
       `1.0.0`,
-      `hzcore-dev`,
-      // @ts-ignore
+      `hzdg-dev`,
       (webServer, addr) => {
         webServer.listen(addr.port || addr.path, addr.host, () => {
           const registryUrl = `http://${addr.host}:${addr.port}`;
@@ -303,7 +305,7 @@ async function startRegistry() {
  */
 async function createTemporaryNPMRC({location}, registry) {
   const NPMRCPath = path.join(location, `.npmrc`);
-  const NPMRC = `${registry.replace(/https?:/g, ``)}/:_authToken="hzcore-dev"`;
+  const NPMRC = `${registry.replace(/https?:/g, ``)}/:_authToken="hzdg-dev"`;
   await writeFile(NPMRCPath, NPMRC);
   return async () => {
     await rm(NPMRCPath);
@@ -354,11 +356,11 @@ async function collectProjectFiles(pkgs, root) {
       }
       for (const pkg of pkgs) {
         const filepath = templateFilename
-          .replace(TemplatePattern, (pattern, match) =>
-            // @ts-ignore
-            match ? pkg[match] : pattern,
-          )
-          .replace('@hzcore/', '')
+          .replace(TemplatePattern, (
+            pattern,
+            /** @type {StringFields<Pkg>} */ match,
+          ) => (match ? pkg[match] : pattern))
+          .replace('@hzdg/', '')
           .replace(ExtPattern, '$1');
         projectFiles[root ? path.join(root, filepath) : filepath] = template(
           pkg,
@@ -442,7 +444,7 @@ async function publishPkgs(pkgs, registry) {
           '--loglevel=silent',
           '--no-progress',
           '--tag',
-          'hzcore-dev',
+          'hzdg-dev',
           `--registry=${registry}`,
         ],
         {cwd: pkg.location},
@@ -470,12 +472,12 @@ async function publishPkgs(pkgs, registry) {
  * @returns {Promise<Project>}
  */
 async function installPublishedPkgs(pkgs, registry) {
-  const packagePath = path.join(os.tmpdir(), 'hzcore', 'test');
+  const packagePath = path.join(os.tmpdir(), 'hzdg', 'test');
   const cleanup = await createTestProject(packagePath, pkgs);
   /** @type Set<string> */
   const pkgsToInstall = new Set();
   for (const pkg of pkgs) {
-    pkgsToInstall.add(`${pkg.name}@hzcore-dev`);
+    pkgsToInstall.add(`${pkg.name}@hzdg-dev`);
     for (const dep in pkg.peerDependencies) {
       pkgsToInstall.add(`${dep}@${pkg.peerDependencies[dep]}`);
     }
@@ -575,9 +577,9 @@ async function testPublish(options) {
   return pkgsToPublish;
 }
 
+exports.testPublish = testPublish;
 // If this is module is being run as a script,
 // then invoke the testPublish function.
-// @ts-ignore
 if (typeof require !== 'undefined' && require.main === module) {
   const options = yargs
     .usage(

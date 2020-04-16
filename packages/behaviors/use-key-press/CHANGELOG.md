@@ -1,0 +1,47 @@
+# Change Log
+
+All notable changes to this project will be documented in this file.
+See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+
+## 1.0.4 (2020-04-15)
+
+
+### @hzdg/use-key-press
+
+* rename to use-key-press ([688e7e6](https://github.com/hzdg/hz-core/commit/688e7e6))
+
+
+## [1.0.3](https://github.com/hzdg/hz-core/compare/@hzcore/hook-key-press@1.0.2...@hzcore/hook-key-press@1.0.3) (2020-03-12)
+
+
+### @hzcore/hook-key-press
+
+* export KePress{Handler,State} types ([7fdf98e](https://github.com/hzdg/hz-core/commit/7fdf98e))
+
+
+## [1.0.2](https://github.com/hzdg/hz-core/compare/@hzcore/hook-key-press@1.0.1...@hzcore/hook-key-press@1.0.2) (2020-02-24)
+
+
+### @hzcore/hook-key-press
+
+* export handler types ([bcc7d6e](https://github.com/hzdg/hz-core/commit/bcc7d6e))
+
+
+## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzcore/hook-key-press@1.0.0...@hzcore/hook-key-press@1.0.1) (2020-02-24)
+
+
+### @hzcore/hook-key-press
+
+* fix typings ([2d54675](https://github.com/hzdg/hz-core/commit/2d54675))
+
+
+# 1.0.0 (2020-02-24)
+
+
+### @hzcore/hook-key-press
+
+* add tests and update implementation to match ([0a6a0c1](https://github.com/hzdg/hz-core/commit/0a6a0c1))
+* add initial implementation, docs ([1611518](https://github.com/hzdg/hz-core/commit/1611518))
+* add warning about accidental `{...bind}` ([ba57fb5](https://github.com/hzdg/hz-core/commit/ba57fb5))
+* remove empty code block ([9aea21e](https://github.com/hzdg/hz-core/commit/9aea21e))
+* prep for publishing ([d7d2f6e](https://github.com/hzdg/hz-core/commit/d7d2f6e))

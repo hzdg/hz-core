@@ -1,0 +1,31 @@
+{
+  "name": "@hzdg/use-hover",
+  "description": "A React hook for hover/focus events",
+  "version": "0.0.6",
+  "author": "Andrey Morozov",
+  "license": "MIT",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/behaviors/use-hover"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "!*/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.3"
+  }
+}

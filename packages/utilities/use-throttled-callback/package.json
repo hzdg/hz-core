@@ -1,0 +1,33 @@
+{
+  "name": "@hzdg/use-throttled-callback",
+  "description": "A React hook for components that want to throttle a callback",
+  "version": "1.0.2",
+  "main": "cjs/index.js",
+  "module": "es/index.js",
+  "typings": "src/index.tsx",
+  "license": "MIT",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/use-throttled-callback"
+  },
+  "files": [
+    "cjs",
+    "es",
+    "src",
+    "types",
+    "!**/examples",
+    "!**/__test*"
+  ],
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.4.4",
+    "@hzdg/use-debounced-callback": "^1.0.2",
+    "@hzdg/use-value-object": "^1.0.3"
+  }
+}

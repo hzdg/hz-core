@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const emojiTypes = require('@hzcore/gitmoji');
+const emojiTypes = require('@hzdg/gitmoji');
 
 const parserOpts = {
   headerPattern: /^([^(\s]*)(?: \(([\w$./@\-* ]*)\))? (.*)$/,

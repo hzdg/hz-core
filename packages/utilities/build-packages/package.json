@@ -1,12 +1,17 @@
 {
   "name": "build-packages",
-  "description": "Build @hzcore- packages",
-  "version": "2.0.1",
+  "description": "Build @hzdg packages",
+  "version": "2.0.2",
   "bin": "bin/build-packages.js",
   "license": "UNLICENSED",
   "private": true,
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/build-packages"
   },
   "dependencies": {
     "@babel/core": "^7.8.6",

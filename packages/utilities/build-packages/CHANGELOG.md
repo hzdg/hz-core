@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.2](https://github.com/hzdg/hz-core/compare/build-packages@2.0.1...build-packages@2.0.2) (2020-04-15)
+
+
+* remote @ts-ignores; add missing types ([b7bf48c](https://github.com/hzdg/hz-core/commit/b7bf48c))
+* namespace under @hzdg ([b1b92f3](https://github.com/hzdg/hz-core/commit/b1b92f3))
+
+
 ## [2.0.1](https://github.com/hzdg/hz-core/compare/build-packages@2.0.0...build-packages@2.0.1) (2020-03-12)
 
 

@@ -75,9 +75,9 @@ Some examples:
 
 `🚨 squash linting errors`
 
-`➕ (@hzcore/scroll-monitor) add react-dom@^16.3.1`
+`➕ (@hzdg/scroll-monitor) add react-dom@^16.3.1`
 
-`🐛 (@hzcore/scroll-monitor) fix wheel delta and velocity`
+`🐛 (@hzdg/scroll-monitor) fix wheel delta and velocity`
 
 ## How to Create a New Package
 
@@ -98,20 +98,25 @@ the following conventions:
     see [Creating a New Package Type](#creating-a-new-package-type).
 -   The package directory name should be `dash-case`.
 -   The package name (in `package.json`) should be `dash-case`.
--   if it will be namespaced under `@hzcore`:
-    -   the package directory should be named `hzcore-<package-name>`.
-    -   the package name should be namespaced `@hzcore/<package-name>`.
+-   The package name should be namespaced `@hzdg/<package-name>`.
 -   if the package exports a React Component, its name should be the
-    `dash-case` version of the `ComponentName`, i.e., `hzcore-component-name`.
+    `dash-case` version of the `ComponentName`, i.e., `component-name`.
 -   if the package exports a React hook, its name should be the `dash-case`
-    version of the `useThisHook`, with `use` replaced with `hook-`,
-    i.e. `hzcore-hook-this-hook`
+    version of the `useThisHook`, i.e. `use-this-hook`
 -   The package should include a `CHANGELOG.md`
 -   The package registry should be defined in `package.json` as:
     ```json
     "publishConfig": {
-      "registry": "http://npmregistry.hzdg.com"
-    }
+      "registry": "https://npm.pkg.github.com/"
+    },
+    ```
+-   The package repository should be defined in `package.json` as:
+    ```json
+    "repository": {
+      "type": "git",
+      "url": "ssh://git@github.com/hzdg/hz-core.git",
+      "directory": "packages/<type>/<package-name>"
+    },
     ```
 
 ### Creating a New Package Type

@@ -1,17 +1,22 @@
 {
-  "name": "@hzcore/commitlint-config",
-  "version": "1.0.2",
-  "description": "The hzcore commitlint confg",
+  "name": "@hzdg/commitlint-config",
+  "version": "1.0.3",
+  "description": "The hzdg commitlint confg",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/conventional-commits/commitlint-config"
   },
   "private": true,
   "main": "index.js",
   "author": "Eric Eldredge <lettertwo@gmail.com>",
   "dependencies": {
     "@commitlint/config-conventional": "^7.0.1",
-    "@hzcore/conventional-changelog": "^1.1.0",
-    "@hzcore/gitmoji": "^1.0.2"
+    "@hzdg/conventional-changelog": "^1.2.0",
+    "@hzdg/gitmoji": "^1.0.3"
   }
 }

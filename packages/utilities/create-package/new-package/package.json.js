@@ -3,10 +3,11 @@
 /**
  * @param {Object} options
  * @param {string} options.name
+ * @param {string} options.type
  */
 const PACKAGE_JSON = options => `
 {
-  "name": "@hzcore/${options.name}",
+  "name": "@hzdg/${options.name}",
   "version": "0.0.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
@@ -14,7 +15,12 @@ const PACKAGE_JSON = options => `
   "license": "MIT",
   "private": true,
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository" : {
+    "type" : "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/${options.type}/${options.name}"
   },
   "files": [
     "cjs",

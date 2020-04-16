@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.1.2](https://github.com/hzdg/hz-core/compare/gesture-visualizer@1.1.1...gesture-visualizer@1.1.2) (2020-04-15)
+
+
+### @hzdg/use-size
+
+* rename to use-size ([7a76aaa](https://github.com/hzdg/hz-core/commit/7a76aaa))
+
+### @hzdg/use-ref-callback
+
+* rename hook-ref-callback use-ref-callback ([71eec99](https://github.com/hzdg/hz-core/commit/71eec99))
+
+* namespace under @hzdg ([b1b92f3](https://github.com/hzdg/hz-core/commit/b1b92f3))
+
+
 ## [1.1.1](https://github.com/hzdg/hz-core/compare/gesture-visualizer@1.1.0...gesture-visualizer@1.1.1) (2020-02-26)
 
 **Note:** Version bump only for package gesture-visualizer

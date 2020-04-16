@@ -1,10 +1,15 @@
 {
-  "name": "@hzcore/gitmoji",
-  "version": "1.0.2",
+  "name": "@hzdg/gitmoji",
+  "version": "1.0.3",
   "description": "Emoji data for git commits",
   "license": "MIT",
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/conventional-commits/gitmoji"
   },
   "private": true,
   "main": "gitmoji.json",

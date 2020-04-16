@@ -6,13 +6,9 @@ const fs = require('fs');
 const dashify = require('dashify');
 const Fuse = require('fuse.js');
 const inquirer = require('inquirer');
-// @ts-ignore
 const report = require('yurnalist');
-// @ts-ignore
 const autocompletePrompt = require('inquirer-autocomplete-prompt');
-// @ts-ignore
 const validatePackageName = require('validate-npm-package-name');
-// @ts-ignore
 const isVarName = require('is-var-name');
 
 const stat = promisify(fs.stat);
@@ -24,11 +20,8 @@ const PROJECT_ROOT = process.cwd();
 const PACKAGES = path.resolve(PROJECT_ROOT, 'packages');
 
 /**
- * @typedef {Object} PackageValidationResult
- * @property {boolean} validForNewPackages
- * @property {boolean} validForOldPackages
- * @property {string[]} [errors]
- * @property {string[]} [warnings]
+ * @template T
+ * @typedef {{[K in keyof T]: T[K] extends string ? K : never}[keyof T]} StringFields
  */
 
 /**
@@ -81,7 +74,7 @@ const FUSE_OPTIONS = {
  * @returns {Promise<string>}
  */
 async function createPackageDir(options) {
-  const dirname = `${options.type}/hzcore-${options.name}`;
+  const dirname = `${options.type}/${options.name}`;
   await mkdirp(path.resolve(PACKAGES, dirname));
   return dirname;
 }
@@ -120,10 +113,10 @@ async function collectPackageFiles(options, root) {
       const template = require(templatePath);
       if (typeof template !== 'function') continue;
       const filepath = templateFilename
-        .replace(/%([^%]+)%/g, (pattern, match) =>
-          // @ts-ignore
-          match ? options[match] : pattern,
-        )
+        .replace(/%([^%]+)%/g, (
+          pattern,
+          /** @type {StringFields<options>} */ match,
+        ) => (match ? options[match] : pattern))
         .replace(/(\.[^.]+)(?:\.js)?$/, '$1');
 
       packageFiles.push({
@@ -213,11 +206,10 @@ function validateName(value, type) {
   if (/_/.test(value)) {
     return 'dash-case only, please!';
   }
-  if (fs.existsSync(path.resolve(PACKAGES, type, `hzcore-${value}`))) {
-    return `${type}/hzcore-${value} already exists!`;
+  if (fs.existsSync(path.resolve(PACKAGES, type, `${value}`))) {
+    return `${type}/${value} already exists!`;
   }
-  /** @type PackageValidationResult */
-  const result = validatePackageName(`@hzcore/${value}`);
+  const result = validatePackageName(`@hzdg/${value}`);
   if (!result.validForNewPackages) {
     if (result.errors && result.errors.length) {
       return result.errors[0];
@@ -252,7 +244,7 @@ function isReactHookName(name) {
 async function promptForOptions() {
   inquirer.registerPrompt('autocomplete', autocompletePrompt);
 
-  let {type} = await inquirer.prompt([
+  const {type} = await inquirer.prompt([
     autocomplete({
       name: 'type',
       message: 'Select the type of package you want to create:',
@@ -292,11 +284,7 @@ async function promptForOptions() {
       name: 'name',
       message: 'Name your new package (dash-case):',
       validate: name => validateName(name, type),
-      transformer: name => `hzcore-${name}`,
-      default: () =>
-        isReactHookName(main)
-          ? `hook-${dashify(main.replace(/use/, ''))}`
-          : dashify(main),
+      default: () => dashify(main),
     },
   ]);
 
@@ -324,15 +312,16 @@ async function promptForOptions() {
     },
   ]);
 
-  // @ts-ignore
   return {name, type, main, isDefault, isReact, menu, route};
 }
 
 // If this is module is being run as a script,
 // collect options from the user,
 // then invoke the createPackage function.
-// @ts-ignore
-if (typeof require !== 'undefined' && require.main === module) {
+if (
+  typeof require !== 'undefined' &&
+  require.main === /** @type {unknown} */ (module)
+) {
   promptForOptions()
     .then(createPackage)
     .then(result => {

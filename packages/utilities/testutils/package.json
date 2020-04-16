@@ -1,12 +1,17 @@
 {
   "name": "testutils",
   "description": "Utilities for testing hzcore packages",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "main": "src/index.ts",
   "license": "UNLISCENSED",
   "private": true,
   "publishConfig": {
-    "registry": "http://npmregistry.hzdg.com"
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/utilities/testutils"
   },
   "files": [
     "**/*.{js,jsx,ts,tsx}",
