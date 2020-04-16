@@ -1,5 +1,10 @@
 /* eslint-env jest, node */
-import {packages, hasDependencyOfAnyType, collectOtherVersions} from './setup';
+import {
+  packages,
+  isExempt,
+  hasDependencyOfAnyType,
+  collectOtherVersions,
+} from './setup';
 
 describe.each(packages)('%s', (name, pkg) => {
   describe('dependencies', () => {
@@ -8,9 +13,11 @@ describe.each(packages)('%s', (name, pkg) => {
       ${'@babel/runtime'} | ${true}
       ${'@prop-types'}    | ${false}
     `('$dependency', ({dependency, required}) => {
-      // Only test this dependency if it is required
-      // or if it appears to be defined.
-      const shouldTest = required || hasDependencyOfAnyType(dependency, pkg);
+      // Only test this dependency if it is not exempted
+      // and it is required or appears to be defined.
+      const shouldTest =
+        !isExempt(dependency, pkg) &&
+        (required || hasDependencyOfAnyType(dependency, pkg));
 
       if (shouldTest) {
         const dependencyRange =
@@ -42,9 +49,11 @@ describe.each(packages)('%s', (name, pkg) => {
       ${'react'}     | ${false}
       ${'react-dom'} | ${false}
     `('$dependency', ({dependency, required}) => {
-      // Only test this dependency if it is required
-      // or if it appears to be defined.
-      const shouldTest = required || hasDependencyOfAnyType(dependency, pkg);
+      // Only test this dependency if it is not exempted
+      // and it is required or appears to be defined.
+      const shouldTest =
+        !isExempt(dependency, pkg) &&
+        (required || hasDependencyOfAnyType(dependency, pkg));
 
       if (shouldTest) {
         const dependencyRange =

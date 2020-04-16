@@ -79,6 +79,11 @@ export type Pkg = {[key in DependencyType]: Record<string, string>} & {
   publishConfig: {
     registry: 'https://npm.pkg.github.com/';
   };
+  config?: {
+    tests?: {
+      dependencies?: boolean | {[packageName: string]: boolean};
+    };
+  };
   main: string;
 };
 
@@ -87,6 +92,29 @@ export const hasDependencyOfAnyType = (dependency: string, pkg: Pkg): boolean =>
   Boolean(pkg.devDependencies && dependency in pkg.devDependencies) ||
   Boolean(pkg.peerDependencies && dependency in pkg.peerDependencies) ||
   Boolean(pkg.optionalDependencies && dependency in pkg.optionalDependencies);
+
+/**
+ * Check if the given `pkg` is configured to skip tests
+ * for the given `dependency`.
+ *
+ * The `pkg` can be configured as such in its `package.json` by
+ * adding a `tests` config, like:
+ *
+ *    {
+ *      ... // other `package.json` entries
+ *      config: {
+ *        tests: {
+ *          // `false` exempts all dependencies from tests for this package.
+ *          dependencies: false // or {dependencyName: false}
+ *        }
+ *      }
+ *    }
+ */
+export const isExempt = (dependency: string, pkg: Pkg): boolean => {
+  const deps = pkg.config && pkg.config.tests && pkg.config.tests.dependencies;
+  if (typeof deps === 'object') return deps[dependency] === false;
+  return deps === false;
+};
 
 // Collect a list of yarn/lerna workspaces.
 let workspaces: Workspace[] = JSON.parse(
@@ -166,13 +194,72 @@ function createMatcherError(
   );
 }
 
+function printDiff(
+  this: jest.MatcherUtils,
+  key: DependencyType,
+  expected: string,
+  received: Pkg,
+): string {
+  const {diff, printExpected, printReceived} = this.utils;
+  const expectedDeps = {[expected]: expect.any(String)};
+  const difference = diff(
+    {[key]: {...received[key], ...expectedDeps}},
+    {[key]: received[key]},
+    {expand: this.expand},
+  );
+  return difference && difference.includes('- Expect')
+    ? `Difference:\n\n${difference}`
+    : `Expected: ${printExpected(expectedDeps)}\n` +
+        `Received: ${printReceived(received[key])}`;
+}
+
+function configSuggestion(
+  this: jest.MatcherUtils,
+  dependency: string,
+  pkg: Pkg,
+): string {
+  const {isNot, utils} = this;
+  const {diff, EXPECTED_COLOR, RECEIVED_COLOR} = utils;
+  const difference = diff(
+    JSON.stringify(pkg, null, 2),
+    JSON.stringify(
+      {
+        ...pkg,
+        config: {
+          ...pkg.config,
+          tests: {
+            ...(pkg.config ? pkg.config.tests : null),
+            [dependency]: false,
+          },
+        },
+      },
+      null,
+      2,
+    ),
+    {
+      includeChangeCounts: false,
+      omitAnnotationLines: true,
+      bColor: EXPECTED_COLOR,
+      aColor: RECEIVED_COLOR,
+      expand: true,
+    },
+  );
+  return (
+    `If you know ${RECEIVED_COLOR(pkg.name)} ` +
+    `${isNot ? 'needs' : 'does not need'} ${EXPECTED_COLOR(dependency)},\n` +
+    'you may exempt it from testing by configuring the test\n' +
+    `in its package.json, like:\n\n` +
+    difference
+  );
+}
+
 function toHaveDependencyOfType(
   this: jest.MatcherUtils,
   received: Pkg,
   expected: string,
   type?: 'dev' | 'peer' | 'optional',
 ): {actual: Pkg; pass: boolean; message: () => string} {
-  const {matcherHint, printExpected, printReceived, diff} = this.utils;
+  const {matcherHint} = this.utils;
   let matcherName:
     | 'toHaveDevDependency'
     | 'toHavePeerDependency'
@@ -215,31 +302,14 @@ function toHaveDependencyOfType(
     });
   }
 
-  const expectedDeps = {[expected]: expect.any(String)};
-
   const pass = typeof (received[key] || {})[expected] === 'string';
 
-  const message = pass
-    ? () =>
-        matcherHint(matcherName) +
-        '\n\n' +
-        `Expected: ${printExpected(expectedDeps)}\n` +
-        `Received: ${printReceived(received[key])}`
-    : () => {
-        const difference = diff(
-          {[key]: expectedDeps},
-          {[key]: received[key]},
-          {expand: this.expand},
-        );
-        return (
-          matcherHint(matcherName) +
-          '\n\n' +
-          (difference && difference.includes('- Expect')
-            ? `Difference:\n\n${difference}`
-            : `Expected: ${printExpected(expectedDeps)}\n` +
-              `Received: ${printReceived(received[key])}`)
-        );
-      };
+  const message = () =>
+    matcherHint(matcherName, undefined, undefined, {isNot: this.isNot}) +
+    '\n\n' +
+    printDiff.call(this, key, expected, received) +
+    '\n\n' +
+    configSuggestion.call(this, expected, received);
 
   return {actual: received, message, pass};
 }
