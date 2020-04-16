@@ -1262,6 +1262,17 @@
   resolved "https://registry.yarnpkg.com/@hutson/parse-repository-url/-/parse-repository-url-3.0.2.tgz#98c23c950a3d9b6c8f0daed06da6c3af06981340"
   integrity sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==
 
+"@hzdg/gesture-catcher@^4.2.1":
+  version "4.2.1"
+  resolved "https://npm.pkg.github.com/download/@hzdg/gesture-catcher/4.2.1/8de201fb25aaa66c85327b6033c7309fc77feacf36c6f39a2e7632eec164d69b#1e91504101f518a4beae8d86f341575ecf93d638"
+  integrity sha512-ckwWcSi3OZJ2L8MzQa3BkUxJh3msFOc2o5nlyHmYog5OfIEbBPesmTo+KFqV1plUs5tu/QhqpEvZwMn1r9yApA==
+  dependencies:
+    "@babel/runtime" "^7.4.4"
+    "@hzdg/gesture-observable" "^2.1.2"
+    "@hzdg/moving-average" "^1.1.0"
+    "@hzdg/use-ref-callback" "^2.0.0"
+    prop-types "15.x.x"
+
 "@istanbuljs/load-nyc-config@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@istanbuljs/load-nyc-config/-/load-nyc-config-1.0.0.tgz#10602de5570baea82f8afbfa2630b24e7a8cfe5b"
