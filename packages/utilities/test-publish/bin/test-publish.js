@@ -43,7 +43,7 @@ const rm = promisify(fs.unlink);
  * @property {{[name: string]: string}} dependencies
  * @property {{[name: string]: string}} devDependencies
  * @property {{[name: string]: string}} peerDependencies
- * @property {{registry: string}} publishConfig
+ * @property {{[registry: string]: string, registry: string}} publishConfig
  */
 
 /**
@@ -319,7 +319,7 @@ async function createTemporaryNPMRC({location}, registry) {
  */
 async function updatePackageRegistry(pkg, registry) {
   const pkgJson = await readPackageJson(pkg);
-  pkgJson.publishConfig = {registry};
+  pkgJson.publishConfig = {registry, ['@hzdg:registry']: registry};
   return writePackageJson(pkg, pkgJson);
 }
 
@@ -383,13 +383,19 @@ async function collectProjectFiles(pkgs, root) {
  *
  * @param {string} packagePath
  * @param {Pkg[]} pkgs
+ * @param {string} registry
  * @returns {Promise<() => Promise<void>>}
  */
-async function createTestProject(packagePath, pkgs) {
+async function createTestProject(packagePath, pkgs, registry) {
   const spinner = report.activity();
   spinner.tick(`creating test project`);
   await rmdir(packagePath);
   await mkdirp(packagePath);
+
+  await writeFile(
+    path.join(packagePath, '.npmrc'),
+    `@hzdg:registry="${registry}"`,
+  );
 
   try {
     const projectFiles = await collectProjectFiles(pkgs);
@@ -439,14 +445,7 @@ async function publishPkgs(pkgs, registry) {
       await updatePackageRegistry(pkg, registry);
       await run(
         'npm',
-        [
-          'publish',
-          '--loglevel=silent',
-          '--no-progress',
-          '--tag',
-          'hzdg-dev',
-          `--registry=${registry}`,
-        ],
+        ['publish', '--quiet', '--no-progress', '--tag', 'hzdg-dev'],
         {cwd: pkg.location},
       );
       publishedPkgs.push(pkg);
@@ -473,7 +472,7 @@ async function publishPkgs(pkgs, registry) {
  */
 async function installPublishedPkgs(pkgs, registry) {
   const packagePath = path.join(os.tmpdir(), 'hzdg', 'test');
-  const cleanup = await createTestProject(packagePath, pkgs);
+  const cleanup = await createTestProject(packagePath, pkgs, registry);
   /** @type Set<string> */
   const pkgsToInstall = new Set();
   for (const pkg of pkgs) {
@@ -491,7 +490,6 @@ async function installPublishedPkgs(pkgs, registry) {
         ...Array.from(pkgsToInstall),
         '--no-progress',
         '--non-interactive',
-        `--registry=${registry}`,
         '--exact',
       ],
       {cwd: packagePath},
