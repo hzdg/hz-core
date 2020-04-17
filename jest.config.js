@@ -28,6 +28,12 @@ module.exports = {
   // This option sets the URL for the jsdom environment. It is reflected in properties such as location.href
   testURL: 'http://localhost',
 
+  // An array of regexp pattern strings that are matched against all test paths before executing the test.
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/packages/deprecated/',
+  ],
+
   // An array of RegExp patterns that are matched against all source file paths before re-running tests in watch mode.
   watchPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/\\..*'],
 
