@@ -107,7 +107,8 @@ the following conventions:
 -   The package registry should be defined in `package.json` as:
     ```json
     "publishConfig": {
-      "registry": "https://npm.pkg.github.com/"
+      "registry": "https://npm.pkg.github.com/",
+      "@hzdg:registry": "https://npm.pkg.github.com/"
     },
     ```
 -   The package repository should be defined in `package.json` as:

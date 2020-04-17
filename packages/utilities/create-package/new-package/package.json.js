@@ -15,7 +15,8 @@ const PACKAGE_JSON = options => `
   "license": "MIT",
   "private": true,
   "publishConfig": {
-    "registry": "https://npm.pkg.github.com/"
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
   },
   "repository" : {
     "type" : "git",

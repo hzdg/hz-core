@@ -78,6 +78,7 @@ export type Pkg = {[key in DependencyType]: Record<string, string>} & {
   license: string;
   publishConfig: {
     registry: 'https://npm.pkg.github.com/';
+    ['@hzdg:registry']: 'https://npm.pkg.github.com/';
   };
   config?: {
     tests?: {
