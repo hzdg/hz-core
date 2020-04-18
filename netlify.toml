@@ -1,0 +1,8 @@
+[build]
+  base = "./"
+  publish = ".docz/dist"
+  command = "yarn build-packages && ./node_modules/.bin/docz build"
+
+[dev]
+  base = "./"
+  publish = ".docz/dist"
