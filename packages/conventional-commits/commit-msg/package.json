@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/commit-msg",
-  "version": "1.0.0-alpha.1",
+  "version": "1.0.0",
   "description": "The hzdg prepare-commit-msg git hook template",
   "license": "MIT",
   "publishConfig": {
