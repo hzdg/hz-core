@@ -8,6 +8,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
+    "preinstall": "node ./scripts/netlify-preinstall.js",
     "build": "./node_modules/.bin/lerna bootstrap --loglevel=error && yarn build-packages",
     "build-docz": "yarn build && ./node_modules/.bin/docz build",
     "build-packages": "./node_modules/.bin/build-packages",
