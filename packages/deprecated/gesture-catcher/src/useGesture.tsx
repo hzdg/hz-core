@@ -81,7 +81,7 @@ export type GestureConfig = MouseGestureConfig &
  * This hook is a 'merge' of the separate input-specific gesture hooks,
  * `useMouseGesture`, `useWheelGesture`, `useTouchGesture`, `useKeyboardGesture`.
  *
- * @see https://hz-core.netlify.com/use-gesture
+ * @see https://hz-core.netlify.app/use-gesture
  */
 function useGesture<T extends HTMLElement>(
   /**

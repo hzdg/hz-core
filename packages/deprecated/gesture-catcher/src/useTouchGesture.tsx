@@ -44,7 +44,7 @@ export type TouchGestureHandler =
  * `useTouchGesture` is a React hook for components that want to handle
  * touch gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-touch-gesture
+ * @see https://hz-core.netlify.app/use-touch-gesture
  */
 function useTouchGesture<T extends HTMLElement>(
   /**
@@ -67,7 +67,7 @@ function useTouchGesture<T extends HTMLElement>(
  * `useTouchGesture` is a React hook for components that want to handle
  * touch gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-touch-gesture
+ * @see https://hz-core.netlify.app/use-touch-gesture
  */
 function useTouchGesture<T extends HTMLElement>(
   /**

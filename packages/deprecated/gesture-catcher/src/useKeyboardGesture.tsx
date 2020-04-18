@@ -44,7 +44,7 @@ export type KeyboardGestureHandler =
  * `useKeyboardGesture` is a React hook for components that want to handle
  * keyboard gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-keyboard-gesture
+ * @see https://hz-core.netlify.app/use-keyboard-gesture
  */
 function useKeyboardGesture<T extends HTMLElement>(
   /**
@@ -67,7 +67,7 @@ function useKeyboardGesture<T extends HTMLElement>(
  * `useKeyboardGesture` is a React hook for components that want to handle
  * keyboard gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-keyboard-gesture
+ * @see https://hz-core.netlify.app/use-keyboard-gesture
  */
 function useKeyboardGesture<T extends HTMLElement>(
   /**

@@ -72,7 +72,7 @@ function useWindowSizeOptions({
  * `useWindowSize` is a React hook for components that care about
  * the window size. It can be used statefully or not.
  *
- * @see https://hz-core.netlify.com/use-windowsize
+ * @see https://hz-core.netlify.app/use-windowsize
  */
 function useWindowSize(
   /**
@@ -89,7 +89,7 @@ function useWindowSize(
  * `useWindowSize` is a React hook for components that care about
  * the window size. It can be used statefully or not.
  *
- * @see https://hz-core.netlify.com/use-windowsize
+ * @see https://hz-core.netlify.app/use-windowsize
  */
 function useWindowSize(
   /**

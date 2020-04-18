@@ -234,13 +234,13 @@ so all you should need to do to publish is a simple `git push`.
 [components]: https://reactjs.org/docs/components-and-props.html
 [render props]: https://reactjs.org/docs/render-props.html
 [hooks]: https://reactjs.org/docs/hooks-intro.html
-[docs]: https://hz-core.netlify.com/
+[docs]: https://hz-core.netlify.app/
 [lerna]: https://github.com/lerna/lerna
 [docz]: https://www.docz.site/
 [typescript]: https://www.typescriptlang.org/
 [yarn]: https://yarnpkg.com/en/
 [semver]: https://semver.org
-[netlify]: https://app.netlify.com/sites/hz-core/overview
+[netlify]: https://app.netlify.app/sites/hz-core/overview
 [ci]: https://circleci.com/gh/hzdg/hz-core
 [issues]: https://github.com/hzdg/hz-core/issues
 [jest]: https://jestjs.io/

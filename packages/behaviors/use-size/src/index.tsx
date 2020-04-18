@@ -229,7 +229,7 @@ function useSubscription(
  * `useSize` is a React hook for components that care about their size.
  * It can be used statefully or not, and with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-size
+ * @see https://hz-core.netlify.app/use-size
  */
 function useSize<T extends HTMLElement>(
   /**

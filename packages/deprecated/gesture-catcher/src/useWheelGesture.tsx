@@ -44,7 +44,7 @@ export type WheelGestureHandler =
  * `useWheelGesture` is a React hook for components that want to handle
  * wheel gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-wheel-gesture
+ * @see https://hz-core.netlify.app/use-wheel-gesture
  */
 function useWheelGesture<T extends HTMLElement>(
   /**
@@ -67,7 +67,7 @@ function useWheelGesture<T extends HTMLElement>(
  * `useWheelGesture` is a React hook for components that want to handle
  * wheel gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-wheel-gesture
+ * @see https://hz-core.netlify.app/use-wheel-gesture
  */
 function useWheelGesture<T extends HTMLElement>(
   /**

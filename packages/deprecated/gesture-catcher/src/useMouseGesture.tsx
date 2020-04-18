@@ -44,7 +44,7 @@ export type MouseGestureHandler =
  * `useMouseGesture` is a React hook for components that want to handle
  * mouse gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-mouse-gesture
+ * @see https://hz-core.netlify.app/use-mouse-gesture
  */
 function useMouseGesture<T extends HTMLElement>(
   /**
@@ -67,7 +67,7 @@ function useMouseGesture<T extends HTMLElement>(
  * `useMouseGesture` is a React hook for components that want to handle
  * mouse gesture intent. It can be used with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-mouse-gesture
+ * @see https://hz-core.netlify.app/use-mouse-gesture
  */
 function useMouseGesture<T extends HTMLElement>(
   /**

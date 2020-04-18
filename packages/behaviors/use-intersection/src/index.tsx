@@ -39,7 +39,7 @@ export interface IntersectionHandler {
    * each time the observed element's intersection with the ancestor element
    * or viewport changes.
    *
-   * @see https://hz-core.netlify.com/use-intersection#state
+   * @see https://hz-core.netlify.app/use-intersection#state
    */
   (entry: IntersectionObserverEntry): void;
 }
@@ -49,14 +49,14 @@ export interface IntersectionHandler {
  * their interesction with an ancestor element or with the viewport.
  * It can be used statefully or not, and with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-intersection
+ * @see https://hz-core.netlify.app/use-intersection
  */
 function useIntersection<T extends HTMLElement>(
   /**
    * An existing ref being passed to the DOM element to measure.
    * Useful for ref forwarding or sharing.
    *
-   * @see https://hz-core.netlify.com/use-intersection#shared-ref--ref-forwarding
+   * @see https://hz-core.netlify.app/use-intersection#shared-ref--ref-forwarding
    */
   providedRef: React.RefObject<T>,
   /**
@@ -64,13 +64,13 @@ function useIntersection<T extends HTMLElement>(
    * the observed element's intersection with the ancestor element
    * or viewport changes.
    *
-   * @see https://hz-core.netlify.com/use-intersection#state
+   * @see https://hz-core.netlify.app/use-intersection#state
    */
   handler: IntersectionHandler,
   /**
    * Optional configuration for the intersection observer.
    *
-   * @see https://hz-core.netlify.com/use-intersection#config
+   * @see https://hz-core.netlify.app/use-intersection#config
    */
   config?: IntersectionObserverInit,
 ): void;
@@ -79,20 +79,20 @@ function useIntersection<T extends HTMLElement>(
  * their interesction with an ancestor element or with the viewport.
  * It can be used statefully or not, and with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-intersection
+ * @see https://hz-core.netlify.app/use-intersection
  */
 function useIntersection<T extends HTMLElement>(
   /**
    * An existing ref being passed to the DOM element to measure.
    * Useful for ref forwarding or sharing.
    *
-   * @see https://hz-core.netlify.com/use-intersection#shared-ref--ref-forwarding
+   * @see https://hz-core.netlify.app/use-intersection#shared-ref--ref-forwarding
    */
   providedRef: React.RefObject<T>,
   /**
    * Optional configuration for the intersection observer.
    *
-   * @see https://hz-core.netlify.com/use-intersection#config
+   * @see https://hz-core.netlify.app/use-intersection#config
    */
   config?: IntersectionObserverInit,
 ): boolean;
@@ -101,7 +101,7 @@ function useIntersection<T extends HTMLElement>(
  * their interesction with an ancestor element or with the viewport.
  * It can be used statefully or not, and with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-intersection
+ * @see https://hz-core.netlify.app/use-intersection
  */
 function useIntersection<T extends HTMLElement>(
   /**
@@ -109,13 +109,13 @@ function useIntersection<T extends HTMLElement>(
    * the observed element's intersection with the ancestor element
    * or viewport changes.
    *
-   * @see https://hz-core.netlify.com/use-intersection#state
+   * @see https://hz-core.netlify.app/use-intersection#state
    */
   handler: IntersectionHandler,
   /**
    * Optional configuration for the intersection observer.
    *
-   * @see https://hz-core.netlify.com/use-intersection#config
+   * @see https://hz-core.netlify.app/use-intersection#config
    */
   config?: IntersectionObserverInit,
 ): (node: T | null) => void;
@@ -124,13 +124,13 @@ function useIntersection<T extends HTMLElement>(
  * their interesction with an ancestor element or with the viewport.
  * It can be used statefully or not, and with an existing ref or not.
  *
- * @see https://hz-core.netlify.com/use-intersection
+ * @see https://hz-core.netlify.app/use-intersection
  */
 function useIntersection<T extends HTMLElement>(
   /**
    * Optional configuration for the intersection observer.
    *
-   * @see https://hz-core.netlify.com/use-intersection#config
+   * @see https://hz-core.netlify.app/use-intersection#config
    */
   config?: IntersectionObserverInit,
 ): [boolean, (node: T | null) => void];
