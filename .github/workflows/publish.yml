@@ -20,6 +20,11 @@ jobs:
       - name: Add node modules bin to system path
         run: echo "::add-path::./node_modules/.bin"
 
+      - name: Configure CI Git User
+        run: |
+          git config --global user.name 'leeroy-jenkins'
+          git config --global user.email 'webmaster@hzdg.com'
+
       - name: Get Yarn cache directory path
         id: yarn-cache-dir-path
         run: echo "::set-output name=dir::$(yarn cache dir)"
