@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/use-value-object",
   "description": "A React hook for components that want to memoize shallowly equal values",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.4.4 (2020-04-18)
+
+
+* add netlify-preinstall script ([8b87c66](https://github.com/hzdg/hz-core/commit/8b87c66))
+
+
 ## 1.4.3 (2020-04-15)
 
 

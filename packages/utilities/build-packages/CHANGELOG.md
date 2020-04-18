@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.0.3 (2020-04-18)
+
+
+* add netlify-preinstall script ([8b87c66](https://github.com/hzdg/hz-core/commit/8b87c66))
+
+
 ## [2.0.2](https://github.com/hzdg/hz-core/compare/build-packages@2.0.1...build-packages@2.0.2) (2020-04-15)
 
 

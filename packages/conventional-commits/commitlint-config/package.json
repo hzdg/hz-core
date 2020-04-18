@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/commitlint-config",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "The hzdg commitlint confg",
   "license": "MIT",
   "publishConfig": {
@@ -17,7 +17,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.3",
     "@commitlint/config-conventional": "^8.3.4",
-    "@hzdg/conventional-changelog": "^1.2.0",
-    "@hzdg/gitmoji": "^1.0.3"
+    "@hzdg/conventional-changelog": "^1.2.1",
+    "@hzdg/gitmoji": "^1.0.4"
   }
 }

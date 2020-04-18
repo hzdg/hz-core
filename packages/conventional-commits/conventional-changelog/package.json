@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/conventional-changelog",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "The hzdg conventional changelog preset",
   "license": "MIT",
   "publishConfig": {
@@ -16,6 +16,6 @@
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzdg/gitmoji": "^1.0.3"
+    "@hzdg/gitmoji": "^1.0.4"
   }
 }
