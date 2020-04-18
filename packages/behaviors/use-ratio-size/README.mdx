@@ -49,10 +49,10 @@ function MyContainer = () => {
       const [playerSize] = useRatioSize();
 
       return (
-        <>
+        <React.Fragment>
           <p>A 16:9 container size to fill current viewport:</p>
           <p>width: {playerSize.width} height: {playerSize.height}</p>
-        </>
+        </React.Fragment>
       );
     }
     return <MyContainer />;
@@ -112,7 +112,7 @@ function MyContainer = () => {
       const getParentRef = () => parentRef;
       const [playerSize] = useRatioSize({options: {containerRef: getParentRef}});
       return (
-        <>
+        <React.Fragment>
           <p>Ratio: 16:9<br />Parent Container: 200 x 200  (orange box)</p>
           <p>calculated width: {playerSize.width},<br />
           height: {playerSize.height} (dotted blue box)</p>
@@ -143,7 +143,7 @@ function MyContainer = () => {
               />
             </div>
           </section>
-        </>
+        </React.Fragment>
       );
     }
     return <MyContainer />;
