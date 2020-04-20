@@ -17,6 +17,7 @@ module.exports = {
     'Styled Components',
     'Utilities',
     'UI Components',
+    'Conventional Commits',
     'Deprecated',
   ],
   htmlContext: {
