@@ -138,13 +138,30 @@ module.exports = {
         },
         {
           type: 'input',
-          name: 'issues',
-          message: 'List any issue closed (#1, ...):',
+          name: 'body',
+          message:
+            'Provide a longer description of the change: (press enter to skip)\n',
+        },
+        {
+          type: 'confirm',
+          name: 'isIssueAffected',
+          message: 'Does this change affect any open issues?',
+          default: false,
         },
         {
           type: 'input',
-          name: 'body',
-          message: 'Provide a longer description:',
+          name: 'issuesBody',
+          default: '-',
+          message:
+            'If issues are closed, the commit requires a body. Please enter a longer description of the commit itself:\n',
+          when: answers =>
+            answers.isIssueAffected && !answers.body && !answers.breakingBody,
+        },
+        {
+          type: 'input',
+          name: 'issues',
+          message: 'Add issue references (e.g. "fix #123", "re #123".):\n',
+          when: answers => answers.isIssueAffected,
         },
       ])
       .then(format)
