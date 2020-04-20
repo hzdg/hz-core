@@ -16,6 +16,11 @@ const config = require('commitizen').configLoader.load();
  */
 
 const options = {
+  defaultType: process.env.CZ_TYPE || config.defaultType,
+  defaultScope: process.env.CZ_SCOPE || config.defaultScope,
+  defaultSubject: process.env.CZ_SUBJECT || config.defaultSubject,
+  defaultBody: process.env.CZ_BODY || config.defaultBody,
+  defaultIssues: process.env.CZ_ISSUES || config.defaultIssues,
   maxHeaderWidth:
     (process.env.CZ_MAX_HEADER_WIDTH &&
       parseInt(process.env.CZ_MAX_HEADER_WIDTH)) ||
@@ -151,12 +156,14 @@ module.exports = {
           name: 'type',
           message: "Select the type of change you're committing:",
           choices: getTypeChoices(),
+          default: options.defaultType,
           keys: ['name'],
         }),
         autocomplete({
           name: 'scope',
           message: 'Specify a scope:',
           choices: getScopeChoices(),
+          default: options.defaultScope,
           keys: ['name'],
         }),
         {
@@ -169,6 +176,7 @@ module.exports = {
               ' chars):\n'
             );
           },
+          default: options.defaultSubject,
           validate: function(subject, answers) {
             const filteredSubject = filterSubject(subject);
             return filteredSubject.length == 0
@@ -226,7 +234,7 @@ module.exports = {
           type: 'confirm',
           name: 'isIssueAffected',
           message: 'Does this change affect any open issues?',
-          default: false,
+          default: options.defaultIssues ? true : false,
         },
         {
           type: 'input',
@@ -242,6 +250,7 @@ module.exports = {
           name: 'issues',
           message: 'Add issue references (e.g. "fix #123", "re #123".):\n',
           when: answers => answers.isIssueAffected,
+          default: options.defaultIssues ? options.defaultIssues : undefined,
         },
       ])
       .then(format)
