@@ -1,5 +1,4 @@
 const path = require('path');
-const truncate = require('cli-truncate');
 const wrap = require('wrap-ansi');
 const pad = require('pad');
 const fuzzy = require('fuzzy');
@@ -9,18 +8,46 @@ const autocompletePrompt = require('inquirer-autocomplete-prompt');
 const emojis = require('@hzdg/gitmoji');
 const project = require('@lerna/project');
 
+const config = require('commitizen').configLoader.load();
+
 /**
  * This commitizen config is based on https://github.com/ngryman/cz-emoji
+ * and https://github.com/commitizen/cz-conventional-changelog
  */
 
-const FUSE_OPTIONS = {
-  shouldSort: true,
-  threshold: 0.4,
-  location: 0,
-  distance: 100,
-  maxPatternLength: 32,
-  minMatchCharLength: 1,
+const options = {
+  maxHeaderWidth:
+    (process.env.CZ_MAX_HEADER_WIDTH &&
+      parseInt(process.env.CZ_MAX_HEADER_WIDTH)) ||
+    config.maxHeaderWidth ||
+    100,
+  maxLineWidth:
+    (process.env.CZ_MAX_LINE_WIDTH &&
+      parseInt(process.env.CZ_MAX_LINE_WIDTH)) ||
+    config.maxLineWidth ||
+    100,
 };
+
+(function(options) {
+  try {
+    const commitlintLoad = require('@commitlint/load');
+    commitlintLoad().then(function(clConfig) {
+      if (clConfig.rules) {
+        const maxHeaderLengthRule = clConfig.rules['header-max-length'];
+        if (
+          typeof maxHeaderLengthRule === 'object' &&
+          maxHeaderLengthRule.length >= 3 &&
+          !process.env.CZ_MAX_HEADER_WIDTH &&
+          !config.maxHeaderWidth
+        ) {
+          options.maxHeaderWidth = maxHeaderLengthRule[2];
+        }
+      }
+    });
+  } catch (err) {
+    /** BOOP! */
+  }
+})(options);
 
 function autocomplete({name, message, choices, keys}) {
   const options = {
@@ -69,16 +96,22 @@ async function getScopeChoices() {
 }
 
 function format({type, scope, subject, issues, body}) {
+  const wrapOptions = {
+    trim: true,
+    cut: false,
+    newline: '\n',
+    indent: '',
+    width: options.maxLineWidth,
+  };
   // parentheses are only needed when a scope is present
   scope = scope ? (scope.trim() ? `(${scope.trim()}) ` : '') : '';
   // build head line and limit it to 100
-  const head = truncate(`${type} ${scope}${subject.trim()}`, 100);
-  // wrap body at 100
-  body = wrap(body, 100);
-  const footer = (issues.match(/#\d+/g) || [])
-    .map(issue => `Closes ${issue}`)
-    .join('\n');
-  return [head, body, footer].join('\n\n').trim();
+  const head = `${type} ${scope}${subject.trim()}`;
+  // wrap body at `options.maxLineWidth`
+  body = body ? wrap(body, wrapOptions) : false;
+  // wrap issues at `options.maxLineWidth`
+  issues = issues ? wrap(issues, wrapOptions) : false;
+  return [head, body, issues].filter(v => v).join('\n\n');
 }
 
 module.exports = {
