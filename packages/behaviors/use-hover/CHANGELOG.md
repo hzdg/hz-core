@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.8 (2020-04-20)
+
+
+### @hzdg/commitizen-config
+
+* fix defaults when no config exists at all ([c31252e](https://github.com/hzdg/hz-core/commit/c31252e))
+
+
 ## 0.0.7 (2020-04-18)
 
 

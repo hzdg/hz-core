@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/use-debounced-callback",
   "description": "A React hook for components that want to debounce a callback",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -27,6 +27,6 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzdg/use-value-object": "^1.0.4"
+    "@hzdg/use-value-object": "^1.0.5"
   }
 }

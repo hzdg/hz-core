@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/commit-msg",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The hzdg prepare-commit-msg git hook template",
   "license": "MIT",
   "publishConfig": {
@@ -21,7 +21,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzdg/gitmoji": "^1.0.4",
+    "@hzdg/gitmoji": "^1.0.5",
     "@lerna/project": "^3.0.0",
     "yargs": "^13.2.2"
   }

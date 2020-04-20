@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/focus-scope",
   "description": "Components and hooks for managing focus in React apps",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -29,8 +29,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzdg/dom-utils": "^1.0.3",
-    "@hzdg/use-key-press": "^1.0.5",
+    "@hzdg/dom-utils": "^1.0.4",
+    "@hzdg/use-key-press": "^1.0.6",
     "tiny-warning": "^1.0.3"
   }
 }

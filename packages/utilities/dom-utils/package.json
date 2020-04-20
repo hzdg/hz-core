@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/dom-utils",
   "description:": "Helpers for interacting with the DOM.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
