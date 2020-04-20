@@ -143,10 +143,16 @@ created by doing the following:
 
 ## How to Publish
 
-We use [Lerna] to manage our packages, which helps make publishing easier.
+We use [Lerna] and a [GitHub Action] that will automatically detect changes,
+version, and publish to [GitHub Packages], so publishing is a simple as `git push`.
+
 Still, it can be daunting to try to cut a release without knowing if it is
 going to work. To embolden us, hzcore has a [smoke test] to check if the new
 package versions are likely to publish successfully.
+
+> **NOTE:** This smoke test is also run as part of the GitHub Publish workflow,
+> So if it fails there, new versions won't be published. For peace-of-mind,
+> it is a good idea to run it locally _before_ pushing to master.
 
 ### Publish 'smoke tests'
 
@@ -191,9 +197,9 @@ See [lerna changed] and [lerna version] for more.
 
 ### Publishing
 
-All you should really need to do is run `lerna publish`, but there's a
-decent chance it will fail, due to our private repository setup and other
-idosyncracies with how lerna and NPM registries interact.
+As noted above, all you should really need to do to publish new package
+versions is `git push` to master. However, it is also possible to publish
+manually by running `lerna publish`.
 
 If the versioning step succeeds (or if you ran `lerna version` separately),
 but `lerna publish` fails, you can try running `npm publish` in each package.
@@ -226,7 +232,7 @@ We use [Docz] to view all components. Check out their info on
 
 ### Publishing docs
 
-[Docs] are published to [Netlify] automatically via [CI],
+[Docs] are built and published to [Netlify] automatically via [Netlify Build],
 so all you should need to do to publish is a simple `git push`.
 
 [hz]: https://hzdg.com
@@ -240,8 +246,7 @@ so all you should need to do to publish is a simple `git push`.
 [typescript]: https://www.typescriptlang.org/
 [yarn]: https://yarnpkg.com/en/
 [semver]: https://semver.org
-[netlify]: https://app.netlify.app/sites/hz-core/overview
-[ci]: https://circleci.com/gh/hzdg/hz-core
+[netlify]: https://app.netlify.com/sites/hz-core/overview
 [issues]: https://github.com/hzdg/hz-core/issues
 [jest]: https://jestjs.io/
 [conventional commits]: https://www.conventionalcommits.org/
@@ -254,3 +259,6 @@ so all you should need to do to publish is a simple `git push`.
 [lerna changed]: https://github.com/lerna/lerna/tree/master/commands/changed#readme
 [lerna version]: https://github.com/lerna/lerna/tree/master/commands/version#readme
 [lerna publish]: https://github.com/lerna/lerna/tree/master/commands/publish#readme
+[github action]: https://github.com/hzdg/hz-core/actions?query=workflow%3APublish
+[github packages]: https://github.com/hzdg/hz-core/packages
+[netlify build]: https://app.netlify.com/sites/hz-core/deploys
