@@ -95,7 +95,7 @@ async function getScopeChoices() {
   ];
 }
 
-function format({type, scope, subject, issues, body}) {
+function format({type, scope, subject, issues, body, breaking}) {
   const wrapOptions = {
     trim: true,
     cut: false,
@@ -109,9 +109,15 @@ function format({type, scope, subject, issues, body}) {
   const head = `${type} ${scope}${subject.trim()}`;
   // wrap body at `options.maxLineWidth`
   body = body ? wrap(body, wrapOptions) : false;
+  // apply breaking change prefix, removing it if already present
+  breaking = breaking ? breaking.trim() : '';
+  breaking = breaking
+    ? `BREAKING CHANGE: ${breaking.replace(/^BREAKING CHANGE: /, '')}`
+    : '';
+  breaking = breaking ? wrap(breaking, wrapOptions) : false;
   // wrap issues at `options.maxLineWidth`
   issues = issues ? wrap(issues, wrapOptions) : false;
-  return [head, body, issues].filter(v => v).join('\n\n');
+  return [head, body, breaking, issues].filter(v => v).join('\n\n');
 }
 
 module.exports = {
@@ -141,6 +147,29 @@ module.exports = {
           name: 'body',
           message:
             'Provide a longer description of the change: (press enter to skip)\n',
+        },
+        {
+          type: 'confirm',
+          name: 'isBreaking',
+          message: 'Are there any breaking changes?',
+          default: false,
+        },
+        {
+          type: 'input',
+          name: 'breakingBody',
+          default: '-',
+          message:
+            'A BREAKING CHANGE commit requires a body. Please enter a longer description of the commit itself:\n',
+          when: answers => answers.isBreaking && !answers.body,
+          validate: breakingBody =>
+            breakingBody.trim().length > 0 ||
+            'Body is required for BREAKING CHANGE',
+        },
+        {
+          type: 'input',
+          name: 'breaking',
+          message: 'Describe the breaking changes:\n',
+          when: answers => answers.isBreaking,
         },
         {
           type: 'confirm',
