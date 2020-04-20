@@ -28,8 +28,8 @@ Open a [new feature request](https://github.com/hzdg/hz-core/issues/new/choose) 
 
 You will need:
 
--   Node 8+
--   Yarn
+- Node 8+
+- Yarn
 
 1. Pull down project from Github
 2. Run `yarn`
@@ -43,10 +43,10 @@ through the magic of [Lerna] and [Yarn] workspaces.
 
 Uses:
 
--   [Lerna]
--   [Docz]
--   [Typescript]
--   [Yarn]
+- [Lerna]
+- [Docz]
+- [Typescript]
+- [Yarn]
 
 ## How to Write a Commit Message
 
@@ -93,32 +93,32 @@ then generate the basic file structure for the package.
 If creating or modifying a package manually, try to adhere to
 the following conventions:
 
--   it should live under `packages/<type>`, where `type` is one of
-    the existing package types. If your package doesn't seem to belong,
-    see [Creating a New Package Type](#creating-a-new-package-type).
--   The package directory name should be `dash-case`.
--   The package name (in `package.json`) should be `dash-case`.
--   The package name should be namespaced `@hzdg/<package-name>`.
--   if the package exports a React Component, its name should be the
-    `dash-case` version of the `ComponentName`, i.e., `component-name`.
--   if the package exports a React hook, its name should be the `dash-case`
-    version of the `useThisHook`, i.e. `use-this-hook`
--   The package should include a `CHANGELOG.md`
--   The package registry should be defined in `package.json` as:
-    ```json
-    "publishConfig": {
-      "registry": "https://npm.pkg.github.com/",
-      "@hzdg:registry": "https://npm.pkg.github.com/"
-    },
-    ```
--   The package repository should be defined in `package.json` as:
-    ```json
-    "repository": {
-      "type": "git",
-      "url": "ssh://git@github.com/hzdg/hz-core.git",
-      "directory": "packages/<type>/<package-name>"
-    },
-    ```
+- it should live under `packages/<type>`, where `type` is one of
+  the existing package types. If your package doesn't seem to belong,
+  see [Creating a New Package Type](#creating-a-new-package-type).
+- The package directory name should be `dash-case`.
+- The package name (in `package.json`) should be `dash-case`.
+- The package name should be namespaced `@hzdg/<package-name>`.
+- if the package exports a React Component, its name should be the
+  `dash-case` version of the `ComponentName`, i.e., `component-name`.
+- if the package exports a React hook, its name should be the `dash-case`
+  version of the `useThisHook`, i.e. `use-this-hook`
+- The package should include a `CHANGELOG.md`
+- The package registry should be defined in `package.json` as:
+  ```json
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/",
+    "@hzdg:registry": "https://npm.pkg.github.com/"
+  },
+  ```
+- The package repository should be defined in `package.json` as:
+  ```json
+  "repository": {
+    "type": "git",
+    "url": "ssh://git@github.com/hzdg/hz-core.git",
+    "directory": "packages/<type>/<package-name>"
+  },
+  ```
 
 ### Creating a New Package Type
 
@@ -126,20 +126,20 @@ If the existing package types (any of the directories under `packages`)
 do not seem to fit the package you would like to add a new type can be
 created by doing the following:
 
--   make a new directory at `packages/<new-type>`, where `new-type`
-    is the dash-case name for the type of packages it will contain.
--   Create a [yarn workspace] in the root `package.json`:
-    ```json
-    "workspaces": [
-      "packages/<new-type>/*",
-    ]
-    ```
--   Create a [lerna package] in the root `lerna.json`:
-    ```json
-    "packages": [
-      "packages/<new-type>/*",
-    ]
-    ```
+- make a new directory at `packages/<new-type>`, where `new-type`
+  is the dash-case name for the type of packages it will contain.
+- Create a [yarn workspace] in the root `package.json`:
+  ```json
+  "workspaces": [
+    "packages/<new-type>/*",
+  ]
+  ```
+- Create a [lerna package] in the root `lerna.json`:
+  ```json
+  "packages": [
+    "packages/<new-type>/*",
+  ]
+  ```
 
 ## How to Publish
 
@@ -202,12 +202,12 @@ See [lerna publish]
 
 ## TODO: How to Write Components
 
--   **Render Props** are a useful technique for components that are used mostly
-    for state management where it does not care about the shape of the children.
-    [Read more about render props here][render props].
-    -   Note: Remember that both `this.props` and `this.state`
-        can share a common variable, so be conscious of which
-        object you pass first into the render prop.
+- **Render Props** are a useful technique for components that are used mostly
+  for state management where it does not care about the shape of the children.
+  [Read more about render props here][render props].
+  - Note: Remember that both `this.props` and `this.state`
+    can share a common variable, so be conscious of which
+    object you pass first into the render prop.
 
 ## TODO: How to Write Tests
 
