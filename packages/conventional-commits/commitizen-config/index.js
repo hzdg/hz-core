@@ -120,6 +120,28 @@ function format({type, scope, subject, issues, body, breaking}) {
   return [head, body, breaking, issues].filter(v => v).join('\n\n');
 }
 
+function filterSubject(subject) {
+  subject = subject.trim();
+  if (subject.charAt(0).toLowerCase() !== subject.charAt(0)) {
+    subject =
+      subject.charAt(0).toLowerCase() + subject.slice(1, subject.length);
+  }
+  while (subject.endsWith('.')) {
+    subject = subject.slice(0, subject.length - 1);
+  }
+  return subject;
+}
+
+function headerLength(answers) {
+  return (
+    answers.type.length + 2 + (answers.scope ? answers.scope.length + 2 : 0)
+  );
+}
+
+function maxSummaryLength(options, answers) {
+  return options.maxHeaderWidth - headerLength(answers);
+}
+
 module.exports = {
   prompter(cz, commit) {
     cz.prompt.registerPrompt('autocomplete', autocompletePrompt);
@@ -140,7 +162,36 @@ module.exports = {
         {
           type: 'input',
           name: 'subject',
-          message: 'Write a short description:',
+          message: function(answers) {
+            return (
+              'Write a short, imperative tense description of the change (max ' +
+              maxSummaryLength(options, answers) +
+              ' chars):\n'
+            );
+          },
+          validate: function(subject, answers) {
+            const filteredSubject = filterSubject(subject);
+            return filteredSubject.length == 0
+              ? 'subject is required'
+              : filteredSubject.length <= maxSummaryLength(options, answers)
+              ? true
+              : 'Subject length must be less than or equal to ' +
+                maxSummaryLength(options, answers) +
+                ' characters. Current length is ' +
+                filteredSubject.length +
+                ' characters.';
+          },
+          transformer: function(subject, answers) {
+            const filteredSubject = filterSubject(subject);
+            const color =
+              filteredSubject.length <= maxSummaryLength(options, answers)
+                ? chalk.green
+                : chalk.red;
+            return color('(' + filteredSubject.length + ') ' + subject);
+          },
+          filter: function(subject) {
+            return filterSubject(subject);
+          },
         },
         {
           type: 'input',
