@@ -2,7 +2,9 @@ const path = require('path');
 const truncate = require('cli-truncate');
 const wrap = require('wrap-ansi');
 const pad = require('pad');
-const Fuse = require('fuse.js');
+const fuzzy = require('fuzzy');
+const chalk = require('chalk');
+const style = require('ansi-styles');
 const autocompletePrompt = require('inquirer-autocomplete-prompt');
 const emojis = require('@hzdg/gitmoji');
 const project = require('@lerna/project');
@@ -21,16 +23,21 @@ const FUSE_OPTIONS = {
 };
 
 function autocomplete({name, message, choices, keys}) {
-  let search;
+  const options = {
+    pre: `${style.yellow.open}${style.bold.open}`,
+    post: `${style.bold.close}${style.yellow.close}`,
+    extract: v => keys.map(k => v[k]).join(''),
+  };
   return {
     type: 'autocomplete',
     name,
     message,
     async source(_, q) {
-      if (!search) {
-        search = new Fuse(await choices, {...FUSE_OPTIONS, keys});
-      }
-      return Promise.resolve(q ? search.search(q) : choices);
+      if (!q) return choices;
+      const results = fuzzy.filter(q, await choices, options);
+      return Promise.resolve(
+        results.map(result => ({...result.original, name: result.string})),
+      );
     },
   };
 }
@@ -83,13 +90,13 @@ module.exports = {
           name: 'type',
           message: "Select the type of change you're committing:",
           choices: getTypeChoices(),
-          keys: ['name', 'code'],
+          keys: ['name'],
         }),
         autocomplete({
           name: 'scope',
           message: 'Specify a scope:',
           choices: getScopeChoices(),
-          keys: ['name', 'location'],
+          keys: ['name'],
         }),
         {
           type: 'input',
