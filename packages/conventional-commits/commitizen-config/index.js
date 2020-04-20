@@ -8,7 +8,7 @@ const autocompletePrompt = require('inquirer-autocomplete-prompt');
 const emojis = require('@hzdg/gitmoji');
 const project = require('@lerna/project');
 
-const config = require('commitizen').configLoader.load();
+const config = require('commitizen').configLoader.load() || {};
 
 /**
  * This commitizen config is based on https://github.com/ngryman/cz-emoji
