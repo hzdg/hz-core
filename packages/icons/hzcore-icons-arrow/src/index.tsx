@@ -1,7 +1,12 @@
 import React from 'react';
 import {useState} from 'react';
 
-export const ThinLeftArrow = ({color, size, hoverColor, horizontalSpacing}) => {
+export const ThinLeftArrow = ({
+  color,
+  size = '35',
+  hoverColor,
+  horizontalSpacing,
+}) => {
   const [isShown, setIsShown] = useState(false);
   const hColor = hoverColor === undefined ? color : hoverColor;
   return (
@@ -28,7 +33,7 @@ export const ThinLeftArrow = ({color, size, hoverColor, horizontalSpacing}) => {
 
 export const ThinRightArrow = ({
   color,
-  size,
+  size = '35',
   hoverColor,
   horizontalSpacing,
 }) => {
@@ -57,7 +62,12 @@ export const ThinRightArrow = ({
   );
 };
 
-export const ThinUpArrow = ({color, size, hoverColor, horizontalSpacing}) => {
+export const ThinUpArrow = ({
+  color,
+  size = '35',
+  hoverColor,
+  horizontalSpacing,
+}) => {
   const [isShown, setIsShown] = useState(false);
   const hColor = hoverColor === undefined ? color : hoverColor;
   return (
@@ -81,7 +91,12 @@ export const ThinUpArrow = ({color, size, hoverColor, horizontalSpacing}) => {
   );
 };
 
-export const ThinDownArrow = ({color, size, hoverColor, horizontalSpacing}) => {
+export const ThinDownArrow = ({
+  color,
+  size = '35',
+  hoverColor,
+  horizontalSpacing,
+}) => {
   const [isShown, setIsShown] = useState(false);
   const hColor = hoverColor === undefined ? color : hoverColor;
   return (
@@ -113,7 +128,7 @@ export const LeftArrow = ({
   color,
   link,
   horizontalSpacing,
-  size,
+  size = '35',
   hoverColor,
 }) => {
   const [isShown, setIsShown] = useState(false);
@@ -150,7 +165,7 @@ export const RightArrow = ({
   color,
   link,
   horizontalSpacing,
-  size,
+  size = '35',
   hoverColor,
 }) => {
   const [isShown, setIsShown] = useState(false);

@@ -10,10 +10,10 @@ interface SocialMediaIconProps {
 }
 
 export const Facebook = ({
-  color,
+  color = 'black',
   hoverColor,
-  link,
-  size,
+  link = 'https://www.facebook.com',
+  size = '75',
   horizontalSpacing = '10px',
 }: SocialMediaIconProps): JSX.Element => {
   const [isShown, setIsShown] = useState(false);
@@ -124,11 +124,11 @@ export const Facebook = ({
 };
 
 export const Instagram = ({
-  color,
+  color = 'black',
   hoverColor,
-  link,
-  size,
-  horizontalSpacing,
+  link = 'https://www.instagram.com',
+  size = '75',
+  horizontalSpacing = '10px',
 }: SocialMediaIconProps): JSX.Element => {
   const [isShown, setIsShown] = useState(false);
   const hColor = hoverColor === undefined ? color : hoverColor;
@@ -178,11 +178,11 @@ export const Instagram = ({
 };
 
 export const Twitter = ({
-  color,
+  color = 'black',
   hoverColor,
-  link,
-  size,
-  horizontalSpacing,
+  link = 'https://www.twitter.com',
+  size = '75',
+  horizontalSpacing = '10px',
 }: SocialMediaIconProps): JSX.Element => {
   const [isShown, setIsShown] = useState(false);
   const hColor = hoverColor === undefined ? color : hoverColor;
@@ -232,11 +232,11 @@ export const Twitter = ({
 };
 
 export const Youtube = ({
-  color,
+  color = 'black',
   hoverColor,
-  link,
-  size,
-  horizontalSpacing,
+  link = 'https://www.youtube.com',
+  size = '75',
+  horizontalSpacing = '10px',
 }: SocialMediaIconProps): JSX.Element => {
   const [isShown, setIsShown] = useState(false);
   const hColor = hoverColor === undefined ? color : hoverColor;

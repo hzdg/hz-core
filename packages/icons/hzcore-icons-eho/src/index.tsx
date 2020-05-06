@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const Eho = ({handicapColor, houseColor}) => {
+export const Eho = ({handicapColor, houseColor, size = '40'}) => {
   return (
     <svg
       version="1.0"
@@ -9,7 +9,7 @@ export const Eho = ({handicapColor, houseColor}) => {
       xmlnsXlink="http://www.w3.org/1999/xlink"
       x="0px"
       y="0px"
-      width="43px"
+      width={size}
       height="21px"
       viewBox="0 0 19.8 9.992"
       enableBackground="new 0 0 19.8 9.992"
