@@ -9,6 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+        with:
+          fetch-depth: '0'
+
+      - name: Fetch all tags
+        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
 
       - uses: actions/setup-node@v1
         env:
@@ -20,10 +25,10 @@ jobs:
       - name: Add node modules bin to system path
         run: echo "::add-path::./node_modules/.bin"
 
-      - name: Configure CI Git User
+      - name: Configure git author
         run: |
-          git config --global user.name 'leeroy-jenkins'
-          git config --global user.email 'webmaster@hzdg.com'
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+          git config user.name "$GITHUB_ACTOR"
 
       - name: Get Yarn cache directory path
         id: yarn-cache-dir-path
