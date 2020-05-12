@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/sectioning",
   "description": "React components for semantic sectioning of HTML content",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",

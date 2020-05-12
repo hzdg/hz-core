@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/use-throttled-callback",
   "description": "A React hook for components that want to throttle a callback",
-  "version": "1.1.0",
+  "version": "1.0.4",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -28,7 +28,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzdg/use-debounced-callback": "^1.1.0",
-    "@hzdg/use-value-object": "^1.1.0"
+    "@hzdg/use-debounced-callback": "^1.0.4",
+    "@hzdg/use-value-object": "^1.0.5"
   }
 }
