@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/draftail-renderer",
   "description": "A React component to render the data coming from the Draftail rich text editor",
-  "version": "1.4.5",
+  "version": "1.5.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",

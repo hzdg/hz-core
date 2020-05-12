@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/use-intersection",
   "description": "A React hook for components that care about interesction with an ancestor element or viewport.",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -24,7 +24,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzdg/use-ref-callback": "^2.0.3",
+    "@hzdg/use-ref-callback": "^2.1.0",
     "intersection-observer": "^0.7.0"
   }
 }

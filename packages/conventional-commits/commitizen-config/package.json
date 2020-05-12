@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/commitizen-config",
-  "version": "1.0.6",
+  "version": "1.1.0",
   "description": "The hzdg commitizen config",
   "license": "MIT",
   "publishConfig": {
@@ -16,7 +16,7 @@
   "main": "index.js",
   "dependencies": {
     "@babel/runtime": "^7.4.3",
-    "@hzdg/gitmoji": "^1.0.5",
+    "@hzdg/gitmoji": "^1.1.0",
     "@lerna/project": "^3.0.0",
     "ansi-styles": "^3.2.1",
     "chalk": "^2.4.2",

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 4.1.0 (2020-05-12)
+
+
+### @hzdg/sectioning
+
+* add sectioning package ([ade51a9](https://github.com/hzdg/hz-core/commit/ade51a9))
+
+
 ## 4.0.6 (2020-04-20)
 
 
