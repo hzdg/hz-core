@@ -23,7 +23,7 @@
     "react-dom": "^16.8.0"
   },
   "dependencies": {
-    "@hzdg/gesture-catcher": "^4.2.1",
+    "@hzdg/gesture-catcher": "^4.2.0",
     "@hzdg/moving-average": "^1.1.3",
     "@hzdg/use-ref-callback": "^2.0.3",
     "@hzdg/use-size": "^4.0.5",

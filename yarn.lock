@@ -1262,14 +1262,14 @@
   resolved "https://registry.yarnpkg.com/@hutson/parse-repository-url/-/parse-repository-url-3.0.2.tgz#98c23c950a3d9b6c8f0daed06da6c3af06981340"
   integrity sha512-H9XAx3hc0BQHY6l+IFSWHDySypcXsvsuLhgYLUGywmJ5pswRVQJUHpOsobnLYp2ZUaUlKiKDrgWWhosOwAEM8Q==
 
-"@hzdg/gesture-catcher@^4.2.1":
-  version "4.2.1"
-  resolved "https://npm.pkg.github.com/download/@hzdg/gesture-catcher/4.2.1/8de201fb25aaa66c85327b6033c7309fc77feacf36c6f39a2e7632eec164d69b#1e91504101f518a4beae8d86f341575ecf93d638"
-  integrity sha512-ckwWcSi3OZJ2L8MzQa3BkUxJh3msFOc2o5nlyHmYog5OfIEbBPesmTo+KFqV1plUs5tu/QhqpEvZwMn1r9yApA==
+"@hzdg/gesture-catcher@^4.2.0":
+  version "4.2.0"
+  resolved "https://npm.pkg.github.com/download/@hzdg/gesture-catcher/4.2.0/ccc260e5fd26e653f4640fea0ff5c3e02b00066c0dae31aafe794e99b7354138#80d79e67084630e987a38596ed46da45d4d2fcb6"
+  integrity sha512-+3Za4cOPa4p/bNypQCUc6fzjaWA3iq5GdQJg+qazKjcZxKsFAGYYn15JXXKhSu9PRcuMb8StmZX0B/gnRhHzbw==
   dependencies:
     "@babel/runtime" "^7.4.4"
-    "@hzdg/gesture-observable" "^2.1.2"
-    "@hzdg/moving-average" "^1.1.0"
+    "@hzdg/gesture-observable" "^2.1.1"
+    "@hzdg/moving-average" "^1.0.1"
     "@hzdg/use-ref-callback" "^2.0.0"
     prop-types "15.x.x"
 
