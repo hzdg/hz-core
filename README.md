@@ -1,12 +1,12 @@
 # HZ Core
 
-[HZ]'s library of [components], [hooks], and utilities for [React]!
+[HZ Core][docs] is [HZ]'s library of [components], [hooks], and utilities for [React]!
 
 ## Usage
 
 What kinda stuff is in here, and how do i use it in my project?
 
-[Read the Docs!][docs]
+[Read the Docs!][docs] (password: dev-1987)
 
 ## Issue Tracking
 
