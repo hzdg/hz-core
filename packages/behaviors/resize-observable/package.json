@@ -24,7 +24,7 @@
   "dependencies": {
     "@babel/runtime": "^7.4.4",
     "@hzdg/dom-utils": "^1.0.4",
-    "@juggle/resize-observer": "^2.4.0",
+    "@juggle/resize-observer": "^3.2.0",
     "zen-observable": "^0.8.14"
   }
 }

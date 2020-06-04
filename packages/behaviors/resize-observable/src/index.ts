@@ -4,9 +4,8 @@
 // may cause user code to fail in unexpected ways.
 // Once the spec is stablized, we should switch to using the native
 // version when available.
-import ResizeObserver from '@juggle/resize-observer';
+import {ResizeObserver, ResizeObserverEntry} from '@juggle/resize-observer';
 import {ResizeObserverSize} from '@juggle/resize-observer/lib/ResizeObserverSize';
-import {ResizeObserverEntry} from '@juggle/resize-observer/lib/ResizeObserverEntry';
 import Observable from 'zen-observable';
 import {ensureDOMInstance} from '@hzdg/dom-utils';
 
@@ -23,7 +22,10 @@ let resizeObserver: ResizeObserver;
 
 function createPayload(entry: ResizeObserverEntry): ResizeObservableSize {
   const {contentBoxSize, borderBoxSize, contentRect} = entry;
-  const payload = Object.assign({contentBoxSize, borderBoxSize}, contentRect);
+  const payload = Object.assign(
+    {contentBoxSize: contentBoxSize[0], borderBoxSize: borderBoxSize[0]},
+    contentRect,
+  );
   const frozenPayload = Object.freeze(
     Object.assign(
       {
