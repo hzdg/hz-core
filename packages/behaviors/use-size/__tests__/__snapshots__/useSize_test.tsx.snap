@@ -181,3 +181,31 @@ Array [
   ],
 ]
 `;
+
+exports[`useSize works on iframed elements 1`] = `
+<div
+  data-testid="size"
+  style="width: 120px; height: 120px;"
+>
+  {
+  "x": 0,
+  "y": 0,
+  "top": 0,
+  "right": 0,
+  "bottom": 0,
+  "left": 0,
+  "width": 0,
+  "height": 0,
+  "vw": 0,
+  "vh": 0,
+  "borderBoxSize": {
+    "blockSize": 0,
+    "inlineSize": 0
+  },
+  "contentBoxSize": {
+    "blockSize": 0,
+    "inlineSize": 0
+  }
+}
+</div>
+`;

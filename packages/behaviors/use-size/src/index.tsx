@@ -129,7 +129,7 @@ function shallowEqual(
   b: Record<string, unknown>,
 ): boolean {
   if (a === b) return true;
-  for (let k in a) {
+  for (const k in a) {
     if (a[k] !== b[k]) {
       return false;
     }

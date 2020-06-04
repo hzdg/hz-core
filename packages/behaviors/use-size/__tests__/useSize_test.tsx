@@ -98,3 +98,20 @@ test('useSize resubscribes to changed refs', () => {
   runAllTimers();
   expect(getByTestId('size')).toMatchSnapshot();
 });
+
+test('useSize works on iframed elements', () => {
+  const iframe = document.createElement('iframe');
+  document.body.appendChild(iframe);
+  const node = (iframe.contentDocument as Document).createElement('div');
+  const SizeUser = (): JSX.Element => {
+    const [size, ref] = useSize<HTMLDivElement>();
+    return (
+      <div ref={ref} style={{width: 120, height: 120}} data-testid="size">
+        {JSON.stringify(size, null, 2)}
+      </div>
+    );
+  };
+  const {getByTestId} = render(<SizeUser />, {container: node});
+  runAllTimers();
+  expect(getByTestId('size')).toMatchSnapshot();
+});
