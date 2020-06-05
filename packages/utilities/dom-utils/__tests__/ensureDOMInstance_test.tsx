@@ -27,5 +27,6 @@ test('ensureDOMInstance passes for node in iframe', () => {
   const iframe = document.createElement('iframe');
   document.body.appendChild(iframe);
   const node = (iframe.contentDocument as Document).createElement('div');
+  expect(node instanceof HTMLDivElement).toBe(false);
   expect(() => ensureDOMInstance(node, HTMLDivElement)).not.toThrow();
 });

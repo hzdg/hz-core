@@ -14,7 +14,7 @@ test('getWindow returns window by default', () => {
 test.each<unknown>([null, false, 0, 1, {}])(
   'getWindow returns null for invalid node `%s`',
   input => {
-    let result = (getWindow as (...args: unknown[]) => null)(input);
+    const result = (getWindow as (...args: unknown[]) => null)(input);
     expect(result).toBeNull();
   },
 );
@@ -34,6 +34,7 @@ test('getWindow returns iframe content window for valid node', () => {
   expect(iframe.contentWindow).not.toBeFalsy();
   const node = (iframe.contentDocument as Document).createElement('div');
   expect(node).not.toBeFalsy();
+  expect(node instanceof Node).toBe(false);
   const result = getWindow(node);
   expect(result).not.toBeFalsy();
   expect(result).not.toBe(window);

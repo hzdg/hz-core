@@ -14,7 +14,7 @@ test('getDocument returns document by default', () => {
 test.each<unknown>([null, false, 0, 1, {}])(
   'getDocument returns null for invalid node `%s`',
   input => {
-    let result = (getDocument as (...args: unknown[]) => null)(input);
+    const result = (getDocument as (...args: unknown[]) => null)(input);
     expect(result).toBeNull();
   },
 );
@@ -33,6 +33,7 @@ test('getDocument returns iframe content document for valid node', () => {
   expect(iframe.contentDocument).not.toBeFalsy();
   const node = (iframe.contentDocument as Document).createElement('div');
   expect(node).not.toBeFalsy();
+  expect(node instanceof Node).toBe(false);
   const result = getDocument(node);
   expect(result).not.toBeFalsy();
   expect(result).not.toBe(document);
