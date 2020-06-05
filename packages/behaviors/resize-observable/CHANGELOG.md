@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.0.4 (2020-06-05)
+
+
+### @hzdg/resize-observable
+
+* upgrade @juggle/resize-observable to ^3.2.0 ([d82d5e1](https://github.com/hzdg/hz-core/commit/d82d5e1))
+
+* publish ([fc06f49](https://github.com/hzdg/hz-core/commit/fc06f49))
+
+
 ## 2.0.3 (2020-04-20)
 
 

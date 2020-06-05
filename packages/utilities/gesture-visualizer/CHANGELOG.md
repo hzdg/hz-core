@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.1.5 (2020-06-05)
+
+
+* publish ([fc06f49](https://github.com/hzdg/hz-core/commit/fc06f49))
+* fix versions on deprecated packages to last published ([2d06105](https://github.com/hzdg/hz-core/commit/2d06105))
+
+
 ## 1.1.4 (2020-04-20)
 
 

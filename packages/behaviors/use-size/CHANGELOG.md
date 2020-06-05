@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.0.6 (2020-06-05)
+
+
+### @hzdg/use-size
+
+* add failing test of useSize in iframe content ([f5b61bc](https://github.com/hzdg/hz-core/commit/f5b61bc))
+
+* publish ([fc06f49](https://github.com/hzdg/hz-core/commit/fc06f49))
+
+
 ## 4.0.5 (2020-04-20)
 
 
