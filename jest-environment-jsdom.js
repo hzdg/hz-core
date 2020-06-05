@@ -1,4 +1,4 @@
-const JSDomEnvironmentBase = require('jest-environment-jsdom-fifteen');
+const JSDomEnvironmentBase = require('jest-environment-jsdom-sixteen');
 
 const PRAGMA_GLOBAL = 'jsdom-global';
 
