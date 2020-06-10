@@ -1,11 +1,10 @@
 {
   "name": "@hzdg/sticky",
-  "version": "0.0.1",
+  "version": "1.0.0-rc.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
   "license": "MIT",
-  "private": true,
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/",
     "@hzdg:registry": "https://npm.pkg.github.com/"
