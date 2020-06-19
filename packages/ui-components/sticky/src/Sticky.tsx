@@ -1,10 +1,4 @@
-import React, {
-  useMemo,
-  forwardRef,
-  useCallback,
-  useRef,
-  useEffect,
-} from 'react';
+import React, {forwardRef, useCallback, useRef, useEffect} from 'react';
 import ReactDOM from 'react-dom';
 import useSize, {Size} from '@hzdg/use-size';
 import useRefCallback from '@hzdg/use-ref-callback';
@@ -23,6 +17,7 @@ import {
 import useAppendChild from './useAppendChild';
 import useContainingElementRef from './useContainingElementRef';
 import useNearestScrollNodeRef from './useNearestScrollNodeRef';
+import usePortableElement from './usePortableElement';
 
 export interface StickyProps extends React.HTMLProps<HTMLDivElement> {
   /**
@@ -214,20 +209,16 @@ export default function Sticky({
   ...rest
 }: StickyProps): JSX.Element {
   /**
-   * An element to portal sticky content into.
-   * We use a portal so that we can 'reparent'
-   * the sticky content without losing its local state.
-   */
-  const el = useMemo(
-    () =>
-      typeof document === 'undefined' ? null : document.createElement('div'),
-    [],
-  );
-  /**
    * Use the portal context for the provided portal ref,
    * falling back to the nearest provided portal context.
    */
   const {portalRef} = useStickyPortalContext(providedRef);
+  /**
+   * An element to portal sticky content into.
+   * We use a portal so that we can 'reparent'
+   * the sticky content without losing its local state.
+   */
+  const el = usePortableElement(portalRef);
   /**
    * A ref to the element embedded in the Sticky content
    * that is used to detect intersection with the scrolling element.
