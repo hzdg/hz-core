@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.7](https://github.com/hzdg/hz-core/compare/@hzdg/scroll-monitor@4.0.6...@hzdg/scroll-monitor@4.0.7) (2020-06-20)
+
+
+### @hzdg/scroll-monitor
+
+* fix scroll hooks for nested (iframe) scopes ([bd1d1f3](https://github.com/hzdg/hz-core/commit/bd1d1f3))
+
+
 ## 4.0.6 (2020-04-20)
 
 

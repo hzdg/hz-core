@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/hzdg/hz-core/compare/@hzdg/dom-utils@1.0.4...@hzdg/dom-utils@1.1.0) (2020-06-20)
+
+
+### @hzdg/dom-utils
+
+* fix accidently passing tests (by making them fail) ([d958946](https://github.com/hzdg/hz-core/commit/d958946))
+* add isDOMInstance util ([00379aa](https://github.com/hzdg/hz-core/commit/00379aa))
+
+
 ## 1.0.4 (2020-04-20)
 
 
