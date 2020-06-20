@@ -1,6 +1,6 @@
 import React from 'react';
 import {render, fireEvent} from '@testing-library/react';
-import useScrollDirection from '../useScrollDirection';
+import useScrollPosition from '../useScrollPosition';
 
 type Mutable<T> = {-readonly [K in keyof T]: T[K]};
 
@@ -17,7 +17,7 @@ function scrollTo(
   });
 }
 
-describe('useScrollDirection', () => {
+describe('useScrollPosition', () => {
   beforeAll(() => {
     // Monkeypatch `body.scrollWidth` and `body.scrollHeight`
     // to give our tests some scrollable area to play with.
@@ -45,48 +45,45 @@ describe('useScrollDirection', () => {
     delete (document.body as Mutable<typeof document.body>).scrollHeight;
   });
 
-  it('only updates direction when it changes', () => {
-    const directions = new Set();
-    const ScrollDirectionUser = (): JSX.Element => {
-      const [direction, ref] = useScrollDirection();
-      directions.add(direction);
+  it('updates position when it changes', () => {
+    const positions = new Set();
+    const ScrollPositionUser = (): JSX.Element => {
+      const ref = useScrollPosition(positions.add.bind(positions));
       return <div ref={ref} />;
     };
-    render(<ScrollDirectionUser />);
-    expect(directions.size).toBe(1);
+    render(<ScrollPositionUser />);
     scrollTo(0, 1);
-    expect(directions.size).toBe(2);
     scrollTo(0, 2);
-    expect(directions.size).toBe(2);
     scrollTo(0, 1);
-    expect(directions.size).toBe(3);
     scrollTo(1, 1);
-    expect(directions.size).toBe(4);
     scrollTo(2, 1);
-    expect(directions.size).toBe(4);
     scrollTo(1, 1);
-    expect(directions.size).toBe(5);
-    expect(directions).toMatchInlineSnapshot(`
+    expect(positions.size).toBe(6);
+    expect(positions).toMatchInlineSnapshot(`
       Set {
         Object {
-          "horizontal": null,
-          "vertical": null,
+          "left": 0,
+          "top": 1,
         },
         Object {
-          "horizontal": null,
-          "vertical": "down",
+          "left": 0,
+          "top": 2,
         },
         Object {
-          "horizontal": null,
-          "vertical": "up",
+          "left": 0,
+          "top": 1,
         },
         Object {
-          "horizontal": "right",
-          "vertical": "up",
+          "left": 1,
+          "top": 1,
         },
         Object {
-          "horizontal": "left",
-          "vertical": "up",
+          "left": 2,
+          "top": 1,
+        },
+        Object {
+          "left": 1,
+          "top": 1,
         },
       }
     `);
@@ -111,49 +108,46 @@ describe('useScrollDirection', () => {
       },
     });
     const node = doc.createElement('div');
-    const directions = new Set();
-    const ScrollDirectionUser = (): JSX.Element => {
-      const [direction, ref] = useScrollDirection();
-      directions.add(direction);
+    const positions = new Set();
+    const ScrollPositionUser = (): JSX.Element => {
+      const ref = useScrollPosition(positions.add.bind(positions));
       return <div ref={ref} data-testid="alien" />;
     };
-    const {getByTestId} = render(<ScrollDirectionUser />, {container: node});
+    const {getByTestId} = render(<ScrollPositionUser />, {container: node});
     expect(getByTestId('alien')).toBeDefined();
     expect(getByTestId('alien')).not.toBeInstanceOf(HTMLDivElement);
-    expect(directions.size).toBe(1);
     scrollTo(0, 1, doc.body);
-    expect(directions.size).toBe(2);
     scrollTo(0, 2, doc.body);
-    expect(directions.size).toBe(2);
     scrollTo(0, 1, doc.body);
-    expect(directions.size).toBe(3);
     scrollTo(1, 1, doc.body);
-    expect(directions.size).toBe(4);
     scrollTo(2, 1, doc.body);
-    expect(directions.size).toBe(4);
     scrollTo(1, 1, doc.body);
-    expect(directions.size).toBe(5);
-    expect(directions).toMatchInlineSnapshot(`
+    expect(positions.size).toBe(6);
+    expect(positions).toMatchInlineSnapshot(`
       Set {
         Object {
-          "horizontal": null,
-          "vertical": null,
+          "left": 0,
+          "top": 1,
         },
         Object {
-          "horizontal": null,
-          "vertical": "down",
+          "left": 0,
+          "top": 2,
         },
         Object {
-          "horizontal": null,
-          "vertical": "up",
+          "left": 0,
+          "top": 1,
         },
         Object {
-          "horizontal": "right",
-          "vertical": "up",
+          "left": 1,
+          "top": 1,
         },
         Object {
-          "horizontal": "left",
-          "vertical": "up",
+          "left": 2,
+          "top": 1,
+        },
+        Object {
+          "left": 1,
+          "top": 1,
         },
       }
     `);

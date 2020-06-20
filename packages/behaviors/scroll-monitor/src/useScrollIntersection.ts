@@ -6,6 +6,7 @@ import {
   useNearestScrollNodeRef,
   useScrollEffect,
 } from './utils';
+import {isDOMInstance} from '@hzdg/dom-utils';
 
 export interface Bounds {
   top: number;
@@ -56,13 +57,17 @@ function intersects(bounds: BoundsRect, rect: ScrollRect): boolean {
 
   const inRangeVertical =
     typeof rect.top === 'number' &&
-    (typeof top === 'number' && top <= rect.top) &&
-    (typeof bottom === 'number' && bottom >= rect.top);
+    typeof top === 'number' &&
+    top <= rect.top &&
+    typeof bottom === 'number' &&
+    bottom >= rect.top;
 
   const inRangeHorizontal =
     typeof rect.left === 'number' &&
-    (typeof left === 'number' && left <= rect.left) &&
-    (typeof right === 'number' && right >= rect.left);
+    typeof left === 'number' &&
+    left <= rect.left &&
+    typeof right === 'number' &&
+    right >= rect.left;
 
   return inRangeVertical && inRangeHorizontal;
 }
@@ -85,7 +90,10 @@ export function getIntersects(
 ): Intersects {
   if (!config) return false;
   const target = event.currentTarget;
-  if (target instanceof HTMLElement || target instanceof Document) {
+  if (
+    isDOMInstance<HTMLElement>(target, HTMLElement) ||
+    isDOMInstance<Document>(target, Document)
+  ) {
     const rect = getScrollRect(target);
     if (Array.isArray(config)) {
       return config.map(c => intersects(c, rect));

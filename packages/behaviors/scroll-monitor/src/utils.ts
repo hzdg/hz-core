@@ -1,5 +1,6 @@
 import invariant from 'invariant';
 import {useRef, useLayoutEffect, useCallback, useState, useEffect} from 'react';
+import {isDOMInstance} from '@hzdg/dom-utils';
 
 const isClient =
   typeof window !== 'undefined' &&
@@ -50,13 +51,13 @@ export function getNearestScrollNode(
 ): HTMLElement | Document | null {
   if (!isClient) return null;
   node = getNode(node);
-  if (node instanceof Document) return node;
-  if (!(node instanceof HTMLElement)) return null;
+  if (isDOMInstance<Document>(node, Document)) return node;
+  if (!isDOMInstance<HTMLElement>(node, HTMLElement)) return null;
 
   const {overflowX, overflowY} = window.getComputedStyle(node);
   if (overflowX === 'scroll' || overflowY === 'scroll') return node;
 
-  return getNearestScrollNode(node.parentNode) || document;
+  return getNearestScrollNode(node.parentNode) || node.ownerDocument;
 }
 
 /**

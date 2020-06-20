@@ -1,6 +1,7 @@
 import {useRef} from 'react';
 import useRefCallback from '@hzdg/use-ref-callback';
 import {getScrollRect, useNearestScrollNodeRef, useScrollEffect} from './utils';
+import {isDOMInstance} from '@hzdg/dom-utils';
 
 /**
  * `ScrollPosition` is an object of `top` and `left` values,
@@ -31,7 +32,10 @@ export interface ScrollPosition {
  */
 export function getScrollPosition(event: Event): ScrollPosition {
   const target = event.currentTarget;
-  if (target instanceof HTMLElement || target instanceof Document) {
+  if (
+    isDOMInstance<HTMLElement>(target, HTMLElement) ||
+    isDOMInstance<Document>(target, Document)
+  ) {
     const rect = getScrollRect(target);
     return {top: rect.top, left: rect.left};
   }
