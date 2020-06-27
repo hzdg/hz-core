@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/focus-scope",
   "description": "Components and hooks for managing focus in React apps",
-  "version": "1.2.3",
+  "version": "1.2.4",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
