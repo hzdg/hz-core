@@ -6,9 +6,12 @@ import React, {
   useState,
   useContext,
   useLayoutEffect,
+  useMemo,
 } from 'react';
 import warning from 'tiny-warning';
 import useKeyPress, {KeyPressState} from '@hzdg/use-key-press';
+import {getDocument} from '@hzdg/dom-utils';
+import useRefCallback from '@hzdg/use-ref-callback';
 import FocusTreeNode, {isTabbable} from './FocusTreeNode';
 import FocusManager from './FocusManager';
 
@@ -139,41 +142,12 @@ interface UseTabKeyDownHandlerConfig extends Pick<FocusScopeConfig, 'trap'> {
   focusTreeNode: FocusTreeNode;
 }
 
-interface UseFocusTreeNodeConfig extends Pick<FocusScopeConfig, 'id'> {
-  /** The DOM target, i.e., the element for a `FocusScope` component. */
-  domTarget: React.RefObject<Element>;
-}
-
 /** Whether or not the given `children` value is a `FocusScopeRendeProp` */
 const isRenderProp = (children: unknown): children is FocusScopeRenderProp =>
   typeof children === 'function';
 
 /** The context via which a `FocusTreeNode` tree is constructed. */
-const FocusTreeContext = createContext<FocusTreeNode | null>(
-  typeof document === 'undefined'
-    ? null
-    : new FocusTreeNode(document.documentElement),
-);
-
-/**
- * `useMergedRefs` will return a callback that, when called, will update
- * all of the passed refs with the current value.
- */
-function useMergedRefs<T>(
-  ...refs: (React.Ref<T> | undefined)[]
-): (value: T | null) => void {
-  const unmerged = useRef(refs);
-  unmerged.current = refs;
-  return useCallback((value: T | null) => {
-    for (const ref of unmerged.current) {
-      if (typeof ref === 'function') {
-        ref(value);
-      } else if (ref && 'current' in ref) {
-        (ref as React.MutableRefObject<T | null>).current = value;
-      }
-    }
-  }, []);
-}
+const FocusTreeContext = createContext<FocusTreeNode | null>(null);
 
 /** Run the given callback on mount. */
 function useInitialLayoutEffect(callback: () => void): void {
@@ -332,68 +306,38 @@ function useTabKeyHandler({
 }
 
 /**
- * `useFocusTreeNode` will create a `FocusTreeNode` for the given `domTarget`
- * and with the given `id`. It will also append the created node as a child
- * of the `FocusTreeNode` in the `FocusScope` context.
+ * Create a new `FocusTreeNode` and try and parent it right away.
+ * If it fails, we may be 'reparenting' an existing node,
+ * so create an orphan node initially. We will need to try to parent
+ * the orphan as a layout effect.
  */
-function useFocusTreeNode({
-  domTarget,
-  id,
-}: UseFocusTreeNodeConfig): FocusTreeNode {
-  /** The parent `FocusTreeNode`. */
-  const parent = useContext(FocusTreeContext);
-
-  /**
-   * The initial `FocusTreeNode` for this scope.
-   * Note that we use `setState` here for its initializer function only.
-   */
-  const [initialFocusTreeNode] = useState(() => {
-    // Try and parent this new node right away.
-    // If it fails, we may be 'reparenting' an existing node,
-    // so create an orphan node initially. We will try to parent
-    // the orphan as a layout effect (see the layout effect below).
-    try {
-      return new FocusTreeNode(domTarget, id, parent);
-    } catch {
-      return new FocusTreeNode(domTarget, id);
-    }
-  });
-  /** The latest `FocusTreeNode` to have been created.*/
-  const focusTreeNode = useRef(initialFocusTreeNode);
-
-  if (
-    focusTreeNode.current.domTarget !== domTarget ||
-    focusTreeNode.current.id !== id
-  ) {
-    // If the `domTarget` or `id` have changed for this node,
-    // destroy it and create a new one.
-    focusTreeNode.current.remove();
-    // Try and parent this new node right away.
-    // If it fails, we may be 'reparenting' an existing node,
-    // so create an orphan node. We will try to parent
-    // the orphan as a layout effect (see the layout effect below).
-    try {
-      focusTreeNode.current = new FocusTreeNode(domTarget, id, parent);
-    } catch {
-      focusTreeNode.current = new FocusTreeNode(domTarget, id);
-    }
+const createFocusTreeNode = (
+  domTarget: Element | null,
+  id?: string | null,
+  parent?: FocusTreeNode | null,
+  shouldThrow = false,
+): FocusTreeNode => {
+  try {
+    return new FocusTreeNode(domTarget, id, parent);
+  } catch (e) {
+    if (shouldThrow) throw e;
+    return new FocusTreeNode(domTarget, id);
   }
+};
 
-  // Try to assign a parent to this node, if it is not already assigned.
-  // We do this in a layout effect so that 'reparenting' of existing
-  // nodes doesn't cause problems in the in-between-render stage, where
-  // the old node is still in the tree while the node is being added.
-  useLayoutEffect(() => {
-    if (parent && focusTreeNode.current.parent !== parent) {
-      parent.appendChildNode(focusTreeNode.current);
-    }
-    return () => {
-      focusTreeNode.current.remove();
-    };
-  }, [parent]);
+const rootNodes = new WeakMap<Element, FocusTreeNode>();
 
-  return focusTreeNode.current;
-}
+const getOrCreateRootNode = (domTarget: Element | null): FocusTreeNode => {
+  if (!domTarget) return createFocusTreeNode(null);
+  const rootElement = getDocument(domTarget)?.documentElement;
+  if (!rootElement) throw new Error('Detached domTarget detected!');
+  let rootNode = rootNodes.get(rootElement);
+  if (!rootNode) {
+    rootNode = createFocusTreeNode(rootElement);
+    rootNodes.set(rootElement, rootNode);
+  }
+  return rootNode;
+};
 
 /**
  * `FocusScope` wraps its children in an element (a `span` by default),
@@ -447,14 +391,25 @@ export const FocusScope = React.forwardRef(function FocusScope(
       );
     }
   }
+
   /** The DOM element that is rendered by this `FocusScope`. */
-  const domTarget = useRef<Element>(null);
-  /** A callback to sync the internal `domTarget` with a `forwardedRef`. */
-  const setDomTarget = useMergedRefs(domTarget, forwardedRef);
+  const [domTarget, setDomTarget] = useRefCallback(null, forwardedRef);
+
+  /** Check the `FocusTreeContext` for a parent. */
+  const parentContext = useContext(FocusTreeContext);
+
   /** The `FocusTreeNode` for this scope. */
-  const focusTreeNode = useFocusTreeNode({domTarget, id});
+  const [focusTreeNode, setFocusTreeNode] = useState(() =>
+    createFocusTreeNode(
+      domTarget.current,
+      id,
+      parentContext ?? getOrCreateRootNode(domTarget.current),
+    ),
+  );
+
   /** The element to restore focus to on unmount. */
   const elementToRestore = useRef<Element | null>(null);
+
   /** The currently focused element in scope. */
   const focusedElementInScope = useFocusScopeBehavior({
     focusTreeNode,
@@ -464,6 +419,7 @@ export const FocusScope = React.forwardRef(function FocusScope(
   });
 
   const tabKeyHandler = useTabKeyHandler({focusTreeNode, trap});
+
   /** A handler for key presses within this scope. */
   const handleKey = useCallback(
     (state: KeyPressState) => {
@@ -483,18 +439,79 @@ export const FocusScope = React.forwardRef(function FocusScope(
     },
     [onKeyPress, tabKeyHandler, focusTreeNode],
   );
+
   /** Binds handlers to `keydown` events that occur within this scope. */
   const bindKeyPress = useKeyPress({onKey: handleKey});
 
+  /**
+   * Checks if the current `focusTreeNode` accurately reflects
+   * the state of this `FocusScope`. If it doesn't,
+   * update (or recreate) it with the new details.
+   */
+  const updateFocusTreeNode = useCallback<
+    (
+      /**
+       * Whether or not to throw errors when reparenting a node.
+       * By default, we let reparenting fail silently, as we expect
+       * errors when the DOM hasn't been updated to reflect the state
+       * of the tree yet.
+       */
+      shouldThrowOnReparentingFailure?: boolean,
+    ) => FocusTreeNode
+  >(
+    function updateFocusTreeNode(shouldThrowOnReparentingFailure = false) {
+      let nextNode = focusTreeNode;
+      const parent = parentContext ?? getOrCreateRootNode(domTarget.current);
+
+      // If the `domTarget`, `parent`, or `id` have changed for this node,
+      // destroy it and create a new one.
+      if (nextNode.domTarget !== domTarget.current || nextNode.id !== id) {
+        nextNode = createFocusTreeNode(
+          domTarget.current,
+          id,
+          parent,
+          shouldThrowOnReparentingFailure,
+        );
+      }
+
+      // If the parent context has changed, reparent this `focusTreeNode`.
+      // If this fails, it probably means this node is being reparented.
+      // We will let if fail silently and assume the tree will be cleaned up
+      // in a later effect.
+      if (nextNode.parent !== parent) {
+        nextNode.remove();
+        try {
+          parent?.appendChildNode(nextNode);
+        } catch (e) {
+          if (shouldThrowOnReparentingFailure) throw e;
+        }
+      }
+
+      if (nextNode !== focusTreeNode) setFocusTreeNode(nextNode);
+      return nextNode;
+    },
+    [parentContext, domTarget, id, focusTreeNode],
+  );
+
+  useMemo(updateFocusTreeNode, [updateFocusTreeNode]);
+
   useInitialLayoutEffect(function() {
-    elementToRestore.current = focusTreeNode.getFocusedElementGlobal();
+    // Update the `focusTreeNode`, and error if reparenting fails.
+    // Note that we want to error now because initial layout has just finished,
+    // and we want to catch any duplicate node ids or other anomalies
+    // in the tree.
+    const currentFocusTreeNode = updateFocusTreeNode(true);
+    // Apply autofocus on initial layout (mount).
+    elementToRestore.current = currentFocusTreeNode.getFocusedElementGlobal();
     if (autoFocus) {
-      focusTreeNode.focusFirst();
-      focusedElementInScope.current = focusTreeNode.getFocusedElement();
+      currentFocusTreeNode.focusFirst();
+      focusedElementInScope.current = currentFocusTreeNode.getFocusedElement();
     }
   });
 
   useUnmountEffect(function onUnmount() {
+    // Apply restoreFocus on unmount,
+    // and remove the focusTreeNode from the tree.
     if (restoreFocus && elementToRestore.current !== null) {
       focusTreeNode.focus(elementToRestore.current);
     }

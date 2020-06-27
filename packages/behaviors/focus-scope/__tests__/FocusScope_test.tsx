@@ -1,69 +1,106 @@
 /* eslint-env jest, browser */
 import React, {Fragment} from 'react';
 import {render, createEvent, fireEvent} from '@testing-library/react';
+import {print, wrap} from 'jest-snapshot-serializer-raw';
 import {FocusScope} from '../src';
 import FocusManager from '../src/FocusManager';
+import FocusTreeNode from '../src/FocusTreeNode';
 
 const NOOP = (): void => {
   /* boop! */
 };
 
-describe('FocusScope', () => {
-  const offsetParentDescriptor = Object.getOwnPropertyDescriptor(
-    HTMLElement.prototype,
-    'offsetParent',
+const indent = (value: string, depth: number): string => {
+  const indentation = new Array(depth).fill('  ').join('');
+  return value
+    .split('\n')
+    .map(line => `${indentation}${line}`)
+    .join('\n');
+};
+
+const serializeFocusTreeNode = (node: FocusTreeNode, depth = 0): string =>
+  indent(
+    `<FocusTreeNode id="${node.id ??
+      (!node.parent ? '<root>' : 'undefined')}"` +
+      (node.hasChildNodes()
+        ? '>\n' +
+          node
+            .getChildNodes()
+            .map(child => serializeFocusTreeNode(child, depth + 1)) +
+          '\n</FocusTreeNode>'
+        : ' />'),
+    node.hasChildNodes() ? depth : Math.max(0, depth - 1),
   );
 
-  beforeAll(() => {
-    // Polyfill `HTMLElement.offsetParent` because we expect it
-    // to be defined for a focusable node, but JSDOM doesn't implement it.
-    // See https://github.com/jsdom/jsdom/issues/1261
-    Object.defineProperty(HTMLElement.prototype, 'offsetParent', {
-      get() {
-        // eslint-disable-next-line @typescript-eslint/no-this-alias
-        let element = this;
-        while (
-          element &&
-          (!element.style ||
-            !element.style.display ||
-            element.style.display.toLowerCase() !== 'none')
-        ) {
-          element = element.parentNode;
-        }
+expect.addSnapshotSerializer({
+  serialize: (node: FocusTreeNode) => print(wrap(serializeFocusTreeNode(node))),
+  test: node => node && node instanceof FocusTreeNode,
+});
 
-        if (element) {
-          return null;
-        }
+const polyfillHTMLElement = (HTMLElementClass = HTMLElement): (() => void) => {
+  const offsetParentDescriptor = Object.getOwnPropertyDescriptor(
+    HTMLElementClass.prototype,
+    'offsetParent',
+  );
+  // Polyfill `HTMLElement.offsetParent` because we expect it
+  // to be defined for a focusable node, but JSDOM doesn't implement it.
+  // See https://github.com/jsdom/jsdom/issues/1261
+  Object.defineProperty(HTMLElementClass.prototype, 'offsetParent', {
+    get() {
+      // eslint-disable-next-line @typescript-eslint/no-this-alias
+      let element = this;
+      while (
+        element &&
+        (!element.style ||
+          !element.style.display ||
+          element.style.display.toLowerCase() !== 'none')
+      ) {
+        element = element.parentNode;
+      }
 
-        if (
-          this.style &&
-          this.style.position &&
-          this.style.position.toLowerCase() === 'fixed'
-        ) {
-          return null;
-        }
+      if (element) {
+        return null;
+      }
 
-        if (
-          this.tagName.toLowerCase() === 'html' ||
-          this.tagName.toLowerCase() === 'body'
-        ) {
-          return null;
-        }
+      if (
+        this.style &&
+        this.style.position &&
+        this.style.position.toLowerCase() === 'fixed'
+      ) {
+        return null;
+      }
 
-        return this.parentNode;
-      },
-    });
+      if (
+        this.tagName.toLowerCase() === 'html' ||
+        this.tagName.toLowerCase() === 'body'
+      ) {
+        return null;
+      }
+
+      return this.parentNode;
+    },
   });
-
-  afterAll(() => {
+  return () => {
     // Restore original `HTMLElement.offsetParent`.
     if (offsetParentDescriptor) {
       Object.defineProperty(
-        HTMLElement.prototype,
+        HTMLElementClass.prototype,
         'offsetParent',
         offsetParentDescriptor,
       );
     }
+  };
+};
+
+describe('FocusScope', () => {
+  let cleanupPolyfill: () => void;
+
+  beforeAll(() => {
+    cleanupPolyfill = polyfillHTMLElement();
+  });
+
+  afterAll(() => {
+    cleanupPolyfill && cleanupPolyfill();
   });
 
   it('renders a span by default', () => {
@@ -131,12 +168,24 @@ describe('FocusScope', () => {
     expect(mockWarn).not.toHaveBeenCalled();
 
     const {rerender} = render(<FocusScope as={FnComponent} />);
-    expect(mockWarn).toHaveBeenCalledTimes(1);
+    expect(mockWarn).toHaveBeenCalledWith(
+      expect.stringMatching(
+        'Warning: FocusScope can only be rendered as a ReactDOM element or ref-forwarding component.',
+      ),
+    );
 
     mockWarn.mockClear();
     mockError.mockClear();
-    rerender(<FocusScope as={ClassComponent} />);
-    expect(mockWarn).toHaveBeenCalledTimes(1);
+    try {
+      rerender(<FocusScope as={ClassComponent} />);
+    } catch {
+      /* boop! */
+    }
+    expect(mockWarn).toHaveBeenCalledWith(
+      expect.stringMatching(
+        'Warning: FocusScope can only be rendered as a ReactDOM element or ref-forwarding component.',
+      ),
+    );
 
     mockWarn.mockRestore();
     mockError.mockRestore();
@@ -701,14 +750,27 @@ describe('FocusScope', () => {
     expect(focusManager3).not.toBe(focusManager2);
     expect(focusManager3._focusTreeNode).not.toBe(focusManager2._focusTreeNode);
 
-    expect(focusManager3.parent).not.toBe(focusManager2);
-    expect(focusManager3.parent._focusTreeNode).toBe(
-      focusManager2._focusTreeNode,
-    );
+    expect(focusManager1.parent).toBeInstanceOf(FocusManager);
+    expect(focusManager2.parent).toBeInstanceOf(FocusManager);
     expect(focusManager2.parent).not.toBe(focusManager1);
     expect(focusManager2.parent._focusTreeNode).toBe(
       focusManager1._focusTreeNode,
     );
+    expect(focusManager3.parent).toBeInstanceOf(FocusManager);
+    expect(focusManager3.parent).not.toBe(focusManager2);
+    expect(focusManager3.parent._focusTreeNode).toBe(
+      focusManager2._focusTreeNode,
+    );
+
+    expect(focusManager1.parent._focusTreeNode).toMatchInlineSnapshot(`
+      <FocusTreeNode id="<root>">
+        <FocusTreeNode id="focusManager1">
+            <FocusTreeNode id="focusManager2">
+                <FocusTreeNode id="focusManager3" />
+            </FocusTreeNode>
+        </FocusTreeNode>
+      </FocusTreeNode>
+    `);
   });
 
   it('reparents nested FocusScope hierarchies', () => {
@@ -747,6 +809,15 @@ describe('FocusScope', () => {
     expect(focusManager3.parent._focusTreeNode).toBe(
       focusManager2._focusTreeNode,
     );
+    expect(focusManager1.parent._focusTreeNode).toMatchInlineSnapshot(`
+      <FocusTreeNode id="<root>">
+        <FocusTreeNode id="focusManager1">
+            <FocusTreeNode id="focusManager2">
+                <FocusTreeNode id="focusManager3" />
+            </FocusTreeNode>
+        </FocusTreeNode>
+      </FocusTreeNode>
+    `);
 
     rerender(
       <div>
@@ -784,41 +855,41 @@ describe('FocusScope', () => {
     );
     expect(focusManager2.parent).toBeNull();
     expect(focusManager3.parent).toBeNull();
+    expect(focusManager1.parent._focusTreeNode).toMatchInlineSnapshot(`
+      <FocusTreeNode id="<root>">
+        <FocusTreeNode id="focusManager1">
+          <FocusTreeNode id="focusManager3" />
+        </FocusTreeNode>
+      </FocusTreeNode>
+    `);
   });
 
   it('supports a render children prop', () => {
-    const renderProp = jest.fn(({ref, focusManager}) => {
-      expect(focusManager.parent).toBeInstanceOf(FocusManager);
-      return <div ref={ref} data-testid="div" />;
-    });
+    const renderProp = jest.fn(({ref}) => <div ref={ref} data-testid="div" />);
     const {getByTestId, rerender} = render(
       <FocusScope id="test">{renderProp}</FocusScope>,
     );
     const div = getByTestId('div');
     expect(div).toBeInTheDocument();
-    expect(renderProp).toHaveBeenCalledTimes(1);
     expect(renderProp).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        ref: expect.any(Function),
-        focusManager: expect.any(FocusManager),
-      }),
+      expect.objectContaining({focusManager: expect.any(FocusManager)}),
     );
-    const lastFocusManager = renderProp.mock.calls[0][0].focusManager;
+    const lastFocusManager = renderProp.mock.calls[1][0].focusManager;
 
+    renderProp.mockReset();
     rerender(<FocusScope id="test">{renderProp}</FocusScope>);
-    expect(renderProp).toHaveBeenCalledTimes(2);
-    expect(renderProp.mock.calls[1][0].focusManager).not.toBe(lastFocusManager);
-    expect(renderProp.mock.calls[1][0].focusManager._focusTreeNode).toBe(
-      lastFocusManager._focusTreeNode,
+    expect(renderProp).toHaveBeenLastCalledWith(
+      expect.objectContaining({focusManager: lastFocusManager}),
     );
 
+    renderProp.mockReset();
     rerender(<FocusScope id="test2">{renderProp}</FocusScope>);
-    expect(renderProp).toHaveBeenCalledTimes(3);
-    expect(renderProp.mock.calls[2][0].focusManager).not.toBe(lastFocusManager);
-    expect(renderProp.mock.calls[2][0].focusManager._focusTreeNode).not.toBe(
-      lastFocusManager._focusTreeNode,
+    expect(renderProp).not.toHaveBeenLastCalledWith(
+      expect.objectContaining({focusManager: lastFocusManager}),
     );
-    expect(lastFocusManager.parent).toBeNull();
+    expect(renderProp).toHaveBeenLastCalledWith(
+      expect.objectContaining({focusManager: expect.any(FocusManager)}),
+    );
   });
 
   it('errors for duplicate ids', () => {
@@ -913,7 +984,9 @@ describe('FocusScope', () => {
     ));
     const {getByTestId} = render(
       // eslint-disable-next-line jsx-a11y/no-autofocus
-      <FocusScope autoFocus>{renderProp}</FocusScope>,
+      <FocusScope id="autoFocus" autoFocus>
+        {renderProp}
+      </FocusScope>,
     );
     const input = getByTestId('input');
     expect(input).toBeInTheDocument();
@@ -961,5 +1034,74 @@ describe('FocusScope', () => {
     expect(input2).not.toBeInTheDocument();
     expect(input).toBeInTheDocument();
     expect(input).toHaveFocus();
+  });
+
+  it('works in an iframe', () => {
+    const iframe = document.createElement('iframe');
+    document.body.appendChild(iframe);
+    const doc = iframe.contentDocument as Document;
+    const ctx = (doc.defaultView as unknown) as {
+      HTMLElement: typeof HTMLElement;
+      FocusEvent: typeof FocusEvent;
+    };
+    polyfillHTMLElement(ctx.HTMLElement);
+    const container = (iframe.contentDocument as Document).createElement('div');
+    doc.body.appendChild(container);
+
+    const focusCb = jest.fn();
+    const blurCb = jest.fn();
+    const {getByTestId} = render(
+      <Fragment>
+        <FocusScope onFocus={focusCb} onBlur={blurCb} data-testid="focusscope">
+          <input data-testid="input" />
+          <input data-testid="input2" />
+        </FocusScope>
+        <input data-testid="input3" />
+      </Fragment>,
+      {container},
+    );
+    const input = getByTestId('input');
+    const input2 = getByTestId('input2');
+    const input3 = getByTestId('input3');
+    expect(input).toBeInTheDocument();
+    expect(input.ownerDocument).toBe(iframe.contentDocument);
+    expect(input2).toBeInTheDocument();
+    expect(input2.ownerDocument).toBe(iframe.contentDocument);
+    expect(input3).toBeInTheDocument();
+    expect(input3.ownerDocument).toBe(iframe.contentDocument);
+    expect(focusCb).not.toHaveBeenCalled();
+    expect(blurCb).not.toHaveBeenCalled();
+
+    input.focus();
+    expect(input).toHaveFocus();
+    expect(focusCb).toHaveBeenCalledTimes(1);
+    expect(focusCb).toHaveBeenLastCalledWith(
+      expect.any(ctx.FocusEvent),
+      expect.any(FocusManager),
+    );
+    expect(blurCb).not.toHaveBeenCalled();
+
+    input2.focus();
+    expect(input2).toHaveFocus();
+    expect(focusCb).toHaveBeenCalledTimes(1);
+    expect(blurCb).not.toHaveBeenCalled();
+
+    input3.focus();
+    expect(input3).toHaveFocus();
+    expect(focusCb).toHaveBeenCalledTimes(1);
+    expect(blurCb).toHaveBeenCalledTimes(1);
+    expect(blurCb).toHaveBeenLastCalledWith(
+      expect.any(ctx.FocusEvent),
+      expect.any(FocusManager),
+    );
+
+    input2.focus();
+    expect(input2).toHaveFocus();
+    expect(focusCb).toHaveBeenCalledTimes(2);
+    expect(focusCb).toHaveBeenLastCalledWith(
+      expect.any(ctx.FocusEvent),
+      expect.any(FocusManager),
+    );
+    expect(blurCb).toHaveBeenCalledTimes(1);
   });
 });

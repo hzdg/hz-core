@@ -66,31 +66,15 @@ describe('FocusTreeNode', () => {
     }
   });
 
-  it('requires a `domTarget`', () => {
-    expect(
-      () =>
-        new ((FocusTreeNode as unknown) as {
-          new (): unknown;
-        })(),
-    ).toThrow();
-    expect(
-      () =>
-        new ((FocusTreeNode as unknown) as {
-          new (v: null): unknown;
-        })(null),
-    ).toThrow();
-  });
-
   it('accepts an element `domTarget`', () => {
     const element = document.createElement('div');
     const node = new FocusTreeNode(element);
     expect(node.domTarget).toBe(element);
   });
 
-  it('accepts a ref `domTarget`', () => {
+  it('errors for an invalid `domTarget`', () => {
     const ref = React.createRef() as React.RefObject<Element>;
-    const node = new FocusTreeNode(ref);
-    expect(node.domTarget).toBe(ref);
+    expect(() => new FocusTreeNode((ref as unknown) as Element)).toThrow();
   });
 
   it("appends the new node to a parent's child nodes", () => {

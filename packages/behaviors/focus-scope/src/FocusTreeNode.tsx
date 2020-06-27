@@ -1,6 +1,5 @@
-import {getDocument} from '@hzdg/dom-utils';
-export type DomTarget = Element | React.RefObject<Element>;
-type ChildNodeMap = Map<DomTarget, FocusTreeNode>;
+import {getDocument, ensureDOMInstance} from '@hzdg/dom-utils';
+type ChildNodeMap = Map<Element, FocusTreeNode>;
 
 /**
  * A selector string that attempts to select all natively 'focusable' elements.
@@ -101,16 +100,12 @@ export function isFocusable(node: Node): boolean {
 }
 
 /** gets the current element for the given `domTarget`. */
-function getElement(domTarget: DomTarget | null): Element | null {
-  if (domTarget && 'current' in domTarget) {
-    return domTarget.current;
-  } else {
-    return domTarget || null;
-  }
+function getElement(domTarget: Element | null): Element | null {
+  return domTarget || null;
 }
 
 /** gets the currently active (focused) element */
-function getActiveElement(domTarget: DomTarget): Element | null {
+function getActiveElement(domTarget: Element | null): Element | null {
   const element = getElement(domTarget);
   if (element) {
     const doc = getDocument(element);
@@ -133,23 +128,23 @@ export default class FocusTreeNode {
     /**
      * The DOM target, i.e., the element for a `FocusScope` component.
      */
-    readonly domTarget: DomTarget,
+    readonly domTarget: Element | null = null,
     /** The id for the created node, or `null`. */
     readonly id?: string | null,
     /** An optional parent `FocusTreeNode`. */
     parent?: FocusTreeNode | null,
   ) {
-    if (!domTarget) throw new Error('A domTarget is required!');
+    if (domTarget) ensureDOMInstance(domTarget, Element);
     if (parent) parent.appendChildNode(this);
   }
 
   protected _parent?: FocusTreeNode | null;
 
   /**
-   * A map of `DomTarget` objects to their `FocusTreeNode` objects.
+   * A map of `Element` objects to their `FocusTreeNode` objects.
    *
    * We use a Map (rather than a `Set<FocusTreeNode>`)
-   * for quick lookup using the `DomTarget` as the key.
+   * for quick lookup using the `Element` as the key.
    */
   protected readonly childNodes: ChildNodeMap = new Map();
 
@@ -243,8 +238,8 @@ export default class FocusTreeNode {
       this.subscribers.clear();
       this.unsubscribeFromFocusEventsIfPossible();
     }
-    if (this.parent && this.domTarget) {
-      this.parent.childNodes.delete(this.domTarget);
+    if (this.parent) {
+      if (this.domTarget) this.parent.childNodes.delete(this.domTarget);
       this._parent = null;
     }
   }
@@ -260,14 +255,15 @@ export default class FocusTreeNode {
       }
     }
 
-    // If we already have a node for this domTarget,
-    // throw an error.
-    const childNode = this.childNodes.get(node.domTarget);
+    // If we already have a node for this `domTarget`, throw an error.
+    const childNode = node.domTarget
+      ? this.childNodes.get(node.domTarget)
+      : null;
     if (childNode) {
       throw new Error(`A child node already exists for this domTarget!`);
     }
     node._parent = this;
-    this.childNodes.set(node.domTarget, node);
+    if (node.domTarget) this.childNodes.set(node.domTarget, node);
   }
 
   /** Get an array of child nodes. */
