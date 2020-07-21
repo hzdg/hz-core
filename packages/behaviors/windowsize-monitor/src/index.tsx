@@ -1,5 +1,7 @@
-import {useState, useRef, useEffect, useMemo} from 'react';
+import {useState, useRef, useEffect, useMemo, useCallback} from 'react';
 import {throttle} from './utils';
+
+import type {RefObject} from 'react';
 
 export interface WindowSize {
   width: number;
@@ -30,6 +32,17 @@ export interface WindowSizeMonitorProps {
 
 const isClient = typeof window !== undefined && typeof window !== 'undefined';
 
+const useMountedRef = (): RefObject<boolean> => {
+  const mounted = useRef(false);
+  useEffect(() => {
+    mounted.current = true;
+    return () => {
+      mounted.current = false;
+    };
+  }, []);
+  return mounted;
+};
+
 const getWindowSize = ({
   initialWidth,
   initialHeight,
@@ -41,7 +54,7 @@ const getWindowSize = ({
 const windowSizeSubscribers = new Set<() => void>();
 
 const dispatchWindowSizeChange = (): void => {
-  windowSizeSubscribers.forEach(cb => cb());
+  windowSizeSubscribers.forEach((cb) => cb());
 };
 
 const subscribeToWindowSizeChange = (callback: () => void): (() => void) => {
@@ -111,12 +124,12 @@ function useWindowSize(
   const options = useWindowSizeOptions(windowSizeOptions);
   const [size, setSize] = useState<WindowSize>(() => getWindowSize(options));
 
-  const handleSizeChange = useMemo(() => {
+  const updateWindowSize = useMemo(() => {
     /**
-     * `handleSizeChange` will update the current change handler
+     * `updateWindowSize` will update the current change handler
      * with a new `WindowSize` whenever the window's size changes.
      */
-    function handleSizeChange(): void {
+    function updateWindowSize(): void {
       const cb = changeHandler.current;
       const size = getWindowSize(options);
       if (typeof cb === 'function') {
@@ -126,9 +139,20 @@ function useWindowSize(
       }
     }
     return options.throttleMs
-      ? throttle(handleSizeChange, options.throttleMs)
-      : handleSizeChange;
+      ? throttle(updateWindowSize, options.throttleMs)
+      : updateWindowSize;
   }, [options]);
+
+  const mounted = useMountedRef();
+
+  const handleSizeChange = useCallback(
+    /**
+     * `handleSizeChange` ensures component is mounted
+     * before calling updateWindowSize()
+     */
+    () => mounted.current && updateWindowSize(),
+    [updateWindowSize, mounted],
+  );
 
   useEffect(() => {
     subscribeToWindowSizeChange(handleSizeChange);
