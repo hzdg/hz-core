@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/use-size",
   "description": "A React hook for components that care about their size.",
-  "version": "4.0.7",
+  "version": "4.0.8",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -25,7 +25,7 @@
     "@babel/runtime": "^7.4.4",
     "@hzdg/resize-observable": "^2.0.5",
     "@hzdg/use-ref-callback": "^2.0.3",
-    "@hzdg/windowsize-monitor": "^2.0.4",
+    "@hzdg/windowsize-monitor": "^2.0.5",
     "memoize-one": "5.1.1"
   }
 }

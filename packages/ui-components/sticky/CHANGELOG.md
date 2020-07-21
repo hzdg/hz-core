@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.0.2 (2020-07-21)
+
+
+* publish ([606b984](https://github.com/hzdg/hz-core/commit/606b984))
+
+
 ## [1.0.1](https://github.com/hzdg/hz-core/compare/@hzdg/sticky@1.0.0...@hzdg/sticky@1.0.1) (2020-06-20)
 
 

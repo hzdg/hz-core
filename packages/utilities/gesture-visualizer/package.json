@@ -1,7 +1,7 @@
 {
   "name": "gesture-visualizer",
   "description": "A fancypants visualizer for showing off gestures and such",
-  "version": "1.1.6",
+  "version": "1.1.7",
   "main": "index.ts",
   "license": "UNLISCENSED",
   "private": true,
@@ -26,7 +26,7 @@
     "@hzdg/gesture-catcher": "^4.2.0",
     "@hzdg/moving-average": "^1.1.3",
     "@hzdg/use-ref-callback": "^2.0.3",
-    "@hzdg/use-size": "^4.0.7",
+    "@hzdg/use-size": "^4.0.8",
     "@types/d3-array": "^2.0.0",
     "@types/d3-scale": "^2.1.1",
     "@types/d3-scale-chromatic": "^1.3.1",

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.0.5 (2020-07-21)
+
+
+### @hzdg/window-size-monitor
+
+* Add useMountedRef to useWindowWidth (#55) ([118205f](https://github.com/hzdg/hz-core/commit/118205f)), closes [#55](https://github.com/hzdg/hz-core/issues/55)
+
+* publish ([606b984](https://github.com/hzdg/hz-core/commit/606b984))
+
+
 ## 2.0.4 (2020-04-20)
 
 
