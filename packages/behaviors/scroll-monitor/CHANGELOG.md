@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.0.8 (2020-08-24)
+
+
+* add missing @types dependencies ([198be71](https://github.com/hzdg/hz-core/commit/198be71))
+* publish ([cc3e373](https://github.com/hzdg/hz-core/commit/cc3e373))
+
+
 ## [4.0.7](https://github.com/hzdg/hz-core/compare/@hzdg/scroll-monitor@4.0.6...@hzdg/scroll-monitor@4.0.7) (2020-06-20)
 
 

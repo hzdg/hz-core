@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/sticky",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "src/index.tsx",
@@ -28,8 +28,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.10.2",
-    "@hzdg/scroll-monitor": "^4.0.7",
+    "@hzdg/scroll-monitor": "^4.0.8",
     "@hzdg/use-ref-callback": "^2.0.3",
-    "@hzdg/use-size": "^4.0.8"
+    "@hzdg/use-size": "^4.0.9"
   }
 }

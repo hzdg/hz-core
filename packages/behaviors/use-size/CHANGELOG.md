@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [4.0.9](https://github.com/hzdg/hz-core/compare/@hzdg/use-size@4.0.8...@hzdg/use-size@4.0.9) (2020-08-24)
+
+**Note:** Version bump only for package @hzdg/use-size
+
+
+
+
+
 ## 4.0.8 (2020-07-21)
 
 

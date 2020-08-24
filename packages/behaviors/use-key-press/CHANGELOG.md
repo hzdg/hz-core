@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.0.7 (2020-08-24)
+
+
+* add __DEV__ typing for ts users ([fb3a760](https://github.com/hzdg/hz-core/commit/fb3a760))
+* publish ([cc3e373](https://github.com/hzdg/hz-core/commit/cc3e373))
+
+
 ## 1.0.6 (2020-04-20)
 
 
