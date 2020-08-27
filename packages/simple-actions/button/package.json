@@ -3,13 +3,13 @@
   "version": "0.0.5",
   "main": "cjs/index.js",
   "module": "es/index.js",
-  "typings": "es/index.tsx",
+  "typings": "ts/index.d.ts",
   "license": "MIT",
   "private": true,
   "files": [
     "cjs",
     "es",
-    "src",
+    "ts",
     "!*/__test*"
   ],
   "dependencies": {

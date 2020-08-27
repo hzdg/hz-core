@@ -21,8 +21,6 @@ import {
 } from './navigation';
 import useValueObject from '@hzdg/use-value-object';
 
-declare const __DEV__: boolean;
-
 // Reexport types in a babel-friendly way.
 export type KeyPressState = _KeyPressState;
 export type KeyPressHandler = _KeyPressHandler;

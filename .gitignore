@@ -5,6 +5,7 @@ node_modules
 packages/**/cjs
 packages/**/es
 packages/**/umd
+packages/**/ts
 
 lerna-debug.log
 yarn-error.log

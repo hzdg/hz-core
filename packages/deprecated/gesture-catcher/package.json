@@ -4,7 +4,7 @@
   "version": "4.2.0",
   "main": "cjs/index.js",
   "module": "es/index.js",
-  "typings": "src/index.tsx",
+  "typings": "ts/index.d.ts",
   "license": "MIT",
   "private": true,
   "publishConfig": {
@@ -19,7 +19,7 @@
   "files": [
     "cjs",
     "es",
-    "src",
+    "ts",
     "!*/examples",
     "!*/__test*"
   ],

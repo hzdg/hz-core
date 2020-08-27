@@ -3,7 +3,7 @@
   "version": "1.0.3",
   "main": "cjs/index.js",
   "module": "es/index.js",
-  "typings": "src/index.tsx",
+  "typings": "ts/index.d.ts",
   "license": "MIT",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/",
@@ -17,7 +17,7 @@
   "files": [
     "cjs",
     "es",
-    "src",
+    "ts",
     "types",
     "!**/examples",
     "!**/__test*"

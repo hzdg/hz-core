@@ -11,7 +11,7 @@ const PACKAGE_JSON = options => `
   "version": "0.0.1",
   "main": "cjs/index.js",
   "module": "es/index.js",
-  "typings": "src/index.tsx",
+  "typings": "ts/index.d.ts",
   "license": "MIT",
   "private": true,
   "publishConfig": {
@@ -26,7 +26,7 @@ const PACKAGE_JSON = options => `
   "files": [
     "cjs",
     "es",
-    "src",
+    "ts",
     "types",
     "!**/examples",
     "!**/__test*"

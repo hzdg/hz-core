@@ -6,7 +6,7 @@
   "license": "MIT",
   "main": "cjs/index.js",
   "module": "es/index.js",
-  "typings": "src/index.ts",
+  "typings": "ts/index.d.ts",
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/",
     "@hzdg:registry": "https://npm.pkg.github.com/"
@@ -19,7 +19,7 @@
   "files": [
     "cjs",
     "es",
-    "src",
+    "ts",
     "!*/__test*"
   ],
   "peerDependencies": {

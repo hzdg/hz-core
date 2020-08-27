@@ -15,8 +15,6 @@ import useRefCallback from '@hzdg/use-ref-callback';
 import FocusTreeNode, {isTabbable} from './FocusTreeNode';
 import FocusManager from './FocusManager';
 
-declare const __DEV__: boolean;
-
 export {default as FocusManager} from './FocusManager';
 
 type PropsOf<

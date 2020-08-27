@@ -5,7 +5,7 @@
   "main": "cjs/index.js",
   "private": true,
   "module": "es/index.js",
-  "typings": "src/index.tsx",
+  "typings": "ts/index.d.ts",
   "files": [
     "cjs",
     "es",
