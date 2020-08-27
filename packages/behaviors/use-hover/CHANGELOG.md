@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 0.0.9 (2020-08-27)
+
+
+* include TS definitions instead of src in all packages ([7d22206](https://github.com/hzdg/hz-core/commit/7d22206))
+* publish ([3e2eb7b](https://github.com/hzdg/hz-core/commit/3e2eb7b))
+
+
 ## 0.0.8 (2020-04-20)
 
 

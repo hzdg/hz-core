@@ -1,6 +1,6 @@
 {
   "name": "@hzdg/button",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "ts/index.d.ts",

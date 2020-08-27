@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.6](https://github.com/hzdg/hz-core/compare/@hzdg/focus-scope@1.2.5...@hzdg/focus-scope@1.2.6) (2020-08-27)
+
+
+* include TS definitions instead of src in all packages ([7d22206](https://github.com/hzdg/hz-core/commit/7d22206))
+
+
 ## 1.2.5 (2020-08-24)
 
 

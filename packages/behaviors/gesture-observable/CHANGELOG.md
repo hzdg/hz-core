@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.1.7 (2020-08-27)
+
+
+* include TS definitions instead of src in all packages ([7d22206](https://github.com/hzdg/hz-core/commit/7d22206))
+* publish ([3e2eb7b](https://github.com/hzdg/hz-core/commit/3e2eb7b))
+
+
 ## [2.1.6](https://github.com/hzdg/hz-core/compare/@hzdg/gesture-observable@2.1.5...@hzdg/gesture-observable@2.1.6) (2020-06-20)
 
 **Note:** Version bump only for package @hzdg/gesture-observable

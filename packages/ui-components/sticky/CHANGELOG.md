@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.4](https://github.com/hzdg/hz-core/compare/@hzdg/sticky@1.0.3...@hzdg/sticky@1.0.4) (2020-08-27)
+
+
+* include TS definitions instead of src in all packages ([7d22206](https://github.com/hzdg/hz-core/commit/7d22206))
+
+
 ## [1.0.3](https://github.com/hzdg/hz-core/compare/@hzdg/sticky@1.0.2...@hzdg/sticky@1.0.3) (2020-08-24)
 
 **Note:** Version bump only for package @hzdg/sticky
