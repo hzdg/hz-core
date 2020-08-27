@@ -40,17 +40,6 @@ const tsCompilerOptions = {
   emitDeclarationOnly: true,
 };
 
-const tsCompilerHost = ts.createCompilerHost(tsCompilerOptions);
-/** @type {Record<string, string>} */
-const tsEmittedFiles = {};
-/**
- * @param {string} filename
- * @param {string} content
- * @returns {string}
- */
-tsCompilerHost.writeFile = (filename, content) =>
-  (tsEmittedFiles[filename] = content);
-
 /**
  * @typedef {import("@lerna/package").Package} Workspace
  */
@@ -220,7 +209,7 @@ const emitTypeDefinition = async (pkg, tsProgram, filename) => {
 
   tsProgram.emit(
     tsProgram.getSourceFile(filename),
-    (tsCompilerHost.writeFile = (_, contents) => (code = contents)),
+    (_, contents) => (code = contents),
   );
 
   const defname = filename.replace(/\.(?:j|t)sx?$/, '.d.ts');
@@ -397,7 +386,7 @@ const buildPackages = (workspaces, force) => {
   const tsProgram = ts.createProgram(
     tsProgramFiles,
     tsCompilerOptions,
-    tsCompilerHost,
+    ts.createCompilerHost(tsCompilerOptions),
   );
 
   // Queue up a package build for each workspace.
