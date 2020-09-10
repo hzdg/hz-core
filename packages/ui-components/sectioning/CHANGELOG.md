@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.1.0](https://github.com/hzdg/hz-core/compare/@hzdg/sectioning@1.0.1...@hzdg/sectioning@1.1.0) (2020-09-10)
+
+
+### @hzdg/sectioning
+
+* improve (and export) component prop types ([c167b7f](https://github.com/hzdg/hz-core/commit/c167b7f))
+* fix typos ([0961f08](https://github.com/hzdg/hz-core/commit/0961f08))
+
+
 ## 1.0.1 (2020-08-27)
 
 
