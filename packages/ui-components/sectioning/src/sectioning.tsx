@@ -1,10 +1,10 @@
 import React from 'react';
 import {SectionLevelProvider, useNextSectionLevel} from './sectionLevel';
 
-type SectionProps = React.HTMLProps<HTMLElement>;
+export type SectionProps = React.ComponentProps<'section'>;
 export const Section = React.forwardRef(function Section(
   {children, ...props}: SectionProps,
-  ref: React.Ref<HTMLElement>,
+  ref: SectionProps['ref'],
 ): JSX.Element {
   return (
     <section {...props} ref={ref}>
@@ -14,13 +14,12 @@ export const Section = React.forwardRef(function Section(
     </section>
   );
 });
-
 Section.displayName = 'Section';
 
-type ArticleProps = React.HTMLProps<HTMLElement>;
+export type ArticleProps = React.ComponentProps<'article'>;
 export const Article = React.forwardRef(function Article(
   {children, ...props}: ArticleProps,
-  ref: React.Ref<HTMLElement>,
+  ref: ArticleProps['ref'],
 ): JSX.Element {
   return (
     <article {...props} ref={ref}>
@@ -32,10 +31,10 @@ export const Article = React.forwardRef(function Article(
 });
 Article.displayName = 'Article';
 
-type AsideProps = React.HTMLProps<HTMLElement>;
+export type AsideProps = React.ComponentProps<'aside'>;
 export const Aside = React.forwardRef(function Aside(
   {children, ...props}: AsideProps,
-  ref: React.Ref<HTMLElement>,
+  ref: AsideProps['ref'],
 ): JSX.Element {
   return (
     <aside {...props} ref={ref}>
@@ -47,10 +46,10 @@ export const Aside = React.forwardRef(function Aside(
 });
 Aside.displayName = 'Aside';
 
-type NavProps = React.HTMLProps<HTMLElement>;
+export type NavProps = React.ComponentProps<'nav'>;
 export const Nav = React.forwardRef(function Nav(
   {children, ...props}: NavProps,
-  ref: React.Ref<HTMLElement>,
+  ref: NavProps['ref'],
 ): JSX.Element {
   return (
     <nav {...props} ref={ref}>

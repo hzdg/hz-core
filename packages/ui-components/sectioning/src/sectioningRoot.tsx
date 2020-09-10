@@ -1,10 +1,10 @@
 import React from 'react';
 import {SectionLevelProvider} from './sectionLevel';
 
-type BodyProps = React.HTMLProps<HTMLBodyElement>;
+export type BodyProps = React.ComponentProps<'body'>;
 export const Body = React.forwardRef(function Body(
   {children, ...props}: BodyProps,
-  ref: React.Ref<HTMLBodyElement>,
+  ref: BodyProps['ref'],
 ): JSX.Element {
   return (
     <body {...props} ref={ref}>
@@ -14,10 +14,10 @@ export const Body = React.forwardRef(function Body(
 });
 Body.displayName = 'Body';
 
-type BlockquoteProps = React.HTMLProps<HTMLQuoteElement>;
+export type BlockquoteProps = React.ComponentProps<'blockquote'>;
 export const Blockquote = React.forwardRef(function Blockquote(
   {children, ...props}: BlockquoteProps,
-  ref: React.Ref<HTMLQuoteElement>,
+  ref: BlockquoteProps['ref'],
 ): JSX.Element {
   return (
     <blockquote {...props} ref={ref}>
@@ -27,10 +27,10 @@ export const Blockquote = React.forwardRef(function Blockquote(
 });
 Blockquote.displayName = 'Blockquote';
 
-type DetailsProps = React.HTMLProps<HTMLDetailsElement>;
+export type DetailsProps = React.ComponentProps<'details'>;
 export const Details = React.forwardRef(function Details(
   {children, ...props}: DetailsProps,
-  ref: React.Ref<HTMLDetailsElement>,
+  ref: DetailsProps['ref'],
 ): JSX.Element {
   return (
     <details {...props} ref={ref}>
@@ -40,10 +40,10 @@ export const Details = React.forwardRef(function Details(
 });
 Details.displayName = 'Details';
 
-type DialogProps = React.HTMLProps<HTMLDialogElement>;
+export type DialogProps = React.ComponentProps<'dialog'>;
 export const Dialog = React.forwardRef(function Dialog(
   {children, ...props}: DialogProps,
-  ref: React.Ref<HTMLDialogElement>,
+  ref: DialogProps['ref'],
 ): JSX.Element {
   return (
     <dialog {...props} ref={ref}>
@@ -53,10 +53,10 @@ export const Dialog = React.forwardRef(function Dialog(
 });
 Dialog.displayName = 'Dialog';
 
-type FieldsetProps = React.HTMLProps<HTMLFieldSetElement>;
+export type FieldsetProps = React.ComponentProps<'fieldset'>;
 export const Fieldset = React.forwardRef(function Fieldset(
   {children, ...props}: FieldsetProps,
-  ref: React.Ref<HTMLFieldSetElement>,
+  ref: FieldsetProps['ref'],
 ): JSX.Element {
   return (
     <fieldset {...props} ref={ref}>
@@ -66,10 +66,10 @@ export const Fieldset = React.forwardRef(function Fieldset(
 });
 Fieldset.displayName = 'Fieldset';
 
-type FigureProps = React.HTMLProps<HTMLElement>;
+export type FigureProps = React.ComponentProps<'figure'>;
 export const Figure = React.forwardRef(function Figure(
   {children, ...props}: FigureProps,
-  ref: React.Ref<HTMLElement>,
+  ref: FigureProps['ref'],
 ): JSX.Element {
   return (
     <figure {...props} ref={ref}>
@@ -79,10 +79,10 @@ export const Figure = React.forwardRef(function Figure(
 });
 Figure.displayName = 'Figure';
 
-type TdProps = React.HTMLProps<HTMLTableDataCellElement>;
+export type TdProps = React.ComponentProps<'td'>;
 export const Td = React.forwardRef(function Td(
   {children, ...props}: TdProps,
-  ref: React.Ref<HTMLTableDataCellElement>,
+  ref: TdProps['ref'],
 ): JSX.Element {
   return (
     <td {...props} ref={ref}>
