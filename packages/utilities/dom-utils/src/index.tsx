@@ -1,5 +1,6 @@
 import ensureDOMInstance from './ensureDOMInstance';
 import findAncestor from './findAncestor';
+import getContainingElement from './getContainingElement';
 import getDocument from './getDocument';
 import getNearestScrollNode from './getNearestScrollNode';
 import getWindow from './getWindow';
@@ -9,6 +10,7 @@ import isDOMInstance from './isDOMInstance';
 export {
   ensureDOMInstance,
   findAncestor,
+  getContainingElement,
   getDocument,
   getNearestScrollNode,
   getWindow,
@@ -19,6 +21,7 @@ export {
 export default {
   ensureDOMInstance,
   findAncestor,
+  getContainingElement,
   getDocument,
   getNearestScrollNode,
   getWindow,
