@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.10.2",
+    "@hzdg/dom-utils": "^1.1.1",
     "@hzdg/scroll-monitor": "^4.0.9",
     "@hzdg/use-ref-callback": "^2.0.4",
     "@hzdg/use-size": "^4.0.10"
