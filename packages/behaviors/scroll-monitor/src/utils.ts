@@ -1,11 +1,6 @@
 import invariant from 'invariant';
 import {useRef, useLayoutEffect, useCallback, useState, useEffect} from 'react';
-import {isDOMInstance} from '@hzdg/dom-utils';
-
-const isClient =
-  typeof window !== 'undefined' &&
-  typeof Document !== 'undefined' &&
-  typeof HTMLElement !== 'undefined';
+import {getDocument, getNearestScrollNode} from '@hzdg/dom-utils';
 
 export interface ScrollRect {
   top: number | null;
@@ -46,20 +41,6 @@ export function getNode(node: NodeLike | null): Node | null {
   return node;
 }
 
-export function getNearestScrollNode(
-  node: Node | null,
-): HTMLElement | Document | null {
-  if (!isClient) return null;
-  node = getNode(node);
-  if (isDOMInstance<Document>(node, Document)) return node;
-  if (!isDOMInstance<HTMLElement>(node, HTMLElement)) return null;
-
-  const {overflowX, overflowY} = window.getComputedStyle(node);
-  if (overflowX === 'scroll' || overflowY === 'scroll') return node;
-
-  return getNearestScrollNode(node.parentNode) || node.ownerDocument;
-}
-
 /**
  * `useForceUpdate` will return a function that, when called
  * will force the component to rerender.
@@ -67,7 +48,7 @@ export function getNearestScrollNode(
 export function useForceUpdate(): () => void {
   const [, flipUpdateBit] = useState(false);
   const forceUpdate = useCallback(function forceUpdate() {
-    flipUpdateBit(v => !v);
+    flipUpdateBit((v) => !v);
   }, []);
   return forceUpdate;
 }
@@ -91,8 +72,10 @@ export function useNearestScrollNodeRef<T extends Node>(
   const forceUpdate = useForceUpdate();
   const scrollRef = useRef<HTMLElement | Document | null>(null);
   useLayoutEffect(() => {
-    scrollRef.current = getNearestScrollNode(current);
-    forceUpdate();
+    const doc = getDocument(current);
+    const scrollNode = getNearestScrollNode(current);
+    scrollRef.current = doc?.documentElement === scrollNode ? doc : scrollNode;
+    if (scrollRef.current !== current) forceUpdate();
   }, [current, forceUpdate]);
   return scrollRef;
 }
