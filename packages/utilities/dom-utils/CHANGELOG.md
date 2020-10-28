@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# 1.2.0 (2020-10-28)
+
+
+### @hzdg/dom-utils
+
+* add getContainingElement util ([8163cad](https://github.com/hzdg/hz-core/commit/8163cad))
+* add getNearestScrollNode util ([b1a0677](https://github.com/hzdg/hz-core/commit/b1a0677))
+
+* publish ([acd936c](https://github.com/hzdg/hz-core/commit/acd936c))
+
+
 ## 1.1.1 (2020-08-27)
 
 

@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.0.10 (2020-10-28)
+
+
+### @hzdg/scroll-monitor
+
+* extract getNearestScrollNode to dom-utils ([7dbeee2](https://github.com/hzdg/hz-core/commit/7dbeee2))
+
+* publish ([acd936c](https://github.com/hzdg/hz-core/commit/acd936c))
+
+
 ## [4.0.9](https://github.com/hzdg/hz-core/compare/@hzdg/scroll-monitor@4.0.8...@hzdg/scroll-monitor@4.0.9) (2020-08-27)
 
 

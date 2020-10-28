@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 1.0.5 (2020-10-28)
+
+
+### @hzdg/sticky
+
+* extract getContainingElement to dom-utils ([73dfd60](https://github.com/hzdg/hz-core/commit/73dfd60))
+
+* publish ([acd936c](https://github.com/hzdg/hz-core/commit/acd936c))
+
+
 ## [1.0.4](https://github.com/hzdg/hz-core/compare/@hzdg/sticky@1.0.3...@hzdg/sticky@1.0.4) (2020-08-27)
 
 

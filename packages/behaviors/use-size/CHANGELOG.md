@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 4.0.11 (2020-10-28)
+
+
+* publish ([acd936c](https://github.com/hzdg/hz-core/commit/acd936c))
+
+
 ## [4.0.10](https://github.com/hzdg/hz-core/compare/@hzdg/use-size@4.0.9...@hzdg/use-size@4.0.10) (2020-08-27)
 
 

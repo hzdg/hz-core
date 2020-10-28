@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.1.8 (2020-10-28)
+
+
+* publish ([acd936c](https://github.com/hzdg/hz-core/commit/acd936c))
+
+
 ## 2.1.7 (2020-08-27)
 
 
