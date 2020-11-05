@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.2.8](https://github.com/hzdg/hz-core/compare/@hzdg/focus-scope@1.2.7...@hzdg/focus-scope@1.2.8) (2020-11-05)
+
+**Note:** Version bump only for package @hzdg/focus-scope
+
+
+
+
+
 ## 1.2.7 (2020-10-28)
 
 

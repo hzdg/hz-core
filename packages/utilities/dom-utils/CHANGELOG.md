@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.0.0](https://github.com/hzdg/hz-core/compare/@hzdg/dom-utils@1.2.0...@hzdg/dom-utils@2.0.0) (2020-11-05)
+
+
+### @hzdg/dom-utils
+
+* fix getContainingElement for all positions ([5704698](https://github.com/hzdg/hz-core/commit/5704698))
+
+
 # 1.2.0 (2020-10-28)
 
 
