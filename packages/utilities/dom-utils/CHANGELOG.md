@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.2](https://github.com/hzdg/hz-core/compare/@hzdg/dom-utils@2.0.1...@hzdg/dom-utils@2.0.2) (2020-11-10)
+
+
+### @hzdg/dom-utils
+
+* Revert getNearestScrollNode should not return html node ([652110d](https://github.com/hzdg/hz-core/commit/652110d))
+
+
 ## [2.0.1](https://github.com/hzdg/hz-core/compare/@hzdg/dom-utils@2.0.0...@hzdg/dom-utils@2.0.1) (2020-11-09)
 
 

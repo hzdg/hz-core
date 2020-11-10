@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.0.8](https://github.com/hzdg/hz-core/compare/@hzdg/sticky@1.0.7...@hzdg/sticky@1.0.8) (2020-11-10)
+
+**Note:** Version bump only for package @hzdg/sticky
+
+
+
+
+
 ## [1.0.7](https://github.com/hzdg/hz-core/compare/@hzdg/sticky@1.0.6...@hzdg/sticky@1.0.7) (2020-11-09)
 
 **Note:** Version bump only for package @hzdg/sticky

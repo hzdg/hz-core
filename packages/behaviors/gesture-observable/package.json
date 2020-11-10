@@ -1,7 +1,7 @@
 {
   "name": "@hzdg/gesture-observable",
   "description": "An Observable for gestures",
-  "version": "2.1.10",
+  "version": "2.1.11",
   "main": "cjs/index.js",
   "module": "es/index.js",
   "typings": "ts/index.d.ts",
@@ -24,7 +24,7 @@
   ],
   "dependencies": {
     "@babel/runtime": "^7.4.4",
-    "@hzdg/dom-utils": "^2.0.1",
+    "@hzdg/dom-utils": "^2.0.2",
     "@hzdg/moving-average": "^1.1.4",
     "callbag": "^1.2.0",
     "callbag-filter": "^1.1.0",
