@@ -12,7 +12,7 @@ export default function getNearestScrollNode(
   if (!isClient) return null;
   if (isDOMInstance<Document>(node, Document)) return node.documentElement;
   if (!isDOMInstance<HTMLElement>(node, HTMLElement)) return null;
-  const ancestor = findAncestor(node.parentElement, (node) => {
+  const ancestor = findAncestor(node, (node) => {
     const {overflowX, overflowY} = getComputedStyle(node);
     if (overflowX === 'scroll') return true;
     if (overflowY === 'scroll') return true;

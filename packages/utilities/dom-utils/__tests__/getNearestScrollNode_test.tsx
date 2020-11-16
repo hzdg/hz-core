@@ -16,6 +16,17 @@ describe('getNearestScrollnode', () => {
     expect(getNearestScrollNode(node)).toBe(document.documentElement);
   });
 
+  it('returns the element if it is scrollable', () => {
+    const container = document.createElement('div');
+    container.style.overflowX = 'scroll';
+    document.body.appendChild(container);
+
+    const node = document.createElement('div');
+    container.appendChild(node);
+
+    expect(getNearestScrollNode(container)).toBe(container);
+  });
+
   it('returns the closest scrollable ancestor', () => {
     const container = document.createElement('div');
     container.style.overflowX = 'scroll';
