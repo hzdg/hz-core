@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.12](https://github.com/hzdg/hz-core/compare/@hzdg/resize-observable@2.0.11...@hzdg/resize-observable@2.0.12) (2020-11-16)
+
+**Note:** Version bump only for package @hzdg/resize-observable
+
+
+
+
+
 ## [2.0.11](https://github.com/hzdg/hz-core/compare/@hzdg/resize-observable@2.0.10...@hzdg/resize-observable@2.0.11) (2020-11-10)
 
 **Note:** Version bump only for package @hzdg/resize-observable

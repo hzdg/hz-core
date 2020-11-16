@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.0.3](https://github.com/hzdg/hz-core/compare/@hzdg/dom-utils@2.0.2...@hzdg/dom-utils@2.0.3) (2020-11-16)
+
+
+### @hzdg/dom-utils
+
+* fix getNearestScrollNode returns node if scrollable ([8bafdac](https://github.com/hzdg/hz-core/commit/8bafdac))
+
+
 ## [2.0.2](https://github.com/hzdg/hz-core/compare/@hzdg/dom-utils@2.0.1...@hzdg/dom-utils@2.0.2) (2020-11-10)
 
 
