@@ -30,7 +30,7 @@ jobs:
           registry-url: "https://npm.pkg.github.com"
 
       - name: Add node modules bin to system path
-        run: echo "::add-path::./node_modules/.bin"
+        run: echo "./node_modules/.bin" >> $GITHUB_PATH
 
       - name: Configure git author
         run: |
